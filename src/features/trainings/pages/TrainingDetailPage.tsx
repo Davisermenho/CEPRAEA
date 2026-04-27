@@ -25,10 +25,10 @@ import type { AppSettings, AttendanceStatus } from '@/types'
 import { cn } from '@/lib/utils'
 
 const STATUS_CONFIG: Record<AttendanceStatus, { label: string; color: string; bg: string }> = {
-  presente:    { label: 'Presente',    color: 'text-green-700',  bg: 'bg-green-100 border-green-300' },
-  ausente:     { label: 'Ausente',     color: 'text-red-700',    bg: 'bg-red-100 border-red-300' },
-  justificado: { label: 'Justificado', color: 'text-amber-700',  bg: 'bg-amber-100 border-amber-300' },
-  pendente:    { label: 'Pendente',    color: 'text-gray-500',   bg: 'bg-gray-100 border-gray-200' },
+  presente:    { label: 'Presente',    color: 'text-green-400',    bg: 'bg-green-500/20 border-green-500/40' },
+  ausente:     { label: 'Ausente',     color: 'text-red-400',      bg: 'bg-red-500/20 border-red-500/40' },
+  justificado: { label: 'Justificado', color: 'text-cep-gold-400', bg: 'bg-cep-gold-400/20 border-cep-gold-400/40' },
+  pendente:    { label: 'Pendente',    color: 'text-cep-muted',    bg: 'bg-cep-purple-800 border-cep-purple-700' },
 }
 
 export default function TrainingDetailPage() {
@@ -60,7 +60,7 @@ export default function TrainingDetailPage() {
   if (!training) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">Treino não encontrado.</p>
+        <p className="text-cep-muted">Treino não encontrado.</p>
       </div>
     )
   }
@@ -205,23 +205,23 @@ export default function TrainingDetailPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-cep-purple-900 border-b border-cep-purple-800">
         <div className="flex items-center gap-2 px-4 py-3">
-          <button onClick={() => navigate(-1)} className="p-1 -ml-1 rounded-lg hover:bg-gray-100 text-gray-600">
+          <button onClick={() => navigate(-1)} className="p-1 -ml-1 rounded-lg hover:bg-cep-purple-800 text-cep-muted hover:text-cep-white transition-colors">
             <ChevronLeft className="h-5 w-5" />
           </button>
           <div className="flex-1 min-w-0">
-            <p className="text-base font-semibold text-gray-900 capitalize truncate">
+            <p className="text-base font-bold text-cep-white capitalize truncate">
               {formatDateLong(training.data)}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-cep-muted">
               {training.horaInicio} – {training.horaFim}
               {trainingLocal && ` · ${trainingLocal}`}
             </p>
           </div>
           <Badge variant={
             training.status === 'realizado' ? 'green' :
-            training.status === 'cancelado' ? 'gray' : 'blue'
+            training.status === 'cancelado' ? 'gray' : 'lime'
           }>
             {training.status === 'agendado' ? 'Agendado' :
              training.status === 'realizado' ? 'Realizado' : 'Cancelado'}
@@ -233,36 +233,36 @@ export default function TrainingDetailPage() {
         {/* Summary */}
         <div className="grid grid-cols-4 gap-2 p-4">
           {[
-            { label: 'Total',      value: summary.totalAtivos, color: 'text-gray-900' },
-            { label: 'Presentes',  value: summary.presentes,   color: 'text-green-700' },
-            { label: 'Ausentes',   value: summary.ausentes,    color: 'text-red-600' },
-            { label: 'Frequência', value: `${pct}%`,           color: 'text-blue-700' },
+            { label: 'Total',      value: summary.totalAtivos, color: 'text-cep-white' },
+            { label: 'Presentes',  value: summary.presentes,   color: 'text-green-400' },
+            { label: 'Ausentes',   value: summary.ausentes,    color: 'text-red-400' },
+            { label: 'Frequência', value: `${pct}%`,           color: 'text-cep-lime-400' },
           ].map(({ label, value, color }) => (
-            <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 text-center">
-              <p className={`text-lg font-bold ${color}`}>{value}</p>
-              <p className="text-xs text-gray-500">{label}</p>
+            <div key={label} className="bg-cep-purple-850 rounded-xl border border-cep-purple-700 p-3 text-center">
+              <p className={`text-lg font-black ${color}`}>{value}</p>
+              <p className="text-xs text-cep-muted">{label}</p>
             </div>
           ))}
         </div>
 
         {/* Sync bar */}
         {syncConfigured && (
-          <div className="mx-4 mb-3 flex items-center gap-2 bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-2.5">
+          <div className="mx-4 mb-3 flex items-center gap-2 bg-cep-purple-850 rounded-xl border border-cep-purple-700 px-4 py-2.5">
             <div className="flex-1 min-w-0">
               {lastSyncAt ? (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-cep-muted">
                   Última sync: {formatTime(lastSyncAt)}
                 </p>
               ) : (
-                <p className="text-xs text-gray-400">Nunca sincronizado</p>
+                <p className="text-xs text-cep-muted/60">Nunca sincronizado</p>
               )}
               {syncStatus === 'ok' && (
-                <p className="text-xs text-green-600 flex items-center gap-1 mt-0.5">
+                <p className="text-xs text-cep-lime-400 flex items-center gap-1 mt-0.5">
                   <Wifi className="h-3 w-3" /> Sincronizado
                 </p>
               )}
               {syncStatus === 'error' && (
-                <p className="text-xs text-red-500 flex items-center gap-1 mt-0.5">
+                <p className="text-xs text-red-400 flex items-center gap-1 mt-0.5">
                   <WifiOff className="h-3 w-3" /> Falha na sync
                 </p>
               )}
@@ -308,7 +308,7 @@ export default function TrainingDetailPage() {
               key={label}
               variant="ghost"
               size="sm"
-              className="text-green-700 border border-green-200 bg-green-50 hover:bg-green-100"
+              className="text-green-400 border border-green-500/30 bg-green-500/10 hover:bg-green-500/20"
               onClick={() => openWA(label, text())}
             >
               <MessageCircle className="h-4 w-4" />
@@ -319,14 +319,14 @@ export default function TrainingDetailPage() {
 
         {/* Athlete attendance list */}
         <div className="px-4 pb-6">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          <h2 className="text-xs font-bold text-cep-muted uppercase tracking-wide mb-2">
             Chamada ({activeAthletes.length} atletas)
           </h2>
 
           {activeAthletes.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">Nenhuma atleta ativa cadastrada.</p>
+            <p className="text-sm text-cep-muted text-center py-8">Nenhuma atleta ativa cadastrada.</p>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-50">
+            <div className="bg-cep-purple-850 rounded-2xl border border-cep-purple-700 divide-y divide-cep-purple-800">
               {activeAthletes.map((athlete) => {
                 const status = getStatus(athlete.id)
                 const config = STATUS_CONFIG[status]
@@ -337,23 +337,23 @@ export default function TrainingDetailPage() {
                 return (
                   <div key={athlete.id} className="flex items-center gap-3 px-4 py-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{athlete.nome}</p>
+                      <p className="text-sm font-semibold text-cep-white">{athlete.nome}</p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-xs text-gray-400">{formatPhone(athlete.telefone)}</p>
+                        <p className="text-xs text-cep-muted">{formatPhone(athlete.telefone)}</p>
                         {confirmed && (
-                          <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 rounded-full px-2 py-0.5">
+                          <span className="inline-flex items-center gap-1 text-xs bg-cep-lime-400/15 text-cep-lime-400 rounded-full px-2 py-0.5">
                             <Wifi className="h-3 w-3" /> Atleta confirmou
                           </span>
                         )}
                         {!confirmed && status !== 'pendente' && (
-                          <span className="text-xs text-gray-400">Manual</span>
+                          <span className="text-xs text-cep-muted/60">Manual</span>
                         )}
                       </div>
                     </div>
 
                     <button
                       onClick={() => abrirWhatsApp(confirmLink, athlete.telefone)}
-                      className="p-2 rounded-lg text-green-600 hover:bg-green-50 active:bg-green-100 transition-colors"
+                      className="p-2 rounded-lg text-green-400 hover:bg-green-500/15 active:bg-green-500/25 transition-colors"
                       title="Enviar link de confirmação"
                     >
                       <Send className="h-4 w-4" />
@@ -384,7 +384,7 @@ export default function TrainingDetailPage() {
               readOnly
               value={waModal.text}
               rows={10}
-              className="w-full rounded-xl bg-gray-50 border border-gray-200 px-3 py-2 text-sm font-mono resize-none focus:outline-none"
+              className="w-full rounded-xl bg-cep-purple-950 border border-cep-purple-700 px-3 py-2 text-sm font-mono text-cep-white resize-none focus:outline-none"
             />
             <div className="flex gap-2">
               <Button variant="secondary" fullWidth onClick={handleCopy}>
@@ -412,13 +412,13 @@ export default function TrainingDetailPage() {
         size="sm"
       >
         <div className="p-4 space-y-3">
-          <p className="text-sm text-gray-600">Informe o motivo da ausência justificada:</p>
+          <p className="text-sm text-cep-muted">Informe o motivo da ausência justificada:</p>
           <textarea
             value={justifText}
             onChange={(e) => setJustifText(e.target.value)}
             placeholder="Ex: Atestado médico, viagem..."
             rows={3}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-xl border border-cep-purple-700 bg-cep-purple-950 text-cep-white placeholder-cep-muted/40 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-cep-lime-400"
             autoFocus
           />
           <div className="flex gap-2">

@@ -32,9 +32,12 @@ export default function ReportsPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 space-y-3">
+      <div className="bg-cep-purple-900 border-b border-cep-purple-800 px-4 py-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Relatórios</h1>
+          <div>
+            <p className="text-xs font-bold text-cep-lime-400 tracking-widest uppercase mb-0.5">Análise</p>
+            <h1 className="text-xl font-black text-cep-white">Relatórios</h1>
+          </div>
           <Button variant="secondary" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4" />
             CSV
@@ -44,32 +47,36 @@ export default function ReportsPage() {
         {/* Date filters */}
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">De</label>
+            <label className="block text-xs text-cep-muted mb-1 font-medium">De</label>
             <input
               type="date"
               value={fromISO}
               onChange={(e) => setFromISO(e.target.value)}
-              className="w-full h-9 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 rounded-xl border border-cep-purple-700 bg-cep-purple-850 px-3 text-sm text-cep-white focus:outline-none focus:ring-2 focus:ring-cep-lime-400"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Até</label>
+            <label className="block text-xs text-cep-muted mb-1 font-medium">Até</label>
             <input
               type="date"
               value={toISO}
               onChange={(e) => setToISO(e.target.value)}
-              className="w-full h-9 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 rounded-xl border border-cep-purple-700 bg-cep-purple-850 px-3 text-sm text-cep-white focus:outline-none focus:ring-2 focus:ring-cep-lime-400"
             />
           </div>
         </div>
 
         {/* Sort */}
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
+        <div className="flex gap-1 bg-cep-purple-850 border border-cep-purple-700 rounded-xl p-1">
           {(['nome', 'pct'] as const).map((s) => (
             <button
               key={s}
               onClick={() => setSortBy(s)}
-              className={`flex-1 h-7 rounded-lg text-xs font-medium transition-colors ${sortBy === s ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
+              className={`flex-1 h-7 rounded-lg text-xs font-semibold transition-colors ${
+                sortBy === s
+                  ? 'bg-cep-purple-950 text-cep-lime-400'
+                  : 'text-cep-muted hover:text-cep-white'
+              }`}
             >
               {s === 'nome' ? 'Por nome' : 'Por frequência'}
             </button>
@@ -88,25 +95,28 @@ export default function ReportsPage() {
         ) : (
           <>
             {/* Column headers */}
-            <div className="sticky top-0 bg-gray-50 border-b border-gray-200 px-4 py-2 grid grid-cols-6 gap-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <div className="sticky top-0 bg-cep-purple-900 border-b border-cep-purple-800 px-4 py-2 grid grid-cols-6 gap-1 text-xs font-bold text-cep-muted uppercase tracking-wide">
               <span className="col-span-2">Atleta</span>
               <span className="text-center">Treinos</span>
-              <span className="text-center text-green-700">Pres.</span>
-              <span className="text-center text-red-600">Aus.</span>
-              <span className="text-center text-blue-700">%</span>
+              <span className="text-center text-green-400">Pres.</span>
+              <span className="text-center text-red-400">Aus.</span>
+              <span className="text-center text-cep-lime-400">%</span>
             </div>
 
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-cep-purple-800">
               {sorted.map((r) => (
                 <div
                   key={r.atletaId}
-                  className="px-4 py-3 grid grid-cols-6 gap-1 items-center hover:bg-gray-50 transition-colors"
+                  className="px-4 py-3 grid grid-cols-6 gap-1 items-center hover:bg-cep-purple-850 transition-colors"
                 >
-                  <span className="col-span-2 text-sm font-medium text-gray-900 truncate">{r.nomeAtleta}</span>
-                  <span className="text-center text-sm text-gray-600">{r.totalTreinos}</span>
-                  <span className="text-center text-sm font-medium text-green-700">{r.presentes}</span>
-                  <span className="text-center text-sm font-medium text-red-600">{r.ausentes}</span>
-                  <span className={`text-center text-sm font-bold ${r.percentualPresenca >= 75 ? 'text-green-700' : r.percentualPresenca >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                  <span className="col-span-2 text-sm font-semibold text-cep-white truncate">{r.nomeAtleta}</span>
+                  <span className="text-center text-sm text-cep-muted">{r.totalTreinos}</span>
+                  <span className="text-center text-sm font-medium text-green-400">{r.presentes}</span>
+                  <span className="text-center text-sm font-medium text-red-400">{r.ausentes}</span>
+                  <span className={`text-center text-sm font-black ${
+                    r.percentualPresenca >= 75 ? 'text-cep-lime-400' :
+                    r.percentualPresenca >= 50 ? 'text-cep-gold-400' : 'text-red-400'
+                  }`}>
                     {formatPercent(r.percentualPresenca)}
                   </span>
                 </div>
@@ -115,16 +125,16 @@ export default function ReportsPage() {
 
             {/* Summary footer */}
             {sorted.length > 0 && (
-              <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 grid grid-cols-6 gap-1 text-xs font-semibold text-gray-600">
+              <div className="px-4 py-3 bg-cep-purple-900 border-t border-cep-purple-800 grid grid-cols-6 gap-1 text-xs font-bold text-cep-muted">
                 <span className="col-span-2">Média geral</span>
                 <span className="text-center">{sorted[0]?.totalTreinos ?? 0}</span>
-                <span className="text-center text-green-700">
+                <span className="text-center text-green-400">
                   {sorted.length > 0 ? Math.round(sorted.reduce((s, r) => s + r.presentes, 0) / sorted.length) : 0}
                 </span>
-                <span className="text-center text-red-600">
+                <span className="text-center text-red-400">
                   {sorted.length > 0 ? Math.round(sorted.reduce((s, r) => s + r.ausentes, 0) / sorted.length) : 0}
                 </span>
-                <span className="text-center text-blue-700">
+                <span className="text-center text-cep-lime-400">
                   {formatPercent(sorted.length > 0 ? sorted.reduce((s, r) => s + r.percentualPresenca, 0) / sorted.length : 0)}
                 </span>
               </div>

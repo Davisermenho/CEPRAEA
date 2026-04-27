@@ -92,27 +92,28 @@ export default function ExportPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4">
-        <h1 className="text-xl font-bold text-gray-900">Exportar / Backup</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Exporte dados ou faça backup completo</p>
+      <div className="bg-cep-purple-900 border-b border-cep-purple-800 px-4 py-4">
+        <p className="text-xs font-bold text-cep-lime-400 tracking-widest uppercase mb-0.5">Dados</p>
+        <h1 className="text-xl font-black text-cep-white">Exportar / Backup</h1>
+        <p className="text-sm text-cep-muted mt-0.5">Exporte dados ou faça backup completo</p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {toast && (
-          <div className="rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 font-medium">
+          <div className="rounded-xl bg-cep-lime-400/15 border border-cep-lime-400/40 px-4 py-3 text-sm text-cep-lime-400 font-medium">
             {toast}
           </div>
         )}
 
         {/* XLSX */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+        <div className="bg-cep-purple-850 rounded-2xl border border-cep-purple-700 p-4 space-y-3">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-green-100 p-2.5">
-              <FileSpreadsheet className="h-5 w-5 text-green-700" />
+            <div className="rounded-xl bg-green-500/20 p-2.5">
+              <FileSpreadsheet className="h-5 w-5 text-green-400" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900">Planilha XLSX</p>
-              <p className="text-xs text-gray-500">4 abas: Atletas, Treinos, Presenças, Frequências</p>
+              <p className="text-sm font-bold text-cep-white">Planilha XLSX</p>
+              <p className="text-xs text-cep-muted">4 abas: Atletas, Treinos, Presenças, Frequências</p>
             </div>
           </div>
           <Button
@@ -127,8 +128,8 @@ export default function ExportPage() {
         </div>
 
         {/* CSV individual */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
-          <p className="text-sm font-semibold text-gray-900">Exportar CSV individual</p>
+        <div className="bg-cep-purple-850 rounded-2xl border border-cep-purple-700 p-4 space-y-3">
+          <p className="text-sm font-bold text-cep-white">Exportar CSV individual</p>
           <div className="space-y-2">
             {[
               { key: 'atletas', label: 'Atletas', count: athletes.length },
@@ -138,27 +139,27 @@ export default function ExportPage() {
               <button
                 key={key}
                 onClick={() => handleExportCsv(key)}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 active:bg-gray-200 transition-colors text-left"
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-cep-purple-800 border border-cep-purple-700 hover:bg-cep-purple-900 active:bg-cep-purple-950 transition-colors text-left"
               >
                 <div className="flex items-center gap-2">
-                  <Download className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-900">{label}</span>
+                  <Download className="h-4 w-4 text-cep-muted" />
+                  <span className="text-sm font-semibold text-cep-white">{label}</span>
                 </div>
-                <span className="text-xs text-gray-500">{count} registros</span>
+                <span className="text-xs text-cep-muted">{count} registros</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Backup JSON */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+        <div className="bg-cep-purple-850 rounded-2xl border border-cep-purple-700 p-4 space-y-3">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-blue-100 p-2.5">
-              <FileJson className="h-5 w-5 text-blue-700" />
+            <div className="rounded-xl bg-cep-purple-700 p-2.5">
+              <FileJson className="h-5 w-5 text-cep-white" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900">Backup completo (JSON)</p>
-              <p className="text-xs text-gray-500">Exporta e restaura todos os dados</p>
+              <p className="text-sm font-bold text-cep-white">Backup completo (JSON)</p>
+              <p className="text-xs text-cep-muted">Exporta e restaura todos os dados</p>
             </div>
           </div>
           <Button
@@ -171,10 +172,10 @@ export default function ExportPage() {
             Baixar backup JSON
           </Button>
 
-          <div className="border-t border-gray-100 pt-3">
+          <div className="border-t border-cep-purple-700 pt-3">
             <div className="flex items-start gap-2 mb-3">
-              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-700">
+              <AlertTriangle className="h-4 w-4 text-cep-gold-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-cep-sand-100">
                 Restaurar um backup substitui <strong>todos</strong> os dados atuais. Esta ação não pode ser desfeita.
               </p>
             </div>
@@ -198,9 +199,9 @@ export default function ExportPage() {
         </div>
 
         {/* Google Sheets V2 placeholder */}
-        <div className="bg-gray-50 rounded-2xl border border-dashed border-gray-300 p-4 text-center">
-          <p className="text-sm font-medium text-gray-500">Google Sheets — Sincronização automática</p>
-          <p className="text-xs text-gray-400 mt-1">Disponível em breve via integração OAuth (V2)</p>
+        <div className="rounded-2xl border border-dashed border-cep-purple-700 p-4 text-center">
+          <p className="text-sm font-medium text-cep-muted">Google Sheets — Sincronização automática</p>
+          <p className="text-xs text-cep-muted/60 mt-1">Disponível em breve via integração OAuth (V2)</p>
         </div>
       </div>
 

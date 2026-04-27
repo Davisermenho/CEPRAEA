@@ -38,24 +38,24 @@ export function HolidayAlert({ conflicts }: HolidayAlertProps) {
   }
 
   return (
-    <div className="mx-4 mt-4 rounded-2xl bg-amber-50 border border-amber-200 overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-3 bg-amber-100 border-b border-amber-200">
-        <AlertTriangle className="h-4 w-4 text-amber-700 shrink-0" />
-        <p className="text-sm font-semibold text-amber-800">
+    <div className="mx-4 mt-4 rounded-2xl bg-cep-gold-400/10 border border-cep-gold-400/40 overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 bg-cep-gold-400/15 border-b border-cep-gold-400/30">
+        <AlertTriangle className="h-4 w-4 text-cep-gold-400 shrink-0" />
+        <p className="text-sm font-bold text-cep-gold-400">
           {conflicts.length === 1
             ? '1 treino coincide com feriado'
             : `${conflicts.length} treinos coincidem com feriados`}
         </p>
       </div>
 
-      <div className="divide-y divide-amber-100">
+      <div className="divide-y divide-cep-gold-400/20">
         {conflicts.map((conflict) => (
           <div key={conflict.training.id} className="p-4 space-y-3">
             <div>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-bold text-cep-white">
                 {formatDateCompact(conflict.training.data)} — {conflict.training.horaInicio}
               </p>
-              <p className="text-xs text-amber-700 mt-0.5">
+              <p className="text-xs text-cep-sand-100 mt-0.5">
                 🗓 {formatHolidayLabel(conflict.holiday)}
               </p>
             </div>
@@ -66,7 +66,7 @@ export function HolidayAlert({ conflicts }: HolidayAlertProps) {
                   key={alt}
                   onClick={() => handleCreateAlternative(conflict, alt)}
                   disabled={resolving === conflict.training.id}
-                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white border border-amber-300 text-xs font-medium text-amber-800 hover:bg-amber-50 active:bg-amber-100 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-cep-purple-850 border border-cep-gold-400/40 text-xs font-semibold text-cep-gold-400 hover:bg-cep-purple-800 active:bg-cep-purple-900 disabled:opacity-50 transition-colors"
                 >
                   <CalendarPlus className="h-3.5 w-3.5" />
                   {formatAlternativeDate(alt)} (manhã)
@@ -76,7 +76,7 @@ export function HolidayAlert({ conflicts }: HolidayAlertProps) {
               <button
                 onClick={() => handleCancel(conflict.training.id)}
                 disabled={resolving === conflict.training.id}
-                className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white border border-red-200 text-xs font-medium text-red-700 hover:bg-red-50 active:bg-red-100 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-cep-purple-850 border border-red-500/40 text-xs font-semibold text-red-400 hover:bg-red-500/15 active:bg-red-500/25 disabled:opacity-50 transition-colors"
               >
                 <X className="h-3.5 w-3.5" />
                 Cancelar

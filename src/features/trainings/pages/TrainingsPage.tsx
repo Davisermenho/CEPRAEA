@@ -9,6 +9,7 @@ import { EmptyState } from '@/shared/components/EmptyState'
 import { Button } from '@/shared/components/Button'
 import { formatDateCompact, todayISO } from '@/lib/utils'
 import { isHoliday } from '@/lib/holidays'
+import { cn } from '@/lib/utils'
 import type { Training } from '@/types'
 
 type Filter = 'proximos' | 'passados' | 'todos'
@@ -19,8 +20,8 @@ const STATUS_ICON = {
   cancelado: XCircle,
 }
 
-const STATUS_VARIANT: Record<string, 'blue' | 'green' | 'gray'> = {
-  agendado: 'blue',
+const STATUS_VARIANT: Record<string, 'purple' | 'green' | 'gray'> = {
+  agendado: 'purple',
   realizado: 'green',
   cancelado: 'gray',
 }
@@ -63,9 +64,12 @@ export default function TrainingsPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 space-y-3">
+      <div className="bg-cep-purple-900 border-b border-cep-purple-800 px-4 py-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Treinos</h1>
+          <div>
+            <p className="text-xs font-bold text-cep-lime-400 tracking-widest uppercase mb-0.5">Cronograma</p>
+            <h1 className="text-xl font-black text-cep-white">Treinos</h1>
+          </div>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" onClick={handleGenerate} loading={generating}>
               <RefreshCw className="h-4 w-4" />
@@ -79,12 +83,16 @@ export default function TrainingsPage() {
         </div>
 
         {/* Filter tabs */}
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
+        <div className="flex gap-1 bg-cep-purple-850 border border-cep-purple-700 rounded-xl p-1">
           {(['proximos', 'passados', 'todos'] as Filter[]).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`flex-1 h-7 rounded-lg text-xs font-medium transition-colors ${filter === f ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
+              className={`flex-1 h-7 rounded-lg text-xs font-semibold transition-colors ${
+                filter === f
+                  ? 'bg-cep-purple-950 text-cep-lime-400'
+                  : 'text-cep-muted hover:text-cep-white'
+              }`}
             >
               {f === 'proximos' ? 'Próximos' : f === 'passados' ? 'Passados' : 'Todos'}
             </button>
@@ -97,7 +105,7 @@ export default function TrainingsPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="mx-4 mt-3 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 font-medium">
+        <div className="mx-4 mt-3 rounded-xl bg-cep-lime-400/15 border border-cep-lime-400/40 px-4 py-3 text-sm text-cep-lime-400 font-medium">
           {toast}
         </div>
       )}
@@ -119,27 +127,35 @@ export default function TrainingsPage() {
                 <li key={t.id}>
                   <button
                     onClick={() => navigate(`/treinos/${t.id}`)}
-                    className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-left hover:border-blue-200 active:bg-gray-50 transition-colors"
+                    className="w-full bg-cep-purple-850 rounded-2xl border border-cep-purple-700 p-4 text-left hover:border-cep-purple-600 hover:bg-cep-purple-800 active:bg-cep-purple-900 transition-colors"
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`mt-0.5 rounded-xl p-2 ${t.status === 'realizado' ? 'bg-green-100' : t.status === 'cancelado' ? 'bg-gray-100' : 'bg-blue-100'}`}>
-                        <Icon className={`h-4 w-4 ${t.status === 'realizado' ? 'text-green-700' : t.status === 'cancelado' ? 'text-gray-500' : 'text-blue-700'}`} />
+                      <div className={cn(
+                        'mt-0.5 rounded-xl p-2',
+                        t.status === 'realizado' ? 'bg-green-500/20' :
+                        t.status === 'cancelado' ? 'bg-cep-purple-700' : 'bg-cep-lime-400/15'
+                      )}>
+                        <Icon className={cn(
+                          'h-4 w-4',
+                          t.status === 'realizado' ? 'text-green-400' :
+                          t.status === 'cancelado' ? 'text-cep-muted' : 'text-cep-lime-400'
+                        )} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-semibold text-gray-900 capitalize">
+                          <p className="text-sm font-bold text-cep-white capitalize">
                             {formatDateCompact(t.data)}
                           </p>
                           <Badge variant={STATUS_VARIANT[t.status]}>{STATUS_LABEL[t.status]}</Badge>
-                          {t.tipo === 'extra' && <Badge variant="yellow">Extra</Badge>}
-                          {holiday && <Badge variant="yellow">⚠ Feriado</Badge>}
+                          {t.tipo === 'extra' && <Badge variant="gold">Extra</Badge>}
+                          {holiday && <Badge variant="gold">⚠ Feriado</Badge>}
                         </div>
-                        <p className="text-sm text-gray-600 mt-0.5">
+                        <p className="text-sm text-cep-muted mt-0.5">
                           {t.horaInicio} – {t.horaFim}
                           {t.local && ` · ${t.local}`}
                         </p>
                         {t.observacoes && (
-                          <p className="text-xs text-gray-400 mt-0.5 truncate">{t.observacoes}</p>
+                          <p className="text-xs text-cep-muted/60 mt-0.5 truncate">{t.observacoes}</p>
                         )}
                       </div>
                     </div>

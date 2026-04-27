@@ -30,9 +30,12 @@ export default function AthletesPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4 space-y-3">
+      <div className="bg-cep-purple-900 border-b border-cep-purple-800 px-4 py-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Atletas</h1>
+          <div>
+            <p className="text-xs font-bold text-cep-lime-400 tracking-widest uppercase mb-0.5">Nosso Time</p>
+            <h1 className="text-xl font-black text-cep-white">Atletas</h1>
+          </div>
           <Button size="sm" onClick={() => setFormOpen(true)}>
             <Plus className="h-4 w-4" />
             Nova
@@ -41,23 +44,27 @@ export default function AthletesPage() {
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-cep-muted" />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome ou telefone..."
-            className="w-full h-10 rounded-xl bg-gray-100 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full h-10 rounded-xl bg-cep-purple-850 border border-cep-purple-700 pl-9 pr-4 text-sm text-cep-white placeholder-cep-muted/50 focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent"
           />
         </div>
 
         {/* Filter tabs */}
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
+        <div className="flex gap-1 bg-cep-purple-850 border border-cep-purple-700 rounded-xl p-1">
           {(['ativo', 'inativo', 'todos'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`flex-1 h-7 rounded-lg text-xs font-medium transition-colors ${filter === f ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
+              className={`flex-1 h-7 rounded-lg text-xs font-semibold transition-colors ${
+                filter === f
+                  ? 'bg-cep-purple-950 text-cep-lime-400'
+                  : 'text-cep-muted hover:text-cep-white'
+              }`}
             >
               {f === 'ativo' ? 'Ativas' : f === 'inativo' ? 'Inativas' : 'Todas'}
             </button>
@@ -82,28 +89,28 @@ export default function AthletesPage() {
             }
           />
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-cep-purple-800">
             {filtered.map((athlete) => (
               <li key={athlete.id}>
                 <button
                   onClick={() => navigate(`/atletas/${athlete.id}`)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-cep-purple-850 active:bg-cep-purple-800 transition-colors text-left"
                 >
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span className="text-blue-700 font-semibold text-sm">
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-cep-lime-400/15 border border-cep-lime-400/30 flex items-center justify-center">
+                    <span className="text-cep-lime-400 font-black text-sm">
                       {athlete.nome.split(' ').map((n) => n[0]).slice(0, 2).join('')}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{athlete.nome}</p>
-                    <p className="text-xs text-gray-500">{formatPhone(athlete.telefone)}</p>
+                    <p className="text-sm font-semibold text-cep-white truncate">{athlete.nome}</p>
+                    <p className="text-xs text-cep-muted">{formatPhone(athlete.telefone)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <Badge variant={athlete.status === 'ativo' ? 'green' : 'gray'}>
+                    <Badge variant={athlete.status === 'ativo' ? 'lime' : 'gray'}>
                       {athlete.status === 'ativo' ? 'Ativa' : 'Inativa'}
                     </Badge>
                     {athlete.categoria && (
-                      <Badge variant="blue">{athlete.categoria}</Badge>
+                      <Badge variant="purple">{athlete.categoria}</Badge>
                     )}
                   </div>
                 </button>
@@ -116,7 +123,7 @@ export default function AthletesPage() {
       {/* FAB mobile */}
       <button
         onClick={() => setFormOpen(true)}
-        className="fixed bottom-20 right-4 z-30 lg:hidden h-14 w-14 rounded-full bg-blue-700 text-white shadow-lg hover:bg-blue-800 active:bg-blue-900 flex items-center justify-center transition-colors"
+        className="fixed bottom-20 right-4 z-30 lg:hidden h-14 w-14 rounded-full bg-cep-lime-400 text-cep-purple-950 shadow-lg hover:bg-cep-lime-500 active:bg-cep-lime-500 flex items-center justify-center transition-colors"
         aria-label="Nova atleta"
       >
         <Plus className="h-6 w-6" />

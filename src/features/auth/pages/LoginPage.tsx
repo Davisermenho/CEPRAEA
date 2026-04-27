@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Shield, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
 import { getSetting, setSetting } from '@/db'
 import { hashPin, verifyPin, setSession } from '@/lib/auth'
@@ -14,7 +14,6 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Detecta se é o primeiro acesso
   useState(() => {
     getSetting<string>('pinHash').then((hash) => setIsFirstTime(!hash))
   })
@@ -59,21 +58,33 @@ export default function LoginPage() {
   if (isFirstTime === null) return null
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center bg-gradient-to-b from-blue-700 to-blue-900 px-6">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center mb-8">
-          <div className="rounded-2xl bg-white/10 p-4 mb-4">
-            <Shield className="h-10 w-10 text-white" />
+    <div className="min-h-dvh flex flex-col items-center justify-center bg-cep-purple-950 px-6 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-cep-purple-850 opacity-50" />
+        <div className="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-cep-purple-900 opacity-60" />
+      </div>
+
+      <div className="w-full max-w-sm relative z-10">
+        {/* Brand */}
+        <div className="flex flex-col items-center mb-10">
+          <div className="mb-6">
+            <div className="h-20 w-20 rounded-2xl bg-cep-purple-850 border border-cep-purple-700 flex items-center justify-center shadow-xl">
+              <span className="text-3xl font-black text-cep-lime-400 tracking-tight">C</span>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-white">CEPRAEA</h1>
-          <p className="text-blue-200 text-sm mt-1">
-            {isFirstTime ? 'Crie seu PIN de acesso' : 'Digite seu PIN para entrar'}
+          <h1 className="text-3xl font-black tracking-widest text-cep-white uppercase">CEPRAEA</h1>
+          <p className="text-cep-muted text-xs mt-2 tracking-widest uppercase">
+            Preparação. Identidade. Competição.
+          </p>
+          <p className="text-cep-muted/70 text-sm mt-4">
+            {isFirstTime ? 'Crie seu PIN de acesso' : 'Acesso do treinador'}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-blue-100 mb-1.5">
+            <label className="block text-xs font-semibold text-cep-muted mb-1.5 tracking-wide uppercase">
               {isFirstTime ? 'Criar PIN' : 'PIN'}
             </label>
             <div className="relative">
@@ -84,13 +95,13 @@ export default function LoginPage() {
                 onChange={(e) => setPin(e.target.value)}
                 placeholder="••••••"
                 maxLength={20}
-                className="w-full h-12 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 pr-12 text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-white/50"
+                className="w-full h-12 rounded-xl bg-cep-purple-850 border border-cep-purple-700 text-cep-white placeholder-cep-muted/40 px-4 pr-12 text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent"
                 autoFocus
               />
               <button
                 type="button"
                 onClick={() => setShowPin(!showPin)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-cep-muted hover:text-cep-white transition-colors"
               >
                 {showPin ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -99,7 +110,7 @@ export default function LoginPage() {
 
           {isFirstTime && (
             <div>
-              <label className="block text-sm font-medium text-blue-100 mb-1.5">
+              <label className="block text-xs font-semibold text-cep-muted mb-1.5 tracking-wide uppercase">
                 Confirmar PIN
               </label>
               <input
@@ -109,13 +120,15 @@ export default function LoginPage() {
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder="••••••"
                 maxLength={20}
-                className="w-full h-12 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 px-4 text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-white/50"
+                className="w-full h-12 rounded-xl bg-cep-purple-850 border border-cep-purple-700 text-cep-white placeholder-cep-muted/40 px-4 text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent"
               />
             </div>
           )}
 
           {error && (
-            <p className="text-red-300 text-sm text-center">{error}</p>
+            <div className="rounded-xl bg-red-500/20 border border-red-500/40 px-4 py-2.5">
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            </div>
           )}
 
           <Button
@@ -123,7 +136,7 @@ export default function LoginPage() {
             fullWidth
             size="lg"
             loading={loading}
-            className="bg-white text-blue-700 hover:bg-blue-50 font-semibold mt-2"
+            className="mt-2"
           >
             {isFirstTime ? 'Criar PIN e entrar' : 'Entrar'}
           </Button>
