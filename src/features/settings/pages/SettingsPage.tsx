@@ -109,26 +109,31 @@ export default function SettingsPage() {
 
   const syncIsConfigured = !!(settings.syncEndpointUrl && settings.syncSecret)
 
+  const inputClass = 'w-full h-10 rounded-xl border border-cep-purple-700 bg-cep-purple-850 px-3 text-sm text-cep-white placeholder-cep-muted/40 focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent'
+  const sectionClass = 'bg-cep-purple-850 rounded-2xl border border-cep-purple-700 p-4 space-y-3'
+  const labelClass = 'block text-xs text-cep-muted mb-1 font-medium'
+
   return (
     <div className="flex flex-col h-full">
-      <div className="bg-white border-b border-gray-200 px-4 py-4">
-        <h1 className="text-xl font-bold text-gray-900">Configurações</h1>
+      <div className="bg-cep-purple-900 border-b border-cep-purple-800 px-4 py-4">
+        <p className="text-xs font-bold text-cep-lime-400 tracking-widest uppercase mb-0.5">Sistema</p>
+        <h1 className="text-xl font-black text-cep-white">Configurações</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         <form onSubmit={handleSave} className="p-4 space-y-4">
 
           {/* Equipe */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-gray-700">Equipe</h2>
+          <section className={sectionClass}>
+            <h2 className="text-xs font-bold text-cep-muted uppercase tracking-wide">Equipe</h2>
             {[
-              { key: 'nomeEquipe' as const,     label: 'Nome da equipe',         type: 'text', placeholder: 'CEPRAEA' },
-              { key: 'nomeTecnico' as const,    label: 'Nome do treinador',       type: 'text', placeholder: 'Prof. Silva' },
-              { key: 'telefoneTecnico' as const, label: 'WhatsApp do treinador', type: 'tel',  placeholder: '21987654321' },
-              { key: 'localPadrao' as const,    label: 'Local padrão',            type: 'text', placeholder: 'Quadra Central' },
+              { key: 'nomeEquipe' as const,      label: 'Nome da equipe',         type: 'text', placeholder: 'CEPRAEA' },
+              { key: 'nomeTecnico' as const,     label: 'Nome do treinador',       type: 'text', placeholder: 'Prof. Silva' },
+              { key: 'telefoneTecnico' as const, label: 'WhatsApp do treinador',   type: 'tel',  placeholder: '21987654321' },
+              { key: 'localPadrao' as const,     label: 'Local padrão',            type: 'text', placeholder: 'Quadra Central' },
             ].map(({ key, label, type, placeholder }) => (
               <div key={key}>
-                <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                <label className={labelClass}>{label}</label>
                 <input
                   type={type}
                   inputMode={type === 'tel' ? 'numeric' : undefined}
@@ -139,69 +144,67 @@ export default function SettingsPage() {
                       : e.target.value) as AppSettings[typeof key])
                   }
                   placeholder={placeholder}
-                  className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={inputClass}
                 />
               </div>
             ))}
           </section>
 
           {/* Treinos */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-gray-700">Treinos Automáticos</h2>
+          <section className={sectionClass}>
+            <h2 className="text-xs font-bold text-cep-muted uppercase tracking-wide">Treinos Automáticos</h2>
             <div>
-              <label className="block text-xs text-gray-500 mb-2">
-                Semanas a gerar: <strong>{settings.semanasFuturas}</strong>
+              <label className={labelClass}>
+                Semanas a gerar: <strong className="text-cep-white">{settings.semanasFuturas}</strong>
               </label>
               <input
                 type="range" min={4} max={24} value={settings.semanasFuturas}
                 onChange={(e) => update('semanasFuturas', Number(e.target.value))}
-                className="w-full accent-blue-700"
+                className="w-full accent-cep-lime-400"
               />
-              <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+              <div className="flex justify-between text-xs text-cep-muted mt-0.5">
                 <span>4</span><span>24 semanas</span>
               </div>
             </div>
           </section>
 
           {/* URL pública */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-2">
-            <h2 className="text-sm font-semibold text-gray-700">URL Pública do App</h2>
+          <section className={sectionClass}>
+            <h2 className="text-xs font-bold text-cep-muted uppercase tracking-wide">URL Pública do App</h2>
             <input
               type="url"
               value={settings.appUrl}
               onChange={(e) => update('appUrl', e.target.value)}
               placeholder="https://cepraea.vercel.app"
-              className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             />
-            <p className="text-xs text-gray-400">Usada nos links de confirmação enviados às atletas.</p>
+            <p className="text-xs text-cep-muted/70">Usada nos links de confirmação enviados às atletas.</p>
           </section>
 
-          {/* ─── Sincronização ─────────────────────────────────────────────────── */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-100">
-              <Wifi className="h-5 w-5 text-blue-600 shrink-0" />
+          {/* Sincronização */}
+          <section className="bg-cep-purple-850 rounded-2xl border border-cep-purple-700 overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-4 border-b border-cep-purple-700">
+              <Wifi className="h-5 w-5 text-cep-lime-400 shrink-0" />
               <div className="flex-1">
-                <h2 className="text-sm font-semibold text-gray-700">Sincronização Remota</h2>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <h2 className="text-sm font-bold text-cep-white">Sincronização Remota</h2>
+                <p className="text-xs text-cep-muted mt-0.5">
                   {syncIsConfigured
                     ? 'Endpoint configurado — confirmações remotas ativas'
                     : 'Configure para receber confirmações das atletas automaticamente'}
                 </p>
               </div>
               {syncIsConfigured && (
-                <span className="h-2 w-2 rounded-full bg-green-500 shrink-0" />
+                <span className="h-2 w-2 rounded-full bg-cep-lime-400 shrink-0" />
               )}
             </div>
 
             <div className="p-4 space-y-4">
               {/* Secret */}
               <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  Secret de autenticação
-                </label>
+                <label className={labelClass}>Secret de autenticação</label>
                 <div className="flex gap-2">
-                  <div className="flex-1 h-10 rounded-xl border border-gray-200 bg-gray-50 px-3 flex items-center overflow-hidden">
-                    <span className="text-xs font-mono text-gray-600 truncate">
+                  <div className="flex-1 h-10 rounded-xl border border-cep-purple-700 bg-cep-purple-900 px-3 flex items-center overflow-hidden">
+                    <span className="text-xs font-mono text-cep-muted truncate">
                       {settings.syncSecret || '(não gerado)'}
                     </span>
                   </div>
@@ -209,7 +212,7 @@ export default function SettingsPage() {
                     type="button"
                     onClick={handleCopySecret}
                     disabled={!settings.syncSecret}
-                    className="h-10 px-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 disabled:opacity-40 transition-colors"
+                    className="h-10 px-3 rounded-xl border border-cep-purple-700 bg-cep-purple-900 text-cep-muted hover:text-cep-white hover:bg-cep-purple-800 disabled:opacity-40 transition-colors"
                     title="Copiar secret"
                   >
                     <Copy className="h-4 w-4" />
@@ -217,29 +220,29 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={handleGenerateSecret}
-                    className="h-10 px-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+                    className="h-10 px-3 rounded-xl border border-cep-purple-700 bg-cep-purple-900 text-cep-muted hover:text-cep-white hover:bg-cep-purple-800 transition-colors"
                     title="Gerar novo secret"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </button>
                 </div>
-                {secretCopied && <p className="text-xs text-green-600 mt-1">Copiado!</p>}
+                {secretCopied && <p className="text-xs text-cep-lime-400 mt-1">Copiado!</p>}
                 {!settings.syncSecret && (
-                  <p className="text-xs text-amber-600 mt-1">
-                    Clique em <RefreshCw className="inline h-3 w-3" /> para gerar um secret. Guarde-o — você precisará colá-lo no Apps Script.
+                  <p className="text-xs text-cep-gold-400 mt-1">
+                    Clique em <RefreshCw className="inline h-3 w-3" /> para gerar um secret.
                   </p>
                 )}
               </div>
 
               {/* Endpoint URL */}
               <div>
-                <label className="block text-xs text-gray-500 mb-1">URL do endpoint (Apps Script)</label>
+                <label className={labelClass}>URL do endpoint (Apps Script)</label>
                 <input
                   type="url"
                   value={settings.syncEndpointUrl ?? ''}
                   onChange={(e) => update('syncEndpointUrl', e.target.value)}
                   placeholder="https://script.google.com/macros/s/.../exec"
-                  className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={inputClass}
                 />
               </div>
 
@@ -258,7 +261,7 @@ export default function SettingsPage() {
                     Testar conexão
                   </Button>
                   {syncTestResult && (
-                    <p className={`text-xs mt-2 flex items-center gap-1.5 ${syncTestResult.ok ? 'text-green-600' : 'text-red-600'}`}>
+                    <p className={`text-xs mt-2 flex items-center gap-1.5 ${syncTestResult.ok ? 'text-cep-lime-400' : 'text-red-400'}`}>
                       {syncTestResult.ok
                         ? <><Wifi className="h-3.5 w-3.5" /> Conexão OK — endpoint acessível</>
                         : <><WifiOff className="h-3.5 w-3.5" /> {syncTestResult.error}</>}
@@ -272,17 +275,17 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setSyncGuideOpen((v) => !v)}
-                  className="flex items-center gap-2 text-sm font-medium text-blue-700 hover:text-blue-900 transition-colors"
+                  className="flex items-center gap-2 text-sm font-semibold text-cep-lime-400 hover:text-cep-lime-500 transition-colors"
                 >
                   {syncGuideOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                   Como configurar o Apps Script (passo a passo)
                 </button>
 
                 {syncGuideOpen && (
-                  <div className="mt-3 rounded-xl bg-blue-50 border border-blue-100 p-4 space-y-3 text-sm text-gray-700">
+                  <div className="mt-3 rounded-xl bg-cep-purple-900 border border-cep-purple-700 p-4 space-y-3 text-sm text-cep-muted">
                     <ol className="list-decimal list-inside space-y-3">
                       <li>
-                        <strong>Gere o secret</strong> acima (botão <RefreshCw className="inline h-3 w-3" />) e copie-o.
+                        <strong className="text-cep-white">Gere o secret</strong> acima (botão <RefreshCw className="inline h-3 w-3" />) e copie-o.
                       </li>
                       <li>
                         Acesse{' '}
@@ -290,42 +293,35 @@ export default function SettingsPage() {
                           href="https://script.google.com"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-700 underline"
+                          className="text-cep-lime-400 underline"
                         >
                           script.google.com
                         </a>{' '}
-                        e crie um <strong>Novo projeto</strong>.
+                        e crie um <strong className="text-cep-white">Novo projeto</strong>.
                       </li>
                       <li>
-                        Substitua todo o conteúdo do editor pelo arquivo{' '}
-                        <code className="bg-white border border-gray-200 rounded px-1 text-xs">apps-script/Code.gs</code>{' '}
-                        do projeto.
+                        Substitua o conteúdo pelo arquivo{' '}
+                        <code className="bg-cep-purple-800 border border-cep-purple-700 rounded px-1 text-xs text-cep-white">apps-script/Code.gs</code>.
                       </li>
                       <li>
                         Na linha{' '}
-                        <code className="bg-white border border-gray-200 rounded px-1 text-xs">var SYNC_SECRET = 'COLE_SEU_SECRET_AQUI';</code>,{' '}
-                        substitua pelo secret copiado.
+                        <code className="bg-cep-purple-800 border border-cep-purple-700 rounded px-1 text-xs text-cep-white">SYNC_SECRET</code>,{' '}
+                        cole o secret copiado.
                       </li>
                       <li>
-                        Clique em <strong>Implantar &gt; Nova implantação</strong>:
-                        <ul className="list-disc list-inside ml-4 mt-1 space-y-1 text-xs text-gray-600">
+                        <strong className="text-cep-white">Implantar &gt; Nova implantação</strong>:
+                        <ul className="list-disc list-inside ml-4 mt-1 space-y-1 text-xs">
                           <li>Tipo: <em>Aplicativo da Web</em></li>
-                          <li>Executar como: <em>Eu (seu e-mail)</em></li>
-                          <li>Quem tem acesso: <em>Qualquer pessoa</em></li>
+                          <li>Executar como: <em>Eu</em></li>
+                          <li>Acesso: <em>Qualquer pessoa</em></li>
                         </ul>
                       </li>
-                      <li>
-                        Copie a <strong>URL do app implantado</strong> e cole no campo "URL do endpoint" acima.
-                      </li>
-                      <li>
-                        Clique em <strong>Testar conexão</strong> para confirmar que está tudo certo.
-                      </li>
-                      <li>
-                        <strong>Salve</strong> as configurações e publique o app na Vercel/Netlify.
-                      </li>
+                      <li>Copie a <strong className="text-cep-white">URL do app</strong> e cole no campo acima.</li>
+                      <li>Clique em <strong className="text-cep-white">Testar conexão</strong>.</li>
+                      <li><strong className="text-cep-white">Salve</strong> as configurações.</li>
                     </ol>
-                    <p className="text-xs text-gray-500 pt-1 border-t border-blue-100">
-                      A aba "confirmacoes" é criada automaticamente na primeira confirmação recebida.
+                    <p className="text-xs text-cep-muted/60 pt-1 border-t border-cep-purple-700">
+                      A aba "confirmacoes" é criada automaticamente na primeira confirmação.
                     </p>
                   </div>
                 )}
@@ -343,19 +339,19 @@ export default function SettingsPage() {
         <div className="px-4 pb-6 space-y-2">
           <button
             onClick={() => setPinModal(true)}
-            className="w-full flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 hover:bg-gray-50 transition-colors text-left"
+            className="w-full flex items-center gap-3 bg-cep-purple-850 rounded-2xl border border-cep-purple-700 px-4 py-3 hover:bg-cep-purple-800 transition-colors text-left"
           >
-            <Shield className="h-5 w-5 text-blue-700" />
-            <span className="flex-1 text-sm font-medium text-gray-900">Alterar PIN de acesso</span>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <Shield className="h-5 w-5 text-cep-lime-400" />
+            <span className="flex-1 text-sm font-semibold text-cep-white">Alterar PIN de acesso</span>
+            <ChevronRight className="h-4 w-4 text-cep-muted" />
           </button>
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 bg-white rounded-2xl border border-red-100 shadow-sm px-4 py-3 hover:bg-red-50 transition-colors text-left"
+            className="w-full flex items-center gap-3 bg-cep-purple-850 rounded-2xl border border-red-500/30 px-4 py-3 hover:bg-red-500/10 transition-colors text-left"
           >
-            <LogOut className="h-5 w-5 text-red-600" />
-            <span className="flex-1 text-sm font-medium text-red-600">Sair</span>
+            <LogOut className="h-5 w-5 text-red-400" />
+            <span className="flex-1 text-sm font-semibold text-red-400">Sair</span>
           </button>
         </div>
       </div>
@@ -364,7 +360,7 @@ export default function SettingsPage() {
         <div className="p-4 space-y-3">
           {(['currentPin', 'newPin', 'confirmPin'] as const).map((field, i) => (
             <div key={field}>
-              <label className="block text-xs text-gray-500 mb-1">
+              <label className={labelClass}>
                 {i === 0 ? 'PIN atual' : i === 1 ? 'Novo PIN' : 'Confirmar novo PIN'}
               </label>
               <input
@@ -377,11 +373,15 @@ export default function SettingsPage() {
                   else if (field === 'newPin') setNewPin(v)
                   else setConfirmPin(v)
                 }}
-                className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={inputClass}
               />
             </div>
           ))}
-          {pinError && <p className="text-xs text-red-600">{pinError}</p>}
+          {pinError && (
+            <div className="rounded-xl bg-red-500/20 border border-red-500/40 px-3 py-2">
+              <p className="text-xs text-red-400">{pinError}</p>
+            </div>
+          )}
           <div className="flex gap-2">
             <Button variant="secondary" fullWidth onClick={() => setPinModal(false)}>Cancelar</Button>
             <Button fullWidth loading={pinLoading} onClick={handleChangePin}>Salvar</Button>

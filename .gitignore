@@ -1,3 +1,6 @@
+# Dev notes (local only)
+/.dev
+
 # Dependencies
 node_modules/
 
