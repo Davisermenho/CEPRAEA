@@ -123,6 +123,39 @@ export interface ScoutAthleteBlock {
   resultadoInd?: string
 }
 
+export interface SpecialistCentralAnalysis {
+  origemBola?: string
+  mexidaInicial?: string
+  soltaFixada?: string
+  baseDeslocada?: string
+  apiDeslocada?: string
+  comportamentoDefesa?: string
+  momentoAtaque?: string
+  ritmo?: string
+  previsibilidade?: string
+  decisaoFinal?: string
+  resultadoEspecialista?: string
+}
+
+export interface FinishAnalysis {
+  tipoFinalizacao?: string
+  pontuacaoEsperada?: string
+  pontuacaoObtida?: string
+  validadeTecnica?: string
+}
+
+export interface ShootoutAnalysis {
+  tipoShootout?: string
+  passadora?: string
+  cobradora?: string
+  goleiraDefensora?: string
+  tipoLancamento?: string
+  tipoFinta?: string
+  tipoFinalizacao?: string
+  acaoGoleira?: string
+  resultadoShootout?: string
+}
+
 export type ScoutGameStatus = 'em_andamento' | 'finalizado'
 
 export interface ScoutGame {
@@ -146,13 +179,27 @@ export interface ScoutEvent {
   placarCEPRAEA: number
   placarAdversario: number
   posse?: string
+
+  // Campos legados mantidos para compatibilidade com eventos já salvos.
   faseJogo?: string
   sistema?: string
+
+  // Leitura tática separada por equipe: essencial para cruzar ataque adversário x defesa CEPRAEA.
+  faseJogoCEPRAEA?: string
+  sistemaTaticoCEPRAEA?: string
+  faseJogoAdversaria?: string
+  sistemaTaticoAdversaria?: string
+
   ladoAcao?: string
   goleira?: string
   reposicao?: string
   ataques: ScoutAthleteBlock[]   // até 4
   defesas: ScoutAthleteBlock[]   // até 3
+
+  especialistaCentral?: SpecialistCentralAnalysis
+  finalizacao?: FinishAnalysis
+  shootout?: ShootoutAnalysis
+
   analise?: string
   resultadoColetivo?: string
   observacao?: string
