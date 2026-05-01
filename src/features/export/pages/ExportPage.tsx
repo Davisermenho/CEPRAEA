@@ -5,6 +5,7 @@ import { useTrainingStore } from '@/stores/trainingStore'
 import { useAttendanceStore } from '@/stores/attendanceStore'
 import { Button } from '@/shared/components/Button'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
+import { CepraeaLogomarca } from '@/shared/components/CepraeaLogomarca'
 import {
   athletesToCsv,
   trainingsToCsv,
@@ -93,6 +94,7 @@ export default function ExportPage() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="bg-cep-purple-900 border-b border-cep-purple-800 px-4 py-4">
+        <CepraeaLogomarca className="h-5 w-auto text-cep-lime-400 mb-3" />
         <p className="text-xs font-bold text-cep-lime-400 tracking-widest uppercase mb-0.5">Dados</p>
         <h1 className="text-xl font-black text-cep-white">Exportar / Backup</h1>
         <p className="text-sm text-cep-muted mt-0.5">Exporte dados ou faça backup completo</p>

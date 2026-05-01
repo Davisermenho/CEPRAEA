@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
+import { CepraeaLogo } from '@/shared/components/CepraeaLogo'
 import { getSetting, setSetting } from '@/db'
 import { hashPin, verifyPin, setSession } from '@/lib/auth'
 
@@ -69,9 +70,7 @@ export default function LoginPage() {
         {/* Brand */}
         <div className="flex flex-col items-center mb-10">
           <div className="mb-6">
-            <div className="h-20 w-20 rounded-2xl bg-cep-purple-850 border border-cep-purple-700 flex items-center justify-center shadow-xl">
-              <span className="text-3xl font-black text-cep-lime-400 tracking-tight">C</span>
-            </div>
+            <CepraeaLogo className="h-20 w-20 text-cep-lime-400" />
           </div>
           <h1 className="text-3xl font-black tracking-widest text-cep-white uppercase">CEPRAEA</h1>
           <p className="text-cep-muted text-xs mt-2 tracking-widest uppercase">

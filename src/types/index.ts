@@ -112,3 +112,50 @@ export interface TrainingSummary {
   justificados: number
   pendentes: number
 }
+
+// ─── Scout ─────────────────────────────────────────────────────────────────────
+
+export interface ScoutAthleteBlock {
+  atleta?: string
+  funcao?: string
+  categoria?: string
+  acao?: string
+  resultadoInd?: string
+}
+
+export type ScoutGameStatus = 'em_andamento' | 'finalizado'
+
+export interface ScoutGame {
+  id: string
+  data: string              // "YYYY-MM-DD"
+  equipeAnalisada: string
+  adversario: string
+  local?: string
+  observacoes?: string
+  status: ScoutGameStatus
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ScoutEvent {
+  id: string
+  jogoId: string
+  tempoJogo?: string
+  set?: string
+  controleJogo?: string
+  placarCEPRAEA: number
+  placarAdversario: number
+  posse?: string
+  faseJogo?: string
+  sistema?: string
+  ladoAcao?: string
+  goleira?: string
+  reposicao?: string
+  ataques: ScoutAthleteBlock[]   // até 4
+  defesas: ScoutAthleteBlock[]   // até 3
+  analise?: string
+  resultadoColetivo?: string
+  observacao?: string
+  revisarVideo: boolean
+  createdAt: string
+}

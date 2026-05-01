@@ -6,7 +6,9 @@ import {
   Dumbbell,
   BarChart2,
   Settings,
+  Crosshair,
 } from 'lucide-react'
+import { CepraeaLogomarca } from '@/shared/components/CepraeaLogomarca'
 import { cn } from '@/lib/utils'
 import { UpdatePrompt } from '@/shared/components/UpdatePrompt'
 import { useTrainingStore } from '@/stores/trainingStore'
@@ -21,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/',             label: 'Início',    icon: LayoutDashboard },
   { to: '/atletas',      label: 'Atletas',   icon: Users },
   { to: '/treinos',      label: 'Treinos',   icon: Dumbbell },
+  { to: '/scout',        label: 'Scout',     icon: Crosshair },
   { to: '/relatorios',   label: 'Relatórios', icon: BarChart2 },
   { to: '/configuracoes', label: 'Config',   icon: Settings },
 ]
@@ -35,8 +38,8 @@ export function AppLayout() {
       {/* Sidebar — desktop only */}
       <aside className="hidden lg:flex lg:w-56 lg:flex-col lg:bg-cep-purple-900 lg:border-r lg:border-cep-purple-800 lg:shrink-0">
         <div className="px-5 py-6">
-          <span className="text-lg font-black tracking-widest text-cep-lime-400 uppercase">CEPRAEA</span>
-          <p className="text-xs text-cep-muted mt-0.5 tracking-wide">Gestão de Treinos</p>
+          <CepraeaLogomarca className="w-36 text-cep-lime-400" />
+          <p className="text-xs text-cep-muted mt-2 tracking-wide">Gestão de Treinos</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {NAV_ITEMS.map(({ to, label, icon: Icon }) => (

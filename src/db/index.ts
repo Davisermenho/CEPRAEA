@@ -1,5 +1,5 @@
 import { openDB, type DBSchema } from 'idb'
-import type { Athlete, Training, AttendanceRecord } from '@/types'
+import type { Athlete, Training, AttendanceRecord, ScoutGame, ScoutEvent } from '@/types'
 
 interface CepraeaDB extends DBSchema {
   athletes: {
@@ -23,10 +23,20 @@ interface CepraeaDB extends DBSchema {
     key: string
     value: { key: string; value: unknown }
   }
+  scoutGames: {
+    key: string
+    value: ScoutGame
+    indexes: { 'by-data': string }
+  }
+  scoutEvents: {
+    key: string
+    value: ScoutEvent
+    indexes: { 'by-jogo': string }
+  }
 }
 
 const DB_NAME = 'cepraea-db'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 let dbPromise: ReturnType<typeof openDB<CepraeaDB>> | null = null
 
@@ -48,6 +58,14 @@ export function getDB() {
         }
         if (!db.objectStoreNames.contains('settings')) {
           db.createObjectStore('settings', { keyPath: 'key' })
+        }
+        if (!db.objectStoreNames.contains('scoutGames')) {
+          const sg = db.createObjectStore('scoutGames', { keyPath: 'id' })
+          sg.createIndex('by-data', 'data')
+        }
+        if (!db.objectStoreNames.contains('scoutEvents')) {
+          const se = db.createObjectStore('scoutEvents', { keyPath: 'id' })
+          se.createIndex('by-jogo', 'jogoId')
         }
       },
     })

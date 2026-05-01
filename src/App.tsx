@@ -6,6 +6,8 @@ import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 
 const LoginPage          = lazy(() => import('@/features/auth/pages/LoginPage'))
 const PublicConfirmPage  = lazy(() => import('@/features/confirm/pages/PublicConfirmPage'))
+const ScoutGamesPage     = lazy(() => import('@/features/scout/pages/ScoutGamesPage'))
+const ScoutLivePage      = lazy(() => import('@/features/scout/pages/ScoutLivePage'))
 const DashboardPage      = lazy(() => import('@/features/dashboard/pages/DashboardPage'))
 const AthletesPage       = lazy(() => import('@/features/athletes/pages/AthletesPage'))
 const AthleteDetailPage  = lazy(() => import('@/features/athletes/pages/AthleteDetailPage'))
@@ -39,6 +41,8 @@ export default function App() {
               <Route path="relatorios" element={<ReportsPage />} />
               <Route path="exportar" element={<ExportPage />} />
               <Route path="configuracoes" element={<SettingsPage />} />
+              <Route path="scout" element={<ScoutGamesPage />} />
+              <Route path="scout/:id/ao-vivo" element={<ScoutLivePage />} />
             </Route>
           </Route>
 
