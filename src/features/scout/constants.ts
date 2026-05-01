@@ -89,6 +89,7 @@ export const SCOUT_LADO_ACAO = [
   'Lado da troca',
   'Lado oposto da troca',
   'Transição',
+  'Shoot-out',
   'Não se aplica',
 ] as const
 
@@ -112,15 +113,28 @@ export const SCOUT_GOLEIRAS = ['Carolina Bezerra', 'Paola Wolff'] as const
 
 export const SCOUT_FUNCOES_ATAQUE = [
   'Central',
+  'Central Especialista',
+  'Central Playmaker Esq',
+  'Central Playmaker Dir',
   'Lateral esquerda',
   'Lateral direita',
+  'Lateral Esquerda Especialista',
+  'Lateral Direita Especialista',
   'Pivô',
   'Especialista',
   'Coringa',
   'Goleira passadora',
+  'Shoot-out - Passadora',
+  'Shoot-out - Cobradora',
 ] as const
 
-export const SCOUT_FUNCOES_DEFESA = ['Base', 'Solta', 'API', 'Goleira'] as const
+export const SCOUT_FUNCOES_DEFESA = [
+  'Base',
+  'Solta',
+  'API / Atrás da Pivô',
+  'Avançada',
+  'Goleira',
+] as const
 
 export const SCOUT_CATEGORIAS = [
   '1 - Ação técnica assertiva',
@@ -129,6 +143,9 @@ export const SCOUT_CATEGORIAS = [
   '4 - Erro de decisão',
   '5 - Recuperação / ação defensiva positiva',
   '6 - Falta / infração / ação irregular',
+  '7 - Boa tomada de decisão',
+  '8 - Passe de apoio',
+  '9 - Desmarque',
 ] as const
 
 export const SCOUT_ACOES_ATAQUE = [
@@ -207,6 +224,201 @@ export const SCOUT_ACOES_ATAQUE = [
   'Contato ofensivo ilegal',
   'Invasão da área',
   'Substituição irregular',
+] as const
+
+export const SCOUT_ACOES_ESPECIALISTA_CENTRAL = [
+  'Passe de central do chão para giro da lateral esquerda',
+  'Passe de central saltando para giro da lateral esquerda',
+  'Passe de central do chão após finta de passe para giro da lateral esquerda',
+  'Passe de central saltando para aérea da lateral esquerda',
+  'Passe de central do chão para giro da lateral direita',
+  'Passe de central saltando para giro da lateral direita',
+  'Passe de central do chão após finta de passe para giro da lateral direita',
+  'Passe de central saltando para aérea da lateral direita',
+  'Passe de central sem olhar para lateral esquerda',
+  'Passe de central sem olhar para lateral direita',
+  'Passe de central sem olhar para pivô',
+  'Passe de central para aérea da pivô',
+  'Passe de central para giro da pivô',
+  'Passe de central após fixar a Base',
+  'Passe de central após atrair a Solta',
+  'Passe de central após deslocar a API',
+  'Finta de passe e passe para aérea',
+  'Finta de passe e passe para giro',
+  'Finta de arremesso e passe para pivô',
+  'Finta de arremesso e passe para lateral',
+  'Passe que quebra a defesa 3x0',
+  'Passe que quebra a defesa 2x1',
+  'Erro de tempo no passe para giro',
+  'Erro de tempo no passe para aérea',
+  'Erro de leitura da defesa',
+  'Erro de decisão após finta',
+] as const
+
+export const SCOUT_ORIGEM_BOLA_ESPECIALISTA = [
+  'Bola vindo da lateral esquerda',
+  'Bola vindo da lateral direita',
+  'Bola vindo da pivô',
+  'Bola vindo da goleira',
+  'Bola vindo da central',
+  'Bola vindo de recuperação',
+  'Bola vindo de reposição',
+  'Bola sem mexida prévia',
+  'Bola após circulação completa',
+  'Bola após circulação parcial',
+] as const
+
+export const SCOUT_MEXIDA_INICIAL = [
+  'Sem mexida',
+  'Mexida rápida',
+  'Mexida lenta',
+  'Mexida alternada',
+  'Mexida de mão em mão',
+  'Circulação completa',
+  'Circulação parcial',
+] as const
+
+export const SCOUT_COMPORTAMENTO_DEFESA = [
+  'Solta não foi fixada',
+  'Solta foi fixada pela lateral direita',
+  'Solta foi fixada pela lateral esquerda',
+  'Solta subiu na central',
+  'Solta fechou linha de passe',
+  'Base permaneceu no centro',
+  'Base saiu para pivô',
+  'Base saiu para especialista',
+  'API permaneceu na pivô',
+  'API dividiu pivô e lateral',
+  'API saiu para lateral',
+  'Defesa deslocou para direita',
+  'Defesa deslocou para esquerda',
+  'Defesa não deslocou',
+  'Defesa induziu sobra na lateral direita',
+  'Defesa induziu sobra na lateral esquerda',
+] as const
+
+export const SCOUT_BOOLEANO_TATICO = ['Sim', 'Não', 'Parcial'] as const
+
+export const SCOUT_MOMENTO_ATAQUE_ESPECIALISTA = [
+  'Atacou cedo demais',
+  'Atacou no tempo correto',
+  'Atacou tarde demais',
+  'Atacou sem fixar a Solta',
+  'Atacou após fixar a Solta',
+  'Atacou sem deslocar Base',
+  'Atacou após deslocar Base',
+  'Atacou sem deslocar API',
+  'Atacou após deslocar API',
+  'Atacou com defesa organizada',
+  'Atacou com defesa em deslocamento',
+  'Atacou com defesa desequilibrada',
+] as const
+
+export const SCOUT_RITMO_ESPECIALISTA = [
+  'Ritmo constante',
+  'Acelerou',
+  'Desacelerou',
+  'Quebra de ritmo',
+  'Atacou após pausa',
+  'Aproximação lenta e aceleração',
+  'Postura pouco ofensiva e ataque rápido',
+  'Postura agressiva e passe',
+  'Simulou ataque e passou',
+  'Chamou atenção e distribuiu',
+] as const
+
+export const SCOUT_PREVISIBILIDADE_ESPECIALISTA = [
+  'Previsível',
+  'Parcialmente previsível',
+  'Imprevisível',
+  'Defesa antecipou a ação',
+  'Defesa não antecipou',
+  'Defesa mordeu a finta',
+  'Defesa esperou e controlou',
+  'Especialista repetiu padrão anterior',
+  'Especialista quebrou padrão anterior',
+  'Especialista variou tempo de ataque',
+] as const
+
+export const SCOUT_DECISAO_FINAL_ESPECIALISTA = [
+  'Finalizou em giro',
+  'Finalizou em aérea',
+  'Finalizou simples',
+  'Passou para lateral esquerda',
+  'Passou para lateral direita',
+  'Passou para pivô',
+  'Deu assistência para gol de 2 pontos',
+  'Gerou tiro de 6m',
+  'Fixou a Solta e passou',
+  'Fixou a Base e passou',
+  'Fixou a API e passou',
+  'Forçou finalização marcada',
+  'Forçou passe sem linha',
+  'Perdeu bola',
+  'Errou tempo de passe',
+  'Errou leitura da defesa',
+] as const
+
+export const SCOUT_TIPO_FINALIZACAO = [
+  'Arremesso simples',
+  'Giro',
+  'Aérea',
+  'Ponte aérea',
+  '360',
+  'Arremesso da especialista',
+  'Arremesso da goleira',
+  'Shoot-out',
+  'Tiro de 6m',
+  'Não se aplica',
+] as const
+
+export const SCOUT_PONTUACAO = ['0 ponto', '1 ponto', '2 pontos'] as const
+export const SCOUT_VALIDADE_TECNICA = ['Válida', 'Erro técnico', 'Revisar'] as const
+
+export const SCOUT_SHOOTOUT_OFENSIVO = [
+  'Lançamento direto da goleira para cobradora',
+  'Lançamento curto da goleira para cobradora',
+  'Lançamento longo da goleira para cobradora',
+  'Lançamento alto para recepção aérea',
+  'Lançamento baixo para recepção em velocidade',
+  'Passe da goleira no tempo correto',
+  'Passe da goleira atrasado',
+  'Passe da goleira adiantado',
+  'Passe da goleira interceptado',
+  'Recepção segura da cobradora',
+  'Erro de recepção da cobradora',
+  'Finta curta na goleira',
+  'Finta longa na goleira',
+  'Finta de corpo',
+  'Finta de arremesso',
+  'Giro no shoot-out',
+  'Aérea no shoot-out',
+  'Finalização direta',
+  'Finalização em giro',
+  'Finalização em aérea',
+  'Finalização por cobertura',
+  'Shoot-out convertido',
+  'Shoot-out perdido',
+] as const
+
+export const SCOUT_SHOOTOUT_DEFENSIVO = [
+  'Goleira leu o lançamento',
+  'Goleira saiu no tempo correto',
+  'Goleira antecipou demais',
+  'Goleira atrasou a saída',
+  'Goleira fechou o ângulo',
+  'Goleira abriu o ângulo',
+  'Goleira induziu a finalização',
+  'Goleira defendeu finalização direta',
+  'Goleira defendeu giro',
+  'Goleira defendeu aérea',
+  'Goleira forçou finalização para fora',
+  'Goleira tocou na bola',
+  'Goleira cometeu tiro de 6m',
+  'Goleira caiu antes da decisão',
+  'Goleira esperou bem a cobradora',
+  'Defesa venceu o shoot-out',
+  'Defesa perdeu o shoot-out',
 ] as const
 
 export const SCOUT_ACOES_DEFESA = [
@@ -322,6 +534,16 @@ export const SCOUT_REPOSICAO = [
 export const SCOUT_RESULTADO_COLETIVO = [
   'Gol 1 ponto',
   'Gol 2 pontos',
+  'Gol de giro 2 pontos',
+  'Gol de aérea 2 pontos',
+  'Gol de giro 1 ponto — erro técnico',
+  'Gol de aérea 1 ponto — erro técnico',
+  'Giro sem validade de 2 pontos',
+  'Aérea sem validade de 2 pontos',
+  'Giro bloqueado',
+  'Aérea bloqueada',
+  'Giro para fora',
+  'Aérea para fora',
   'Gol sofrido 1 ponto',
   'Gol sofrido 2 pontos',
   'Defesa da goleira',
