@@ -8,6 +8,7 @@ const LoginPage          = lazy(() => import('@/features/auth/pages/LoginPage'))
 const PublicConfirmPage  = lazy(() => import('@/features/confirm/pages/PublicConfirmPage'))
 const ScoutGamesPage     = lazy(() => import('@/features/scout/pages/ScoutGamesPage'))
 const ScoutLivePage      = lazy(() => import('@/features/scout/pages/ScoutLivePage'))
+const ScoutSummaryPage   = lazy(() => import('@/features/scout/pages/ScoutSummaryPage'))
 const DashboardPage      = lazy(() => import('@/features/dashboard/pages/DashboardPage'))
 const AthletesPage       = lazy(() => import('@/features/athletes/pages/AthletesPage'))
 const AthleteDetailPage  = lazy(() => import('@/features/athletes/pages/AthleteDetailPage'))
@@ -43,6 +44,7 @@ export default function App() {
               <Route path="configuracoes" element={<SettingsPage />} />
               <Route path="scout" element={<ScoutGamesPage />} />
               <Route path="scout/:id/ao-vivo" element={<ScoutLivePage />} />
+              <Route path="scout/:id/resumo" element={<ScoutSummaryPage />} />
             </Route>
           </Route>
 
