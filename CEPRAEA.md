@@ -433,6 +433,10 @@ cepraea-pwa/
 │   ├── icon-maskable-192.png
 │   └── icon-maskable-512.png
 │
+├── .files/                      # Arquivos de referência do projeto (rastreados no git)
+│   └── scout.xlsx              # Planilha-base de referência para o módulo Scout
+│                               # Define estruturas de eventos, fases, sistemas e ações
+│
 ├── .gitignore
 ├── .gitattributes
 ├── index.html                   # HTML base
@@ -492,6 +496,7 @@ Domínios:
 │   ├── Store: scoutStore.ts
 │   ├── Types: ScoutGame, ScoutEvent, ScoutAthleteBlock, ScoutGameStatus
 │   ├── Constants: sets, equipes, fases, sistemas, laçados, resultados
+│   │             (fonte de verdade: .files/scout.xlsx)
 │   └── Features: ScoutGamesPage, ScoutLivePage, EventForm
 │
 ├── Sync (Sincronização)
