@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:supabase": "bash scripts/run-supabase-tests.sh",
+    "validate:supabase-foundation": "supabase db reset && npm run test:supabase && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.87.1",
