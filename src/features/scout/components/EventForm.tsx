@@ -1,21 +1,23 @@
 import { useState } from 'react'
-import type { ScoutEvent, ScoutAthleteBlock, SpecialistCentralAnalysis, FinishAnalysis, ShootoutAnalysis } from '@/types'
+import type { ScoutEvent, ScoutAthleteBlock, SpecialistCentralAnalysis, FinishAnalysis, ShootoutAnalysis, ReposicaoAnalysis } from '@/types'
 import { Button } from '@/shared/components/Button'
 import {
   SCOUT_SETS,
   SCOUT_CONTROLE_JOGO,
   SCOUT_POSSE,
   SCOUT_FASE_JOGO,
-  SCOUT_SISTEMAS,
   SCOUT_LADO_ACAO,
+  SCOUT_ZONA_ACAO,
   SCOUT_GOLEIRAS,
   SCOUT_REPOSICAO,
   SCOUT_ATLETAS,
+  SCOUT_NUMEROS_ADVERSARIA,
   SCOUT_FUNCOES_ATAQUE,
   SCOUT_FUNCOES_DEFESA,
   SCOUT_CATEGORIAS,
   SCOUT_ACOES_ATAQUE,
   SCOUT_ACOES_DEFESA,
+  SCOUT_ACOES_GOLEIRA,
   SCOUT_ACOES_ESPECIALISTA_CENTRAL,
   SCOUT_RESULTADO_INDIVIDUAL,
   SCOUT_RESULTADO_COLETIVO,
@@ -29,10 +31,12 @@ import {
   SCOUT_PREVISIBILIDADE_ESPECIALISTA,
   SCOUT_DECISAO_FINAL_ESPECIALISTA,
   SCOUT_TIPO_FINALIZACAO,
+  SCOUT_DIRECAO_GOL,
   SCOUT_PONTUACAO,
   SCOUT_VALIDADE_TECNICA,
   SCOUT_SHOOTOUT_OFENSIVO,
   SCOUT_SHOOTOUT_DEFENSIVO,
+  getSistemasPorFase,
 } from '../constants'
 
 type Step = 'contexto' | 'atletas' | 'especialista' | 'resultado'
@@ -100,6 +104,7 @@ function AthleteBlockForm({
   block,
   funcoes,
   acoes,
+  isAdversario,
   onChange,
 }: {
   index: number
@@ -107,6 +112,7 @@ function AthleteBlockForm({
   block: ScoutAthleteBlock
   funcoes: readonly string[]
   acoes: readonly string[]
+  isAdversario?: boolean
   onChange: (b: ScoutAthleteBlock) => void
 }) {
   const set = (key: keyof ScoutAthleteBlock, val: string) => onChange({ ...block, [key]: val || undefined })
@@ -115,7 +121,10 @@ function AthleteBlockForm({
   return (
     <div className="rounded-xl border border-cep-purple-700 bg-cep-purple-900/60 p-3 space-y-2">
       <p className="text-xs font-bold text-cep-lime-400 uppercase tracking-wide">{label} {index + 1}</p>
-      <SelectField label="Atleta" value={block.atleta ?? ''} onChange={(v) => set('atleta', v)} options={SCOUT_ATLETAS} />
+      {isAdversario
+        ? <SelectField label="Número" value={block.numero ?? ''} onChange={(v) => set('numero', v)} options={SCOUT_NUMEROS_ADVERSARIA} placeholder="Nº" />
+        : <SelectField label="Atleta" value={block.atleta ?? ''} onChange={(v) => set('atleta', v)} options={SCOUT_ATLETAS} />
+      }
       <SelectField label="Função" value={block.funcao ?? ''} onChange={(v) => set('funcao', v)} options={funcoes} />
       <SelectField label="Categoria" value={block.categoria ?? ''} onChange={(v) => set('categoria', v)} options={SCOUT_CATEGORIAS} />
       <SelectField label="Ação" value={block.acao ?? ''} onChange={(v) => set('acao', v)} options={actionOptions} />
@@ -130,6 +139,8 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
     tempoJogo: '',
     set: initialSet ?? '',
     controleJogo: '',
+    pontosCEPRAEA: 0,
+    pontosAdversario: 0,
     placarCEPRAEA: initialPlacarCEPRAEA,
     placarAdversario: initialPlacarAdversario,
     posse: '',
@@ -144,8 +155,13 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
     reposicao: '',
     ataques: [{ ...EMPTY_BLOCK }],
     defesas: [{ ...EMPTY_BLOCK }],
+    ataqueCEPRAEA: [{ ...EMPTY_BLOCK }],
+    defesaCEPRAEA: [{ ...EMPTY_BLOCK }],
+    ataqueAdversario: [{ ...EMPTY_BLOCK }],
+    defesaAdversaria: [{ ...EMPTY_BLOCK }],
     especialistaCentral: {},
     finalizacao: {},
+    reposicaoDetalhe: {},
     shootout: {},
     analise: '',
     resultadoColetivo: '',
@@ -165,11 +181,20 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
   const setShootout = (key: keyof ShootoutAnalysis, val: string) =>
     setForm((f) => ({ ...f, shootout: { ...(f.shootout ?? {}), [key]: val || undefined } }))
 
+  const setReposicao = (key: keyof ReposicaoAnalysis, val: string | boolean) =>
+    setForm((f) => ({ ...f, reposicaoDetalhe: { ...(f.reposicaoDetalhe ?? {}), [key]: val === '' ? undefined : val } }))
+
   const updateAtaque = (i: number, b: ScoutAthleteBlock) =>
     setForm((f) => { const arr = [...f.ataques]; arr[i] = b; return { ...f, ataques: arr } })
 
   const updateDefesa = (i: number, b: ScoutAthleteBlock) =>
     setForm((f) => { const arr = [...f.defesas]; arr[i] = b; return { ...f, defesas: arr } })
+
+  const updateAtaqueAdversario = (i: number, b: ScoutAthleteBlock) =>
+    setForm((f) => { const arr = [...(f.ataqueAdversario ?? [])]; arr[i] = b; return { ...f, ataqueAdversario: arr } })
+
+  const updateDefesaAdversaria = (i: number, b: ScoutAthleteBlock) =>
+    setForm((f) => { const arr = [...(f.defesaAdversaria ?? [])]; arr[i] = b; return { ...f, defesaAdversaria: arr } })
 
   const addAtaque = () => {
     if (form.ataques.length < 4) setForm((f) => ({ ...f, ataques: [...f.ataques, { ...EMPTY_BLOCK }] }))
@@ -184,6 +209,22 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
     if (form.defesas.length > 1) setForm((f) => ({ ...f, defesas: f.defesas.slice(0, -1) }))
   }
 
+  const ataqueAdversario = form.ataqueAdversario ?? [{ ...EMPTY_BLOCK }]
+  const defesaAdversaria = form.defesaAdversaria ?? [{ ...EMPTY_BLOCK }]
+
+  const addAtaqueAdversario = () => {
+    if (ataqueAdversario.length < 4) setForm((f) => ({ ...f, ataqueAdversario: [...(f.ataqueAdversario ?? []), { ...EMPTY_BLOCK }] }))
+  }
+  const removeAtaqueAdversario = () => {
+    if (ataqueAdversario.length > 1) setForm((f) => ({ ...f, ataqueAdversario: (f.ataqueAdversario ?? []).slice(0, -1) }))
+  }
+  const addDefesaAdversaria = () => {
+    if (defesaAdversaria.length < 3) setForm((f) => ({ ...f, defesaAdversaria: [...(f.defesaAdversaria ?? []), { ...EMPTY_BLOCK }] }))
+  }
+  const removeDefesaAdversaria = () => {
+    if (defesaAdversaria.length > 1) setForm((f) => ({ ...f, defesaAdversaria: (f.defesaAdversaria ?? []).slice(0, -1) }))
+  }
+
   const nextStep = () => {
     if (step === 'contexto') setStep('atletas')
     else if (step === 'atletas') setStep('especialista')
@@ -191,7 +232,13 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
   }
 
   const handleSave = () => {
-    onSave({ jogoId, ...form })
+    onSave({
+      jogoId,
+      ...form,
+      // Sincroniza campos CEPRAEA com os legados para compatibilidade com resumo existente
+      ataqueCEPRAEA: form.ataques,
+      defesaCEPRAEA: form.defesas,
+    })
   }
 
   const isShootout = form.faseJogo === 'Shoot-out' || form.faseJogoCEPRAEA === 'Shoot-out' || form.faseJogoAdversaria === 'Shoot-out'
@@ -246,10 +293,25 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
             </div>
 
             <SelectField label="Posse" value={form.posse ?? ''} onChange={(v) => setField('posse', v)} options={SCOUT_POSSE} />
+
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-cep-muted">Pontos do lance</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-xs text-cep-muted/70">{equipeAnalisada}</label>
+                  <input type="number" min={0} max={2} value={form.pontosCEPRAEA ?? 0} onChange={(e) => setField('pontosCEPRAEA', Number(e.target.value))} className="w-full rounded-lg bg-cep-purple-800 border border-cep-purple-700 text-cep-white text-sm px-3 h-9 focus:outline-none focus:ring-2 focus:ring-cep-lime-400" />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-xs text-cep-muted/70">{adversario}</label>
+                  <input type="number" min={0} max={2} value={form.pontosAdversario ?? 0} onChange={(e) => setField('pontosAdversario', Number(e.target.value))} className="w-full rounded-lg bg-cep-purple-800 border border-cep-purple-700 text-cep-white text-sm px-3 h-9 focus:outline-none focus:ring-2 focus:ring-cep-lime-400" />
+                </div>
+              </div>
+            </div>
+
             <SelectField label="Fase de jogo - CEPRAEA" value={form.faseJogoCEPRAEA ?? ''} onChange={(v) => { setField('faseJogoCEPRAEA', v); setField('faseJogo', v) }} options={SCOUT_FASE_JOGO} />
-            <SelectField label="Sistema tático - CEPRAEA" value={form.sistemaTaticoCEPRAEA ?? ''} onChange={(v) => { setField('sistemaTaticoCEPRAEA', v); setField('sistema', v) }} options={SCOUT_SISTEMAS} />
+            <SelectField label="Sistema tático - CEPRAEA" value={form.sistemaTaticoCEPRAEA ?? ''} onChange={(v) => { setField('sistemaTaticoCEPRAEA', v); setField('sistema', v) }} options={getSistemasPorFase(form.faseJogoCEPRAEA)} />
             <SelectField label="Fase de jogo - adversária" value={form.faseJogoAdversaria ?? ''} onChange={(v) => setField('faseJogoAdversaria', v)} options={SCOUT_FASE_JOGO} />
-            <SelectField label="Sistema tático - adversária" value={form.sistemaTaticoAdversaria ?? ''} onChange={(v) => setField('sistemaTaticoAdversaria', v)} options={SCOUT_SISTEMAS} />
+            <SelectField label="Sistema tático - adversária" value={form.sistemaTaticoAdversaria ?? ''} onChange={(v) => setField('sistemaTaticoAdversaria', v)} options={getSistemasPorFase(form.faseJogoAdversaria)} />
             <SelectField label="Lado / zona da ação" value={form.ladoAcao ?? ''} onChange={(v) => setField('ladoAcao', v)} options={SCOUT_LADO_ACAO} />
             <SelectField label="Goleira" value={form.goleira ?? ''} onChange={(v) => setField('goleira', v)} options={SCOUT_GOLEIRAS} />
             <SelectField label="Reposição" value={form.reposicao ?? ''} onChange={(v) => setField('reposicao', v)} options={SCOUT_REPOSICAO} />
@@ -260,7 +322,7 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
           <>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-cep-white">Ataque</p>
+                <p className="text-sm font-bold text-cep-white">{equipeAnalisada} — Ataque</p>
                 <div className="flex gap-2">
                   {form.ataques.length > 1 && <button onClick={removeAtaque} className="text-xs text-red-400 hover:text-red-300">− Remover</button>}
                   {form.ataques.length < 4 && <button onClick={addAtaque} className="text-xs text-cep-lime-400 hover:text-cep-lime-300">+ Adicionar</button>}
@@ -273,7 +335,7 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
 
             <div className="space-y-2 mt-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-cep-white">Defesa</p>
+                <p className="text-sm font-bold text-cep-white">{equipeAnalisada} — Defesa</p>
                 <div className="flex gap-2">
                   {form.defesas.length > 1 && <button onClick={removeDefesa} className="text-xs text-red-400 hover:text-red-300">− Remover</button>}
                   {form.defesas.length < 3 && <button onClick={addDefesa} className="text-xs text-cep-lime-400 hover:text-cep-lime-300">+ Adicionar</button>}
@@ -281,6 +343,32 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
               </div>
               {form.defesas.map((b, i) => (
                 <AthleteBlockForm key={i} index={i} label="Defesa" block={b} funcoes={SCOUT_FUNCOES_DEFESA} acoes={SCOUT_ACOES_DEFESA} onChange={(nb) => updateDefesa(i, nb)} />
+              ))}
+            </div>
+
+            <div className="space-y-2 mt-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold text-cep-white">{adversario} — Ataque</p>
+                <div className="flex gap-2">
+                  {ataqueAdversario.length > 1 && <button onClick={removeAtaqueAdversario} className="text-xs text-red-400 hover:text-red-300">− Remover</button>}
+                  {ataqueAdversario.length < 4 && <button onClick={addAtaqueAdversario} className="text-xs text-cep-lime-400 hover:text-cep-lime-300">+ Adicionar</button>}
+                </div>
+              </div>
+              {ataqueAdversario.map((b, i) => (
+                <AthleteBlockForm key={i} index={i} label="Adversária" block={b} funcoes={SCOUT_FUNCOES_ATAQUE} acoes={SCOUT_ACOES_ATAQUE} isAdversario onChange={(nb) => updateAtaqueAdversario(i, nb)} />
+              ))}
+            </div>
+
+            <div className="space-y-2 mt-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold text-cep-white">{adversario} — Defesa</p>
+                <div className="flex gap-2">
+                  {defesaAdversaria.length > 1 && <button onClick={removeDefesaAdversaria} className="text-xs text-red-400 hover:text-red-300">− Remover</button>}
+                  {defesaAdversaria.length < 3 && <button onClick={addDefesaAdversaria} className="text-xs text-cep-lime-400 hover:text-cep-lime-300">+ Adicionar</button>}
+                </div>
+              </div>
+              {defesaAdversaria.map((b, i) => (
+                <AthleteBlockForm key={i} index={i} label="Adversária" block={b} funcoes={SCOUT_FUNCOES_DEFESA} acoes={SCOUT_ACOES_DEFESA} isAdversario onChange={(nb) => updateDefesaAdversaria(i, nb)} />
               ))}
             </div>
           </>
@@ -303,10 +391,37 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
             </Section>
 
             <Section title="Finalização" description="Registre giro/aérea e diferencie gol de 2 pontos de execução que valeu só 1 ponto.">
+              <SelectField label="Finalizadora" value={form.finalizacao?.finalizadora ?? ''} onChange={(v) => setFinalizacao('finalizadora', v)} options={SCOUT_ATLETAS} />
+              <SelectField label="Zona do arremesso" value={form.finalizacao?.zonaArremesso ?? ''} onChange={(v) => setFinalizacao('zonaArremesso', v)} options={SCOUT_ZONA_ACAO} />
+              <SelectField label="Direção do gol" value={form.finalizacao?.direcaoGol ?? ''} onChange={(v) => setFinalizacao('direcaoGol', v)} options={SCOUT_DIRECAO_GOL} />
+              <SelectField label="Resultado da finalização" value={form.finalizacao?.resultadoFinalizacao ?? ''} onChange={(v) => setFinalizacao('resultadoFinalizacao', v)} options={SCOUT_RESULTADO_INDIVIDUAL} />
+              <SelectField label="Goleira adversária" value={form.finalizacao?.goleira ?? ''} onChange={(v) => setFinalizacao('goleira', v)} options={SCOUT_GOLEIRAS} />
+              <SelectField label="Ação da goleira" value={form.finalizacao?.acaoGoleira ?? ''} onChange={(v) => setFinalizacao('acaoGoleira', v)} options={SCOUT_ACOES_GOLEIRA} />
               <SelectField label="Tipo de finalização" value={form.finalizacao?.tipoFinalizacao ?? ''} onChange={(v) => setFinalizacao('tipoFinalizacao', v)} options={SCOUT_TIPO_FINALIZACAO} />
               <SelectField label="Pontuação esperada" value={form.finalizacao?.pontuacaoEsperada ?? ''} onChange={(v) => setFinalizacao('pontuacaoEsperada', v)} options={SCOUT_PONTUACAO} />
               <SelectField label="Pontuação obtida" value={form.finalizacao?.pontuacaoObtida ?? ''} onChange={(v) => setFinalizacao('pontuacaoObtida', v)} options={SCOUT_PONTUACAO} />
               <SelectField label="Validade técnica" value={form.finalizacao?.validadeTecnica ?? ''} onChange={(v) => setFinalizacao('validadeTecnica', v)} options={SCOUT_VALIDADE_TECNICA} />
+            </Section>
+
+            <Section title="Reposição" description="Preencha quando houver troca de jogadoras durante o evento.">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.reposicaoDetalhe?.houveReposicao ?? false}
+                  onChange={(e) => setReposicao('houveReposicao', e.target.checked)}
+                  className="h-4 w-4 rounded accent-cep-lime-400"
+                />
+                <span className="text-sm text-cep-white">Houve reposição</span>
+              </label>
+              {form.reposicaoDetalhe?.houveReposicao && (
+                <>
+                  <SelectField label="Tipo de reposição" value={form.reposicaoDetalhe?.tipoReposicao ?? ''} onChange={(v) => setReposicao('tipoReposicao', v)} options={SCOUT_REPOSICAO} />
+                  <SelectField label="Lado da troca" value={form.reposicaoDetalhe?.ladoTroca ?? ''} onChange={(v) => setReposicao('ladoTroca', v)} options={SCOUT_ZONA_ACAO} />
+                  <SelectField label="Atleta que entrou" value={form.reposicaoDetalhe?.atletaEntrou ?? ''} onChange={(v) => setReposicao('atletaEntrou', v)} options={SCOUT_ATLETAS} />
+                  <SelectField label="Atleta que saiu" value={form.reposicaoDetalhe?.atletaSaiu ?? ''} onChange={(v) => setReposicao('atletaSaiu', v)} options={SCOUT_ATLETAS} />
+                  <SelectField label="Resultado da reposição" value={form.reposicaoDetalhe?.resultadoReposicao ?? ''} onChange={(v) => setReposicao('resultadoReposicao', v)} options={SCOUT_RESULTADO_INDIVIDUAL} />
+                </>
+              )}
             </Section>
 
             <Section title="Shoot-out" description={isShootout ? 'Fase atual marcada como shoot-out.' : 'Preencha apenas quando o evento for shoot-out.'}>
