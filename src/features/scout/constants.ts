@@ -152,7 +152,6 @@ export const SCOUT_ATLETAS = [
 ] as const
 
 export const SCOUT_GOLEIRAS = ['Carolina Bezerra', 'Paola Wolff'] as const
-export const SCOUT_NUMEROS_ADVERSARIA = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16'] as const
 
 export const SCOUT_FUNCOES_ATAQUE = [
   'Central',
@@ -191,209 +190,197 @@ export const SCOUT_CATEGORIAS = [
   '9 - Desmarque',
 ] as const
 
-export const SCOUT_ACOES_ATAQUE = [
-  'Recepção segura na lateral esquerda',
-  'Recepção segura na lateral direita',
-  'Finalização de 1 ponto convertida',
-  'Finalização de 2 pontos convertida',
-  'Arremesso em giro convertido',
-  'Arremesso em aérea convertido',
-  'Infiltração pelo lado esquerdo com vantagem',
-  'Ataque ao espaço vazio da defesa',
-  'Finta curta para ganhar ângulo',
-  'Passe rápido para continuidade do ataque',
-  'Passe longo correto para lado oposto',
-  'Passe para pivô em condição de finalização',
-  'Passe para especialista em condição de finalização',
-  'Troca de posição correta com a central',
-  'Troca de posição correta com a pivô',
-  'Fixação da defensora antes do passe',
-  'Leitura correta do bloqueio defensivo',
-  'Finalização com bom ângulo',
-  'Ataque em superioridade bem executado',
-  'Continuidade após pressão defensiva',
-  'Tomada de decisão rápida na transição',
-  'Ataque ao espaço entre base e API',
-  'Ataque ao espaço entre base e solta',
-  'Passe correto para pivô',
-  'Passe correto para especialista',
-  'Passe correto para central',
-  'Posicionamento correto entre defensoras',
-  'Recepção segura próxima à área',
-  'Recepção aérea correta',
-  'Giro convertido',
-  'Aérea convertida',
-  'Proteção da bola sem falta',
-  'Bloqueio ofensivo legal',
-  'Desmarque curto para receber',
-  'Organização correta do ataque',
-  'Passe inicial seguro',
-  'Passe para lateral em vantagem',
-  'Passe para pivô em vantagem',
-  'Passe para especialista em vantagem',
-  'Passe longo correto',
-  'Passe aéreo correto',
-  'Controle de ritmo do ataque',
-  'Chamada correta do sistema',
-  'Erro de recepção',
-  'Passe errado',
-  'Passe interceptado',
-  'Arremesso para fora',
-  'Arremesso bloqueado',
-  'Arremesso sem ângulo',
-  'Erro de tempo na aérea',
-  'Erro de tempo no giro',
-  'Pisou na área',
-  'Perdeu a bola sob pressão',
-  'Erro de substituição',
-  'Arremesso precipitado',
-  'Perda de bola por demora na decisão',
-  'Assistência para pivô',
-  'Assistência para especialista',
-  'Assistência para central',
-  'Assistência em aérea',
-  'Passe que gera gol de 2 pontos',
-  'Passe que gera tiro de 6m',
-  'Assistência para lateral esquerda',
-  'Assistência para lateral direita',
-  'Forçou finalização marcada',
-  'Forçou passe para pivô sem linha',
-  'Não viu atleta livre',
-  'Prendeu a bola e atrasou o ataque',
-  'Não acelerou em vantagem numérica',
-  'Não identificou pivô livre',
-  'Não identificou especialista livre',
-  'Falta de ataque',
-  'Contato ofensivo ilegal',
-  'Invasão da área',
-  'Substituição irregular',
+export type ScoutActionOption = {
+  label: string
+  categoria: typeof SCOUT_CATEGORIAS[number]
+  tags?: string[]
+}
+
+const acao = (label: string, categoria: typeof SCOUT_CATEGORIAS[number], tags: string[] = []): ScoutActionOption => ({ label, categoria, tags })
+
+export const SCOUT_ACOES_LATERAL = [
+  acao('Recepção segura na lateral', '1 - Ação técnica assertiva'),
+  acao('Giro convertido', '1 - Ação técnica assertiva', ['finalizacao', 'giro']),
+  acao('Aérea convertida', '1 - Ação técnica assertiva', ['finalizacao', 'aerea']),
+  acao('Arremesso simples', '1 - Ação técnica assertiva', ['finalizacao']),
+  acao('Arremesso em giro', '1 - Ação técnica assertiva', ['finalizacao', 'giro']),
+  acao('Arremesso em aérea', '1 - Ação técnica assertiva', ['finalizacao', 'aerea']),
+  acao('Passe para pivô', '8 - Passe de apoio'),
+  acao('Passe para central', '8 - Passe de apoio'),
+  acao('Passe para especialista', '8 - Passe de apoio'),
+  acao('Fixou Solta', '7 - Boa tomada de decisão'),
+  acao('Fixou Base', '7 - Boa tomada de decisão'),
+  acao('Assistência para pivô', '3 - Assistência / ação que gera finalização'),
+  acao('Assistência para central', '3 - Assistência / ação que gera finalização'),
+  acao('Finalização para fora', '2 - Erro técnico', ['finalizacao']),
+  acao('Finalização bloqueada', '2 - Erro técnico', ['finalizacao']),
+  acao('Erro de recepção', '2 - Erro técnico'),
+  acao('Erro de tempo no giro', '2 - Erro técnico'),
+  acao('Erro de tempo na aérea', '2 - Erro técnico'),
+  acao('Pisou na área', '6 - Falta / infração / ação irregular'),
+  acao('Perda de bola', '2 - Erro técnico'),
+  acao('Forçou finalização marcada', '4 - Erro de decisão', ['finalizacao']),
 ] as const
 
-export const SCOUT_ACOES_ESPECIALISTA_CENTRAL = [
-  'Passe de central do chão para giro da lateral esquerda',
-  'Passe de central saltando para giro da lateral esquerda',
-  'Passe de central do chão após finta de passe para giro da lateral esquerda',
-  'Passe de central saltando para aérea da lateral esquerda',
-  'Passe de central do chão para giro da lateral direita',
-  'Passe de central saltando para giro da lateral direita',
-  'Passe de central do chão após finta de passe para giro da lateral direita',
-  'Passe de central saltando para aérea da lateral direita',
-  'Passe de central sem olhar para lateral esquerda',
-  'Passe de central sem olhar para lateral direita',
-  'Passe de central sem olhar para pivô',
-  'Passe de central para aérea da pivô',
-  'Passe de central para giro da pivô',
-  'Passe de central após fixar a Base',
-  'Passe de central após atrair a Solta',
-  'Passe de central após deslocar a API',
-  'Finta de passe e passe para aérea',
-  'Finta de passe e passe para giro',
-  'Finta de arremesso e passe para pivô',
-  'Finta de arremesso e passe para lateral',
-  'Passe que quebra a defesa 3x0',
-  'Passe que quebra a defesa 2x1',
-  'Erro de tempo no passe para giro',
-  'Erro de tempo no passe para aérea',
-  'Erro de leitura da defesa',
-  'Erro de decisão após finta',
+export const SCOUT_ACOES_PIVO = [
+  acao('Recepção próxima à área', '1 - Ação técnica assertiva'),
+  acao('Recepção aérea', '1 - Ação técnica assertiva'),
+  acao('Giro convertido', '1 - Ação técnica assertiva', ['finalizacao', 'giro']),
+  acao('Aérea convertida', '1 - Ação técnica assertiva', ['finalizacao', 'aerea']),
+  acao('Arremesso em giro', '1 - Ação técnica assertiva', ['finalizacao', 'giro']),
+  acao('Arremesso em aérea', '1 - Ação técnica assertiva', ['finalizacao', 'aerea']),
+  acao('Fixou API', '7 - Boa tomada de decisão'),
+  acao('Fixou Base', '7 - Boa tomada de decisão'),
+  acao('Desmarque curto', '9 - Desmarque'),
+  acao('Bloqueio ofensivo legal', '1 - Ação técnica assertiva'),
+  acao('Passe de apoio', '8 - Passe de apoio'),
+  acao('Erro de recepção', '2 - Erro técnico'),
+  acao('Erro de tempo no giro', '2 - Erro técnico'),
+  acao('Erro de tempo na aérea', '2 - Erro técnico'),
+  acao('Girou contra bloqueio duplo', '4 - Erro de decisão', ['finalizacao']),
+  acao('Pisou na área', '6 - Falta / infração / ação irregular'),
+  acao('Falta de ataque', '6 - Falta / infração / ação irregular'),
 ] as const
 
-export const SCOUT_ACOES_DEFESA = [
-  'Posicionamento central correto',
-  'Comunicação defensiva efetiva',
-  'Leitura correta da especialista central',
-  'Leitura correta da pivô',
-  'Fechamento do centro',
-  'Fechamento da linha da área',
-  'Cobertura da API',
-  'Cobertura da solta',
-  'Troca de marcação correta',
-  'Flutuação entre pivô e especialista',
-  'Indução do ataque para lateral',
-  'Temporização da atacante com bola',
-  'Bloqueio de arremesso',
-  'Bloqueio após giro',
-  'Bloqueio duplo correto',
-  'Antecipação de passe central',
-  'Pressão controlada sem abrir o centro',
-  'Recuperação defensiva após perda',
-  'Pressão correta na primeira linha',
-  'Entrada correta na linha de passe',
-  'Antecipação de passe',
-  'Interceptação de passe',
-  'Dissuasão na lateral',
-  'Dissuasão na central',
-  'Pressão na playmaker',
-  'Recuo no tempo correto',
-  'Subida no tempo correto',
-  'Leitura correta do lado da troca',
-  'Indução ao passe longo',
-  'Indução ao erro técnico',
-  'Fechamento da linha de passe para especialista',
-  'Marcação indireta da especialista',
-  'Posicionamento correto atrás da pivô',
-  'Controle da pivô sem contato ilegal',
-  'Fechamento da linha de passe para pivô',
-  'Defesa do passe aéreo para pivô',
-  'Antecipação do passe para pivô',
-  'Falsa liberdade bem executada',
-  'Acompanhamento da pivô',
-  'Bloqueio do giro da pivô',
-  'Proteção contra aérea',
-  'Erro de posicionamento central',
-  'Saiu do centro sem cobertura',
-  'Perdeu a especialista',
-  'Perdeu a pivô',
-  'Chegou atrasada no bloqueio',
-  'Falhou na comunicação',
-  'Subiu fora do tempo',
-  'Recuou tarde',
-  'Abriu passe longo fácil',
-  'Foi batida na primeira pressão',
-  'Não retornou após pressão',
-  'Deu liberdade real para finalização',
-  'Errou o tempo da falsa liberdade',
-  'Deixou aérea entrar',
-  'Não fechou a linha da área',
-  'Escolheu pressionar quando deveria proteger o centro',
-  'Pressionou sem cobertura',
-  'Tentou roubar bola sem leitura',
-  'Marcou a bola e esqueceu a pivô',
-  'Interceptação de passe',
-  'Recuperação de bola',
-  'Indução de erro ofensivo',
-  'Forçou passe longo',
-  'Forçou arremesso ruim',
-  'Gerou falta de ataque',
-  'Bloqueio que impediu gol',
-  'Roubo de bola',
-  'Passe recuperado',
-  'Gerou contra-ataque',
-  'Bloqueio de giro',
-  'Bloqueio duplo efetivo',
-  'Contato ilegal',
-  'Contato no ar',
-  'Tiro de 6m cometido',
-  'Invasão da área',
-  'Falta defensiva desnecessária',
-  'Contato ilegal na pivô',
+export const SCOUT_ACOES_CENTRAL = [
+  acao('Organização do ataque', '1 - Ação técnica assertiva'),
+  acao('Passe para lateral esquerda', '8 - Passe de apoio'),
+  acao('Passe para lateral direita', '8 - Passe de apoio'),
+  acao('Passe para pivô', '8 - Passe de apoio'),
+  acao('Passe longo para lado oposto', '8 - Passe de apoio'),
+  acao('Controle de ritmo', '7 - Boa tomada de decisão'),
+  acao('Chamada do sistema', '7 - Boa tomada de decisão'),
+  acao('Fixou Base', '7 - Boa tomada de decisão'),
+  acao('Fixou Solta', '7 - Boa tomada de decisão'),
+  acao('Assistência para lateral esquerda', '3 - Assistência / ação que gera finalização'),
+  acao('Assistência para lateral direita', '3 - Assistência / ação que gera finalização'),
+  acao('Assistência para pivô', '3 - Assistência / ação que gera finalização'),
+  acao('Passe errado', '2 - Erro técnico'),
+  acao('Passe interceptado', '2 - Erro técnico'),
+  acao('Erro de leitura', '4 - Erro de decisão'),
+  acao('Forçou passe sem linha', '4 - Erro de decisão'),
+  acao('Prendeu bola e atrasou ataque', '4 - Erro de decisão'),
 ] as const
 
-export const SCOUT_ACOES_GOLEIRA = [
-  'Defesa de arremesso de 1 ponto',
-  'Defesa de arremesso de 2 pontos',
-  'Defesa de giro',
-  'Defesa de aérea',
-  'Fechou ângulo',
-  'Passe de saída correto',
-  'Passe longo para transição',
-  'Passe errado na saída',
-  'Defesa no shoot-out',
-  'Gol de goleira',
-  'Erro de posicionamento',
-  'Reposição rápida',
-  'Reposição lenta',
+export const SCOUT_ACOES_ESPECIALISTA_CENTRAL_OPCOES = [
+  acao('Passe de central do chão para giro da lateral esquerda', '3 - Assistência / ação que gera finalização'),
+  acao('Passe de central saltando para giro da lateral esquerda', '3 - Assistência / ação que gera finalização'),
+  acao('Passe de central do chão após finta de passe para giro da lateral esquerda', '3 - Assistência / ação que gera finalização'),
+  acao('Passe de central saltando para aérea da lateral esquerda', '3 - Assistência / ação que gera finalização'),
+  acao('Passe de central do chão para giro da lateral direita', '3 - Assistência / ação que gera finalização'),
+  acao('Passe de central saltando para giro da lateral direita', '3 - Assistência / ação que gera finalização'),
+  acao('Passe de central do chão após finta de passe para giro da lateral direita', '3 - Assistência / ação que gera finalização'),
+  acao('Passe de central saltando para aérea da lateral direita', '3 - Assistência / ação que gera finalização'),
+  acao('Passe de central sem olhar para lateral esquerda', '8 - Passe de apoio'),
+  acao('Passe de central sem olhar para lateral direita', '8 - Passe de apoio'),
+  acao('Passe de central sem olhar para pivô', '8 - Passe de apoio'),
+  acao('Passe de central para aérea da pivô', '3 - Assistência / ação que gera finalização'),
+  acao('Passe de central para giro da pivô', '3 - Assistência / ação que gera finalização'),
+  acao('Passe de central após fixar a Base', '7 - Boa tomada de decisão'),
+  acao('Passe de central após atrair a Solta', '7 - Boa tomada de decisão'),
+  acao('Passe de central após deslocar a API', '7 - Boa tomada de decisão'),
+  acao('Finta de passe e passe para aérea', '3 - Assistência / ação que gera finalização'),
+  acao('Finta de passe e passe para giro', '3 - Assistência / ação que gera finalização'),
+  acao('Finta de arremesso e passe para pivô', '3 - Assistência / ação que gera finalização'),
+  acao('Finta de arremesso e passe para lateral', '3 - Assistência / ação que gera finalização'),
+  acao('Passe que quebra a defesa 3x0', '7 - Boa tomada de decisão'),
+  acao('Passe que quebra a defesa 2x1', '7 - Boa tomada de decisão'),
+  acao('Erro de tempo no passe para giro', '2 - Erro técnico'),
+  acao('Erro de tempo no passe para aérea', '2 - Erro técnico'),
+  acao('Erro de leitura da defesa', '4 - Erro de decisão'),
+  acao('Erro de decisão após finta', '4 - Erro de decisão'),
 ] as const
+
+export const SCOUT_ACOES_GOLEIRA_PASSADORA = [
+  acao('Passe de saída correto', '1 - Ação técnica assertiva'),
+  acao('Passe longo para transição', '1 - Ação técnica assertiva'),
+  acao('Lançamento para shoot-out no tempo correto', '1 - Ação técnica assertiva'),
+  acao('Reposição rápida', '1 - Ação técnica assertiva'),
+  acao('Gol de goleira', '1 - Ação técnica assertiva', ['finalizacao']),
+  acao('Passe errado na saída', '2 - Erro técnico'),
+  acao('Lançamento atrasado', '2 - Erro técnico'),
+  acao('Lançamento adiantado', '2 - Erro técnico'),
+  acao('Erro de substituição', '6 - Falta / infração / ação irregular'),
+] as const
+
+export const SCOUT_ACOES_BASE = [
+  acao('Fechamento do centro', '1 - Ação técnica assertiva'),
+  acao('Comunicação defensiva', '1 - Ação técnica assertiva'),
+  acao('Cobertura da Solta', '1 - Ação técnica assertiva'),
+  acao('Cobertura da API', '1 - Ação técnica assertiva'),
+  acao('Troca de marcação', '1 - Ação técnica assertiva'),
+  acao('Bloqueio de arremesso', '5 - Recuperação / ação defensiva positiva'),
+  acao('Bloqueio após giro', '5 - Recuperação / ação defensiva positiva'),
+  acao('Bloqueio duplo', '5 - Recuperação / ação defensiva positiva'),
+  acao('Recuperação defensiva', '5 - Recuperação / ação defensiva positiva'),
+  acao('Saiu do centro sem cobertura', '4 - Erro de decisão'),
+  acao('Perdeu pivô', '4 - Erro de decisão'),
+  acao('Perdeu especialista', '4 - Erro de decisão'),
+  acao('Chegou atrasada no bloqueio', '2 - Erro técnico'),
+  acao('Contato ilegal', '6 - Falta / infração / ação irregular'),
+  acao('Tiro de 6m cometido', '6 - Falta / infração / ação irregular'),
+] as const
+
+export const SCOUT_ACOES_SOLTA = [
+  acao('Pressão na primeira linha', '1 - Ação técnica assertiva'),
+  acao('Dissuasão na lateral', '1 - Ação técnica assertiva'),
+  acao('Dissuasão na central', '1 - Ação técnica assertiva'),
+  acao('Antecipação de passe', '5 - Recuperação / ação defensiva positiva'),
+  acao('Interceptação de passe', '5 - Recuperação / ação defensiva positiva'),
+  acao('Recuo no tempo correto', '1 - Ação técnica assertiva'),
+  acao('Subida no tempo correto', '1 - Ação técnica assertiva'),
+  acao('Indução ao passe longo', '7 - Boa tomada de decisão'),
+  acao('Retorno defensivo', '1 - Ação técnica assertiva'),
+  acao('Subiu fora do tempo', '2 - Erro técnico'),
+  acao('Pressionou sem cobertura', '4 - Erro de decisão'),
+  acao('Foi batida na primeira pressão', '2 - Erro técnico'),
+  acao('Não retornou após pressão', '2 - Erro técnico'),
+] as const
+
+export const SCOUT_ACOES_API = [
+  acao('Acompanhamento da pivô', '1 - Ação técnica assertiva'),
+  acao('Fechamento da linha de passe para pivô', '1 - Ação técnica assertiva'),
+  acao('Defesa do passe aéreo para pivô', '1 - Ação técnica assertiva'),
+  acao('Falsa liberdade bem executada', '7 - Boa tomada de decisão'),
+  acao('Bloqueio do giro da pivô', '5 - Recuperação / ação defensiva positiva'),
+  acao('Proteção contra aérea', '1 - Ação técnica assertiva'),
+  acao('Dividiu pivô e lateral', '1 - Ação técnica assertiva'),
+  acao('Perdeu pivô', '4 - Erro de decisão'),
+  acao('Deu liberdade real para finalização', '4 - Erro de decisão'),
+  acao('Errou tempo da falsa liberdade', '2 - Erro técnico'),
+  acao('Contato ilegal na pivô', '6 - Falta / infração / ação irregular'),
+] as const
+
+export const SCOUT_ACOES_GOLEIRA_DEFENSIVA = [
+  acao('Defesa de arremesso de 1 ponto', '5 - Recuperação / ação defensiva positiva'),
+  acao('Defesa de arremesso de 2 pontos', '5 - Recuperação / ação defensiva positiva'),
+  acao('Defesa de giro', '5 - Recuperação / ação defensiva positiva'),
+  acao('Defesa de aérea', '5 - Recuperação / ação defensiva positiva'),
+  acao('Fechou ângulo', '1 - Ação técnica assertiva'),
+  acao('Defesa no shoot-out', '5 - Recuperação / ação defensiva positiva'),
+  acao('Erro de posicionamento', '2 - Erro técnico'),
+  acao('Caiu antes da decisão', '4 - Erro de decisão'),
+] as const
+
+export const SCOUT_ACOES_ATAQUE_OPCOES = [
+  ...SCOUT_ACOES_LATERAL,
+  ...SCOUT_ACOES_PIVO,
+  ...SCOUT_ACOES_CENTRAL,
+  ...SCOUT_ACOES_ESPECIALISTA_CENTRAL_OPCOES,
+  ...SCOUT_ACOES_GOLEIRA_PASSADORA,
+] as const
+
+export const SCOUT_ACOES_DEFESA_OPCOES = [
+  ...SCOUT_ACOES_BASE,
+  ...SCOUT_ACOES_SOLTA,
+  ...SCOUT_ACOES_API,
+  ...SCOUT_ACOES_GOLEIRA_DEFENSIVA,
+] as const
+
+export const SCOUT_ACOES_ATAQUE = SCOUT_ACOES_ATAQUE_OPCOES.map((item) => item.label)
+export const SCOUT_ACOES_DEFESA = SCOUT_ACOES_DEFESA_OPCOES.map((item) => item.label)
+export const SCOUT_ACOES_ESPECIALISTA_CENTRAL = SCOUT_ACOES_ESPECIALISTA_CENTRAL_OPCOES.map((item) => item.label)
+export const SCOUT_ACOES_GOLEIRA = SCOUT_ACOES_GOLEIRA_DEFENSIVA.map((item) => item.label)
 
 export const SCOUT_REPOSICAO = [
   'Troca lado direito',
@@ -636,9 +623,34 @@ export const SCOUT_SHOOTOUT_DEFENSIVO = [
   'Defesa perdeu o shoot-out',
 ] as const
 
+export function getActionOptionsByFuncao(funcao?: string, tipo?: 'ataque' | 'defesa'): readonly ScoutActionOption[] {
+  if (tipo === 'defesa') {
+    if (funcao === 'Base') return SCOUT_ACOES_BASE
+    if (funcao === 'Solta') return SCOUT_ACOES_SOLTA
+    if (funcao === 'API / Atrás da Pivô') return SCOUT_ACOES_API
+    if (funcao === 'Goleira') return SCOUT_ACOES_GOLEIRA_DEFENSIVA
+    return SCOUT_ACOES_DEFESA_OPCOES
+  }
+
+  if (funcao === 'Central Especialista' || funcao === 'Especialista') return SCOUT_ACOES_ESPECIALISTA_CENTRAL_OPCOES
+  if (funcao === 'Central' || funcao?.includes('Playmaker')) return SCOUT_ACOES_CENTRAL
+  if (funcao === 'Pivô') return SCOUT_ACOES_PIVO
+  if (funcao?.includes('Lateral')) return SCOUT_ACOES_LATERAL
+  if (funcao === 'Goleira passadora') return SCOUT_ACOES_GOLEIRA_PASSADORA
+  return SCOUT_ACOES_ATAQUE_OPCOES
+}
+
 export function getAcoesPorFuncao(funcao?: string, tipo?: 'ataque' | 'defesa'): readonly string[] {
-  if (tipo === 'defesa') return SCOUT_ACOES_DEFESA
-  if (funcao === 'Central Especialista') return SCOUT_ACOES_ESPECIALISTA_CENTRAL
-  if (funcao === 'Goleira passadora') return SCOUT_ACOES_GOLEIRA
-  return SCOUT_ACOES_ATAQUE
+  return getActionOptionsByFuncao(funcao, tipo).map((option) => option.label)
+}
+
+export function getCategoriaPorAcao(label?: string, funcao?: string, tipo?: 'ataque' | 'defesa'): string | undefined {
+  if (!label) return undefined
+  return getActionOptionsByFuncao(funcao, tipo).find((option) => option.label === label)?.categoria
+}
+
+export function actionIndicatesFinish(label?: string): boolean {
+  if (!label) return false
+  const action = label.toLowerCase()
+  return ['arremesso', 'finalização', 'giro', 'aérea', 'aerea', 'gol de goleira'].some((term) => action.includes(term))
 }
