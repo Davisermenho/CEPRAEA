@@ -325,11 +325,15 @@ export default function SettingsPage() {
               <div>
                 <label className={labelClass}>Secret de autenticação</label>
                 <div className="flex gap-2">
-                  <div className="flex-1 h-10 rounded-xl border border-cep-purple-700 bg-cep-purple-900 px-3 flex items-center overflow-hidden">
-                    <span className="text-xs font-mono text-cep-muted truncate">
-                      {settings.syncSecret || '(não gerado)'}
-                    </span>
-                  </div>
+                  <input
+                    type="text"
+                    value={settings.syncSecret ?? ''}
+                    onChange={(e) => { update('syncSecret', e.target.value); setSyncTestResult(null) }}
+                    placeholder="Cole ou gere um secret"
+                    className={inputClass + ' flex-1 font-mono text-xs'}
+                    spellCheck={false}
+                    autoComplete="off"
+                  />
                   <button
                     type="button"
                     onClick={handleCopySecret}
@@ -351,7 +355,7 @@ export default function SettingsPage() {
                 {secretCopied && <p className="text-xs text-cep-lime-400 mt-1">Copiado!</p>}
                 {!settings.syncSecret && (
                   <p className="text-xs text-cep-gold-400 mt-1">
-                    Clique em <RefreshCw className="inline h-3 w-3" /> para gerar um secret.
+                    Cole o secret existente ou clique em <RefreshCw className="inline h-3 w-3" /> para gerar um novo.
                   </p>
                 )}
               </div>
