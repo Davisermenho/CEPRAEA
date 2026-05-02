@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Save, LogOut, Shield, ChevronRight, ChevronDown, Copy, Wifi, WifiOff, RefreshCw, Plus, Trash2 } from 'lucide-react'
+import { Save, LogOut, Shield, ChevronRight, ChevronDown, Copy, Wifi, WifiOff, RefreshCw, Plus, Trash2, Download } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
 import { getSetting, setSetting } from '@/db'
 import { clearSession, hashPin, verifyPin } from '@/lib/auth'
-import { pingEndpoint, generateSecret } from '@/lib/sync'
+import { pingEndpoint, generateSecret, loadSyncConfig } from '@/lib/sync'
+import { useAthleteStore } from '@/stores/athleteStore'
+import { useTrainingStore } from '@/stores/trainingStore'
+import { useAttendanceStore } from '@/stores/attendanceStore'
 import { copiarTexto } from '@/lib/whatsapp'
 import type { AppSettings } from '@/types'
 
@@ -43,6 +46,12 @@ export default function SettingsPage() {
   const [testingSync, setTestingSync] = useState(false)
   const [syncTestResult, setSyncTestResult] = useState<{ ok: boolean; error?: string } | null>(null)
   const [secretCopied, setSecretCopied] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [syncAllResult, setSyncAllResult] = useState<{ ok: boolean; msg: string } | null>(null)
+
+  const syncAthletes = useAthleteStore((s) => s.syncFromRemote)
+  const syncTrainings = useTrainingStore((s) => s.syncFromRemote)
+  const syncAttendances = useAttendanceStore((s) => s.syncFromRemote)
 
   useEffect(() => {
     getSetting<AppSettings>('appSettings').then((s) => {
@@ -74,6 +83,34 @@ export default function SettingsPage() {
     await copiarTexto(settings.syncSecret ?? '')
     setSecretCopied(true)
     setTimeout(() => setSecretCopied(false), 2000)
+  }
+
+  const handleSyncAll = async () => {
+    setSyncing(true)
+    setSyncAllResult(null)
+    const config = await loadSyncConfig()
+    if (!config) {
+      setSyncAllResult({ ok: false, msg: 'Salve as configurações antes de sincronizar.' })
+      setSyncing(false)
+      return
+    }
+    try {
+      const [r1, r2, r3] = await Promise.all([
+        syncAthletes(config),
+        syncTrainings(config),
+        syncAttendances(config),
+      ])
+      const total = (r1.merged ?? 0) + (r2.merged ?? 0) + (r3.merged ?? 0)
+      if (r1.ok && r2.ok && r3.ok) {
+        setSyncAllResult({ ok: true, msg: `Sincronizado! ${total} registro(s) atualizados.` })
+      } else {
+        const err = r1.error ?? r2.error ?? r3.error ?? 'Erro desconhecido'
+        setSyncAllResult({ ok: false, msg: err })
+      }
+    } catch (e) {
+      setSyncAllResult({ ok: false, msg: 'Falha na sincronização.' })
+    }
+    setSyncing(false)
   }
 
   const handleTestSync = async () => {
@@ -331,9 +368,9 @@ export default function SettingsPage() {
                 />
               </div>
 
-              {/* Test connection */}
+              {/* Test connection + Sync all */}
               {syncIsConfigured && (
-                <div>
+                <div className="space-y-2">
                   <Button
                     type="button"
                     variant="secondary"
@@ -346,10 +383,27 @@ export default function SettingsPage() {
                     Testar conexão
                   </Button>
                   {syncTestResult && (
-                    <p className={`text-xs mt-2 flex items-center gap-1.5 ${syncTestResult.ok ? 'text-cep-lime-400' : 'text-red-400'}`}>
+                    <p className={`text-xs flex items-center gap-1.5 ${syncTestResult.ok ? 'text-cep-lime-400' : 'text-red-400'}`}>
                       {syncTestResult.ok
                         ? <><Wifi className="h-3.5 w-3.5" /> Conexão OK — endpoint acessível</>
                         : <><WifiOff className="h-3.5 w-3.5" /> {syncTestResult.error}</>}
+                    </p>
+                  )}
+                  <Button
+                    type="button"
+                    size="sm"
+                    fullWidth
+                    onClick={handleSyncAll}
+                    loading={syncing}
+                  >
+                    <Download className="h-4 w-4" />
+                    Sincronizar tudo agora
+                  </Button>
+                  {syncAllResult && (
+                    <p className={`text-xs flex items-center gap-1.5 ${syncAllResult.ok ? 'text-cep-lime-400' : 'text-red-400'}`}>
+                      {syncAllResult.ok
+                        ? <><Download className="h-3.5 w-3.5" /> {syncAllResult.msg}</>
+                        : <><WifiOff className="h-3.5 w-3.5" /> {syncAllResult.msg}</>}
                     </p>
                   )}
                 </div>
