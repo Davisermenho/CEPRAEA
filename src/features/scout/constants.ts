@@ -37,7 +37,7 @@ export const SCOUT_FASE_JOGO = [
   'Controle de jogo',
 ] as const
 
-export const SCOUT_SISTEMAS = [
+export const SCOUT_SISTEMAS_ATAQUE_POSICIONADO = [
   'Ataque 3:1 ESP central + pivô destra',
   'Ataque 3:1 ESP central + pivô canhota',
   'Ataque 3:1 ESP lat direita canhota',
@@ -48,6 +48,9 @@ export const SCOUT_SISTEMAS = [
   'Ataque 4:0 ESP central esquerda',
   'Ataque 4:0 ESP central direita canhota',
   'Ataque 4:0 ESP central direita destra',
+] as const
+
+export const SCOUT_SISTEMAS_DEFESA_POSICIONADA = [
   'Defesa 3x0',
   'Defesa 2x1',
   'Defesa 0x3',
@@ -55,12 +58,18 @@ export const SCOUT_SISTEMAS = [
   'Defesa individual',
   'Defesa mista',
   'Defesa API / Base / Solta',
+] as const
+
+export const SCOUT_SISTEMAS_TRANSICAO_OFENSIVA_DIRETA = [
   'Transição ofensiva direta 1x0 lat esquerda',
   'Transição ofensiva direta 1x0 lat esquerda + central',
   'Transição ofensiva direta 1x0 lat esquerda + central + pivô + lat direita',
   'Transição ofensiva direta 2x1 lat direita',
   'Transição ofensiva direta 2x1 lat direita + central',
   'Transição ofensiva direta 2x1 lat esquerda',
+] as const
+
+export const SCOUT_SISTEMAS_TRANSICAO_OFENSIVA_INDIRETA = [
   'Transição ofensiva indireta 3:1 ESP central',
   'Transição ofensiva indireta 3:1 ESP lat esquerda',
   'Transição ofensiva indireta 3:1 ESP lat direita',
@@ -68,6 +77,9 @@ export const SCOUT_SISTEMAS = [
   'Transição ofensiva indireta 4:0 ESP lat direita',
   'Transição ofensiva indireta 4:0 ESP central esquerda',
   'Transição ofensiva indireta 4:0 ESP central direita',
+] as const
+
+export const SCOUT_SISTEMAS_TRANSICAO_DEFENSIVA_DIRETA = [
   'Transição defensiva direta 2x1',
   'Transição defensiva direta 3x0 - 1ª Base',
   'Transição defensiva direta 3x0 - 1ª Solta',
@@ -75,23 +87,53 @@ export const SCOUT_SISTEMAS = [
   'Transição defensiva direta 3x0',
   'Transição defensiva direta 0x3',
   'Transição defensiva direta individual alta',
-  'Transição defensiva indireta 2x1',
-  'Transição defensiva indireta 3x0',
-  'Shoot-out ofensivo',
-  'Shoot-out defensivo',
 ] as const
 
-export const SCOUT_LADO_ACAO = [
-  'Esquerda',
+export const SCOUT_SISTEMAS_TRANSICAO_DEFENSIVA_INDIRETA = [
+  'Transição defensiva indireta 2x1',
+  'Transição defensiva indireta 3x0',
+] as const
+
+export const SCOUT_SISTEMAS_SHOOTOUT = ['Shoot-out ofensivo', 'Shoot-out defensivo'] as const
+
+export const SCOUT_SISTEMAS = [
+  ...SCOUT_SISTEMAS_ATAQUE_POSICIONADO,
+  ...SCOUT_SISTEMAS_DEFESA_POSICIONADA,
+  ...SCOUT_SISTEMAS_TRANSICAO_OFENSIVA_DIRETA,
+  ...SCOUT_SISTEMAS_TRANSICAO_OFENSIVA_INDIRETA,
+  ...SCOUT_SISTEMAS_TRANSICAO_DEFENSIVA_DIRETA,
+  ...SCOUT_SISTEMAS_TRANSICAO_DEFENSIVA_INDIRETA,
+  ...SCOUT_SISTEMAS_SHOOTOUT,
+] as const
+
+export function getSistemasPorFase(fase?: string): readonly string[] {
+  switch (fase) {
+    case 'Ataque posicionado': return SCOUT_SISTEMAS_ATAQUE_POSICIONADO
+    case 'Defesa posicionada': return SCOUT_SISTEMAS_DEFESA_POSICIONADA
+    case 'Transição ofensiva direta': return SCOUT_SISTEMAS_TRANSICAO_OFENSIVA_DIRETA
+    case 'Transição ofensiva indireta': return SCOUT_SISTEMAS_TRANSICAO_OFENSIVA_INDIRETA
+    case 'Transição defensiva direta': return SCOUT_SISTEMAS_TRANSICAO_DEFENSIVA_DIRETA
+    case 'Transição defensiva indireta': return SCOUT_SISTEMAS_TRANSICAO_DEFENSIVA_INDIRETA
+    case 'Shoot-out': return SCOUT_SISTEMAS_SHOOTOUT
+    default: return SCOUT_SISTEMAS
+  }
+}
+
+export const SCOUT_ZONA_ACAO = [
+  'Lateral esquerda',
+  'Central esquerda',
   'Centro',
-  'Direita',
-  'Área',
+  'Central direita',
+  'Lateral direita',
+  'Área / pivô',
   'Lado da troca',
   'Lado oposto da troca',
   'Transição',
   'Shoot-out',
   'Não se aplica',
 ] as const
+
+export const SCOUT_LADO_ACAO = SCOUT_ZONA_ACAO
 
 export const SCOUT_ATLETAS = [
   'Aline Mello',
@@ -110,6 +152,7 @@ export const SCOUT_ATLETAS = [
 ] as const
 
 export const SCOUT_GOLEIRAS = ['Carolina Bezerra', 'Paola Wolff'] as const
+export const SCOUT_NUMEROS_ADVERSARIA = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16'] as const
 
 export const SCOUT_FUNCOES_ATAQUE = [
   'Central',
@@ -150,6 +193,7 @@ export const SCOUT_CATEGORIAS = [
 
 export const SCOUT_ACOES_ATAQUE = [
   'Recepção segura na lateral esquerda',
+  'Recepção segura na lateral direita',
   'Finalização de 1 ponto convertida',
   'Finalização de 2 pontos convertida',
   'Arremesso em giro convertido',
@@ -169,7 +213,6 @@ export const SCOUT_ACOES_ATAQUE = [
   'Ataque em superioridade bem executado',
   'Continuidade após pressão defensiva',
   'Tomada de decisão rápida na transição',
-  'Recepção segura na lateral direita',
   'Ataque ao espaço entre base e API',
   'Ataque ao espaço entre base e solta',
   'Passe correto para pivô',
@@ -224,6 +267,35 @@ export const SCOUT_ACOES_ATAQUE = [
   'Contato ofensivo ilegal',
   'Invasão da área',
   'Substituição irregular',
+] as const
+
+export const SCOUT_ACOES_ESPECIALISTA_CENTRAL = [
+  'Passe de central do chão para giro da lateral esquerda',
+  'Passe de central saltando para giro da lateral esquerda',
+  'Passe de central do chão após finta de passe para giro da lateral esquerda',
+  'Passe de central saltando para aérea da lateral esquerda',
+  'Passe de central do chão para giro da lateral direita',
+  'Passe de central saltando para giro da lateral direita',
+  'Passe de central do chão após finta de passe para giro da lateral direita',
+  'Passe de central saltando para aérea da lateral direita',
+  'Passe de central sem olhar para lateral esquerda',
+  'Passe de central sem olhar para lateral direita',
+  'Passe de central sem olhar para pivô',
+  'Passe de central para aérea da pivô',
+  'Passe de central para giro da pivô',
+  'Passe de central após fixar a Base',
+  'Passe de central após atrair a Solta',
+  'Passe de central após deslocar a API',
+  'Finta de passe e passe para aérea',
+  'Finta de passe e passe para giro',
+  'Finta de arremesso e passe para pivô',
+  'Finta de arremesso e passe para lateral',
+  'Passe que quebra a defesa 3x0',
+  'Passe que quebra a defesa 2x1',
+  'Erro de tempo no passe para giro',
+  'Erro de tempo no passe para aérea',
+  'Erro de leitura da defesa',
+  'Erro de decisão após finta',
 ] as const
 
 export const SCOUT_ACOES_DEFESA = [
@@ -310,6 +382,9 @@ export const SCOUT_ACOES_DEFESA = [
 export const SCOUT_ACOES_GOLEIRA = [
   'Defesa de arremesso de 1 ponto',
   'Defesa de arremesso de 2 pontos',
+  'Defesa de giro',
+  'Defesa de aérea',
+  'Fechou ângulo',
   'Passe de saída correto',
   'Passe longo para transição',
   'Passe errado na saída',
@@ -381,35 +456,6 @@ export const SCOUT_RESULTADO_INDIVIDUAL = [
 ] as const
 
 export const SCOUT_ANALISE = ['Positiva', 'Neutra', 'Negativa', 'Revisar'] as const
-
-export const SCOUT_ACOES_ESPECIALISTA_CENTRAL = [
-  'Passe de central do chão para giro da lateral esquerda',
-  'Passe de central saltando para giro da lateral esquerda',
-  'Passe de central do chão após finta de passe para giro da lateral esquerda',
-  'Passe de central saltando para aérea da lateral esquerda',
-  'Passe de central do chão para giro da lateral direita',
-  'Passe de central saltando para giro da lateral direita',
-  'Passe de central do chão após finta de passe para giro da lateral direita',
-  'Passe de central saltando para aérea da lateral direita',
-  'Passe de central sem olhar para lateral esquerda',
-  'Passe de central sem olhar para lateral direita',
-  'Passe de central sem olhar para pivô',
-  'Passe de central para aérea da pivô',
-  'Passe de central para giro da pivô',
-  'Passe de central após fixar a Base',
-  'Passe de central após atrair a Solta',
-  'Passe de central após deslocar a API',
-  'Finta de passe e passe para aérea',
-  'Finta de passe e passe para giro',
-  'Finta de arremesso e passe para pivô',
-  'Finta de arremesso e passe para lateral',
-  'Passe que quebra a defesa 3x0',
-  'Passe que quebra a defesa 2x1',
-  'Erro de tempo no passe para giro',
-  'Erro de tempo no passe para aérea',
-  'Erro de leitura da defesa',
-  'Erro de decisão após finta',
-] as const
 
 export const SCOUT_ORIGEM_BOLA_ESPECIALISTA = [
   'Bola vindo da lateral esquerda',
@@ -528,6 +574,19 @@ export const SCOUT_TIPO_FINALIZACAO = [
   'Não se aplica',
 ] as const
 
+export const SCOUT_DIRECAO_GOL = [
+  'Alto direito',
+  'Alto esquerdo',
+  'Baixo direito',
+  'Baixo esquerdo',
+  'Centro',
+  'Entre as pernas',
+  'Por cobertura',
+  'Fora',
+  'Trave',
+] as const
+
+export const SCOUT_PONTOS_LANCE = ['0', '1', '2'] as const
 export const SCOUT_PONTUACAO = ['0 ponto', '1 ponto', '2 pontos'] as const
 export const SCOUT_VALIDADE_TECNICA = ['Válida', 'Erro técnico', 'Revisar'] as const
 
@@ -576,3 +635,10 @@ export const SCOUT_SHOOTOUT_DEFENSIVO = [
   'Defesa venceu o shoot-out',
   'Defesa perdeu o shoot-out',
 ] as const
+
+export function getAcoesPorFuncao(funcao?: string, tipo?: 'ataque' | 'defesa'): readonly string[] {
+  if (tipo === 'defesa') return SCOUT_ACOES_DEFESA
+  if (funcao === 'Central Especialista') return SCOUT_ACOES_ESPECIALISTA_CENTRAL
+  if (funcao === 'Goleira passadora') return SCOUT_ACOES_GOLEIRA
+  return SCOUT_ACOES_ATAQUE
+}
