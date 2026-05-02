@@ -1,0 +1,36 @@
+name: Supabase Foundation
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - feat/supabase-foundation
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase start
+      - run: supabase db reset
+      - name: RLS tests
+        run: psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1 -f supabase/tests/rls.test.sql
+      - name: Grants tests
+        run: psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1 -f supabase/tests/grants.test.sql
+      - name: RPC generate trainings tests
+        run: psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1 -f supabase/tests/rpc_generate_trainings.test.sql
+      - name: RPC token tests
+        run: psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1 -f supabase/tests/rpc_presence_tokens.test.sql
+      - name: RPC confirm presence tests
+        run: psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1 -f supabase/tests/rpc_confirm_presence.test.sql
+      - run: npm run build
