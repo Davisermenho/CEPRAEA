@@ -128,6 +128,7 @@ export interface TrainingSummary {
 
 export interface ScoutAthleteBlock {
   atleta?: string
+  numero?: string
   funcao?: string
   categoria?: string
   acao?: string
@@ -149,10 +150,25 @@ export interface SpecialistCentralAnalysis {
 }
 
 export interface FinishAnalysis {
+  finalizadora?: string
+  zonaArremesso?: string
+  direcaoGol?: string
+  resultadoFinalizacao?: string
+  goleira?: string
+  acaoGoleira?: string
   tipoFinalizacao?: string
   pontuacaoEsperada?: string
   pontuacaoObtida?: string
   validadeTecnica?: string
+}
+
+export interface ReposicaoAnalysis {
+  houveReposicao?: boolean
+  tipoReposicao?: string
+  ladoTroca?: string
+  atletaEntrou?: string
+  atletaSaiu?: string
+  resultadoReposicao?: string
 }
 
 export interface ShootoutAnalysis {
@@ -187,6 +203,9 @@ export interface ScoutEvent {
   tempoJogo?: string
   set?: string
   controleJogo?: string
+
+  pontosCEPRAEA?: number
+  pontosAdversario?: number
   placarCEPRAEA: number
   placarAdversario: number
   posse?: string
@@ -204,11 +223,17 @@ export interface ScoutEvent {
   ladoAcao?: string
   goleira?: string
   reposicao?: string
-  ataques: ScoutAthleteBlock[]   // até 4
-  defesas: ScoutAthleteBlock[]   // até 3
+
+  ataques: ScoutAthleteBlock[]   // até 4; compatibilidade com cards/resumo existentes
+  defesas: ScoutAthleteBlock[]   // até 3; compatibilidade com cards/resumo existentes
+  ataqueCEPRAEA?: ScoutAthleteBlock[]
+  defesaCEPRAEA?: ScoutAthleteBlock[]
+  ataqueAdversario?: ScoutAthleteBlock[]
+  defesaAdversaria?: ScoutAthleteBlock[]
 
   especialistaCentral?: SpecialistCentralAnalysis
   finalizacao?: FinishAnalysis
+  reposicaoDetalhe?: ReposicaoAnalysis
   shootout?: ShootoutAnalysis
 
   analise?: string
