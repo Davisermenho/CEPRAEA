@@ -19,11 +19,18 @@ select * from public.generate_trainings(
   'Teste'
 );
 
+create temporary table test_training as
+select id as training_id
+from public.trainings
+where team_id = '10000000-0000-0000-0000-000000000001'
+order by starts_at desc
+limit 1;
+
 create temporary table token_result as
 select *
 from public.create_presence_token_batch(
   '10000000-0000-0000-0000-000000000001',
-  (select id from public.trainings where team_id = '10000000-0000-0000-0000-000000000001' limit 1),
+  (select training_id from test_training limit 1),
   now() + interval '7 days'
 );
 
@@ -57,7 +64,7 @@ begin
   begin
     perform * from public.create_presence_token_batch(
       '10000000-0000-0000-0000-000000000001',
-      (select training_id from token_result limit 1),
+      (select training_id from test_training limit 1),
       now() + interval '7 days'
     );
     raise exception 'second active batch created unexpectedly';
