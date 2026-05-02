@@ -27,11 +27,18 @@ from public.create_presence_token_batch(
   now() + interval '7 days'
 );
 
+-- Captura o token puro antes de trocar para anon. A tabela temporária pertence ao
+-- contexto autenticado e não deve ser acessada depois da mudança de role.
+select token as plain_token, batch_id as token_batch_id
+from token_result
+limit 1
+\gset
+
 set local role anon;
 set local request.jwt.claim.sub = '';
 
 create temporary table confirm_result as
-select * from public.confirm_presence_by_token((select token from token_result limit 1), 'presente', null);
+select * from public.confirm_presence_by_token(:'plain_token', 'presente', null);
 
 do $$
 begin
@@ -47,7 +54,7 @@ begin
 end $$;
 
 -- Reuse before lock must update use_count.
-select * from public.confirm_presence_by_token((select token from token_result limit 1), 'ausente', 'teste');
+select * from public.confirm_presence_by_token(:'plain_token', 'ausente', 'teste');
 
 do $$
 begin
@@ -73,7 +80,7 @@ end $$;
 -- Revoked batch must invalidate token generically.
 set local role authenticated;
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000001';
-select public.revoke_presence_token_batch((select batch_id from token_result limit 1));
+select public.revoke_presence_token_batch(:'token_batch_id'::uuid);
 
 set local role anon;
 set local request.jwt.claim.sub = '';
@@ -82,7 +89,7 @@ declare
   revoked_ok boolean;
   revoked_message text;
 begin
-  select ok, message into revoked_ok, revoked_message from public.confirm_presence_by_token((select token from token_result limit 1), 'presente', null) limit 1;
+  select ok, message into revoked_ok, revoked_message from public.confirm_presence_by_token(:'plain_token', 'presente', null) limit 1;
   if revoked_ok is true or revoked_message <> 'Link inválido, expirado ou indisponível.' then
     raise exception 'revoked token should fail generically';
   end if;
