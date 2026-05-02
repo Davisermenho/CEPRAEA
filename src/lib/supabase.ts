@@ -5,7 +5,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undef
 
 if (!supabaseUrl || !supabaseAnonKey) {
   // Mantém a falha explícita para builds/ambientes que tentem usar Supabase sem configuração.
-  // A service_role key é proibida no frontend e não deve existir como variável VITE_.
   console.warn('[CEPRAEA] Supabase não configurado: defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.')
 }
 
