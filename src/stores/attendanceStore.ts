@@ -3,6 +3,7 @@ import { getDB } from '@/db'
 import type { AttendanceRecord, AttendanceStatus, FrequencyReport, TrainingSummary } from '@/types'
 import { useAthleteStore } from './athleteStore'
 import { useTrainingStore } from './trainingStore'
+import { pullConfirmations, type SyncConfig } from '@/lib/sync'
 
 interface AttendanceStore {
   records: AttendanceRecord[]
@@ -20,6 +21,7 @@ interface AttendanceStore {
   getTrainingSummary: (treinoId: string, totalAtivos: number) => TrainingSummary
   getFrequencyReports: (fromISO?: string, toISO?: string) => FrequencyReport[]
   getAthleteFrequency: (atletaId: string, fromISO?: string, toISO?: string) => FrequencyReport
+  syncFromRemote: (config: SyncConfig, opts?: { treinoId?: string; since?: string }) => Promise<{ ok: boolean; merged: number; error?: string }>
 }
 
 export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
@@ -114,6 +116,49 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
         percentualPresenca: total > 0 ? Math.round((presentes / total) * 100) : 0,
       }
     })
+  },
+
+  syncFromRemote: async (config, opts) => {
+    const result = await pullConfirmations(config, opts)
+    if (!result.ok) return { ok: false, merged: 0, error: result.error }
+
+    const remote = result.records ?? []
+    const db = await getDB()
+    const local = await db.getAll('attendance')
+    const localById = new Map(local.map((r) => [r.id, r]))
+
+    let merged = 0
+    const tx = db.transaction('attendance', 'readwrite')
+    const promises: Promise<unknown>[] = []
+    for (const r of remote) {
+      const id = `${r.treinoId}::${r.atletaId}`
+      const existing = localById.get(id)
+      const isFromAthlete = r.origem === 'link'
+      // Regra (mantém a do TrainingDetailPage atual): override se vazio, ou pendente local,
+      // ou remote veio do link (atleta confirmou).
+      const shouldOverride = !existing || existing.status === 'pendente' || isFromAthlete
+      if (!shouldOverride) continue
+      if (r.status !== 'presente' && r.status !== 'ausente' && r.status !== 'justificado') continue
+
+      const next: AttendanceRecord = {
+        id,
+        treinoId: r.treinoId,
+        atletaId: r.atletaId,
+        status: r.status,
+        justificativa: existing?.justificativa,
+        confirmadoPelaAtleta: isFromAthlete,
+        registradoEm: r.timestamp || new Date().toISOString(),
+      }
+      promises.push(tx.store.put(next))
+      merged++
+    }
+    await Promise.all(promises)
+    await tx.done
+
+    if (merged > 0) {
+      await get().loadAll()
+    }
+    return { ok: true, merged }
   },
 
   getAthleteFrequency: (atletaId, fromISO, toISO) => {

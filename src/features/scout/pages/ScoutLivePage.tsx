@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, Trash2, CheckCircle, Flag, Eye } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, CheckCircle, Flag, Eye, BarChart2 } from 'lucide-react'
 import { useScoutStore } from '@/stores/scoutStore'
 import { Button } from '@/shared/components/Button'
 import { Badge } from '@/shared/components/Badge'
@@ -19,7 +19,11 @@ const ANALISE_VARIANT: Record<string, 'lime' | 'yellow' | 'red' | 'gray'> = {
 
 const RESULTADO_GOL_CLASSES: Record<string, string> = {
   'Gol 2 pontos': 'text-cep-lime-400 font-bold',
+  'Gol de giro 2 pontos': 'text-cep-lime-400 font-bold',
+  'Gol de aérea 2 pontos': 'text-cep-lime-400 font-bold',
   'Gol 1 ponto': 'text-green-400 font-bold',
+  'Gol de giro 1 ponto — erro técnico': 'text-cep-gold-400 font-bold',
+  'Gol de aérea 1 ponto — erro técnico': 'text-cep-gold-400 font-bold',
   'Gol sofrido 1 ponto': 'text-red-400 font-bold',
   'Gol sofrido 2 pontos': 'text-red-400 font-bold',
 }
@@ -45,7 +49,7 @@ function EventCard({ event, onDelete }: { event: ScoutEvent; onDelete: () => voi
               <span className="shrink-0 text-xs text-cep-muted">{event.set}</span>
             )}
             <span className={cn('text-sm truncate', RESULTADO_GOL_CLASSES[event.resultadoColetivo ?? ''] ?? 'text-cep-white')}>
-              {event.resultadoColetivo || event.faseJogo || 'Evento'}
+              {event.resultadoColetivo || event.faseJogoCEPRAEA || event.faseJogo || 'Evento'}
             </span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
@@ -74,11 +78,17 @@ function EventCard({ event, onDelete }: { event: ScoutEvent; onDelete: () => voi
           {event.posse && (
             <p className="text-xs text-cep-muted">Posse: <span className="text-cep-white">{event.posse}</span></p>
           )}
-          {event.faseJogo && (
-            <p className="text-xs text-cep-muted">Fase: <span className="text-cep-white">{event.faseJogo}</span></p>
+          {(event.faseJogoCEPRAEA || event.faseJogo) && (
+            <p className="text-xs text-cep-muted">Fase CEPRAEA: <span className="text-cep-white">{event.faseJogoCEPRAEA || event.faseJogo}</span></p>
           )}
-          {event.sistema && (
-            <p className="text-xs text-cep-muted">Sistema: <span className="text-cep-white">{event.sistema}</span></p>
+          {(event.sistemaTaticoCEPRAEA || event.sistema) && (
+            <p className="text-xs text-cep-muted">Sistema CEPRAEA: <span className="text-cep-white">{event.sistemaTaticoCEPRAEA || event.sistema}</span></p>
+          )}
+          {event.faseJogoAdversaria && (
+            <p className="text-xs text-cep-muted">Fase adversária: <span className="text-cep-white">{event.faseJogoAdversaria}</span></p>
+          )}
+          {event.sistemaTaticoAdversaria && (
+            <p className="text-xs text-cep-muted">Sistema adversário: <span className="text-cep-white">{event.sistemaTaticoAdversaria}</span></p>
           )}
           {event.ladoAcao && (
             <p className="text-xs text-cep-muted">Lado: <span className="text-cep-white">{event.ladoAcao}</span></p>
@@ -108,6 +118,12 @@ function EventCard({ event, onDelete }: { event: ScoutEvent; onDelete: () => voi
                 </p>
               ))}
             </div>
+          )}
+          {event.especialistaCentral?.origemBola && (
+            <p className="text-xs text-cep-muted">Especialista: <span className="text-cep-white">{event.especialistaCentral.origemBola}</span>{event.especialistaCentral.momentoAtaque && ` · ${event.especialistaCentral.momentoAtaque}`}</p>
+          )}
+          {event.shootout?.resultadoShootout && (
+            <p className="text-xs text-cep-muted">Shoot-out: <span className="text-cep-white">{event.shootout.resultadoShootout}</span></p>
           )}
           {event.observacao && (
             <p className="text-xs text-cep-muted italic">"{event.observacao}"</p>
@@ -227,8 +243,8 @@ export default function ScoutLivePage() {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-2 mt-2">
+          <Button size="sm" variant="secondary" onClick={() => navigate(`/scout/${game.id}/resumo`)}><BarChart2 className="h-4 w-4" />Resumo</Button>
           {game.status === 'em_andamento' ? (
             <>
               <Button size="sm" fullWidth onClick={() => setFormOpen(true)}>

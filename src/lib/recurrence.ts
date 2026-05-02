@@ -2,13 +2,14 @@ import type { Training } from '@/types'
 import { dateToISO, todayISO } from './utils'
 import { isHoliday } from './holidays'
 
-interface Schedule {
-  dow: number      // 0 = domingo, 4 = quinta
+export interface RecurrenceSchedule {
+  dow: number      // 0 = domingo, 6 = sábado
   horaInicio: string
   horaFim: string
 }
 
-const SCHEDULES: Schedule[] = [
+/** Horários default (fallback se não houver config nas settings). */
+export const DEFAULT_SCHEDULES: RecurrenceSchedule[] = [
   { dow: 4, horaInicio: '20:00', horaFim: '21:30' },  // quinta
   { dow: 0, horaInicio: '07:30', horaFim: '09:00' },  // domingo
 ]
@@ -24,6 +25,7 @@ type TrainingDraft = Omit<Training, 'id' | 'createdAt' | 'updatedAt'>
 export function generateRecurringDrafts(
   weeksAhead: number,
   existingKeys: Set<string>,
+  schedules: RecurrenceSchedule[] = DEFAULT_SCHEDULES,
 ): TrainingDraft[] {
   const result: TrainingDraft[] = []
   const today = new Date()
@@ -31,12 +33,10 @@ export function generateRecurringDrafts(
   const todayStr = todayISO()
 
   for (let week = 0; week < weeksAhead; week++) {
-    for (const schedule of SCHEDULES) {
-      // Início da semana (domingo) a partir de hoje + week * 7 dias
+    for (const schedule of schedules) {
       const base = new Date(today)
       base.setDate(today.getDate() + week * 7)
 
-      // Encontrar o dia correto da semana
       const currentDow = base.getDay()
       let diff = schedule.dow - currentDow
       if (diff < 0) diff += 7
@@ -45,7 +45,6 @@ export function generateRecurringDrafts(
       target.setDate(base.getDate() + diff)
       const dateISO = dateToISO(target)
 
-      // Não gerar no passado
       if (dateISO < todayStr) continue
 
       const key = `${dateISO}|${schedule.horaInicio}`

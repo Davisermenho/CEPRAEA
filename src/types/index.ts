@@ -66,12 +66,19 @@ export interface HolidayConflict {
 
 // ─── Configurações ─────────────────────────────────────────────────────────────
 
+export interface RecurrenceSchedule {
+  dow: number       // 0 = domingo … 6 = sábado
+  horaInicio: string
+  horaFim: string
+}
+
 export interface AppSettings {
   nomeEquipe: string
   nomeTecnico: string
   telefoneTecnico: string
   localPadrao: string
   semanasFuturas: number
+  recurrenceSchedules?: RecurrenceSchedule[]
   pinHash: string
   appUrl: string
   // Sincronização remota via Apps Script
@@ -86,6 +93,10 @@ export const DEFAULT_SETTINGS: Omit<AppSettings, 'pinHash'> = {
   telefoneTecnico: '',
   localPadrao: '',
   semanasFuturas: 12,
+  recurrenceSchedules: [
+    { dow: 4, horaInicio: '20:00', horaFim: '21:30' },
+    { dow: 0, horaInicio: '07:30', horaFim: '09:00' },
+  ],
   appUrl: typeof window !== 'undefined' ? window.location.origin : '',
   syncEndpointUrl: '',
   syncSecret: '',
@@ -123,6 +134,39 @@ export interface ScoutAthleteBlock {
   resultadoInd?: string
 }
 
+export interface SpecialistCentralAnalysis {
+  origemBola?: string
+  mexidaInicial?: string
+  soltaFixada?: string
+  baseDeslocada?: string
+  apiDeslocada?: string
+  comportamentoDefesa?: string
+  momentoAtaque?: string
+  ritmo?: string
+  previsibilidade?: string
+  decisaoFinal?: string
+  resultadoEspecialista?: string
+}
+
+export interface FinishAnalysis {
+  tipoFinalizacao?: string
+  pontuacaoEsperada?: string
+  pontuacaoObtida?: string
+  validadeTecnica?: string
+}
+
+export interface ShootoutAnalysis {
+  tipoShootout?: string
+  passadora?: string
+  cobradora?: string
+  goleiraDefensora?: string
+  tipoLancamento?: string
+  tipoFinta?: string
+  tipoFinalizacao?: string
+  acaoGoleira?: string
+  resultadoShootout?: string
+}
+
 export type ScoutGameStatus = 'em_andamento' | 'finalizado'
 
 export interface ScoutGame {
@@ -146,13 +190,27 @@ export interface ScoutEvent {
   placarCEPRAEA: number
   placarAdversario: number
   posse?: string
+
+  // Campos legados mantidos para compatibilidade com eventos já salvos.
   faseJogo?: string
   sistema?: string
+
+  // Leitura tática separada por equipe: essencial para cruzar ataque adversário x defesa CEPRAEA.
+  faseJogoCEPRAEA?: string
+  sistemaTaticoCEPRAEA?: string
+  faseJogoAdversaria?: string
+  sistemaTaticoAdversaria?: string
+
   ladoAcao?: string
   goleira?: string
   reposicao?: string
   ataques: ScoutAthleteBlock[]   // até 4
   defesas: ScoutAthleteBlock[]   // até 3
+
+  especialistaCentral?: SpecialistCentralAnalysis
+  finalizacao?: FinishAnalysis
+  shootout?: ShootoutAnalysis
+
   analise?: string
   resultadoColetivo?: string
   observacao?: string

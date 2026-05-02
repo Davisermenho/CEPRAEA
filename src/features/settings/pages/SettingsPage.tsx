@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Save, LogOut, Shield, ChevronRight, ChevronDown, Copy, Wifi, WifiOff, RefreshCw } from 'lucide-react'
+import { Save, LogOut, Shield, ChevronRight, ChevronDown, Copy, Wifi, WifiOff, RefreshCw, Plus, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
@@ -15,12 +15,18 @@ const DEFAULT: AppSettings = {
   telefoneTecnico: '',
   localPadrao: '',
   semanasFuturas: 12,
+  recurrenceSchedules: [
+    { dow: 4, horaInicio: '20:00', horaFim: '21:30' },
+    { dow: 0, horaInicio: '07:30', horaFim: '09:00' },
+  ],
   pinHash: '',
   appUrl: window.location.origin,
   syncEndpointUrl: '',
   syncSecret: '',
   lastSyncAt: '',
 }
+
+const DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
 export default function SettingsPage() {
   const navigate = useNavigate()
@@ -165,6 +171,85 @@ export default function SettingsPage() {
               <div className="flex justify-between text-xs text-cep-muted mt-0.5">
                 <span>4</span><span>24 semanas</span>
               </div>
+            </div>
+
+            {/* Horários recorrentes */}
+            <div className="pt-2 border-t border-cep-purple-700/50">
+              <div className="flex items-center justify-between mb-2">
+                <label className={labelClass + ' mb-0'}>Horários da semana</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const list = settings.recurrenceSchedules ?? []
+                    update('recurrenceSchedules', [
+                      ...list,
+                      { dow: 4, horaInicio: '20:00', horaFim: '21:30' },
+                    ])
+                  }}
+                  className="flex items-center gap-1 text-xs font-semibold text-cep-lime-400 hover:text-cep-lime-500"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Adicionar
+                </button>
+              </div>
+
+              {(settings.recurrenceSchedules ?? []).length === 0 && (
+                <p className="text-xs text-cep-muted/70">Nenhum horário configurado.</p>
+              )}
+
+              <div className="space-y-2">
+                {(settings.recurrenceSchedules ?? []).map((sch, idx) => (
+                  <div key={idx} className="flex items-center gap-2 bg-cep-purple-900 border border-cep-purple-700 rounded-xl p-2">
+                    <select
+                      value={sch.dow}
+                      onChange={(e) => {
+                        const list = [...(settings.recurrenceSchedules ?? [])]
+                        list[idx] = { ...list[idx], dow: Number(e.target.value) }
+                        update('recurrenceSchedules', list)
+                      }}
+                      className="h-9 rounded-lg border border-cep-purple-700 bg-cep-purple-850 px-2 text-xs text-cep-white focus:outline-none focus:ring-2 focus:ring-cep-lime-400"
+                    >
+                      {DAY_LABELS.map((d, i) => (
+                        <option key={i} value={i}>{d}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="time"
+                      value={sch.horaInicio}
+                      onChange={(e) => {
+                        const list = [...(settings.recurrenceSchedules ?? [])]
+                        list[idx] = { ...list[idx], horaInicio: e.target.value }
+                        update('recurrenceSchedules', list)
+                      }}
+                      className="h-9 rounded-lg border border-cep-purple-700 bg-cep-purple-850 px-2 text-xs text-cep-white focus:outline-none focus:ring-2 focus:ring-cep-lime-400"
+                    />
+                    <span className="text-cep-muted text-xs">até</span>
+                    <input
+                      type="time"
+                      value={sch.horaFim}
+                      onChange={(e) => {
+                        const list = [...(settings.recurrenceSchedules ?? [])]
+                        list[idx] = { ...list[idx], horaFim: e.target.value }
+                        update('recurrenceSchedules', list)
+                      }}
+                      className="h-9 rounded-lg border border-cep-purple-700 bg-cep-purple-850 px-2 text-xs text-cep-white focus:outline-none focus:ring-2 focus:ring-cep-lime-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const list = (settings.recurrenceSchedules ?? []).filter((_, i) => i !== idx)
+                        update('recurrenceSchedules', list)
+                      }}
+                      className="ml-auto text-cep-muted hover:text-red-400 transition-colors"
+                      aria-label="Remover"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-cep-muted/70 mt-2">
+                Define quais dias e horários de treino serão criados automaticamente quando você clicar "Gerar treinos".
+              </p>
             </div>
           </section>
 

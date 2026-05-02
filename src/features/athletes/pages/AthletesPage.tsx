@@ -23,8 +23,8 @@ export default function AthletesPage() {
     return matchFilter && matchSearch
   })
 
-  const handleSave = async (data: Omit<Athlete, 'id' | 'createdAt' | 'updatedAt'>) => {
-    await add(data)
+  const handleSave = async (data: Omit<Athlete, 'id' | 'createdAt' | 'updatedAt'>, opts?: { pin?: string }) => {
+    await add(data, opts)
   }
 
   return (
