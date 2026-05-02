@@ -49,6 +49,9 @@ export default function SettingsPage() {
   const [syncing, setSyncing] = useState(false)
   const [syncAllResult, setSyncAllResult] = useState<{ ok: boolean; msg: string } | null>(null)
 
+  const pushAllAthletes = useAthleteStore((s) => s.pushAllToRemote)
+  const pushAllTrainings = useTrainingStore((s) => s.pushAllToRemote)
+
   const syncAthletes = useAthleteStore((s) => s.syncFromRemote)
   const syncTrainings = useTrainingStore((s) => s.syncFromRemote)
   const syncAttendances = useAttendanceStore((s) => s.syncFromRemote)
@@ -95,14 +98,30 @@ export default function SettingsPage() {
       return
     }
     try {
+      // 1. Push local → remoto (pull-before-push garante que não sobrescreve versão mais nova)
+      const [pushA, pushT] = await Promise.all([
+        pushAllAthletes(config),
+        pushAllTrainings(config),
+      ])
+
+      // 2. Pull remoto → local (sincroniza novidades vindas de outros dispositivos)
       const [r1, r2, r3] = await Promise.all([
         syncAthletes(config),
         syncTrainings(config),
         syncAttendances(config),
       ])
-      const total = (r1.merged ?? 0) + (r2.merged ?? 0) + (r3.merged ?? 0)
+
+      const totalPushed = pushA.pushed + pushT.pushed
+      const totalPulled = (r1.merged ?? 0) + (r2.merged ?? 0) + (r3.merged ?? 0)
+
       if (r1.ok && r2.ok && r3.ok) {
-        setSyncAllResult({ ok: true, msg: `Sincronizado! ${total} registro(s) atualizados.` })
+        const parts: string[] = []
+        if (totalPushed > 0) parts.push(`${totalPushed} enviado(s)`)
+        if (totalPulled > 0) parts.push(`${totalPulled} recebido(s)`)
+        setSyncAllResult({
+          ok: true,
+          msg: parts.length > 0 ? `Sincronizado! ${parts.join(', ')}.` : 'Tudo sincronizado, nenhuma novidade.',
+        })
       } else {
         const err = r1.error ?? r2.error ?? r3.error ?? 'Erro desconhecido'
         setSyncAllResult({ ok: false, msg: err })

@@ -10,13 +10,14 @@ import {
   pushTraining,
   deleteTrainingRemote,
   type SyncConfig,
+  type RemoteTraining,
 } from '@/lib/sync'
 
 interface TrainingStore {
   trainings: Training[]
   isLoading: boolean
   loadAll: () => Promise<void>
-  generateRecurring: () => Promise<number>
+  generateRecurring: () => Promise<{ count: number; synced: boolean }>
   addExtra: (data: Omit<Training, 'id' | 'tipo' | 'criadoManualmente' | 'createdAt' | 'updatedAt'>) => Promise<Training>
   add: (data: Omit<Training, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Training>
   update: (id: string, data: Partial<Omit<Training, 'id' | 'createdAt'>>) => Promise<void>
@@ -25,6 +26,7 @@ interface TrainingStore {
   getById: (id: string) => Training | undefined
   getConflicts: () => HolidayConflict[]
   syncFromRemote: (config: SyncConfig, opts?: { since?: string; until?: string }) => Promise<{ ok: boolean; merged: number; error?: string }>
+  pushAllToRemote: (config: SyncConfig) => Promise<{ pushed: number; skipped: number }>
 }
 
 function sortTrainings(list: Training[]): Training[] {
@@ -58,7 +60,7 @@ export const useTrainingStore = create<TrainingStore>((set, get) => ({
     const existingKeys = buildExistingKeys(existing)
     const drafts = generateRecurringDrafts(semanasFuturas, existingKeys, schedules)
 
-    if (drafts.length === 0) return 0
+    if (drafts.length === 0) return { count: 0, synced: false }
 
     const now = new Date().toISOString()
     const newTrainings: Training[] = drafts.map((d) => ({
@@ -75,13 +77,12 @@ export const useTrainingStore = create<TrainingStore>((set, get) => ({
 
     set((s) => ({ trainings: sortTrainings([...s.trainings, ...newTrainings]) }))
 
-    // Push em batch (silencioso)
-    void loadSyncConfig().then((config) => {
-      if (!config) return
+    const config = await loadSyncConfig()
+    if (config) {
       for (const t of newTrainings) void pushTraining(config, t)
-    })
-
-    return newTrainings.length
+      return { count: newTrainings.length, synced: true }
+    }
+    return { count: newTrainings.length, synced: false }
   },
 
   addExtra: async (data) => {
@@ -171,5 +172,30 @@ export const useTrainingStore = create<TrainingStore>((set, get) => ({
       await get().loadAll()
     }
     return { ok: true, merged }
+  },
+
+  pushAllToRemote: async (config) => {
+    // Pull-before-push: busca updatedAt remotos para não sobrescrever versão mais nova
+    const remoteResult = await pullTrainings(config)
+    const remoteById = new Map<string, RemoteTraining>(
+      (remoteResult.records ?? []).map((r) => [r.id, r])
+    )
+
+    const local = get().trainings
+    let pushed = 0
+    let skipped = 0
+
+    for (const t of local) {
+      const remote = remoteById.get(t.id)
+      // Só envia se local é mais novo que o remoto (ou se não existe no remoto)
+      if (!remote || t.updatedAt > remote.updatedAt) {
+        void pushTraining(config, t)
+        pushed++
+      } else {
+        skipped++
+      }
+    }
+
+    return { pushed, skipped }
   },
 }))

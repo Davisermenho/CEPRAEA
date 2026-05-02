@@ -51,9 +51,17 @@ export default function TrainingsPage() {
 
   const handleGenerate = async () => {
     setGenerating(true)
-    const count = await generateRecurring()
-    setToast(count > 0 ? `${count} treino(s) gerado(s)!` : 'Nenhum treino novo a gerar.')
-    setTimeout(() => setToast(''), 3000)
+    const { count, synced } = await generateRecurring()
+    if (count > 0) {
+      setToast(
+        synced
+          ? `${count} treino(s) gerado(s) e enviado(s) ao servidor.`
+          : `${count} treino(s) gerado(s) localmente. Vá em Configurações e sincronize para salvar no servidor.`
+      )
+    } else {
+      setToast('Nenhum treino novo a gerar.')
+    }
+    setTimeout(() => setToast(''), 5000)
     setGenerating(false)
   }
 

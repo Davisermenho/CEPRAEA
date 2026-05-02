@@ -6,6 +6,7 @@ import { useAthleteStore } from './stores/athleteStore'
 import { useTrainingStore } from './stores/trainingStore'
 import { useAttendanceStore } from './stores/attendanceStore'
 import { seedDefaults } from './lib/seed'
+import { loadSyncConfig } from './lib/sync'
 
 async function bootstrap() {
   await seedDefaults()
@@ -20,6 +21,13 @@ async function bootstrap() {
       <App />
     </StrictMode>,
   )
+
+  // Pull em background após render: mantém IDB alinhado ao servidor sem bloquear a UI
+  void loadSyncConfig().then((config) => {
+    if (!config) return
+    void useAthleteStore.getState().syncFromRemote(config)
+    void useTrainingStore.getState().syncFromRemote(config)
+  })
 }
 
 bootstrap()

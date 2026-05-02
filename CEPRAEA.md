@@ -1,7 +1,7 @@
 # CEPRAEA — Arquitetura Técnica e Especificações de Sistema
 
-**Versão:** 1.1.0  
-**Data:** 1 de maio de 2026  
+**Versão:** 1.2.0  
+**Data:** 2 de maio de 2026  
 **Escopo:** Sistema PWA para Gestão de Treinos, Controle de Presença e Scout Tático  
 **Status:** Produção
 
@@ -147,7 +147,7 @@ CEPRAEA adota uma arquitetura **cliente-centric offline-first** com sincronizaç
 | **Autenticação** | Validação de acesso via PIN com hash | Web Crypto API SHA-256 | SessionStorage |
 | **Lógica de Negócio** | Cálculos, validações, geração de dados | TypeScript | Determinístico |
 | **Sincronização** | Push/Pull com endpoint remoto | Fetch API | Async |
-| **PWA** | Instalação, offline, atualização | Workbox v7, vite-plugin-pwa | Auto |
+| **PWA** | Instalação, offline, atualização automática | Workbox v7, vite-plugin-pwa (`autoUpdate`) | Auto |
 | **Integração WhatsApp** | Geração de links e mensagens | WhatsApp Web URLs | Web |
 | **Exportação** | CSV/Excel | XLSX v0.18 | Blob Download |
 | **Identidade Visual** | Logo e logomarca CEPRAEA como componentes React inline SVG | CepraeaLogo.tsx, CepraeaLogomarca.tsx | Tailwind currentColor |
@@ -601,6 +601,11 @@ toggleStatus(id: string): Promise<void>
 
 // Delete
 remove(id: string): Promise<void>
+
+// Sync
+// Pull-before-push: só envia registros onde local.updatedAt > remote.updatedAt
+pushAllToRemote(config: SyncConfig): Promise<{ pushed: number; skipped: number }>
+syncFromRemote(config: SyncConfig): Promise<void>
 ```
 
 #### **CRUD de Treinos** (`trainingStore.ts`)
@@ -613,7 +618,8 @@ getById(id: string): Training | undefined
 // Create
 add(data: Omit<Training, 'id' | 'createdAt' | 'updatedAt'>): Promise<Training>
 addExtra(data: omit): Promise<Training>
-generateRecurring(): Promise<number>  // Retorna count de treinos gerados
+// count = treinos gerados; synced = false se syncConfig ausente (sem credenciais)
+generateRecurring(): Promise<{ count: number; synced: boolean }>
 
 // Update
 update(id: string, data: Partial<Training>): Promise<void>
@@ -624,6 +630,11 @@ remove(id: string): Promise<void>
 
 // Business Logic
 getConflicts(): HolidayConflict[]  // Treinos em feriados
+
+// Sync
+// Pull-before-push: só envia registros onde local.updatedAt > remote.updatedAt
+pushAllToRemote(config: SyncConfig): Promise<{ pushed: number; skipped: number }>
+syncFromRemote(config: SyncConfig): Promise<void>
 ```
 
 #### **Registro de Presença** (`attendanceStore.ts`)
@@ -883,9 +894,14 @@ Response:
 
 #### Estratégia de Sincronização
 - **Direção**: Bidirecional (push + pull)
-- **Push**: Automático ao confirmar presença via link público (se endpoint ativo)
-- **Pull**: Manual via Settings > "Sincronizar"
-- **Conflito**: Local sobrescreve remoto (last write wins)
+- **Push local → remoto**: Via `pushAllToRemote()` nos stores — padrão _pull-before-push_: busca `updatedAt` remotos, só envia registros onde `local.updatedAt > remote.updatedAt`. Evita sobrescrita de dados mais recentes no servidor.
+- **Pull remoto → local**: `syncFromRemote()` nos stores — baixa todos os registros remotos e faz upsert local
+- **Disparo manual**: Settings > "Sincronizar tudo agora" — executa push (athletes + trainings) **depois** pull (athletes + trainings + attendance). Exibe contagem separada: "X enviado(s), Y recebido(s)".
+- **Disparo automático no boot**: `main.tsx` inicia pull em background após renderização inicial (não-bloqueante). Se `syncConfig` não estiver configurado, o pull é silenciosamente pulado.
+- **Conflito**: Pull-before-push no envio. No recebimento: remoto sobrescreve local (last write wins por `updatedAt`).
+- **Aviso de sincronização pendente**: `generateRecurring()` retorna `{ synced: false }` quando `syncConfig` ausente; `TrainingsPage` exibe toast de 5s orientando o usuário a ir em Configurações.
+
+> **Nota:** O Apps Script (`Code.gs`) **não compara `updatedAt`** antes de sobrescrever — aceita qualquer upsert recebido. A proteção contra sobrescrita indevida é responsabilidade do cliente via `pushAllToRemote()`.
 
 ### 4.7 Eventos do Sistema
 
@@ -900,6 +916,8 @@ Response:
 | `attendance:pendente` | treino realizado mas sem presença | Alerta visual |
 | `sync:success` | push para Apps Script bem-sucedido | Update lastSyncAt |
 | `sync:error` | falha na sincronização | Toast error |
+| `training:sync-pending` | `generateRecurring()` sem syncConfig | Toast 5s orientando a ir em Configurações |
+| `sw:updated` | Service Worker novo ativou automaticamente | Toast 4s: "App atualizado para a versão mais recente." |
 
 ---
 
@@ -985,7 +1003,7 @@ DashboardPage → "Exportar" → ExportPage → Seleciona tipo (CSV/Excel) → D
 | `ConfirmDialog` | `open`, `onConfirm`, `title`, `description` | Delete, cancel actions |
 | `LoadingSpinner` | `size` (sm, md, lg) | Async operations (exibe CepraeaLogo acima) |
 | `EmptyState` | `title`, `description`, `icon` | Listas vazias |
-| `UpdatePrompt` | PWA update trigger | Service Worker skip-waiting |
+| `UpdatePrompt` | Toast informativo pós-atualização automática do SW | Exibido 4s após reload por novo SW (`autoUpdate`) |
 | `CepraeaLogo` | `className?` | Símbolo/ícone CEPRAEA (SVG inline, `fill=currentColor`) |
 | `CepraeaLogomarca` | `className?` | Logomarca completa CEPRAEA (SVG inline, `fill=currentColor`) |
 

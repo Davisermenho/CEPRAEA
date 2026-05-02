@@ -20,6 +20,7 @@ interface AthleteStore {
   toggleStatus: (id: string) => Promise<void>
   getById: (id: string) => Athlete | undefined
   syncFromRemote: (config: SyncConfig) => Promise<{ ok: boolean; merged: number; error?: string }>
+  pushAllToRemote: (config: SyncConfig) => Promise<{ pushed: number; skipped: number }>
 }
 
 function sortByName(list: Athlete[]): Athlete[] {
@@ -128,6 +129,30 @@ export const useAthleteStore = create<AthleteStore>((set, get) => ({
       await get().loadAll()
     }
     return { ok: true, merged }
+  },
+
+  pushAllToRemote: async (config) => {
+    // Pull-before-push: não sobrescreve registros mais novos que já estão no remoto
+    const remoteResult = await pullAthletes(config)
+    const remoteById = new Map<string, RemoteAthlete>(
+      (remoteResult.records ?? []).map((r) => [r.id, r])
+    )
+
+    const local = get().athletes
+    let pushed = 0
+    let skipped = 0
+
+    for (const a of local) {
+      const remote = remoteById.get(a.id)
+      if (!remote || a.updatedAt > remote.updatedAt) {
+        void pushAthlete(config, a)
+        pushed++
+      } else {
+        skipped++
+      }
+    }
+
+    return { pushed, skipped }
   },
 }))
 
