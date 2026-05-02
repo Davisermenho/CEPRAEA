@@ -136,6 +136,7 @@ export interface ScoutAthleteBlock {
 }
 
 export interface SpecialistCentralAnalysis {
+  equipe?: 'CEPRAEA' | 'Adversária'
   origemBola?: string
   mexidaInicial?: string
   soltaFixada?: string
@@ -150,6 +151,9 @@ export interface SpecialistCentralAnalysis {
 }
 
 export interface FinishAnalysis {
+  houveFinalizacao?: boolean
+  equipeFinalizadora?: 'CEPRAEA' | 'Adversária'
+  equipeGoleira?: 'CEPRAEA' | 'Adversária'
   finalizadora?: string
   zonaArremesso?: string
   direcaoGol?: string
