@@ -1,5 +1,8 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
+import { createRequire } from 'module'
+
+const _require = createRequire(import.meta.url)
 
 // Polyfill crypto.subtle para jsdom
 Object.defineProperty(globalThis, 'crypto', {
@@ -14,7 +17,7 @@ Object.defineProperty(globalThis, 'crypto', {
       },
     },
     getRandomValues: (arr: Uint8Array) => {
-      const { randomFillSync } = require('crypto')
+      const { randomFillSync } = _require('crypto')
       return randomFillSync(arr)
     },
   },

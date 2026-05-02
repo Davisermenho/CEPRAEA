@@ -9,7 +9,7 @@
  */
 
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
-import { generateSecret, pingEndpoint, resolveEndpointUrl } from '../sync'
+import { generateSecret, pingEndpoint } from '../sync'
 
 // ─── generateSecret ───────────────────────────────────────────────────────────
 

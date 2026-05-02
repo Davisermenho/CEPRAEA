@@ -8,19 +8,9 @@
  * - isHoliday não excluindo data → feriadoOrigem seria undefined → test_feriado_marcado falha → DETECTADO
  */
 
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, test, expect, vi } from 'vitest'
 import { generateRecurringDrafts, buildExistingKeys, DEFAULT_SCHEDULES } from '../recurrence'
 import type { Training } from '@/types'
-
-// Helper: cria data no formato YYYY-MM-DD para um dia da semana próximo
-function nextDow(dow: number, fromDate = new Date()): string {
-  const d = new Date(fromDate)
-  d.setHours(0, 0, 0, 0)
-  let diff = dow - d.getDay()
-  if (diff <= 0) diff += 7
-  d.setDate(d.getDate() + diff)
-  return d.toISOString().slice(0, 10)
-}
 
 // ─── buildExistingKeys ────────────────────────────────────────────────────────
 
