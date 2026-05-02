@@ -14,7 +14,7 @@
  */
 
 // ⚠️ ALTERE ESTE VALOR para o secret copiado de Configurações > Sincronização no app
-var SYNC_SECRET = 'COLE_SEU_SECRET_AQUI';
+var SYNC_SECRET = '2f4c7c69e7cf2d5b42a852d1829adbc5';
 
 var SHEET_CONFIRMACOES = 'confirmacoes';
 var SHEET_ATHLETES = 'athletes';

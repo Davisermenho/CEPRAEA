@@ -1,4 +1,4 @@
-import { getSetting, setSetting } from '@/db'
+import { setSetting } from '@/db'
 import { hashPin } from '@/lib/auth'
 
 export async function seedDefaults(): Promise<void> {
@@ -6,19 +6,12 @@ export async function seedDefaults(): Promise<void> {
   const secret = import.meta.env.VITE_SYNC_SECRET as string | undefined
   const defaultPin = import.meta.env.VITE_COACH_DEFAULT_PIN as string | undefined
 
-  if (endpointUrl) {
-    const existing = await getSetting<string>('syncEndpointUrl')
-    if (!existing) await setSetting('syncEndpointUrl', endpointUrl)
-  }
-  if (secret) {
-    const existing = await getSetting<string>('syncSecret')
-    if (!existing) await setSetting('syncSecret', secret)
-  }
+  // Sempre sobrescreve com os valores das env vars para garantir consistência
+  // entre dispositivos. Mudanças de configuração chegam via Vercel.
+  if (endpointUrl) await setSetting('syncEndpointUrl', endpointUrl)
+  if (secret) await setSetting('syncSecret', secret)
   if (defaultPin) {
-    const existing = await getSetting<string>('pinHash')
-    if (!existing) {
-      const hash = await hashPin(defaultPin)
-      await setSetting('pinHash', hash)
-    }
+    const hash = await hashPin(defaultPin)
+    await setSetting('pinHash', hash)
   }
 }
