@@ -45,6 +45,15 @@ begin
   if not exists (select 1 from confirm_result where ok = true and message = 'Presença registrada.') then
     raise exception 'valid token should confirm presence';
   end if;
+end $$;
+
+-- A chamada pública deve ser feita como anon, mas a verificação de estado interno
+-- precisa voltar ao owner autenticado. Anon não deve conseguir ler tabelas privadas.
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000001';
+
+do $$
+begin
   if not exists (select 1 from public.attendance_records where status = 'presente' and confirmed_by_athlete = true) then
     raise exception 'attendance record should be created';
   end if;
@@ -54,7 +63,12 @@ begin
 end $$;
 
 -- Reuse before lock must update use_count.
+set local role anon;
+set local request.jwt.claim.sub = '';
 select * from public.confirm_presence_by_token(:'plain_token', 'ausente', 'teste');
+
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000001';
 
 do $$
 begin
@@ -67,6 +81,8 @@ begin
 end $$;
 
 -- Invalid token must fail generically.
+set local role anon;
+set local request.jwt.claim.sub = '';
 do $$
 declare
   invalid_message text;
