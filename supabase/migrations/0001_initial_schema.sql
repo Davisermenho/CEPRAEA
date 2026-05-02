@@ -55,9 +55,7 @@ create table if not exists public.training_series (
   timezone text not null default 'America/Sao_Paulo',
   location text,
   created_at timestamptz not null default now(),
-  constraint training_series_days_of_week_valid check (
-    not exists (select 1 from unnest(days_of_week) as d where d < 0 or d > 6)
-  )
+  constraint training_series_days_of_week_valid check (days_of_week <@ array[0,1,2,3,4,5,6])
 );
 
 create table if not exists public.trainings (
