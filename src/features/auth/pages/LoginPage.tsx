@@ -3,21 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
 import { CepraeaLogo } from '@/shared/components/CepraeaLogo'
-import { getSetting, setSetting } from '@/db'
-import { hashPin, verifyPin, setSession } from '@/lib/auth'
+import { getSetting } from '@/db'
+import { verifyPin, setSession } from '@/lib/auth'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const [pin, setPin] = useState('')
   const [showPin, setShowPin] = useState(false)
-  const [confirm, setConfirm] = useState('')
-  const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  useState(() => {
-    getSetting<string>('pinHash').then((hash) => setIsFirstTime(!hash))
-  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,35 +22,25 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      if (isFirstTime) {
-        if (pin !== confirm) {
-          setError('Os PINs não coincidem.')
-          setLoading(false)
-          return
-        }
-        const hash = await hashPin(pin)
-        await setSetting('pinHash', hash)
-        setSession()
-        navigate('/', { replace: true })
-      } else {
-        const storedHash = await getSetting<string>('pinHash')
-        if (!storedHash) return
-        const ok = await verifyPin(pin, storedHash)
-        if (!ok) {
-          setError('PIN incorreto. Tente novamente.')
-          setLoading(false)
-          return
-        }
-        setSession()
-        navigate('/', { replace: true })
+      const storedHash = await getSetting<string>('pinHash')
+      if (!storedHash) {
+        setError('Configuração não encontrada. Recarregue a página.')
+        setLoading(false)
+        return
       }
+      const ok = await verifyPin(pin, storedHash)
+      if (!ok) {
+        setError('PIN incorreto. Tente novamente.')
+        setLoading(false)
+        return
+      }
+      setSession()
+      navigate('/', { replace: true })
     } catch {
       setError('Erro ao verificar PIN.')
     }
     setLoading(false)
   }
-
-  if (isFirstTime === null) return null
 
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center bg-cep-purple-950 px-6 relative overflow-hidden">
@@ -77,14 +61,14 @@ export default function LoginPage() {
             Preparação. Identidade. Competição.
           </p>
           <p className="text-cep-muted/70 text-sm mt-4">
-            {isFirstTime ? 'Crie seu PIN de acesso' : 'Acesso do treinador'}
+            Acesso do treinador
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-cep-muted mb-1.5 tracking-wide uppercase">
-              {isFirstTime ? 'Criar PIN' : 'PIN'}
+              PIN
             </label>
             <div className="relative">
               <input
@@ -107,23 +91,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {isFirstTime && (
-            <div>
-              <label className="block text-xs font-semibold text-cep-muted mb-1.5 tracking-wide uppercase">
-                Confirmar PIN
-              </label>
-              <input
-                type={showPin ? 'text' : 'password'}
-                inputMode="numeric"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="••••••"
-                maxLength={20}
-                className="w-full h-12 rounded-xl bg-cep-purple-850 border border-cep-purple-700 text-cep-white placeholder-cep-muted/40 px-4 text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent"
-              />
-            </div>
-          )}
-
           {error && (
             <div className="rounded-xl bg-red-500/20 border border-red-500/40 px-4 py-2.5">
               <p className="text-red-400 text-sm text-center">{error}</p>
@@ -137,7 +104,7 @@ export default function LoginPage() {
             loading={loading}
             className="mt-2"
           >
-            {isFirstTime ? 'Criar PIN e entrar' : 'Entrar'}
+            Entrar
           </Button>
         </form>
       </div>
