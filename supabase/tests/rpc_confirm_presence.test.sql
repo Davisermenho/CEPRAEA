@@ -83,12 +83,12 @@ end $$;
 -- Invalid token must fail generically.
 set local role anon;
 set local request.jwt.claim.sub = '';
+create temporary table invalid_result as
+select * from public.confirm_presence_by_token('invalid-token', 'presente', null);
+
 do $$
-declare
-  invalid_message text;
 begin
-  select message into invalid_message from public.confirm_presence_by_token('invalid-token', 'presente', null) limit 1;
-  if invalid_message <> 'Link inválido, expirado ou indisponível.' then
+  if not exists (select 1 from invalid_result where ok = false and message = 'Link inválido, expirado ou indisponível.') then
     raise exception 'invalid token should fail generically';
   end if;
 end $$;
@@ -100,13 +100,12 @@ select public.revoke_presence_token_batch(:'token_batch_id'::uuid);
 
 set local role anon;
 set local request.jwt.claim.sub = '';
+create temporary table revoked_result as
+select * from public.confirm_presence_by_token(:'plain_token', 'presente', null);
+
 do $$
-declare
-  revoked_ok boolean;
-  revoked_message text;
 begin
-  select ok, message into revoked_ok, revoked_message from public.confirm_presence_by_token(:'plain_token', 'presente', null) limit 1;
-  if revoked_ok is true or revoked_message <> 'Link inválido, expirado ou indisponível.' then
+  if not exists (select 1 from revoked_result where ok = false and message = 'Link inválido, expirado ou indisponível.') then
     raise exception 'revoked token should fail generically';
   end if;
 end $$;
