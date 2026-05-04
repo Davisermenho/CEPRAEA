@@ -5,6 +5,7 @@ import { AuthGuard } from '@/shared/layouts/AuthGuard'
 import { AtletaGuard } from '@/shared/layouts/AtletaGuard'
 import { AtletaLayout } from '@/shared/layouts/AtletaLayout'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { SupabaseAuthProvider } from '@/features/auth/SupabaseAuthProvider'
 import { isAuthenticated } from '@/lib/auth'
 import { isAtletaAuthenticated } from '@/lib/athleteAuth'
 
@@ -41,45 +42,47 @@ function WelcomeOrRedirect() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          {/* Públicas */}
-          <Route path="/welcome" element={<WelcomeOrRedirect />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/atleta/login" element={<AtletaLoginPage />} />
-          <Route path="/confirmar/:treinoId/:atletaId" element={<PublicConfirmPage />} />
-          <Route path="/confirmar-presenca" element={<PublicConfirmPage />} />
+    <SupabaseAuthProvider>
+      <BrowserRouter>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            {/* Públicas */}
+            <Route path="/welcome" element={<WelcomeOrRedirect />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/atleta/login" element={<AtletaLoginPage />} />
+            <Route path="/confirmar/:treinoId/:atletaId" element={<PublicConfirmPage />} />
+            <Route path="/confirmar-presenca" element={<PublicConfirmPage />} />
 
-          {/* Atleta (protegidas) */}
-          <Route element={<AtletaGuard />}>
-            <Route element={<AtletaLayout />}>
-              <Route path="/atleta/treinos" element={<AtletaTreinosPage />} />
-              <Route path="/atleta/treinos/:id" element={<AtletaTreinoDetailPage />} />
-              <Route path="/atleta/perfil" element={<AtletaPerfilPage />} />
+            {/* Atleta (protegidas) */}
+            <Route element={<AtletaGuard />}>
+              <Route element={<AtletaLayout />}>
+                <Route path="/atleta/treinos" element={<AtletaTreinosPage />} />
+                <Route path="/atleta/treinos/:id" element={<AtletaTreinoDetailPage />} />
+                <Route path="/atleta/perfil" element={<AtletaPerfilPage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Treinador (protegidas) */}
-          <Route element={<AuthGuard />}>
-            <Route element={<AppLayout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="atletas" element={<AthletesPage />} />
-              <Route path="atletas/:id" element={<AthleteDetailPage />} />
-              <Route path="treinos" element={<TrainingsPage />} />
-              <Route path="treinos/:id" element={<TrainingDetailPage />} />
-              <Route path="relatorios" element={<ReportsPage />} />
-              <Route path="exportar" element={<ExportPage />} />
-              <Route path="configuracoes" element={<SettingsPage />} />
-              <Route path="scout" element={<ScoutGamesPage />} />
-              <Route path="scout/:id/ao-vivo" element={<ScoutLivePage />} />
-              <Route path="scout/:id/resumo" element={<ScoutSummaryPage />} />
+            {/* Treinador (protegidas) */}
+            <Route element={<AuthGuard />}>
+              <Route element={<AppLayout />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="atletas" element={<AthletesPage />} />
+                <Route path="atletas/:id" element={<AthleteDetailPage />} />
+                <Route path="treinos" element={<TrainingsPage />} />
+                <Route path="treinos/:id" element={<TrainingDetailPage />} />
+                <Route path="relatorios" element={<ReportsPage />} />
+                <Route path="exportar" element={<ExportPage />} />
+                <Route path="configuracoes" element={<SettingsPage />} />
+                <Route path="scout" element={<ScoutGamesPage />} />
+                <Route path="scout/:id/ao-vivo" element={<ScoutLivePage />} />
+                <Route path="scout/:id/resumo" element={<ScoutSummaryPage />} />
+              </Route>
             </Route>
-          </Route>
 
-          <Route path="*" element={<Navigate to="/welcome" replace />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+            <Route path="*" element={<Navigate to="/welcome" replace />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </SupabaseAuthProvider>
   )
 }
