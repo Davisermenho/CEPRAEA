@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { CheckCircle, XCircle, Dumbbell, Wifi, WifiOff } from 'lucide-react'
 import { useAthleteStore } from '@/stores/athleteStore'
 import { useTrainingStore } from '@/stores/trainingStore'
@@ -7,13 +7,20 @@ import { getSetting } from '@/db'
 import { formatDateLong } from '@/lib/utils'
 import { abrirWhatsApp } from '@/lib/whatsapp'
 import { pushConfirmation, loadSyncConfig } from '@/lib/sync'
+import { confirmPresenceByToken } from '@/features/presence-tokens/presenceTokenApi'
+import { isSupabasePresenceTokensEnabled } from '@/features/presence-tokens/presenceTokenFeatureFlag'
 import { useState, useEffect } from 'react'
 import type { AppSettings } from '@/types'
+import type { PresenceTokenStatus } from '@/features/presence-tokens/presenceTokenTypes'
 
 type PageState = 'loading' | 'pending' | 'sending' | 'synced' | 'fallback-wa' | 'error' | 'not-found'
 
 export default function PublicConfirmPage() {
   const { treinoId, atletaId } = useParams<{ treinoId: string; atletaId: string }>()
+  const [searchParams] = useSearchParams()
+  const token = searchParams.get('token') ?? ''
+  const usingSupabaseToken = isSupabasePresenceTokensEnabled() && token.length > 0
+
   const training = useTrainingStore((s) => s.getById(treinoId ?? ''))
   const athlete = useAthleteStore((s) => s.getById(atletaId ?? ''))
   const upsert = useAttendanceStore((s) => s.upsert)
@@ -22,17 +29,40 @@ export default function PublicConfirmPage() {
   const [settings, setSettings] = useState<Partial<AppSettings>>({})
   const [waMsg, setWaMsg] = useState('')
   const [waTel, setWaTel] = useState<string | undefined>(undefined)
+  const [remoteMessage, setRemoteMessage] = useState('')
 
   useEffect(() => {
     getSetting<AppSettings>('appSettings').then((s) => {
       if (s) setSettings(s)
     })
+
+    if (usingSupabaseToken) {
+      setPageState('pending')
+      return
+    }
+
     if (training !== undefined && athlete !== undefined) {
       setPageState(training && athlete ? 'pending' : 'not-found')
     }
-  }, [training, athlete])
+  }, [training, athlete, usingSupabaseToken])
+
+  const handleSupabaseTokenConfirm = async (status: PresenceTokenStatus) => {
+    if (!token) return
+
+    setPageState('sending')
+    setConfirmed(status === 'presente')
+
+    const result = await confirmPresenceByToken({ token, status })
+    setRemoteMessage(result.message)
+    setPageState(result.ok ? 'synced' : 'not-found')
+  }
 
   const handleConfirm = async (presente: boolean) => {
+    if (usingSupabaseToken) {
+      await handleSupabaseTokenConfirm(presente ? 'presente' : 'ausente')
+      return
+    }
+
     if (!treinoId || !atletaId || !training || !athlete) return
 
     setPageState('sending')
@@ -81,7 +111,7 @@ export default function PublicConfirmPage() {
           <Dumbbell className="h-10 w-10 text-cep-muted" />
         </div>
         <h1 className="text-lg font-bold text-cep-white mb-2">Link não encontrado</h1>
-        <p className="text-sm text-cep-muted">Este link de confirmação é inválido ou expirou.</p>
+        <p className="text-sm text-cep-muted">{remoteMessage || 'Este link de confirmação é inválido ou expirou.'}</p>
       </div>
     )
   }
@@ -109,7 +139,7 @@ export default function PublicConfirmPage() {
             {presente ? 'Presença confirmada!' : 'Ausência registrada'}
           </h1>
           <p className="text-sm text-cep-muted mt-2 max-w-xs">
-            {presente ? 'Ótimo! Até o treino! 💪' : 'Sua ausência foi comunicada. Até a próxima!'}
+            {remoteMessage || (presente ? 'Ótimo! Até o treino! 💪' : 'Sua ausência foi comunicada. Até a próxima!')}
           </p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold bg-cep-lime-400/15 text-cep-lime-400">
@@ -154,7 +184,7 @@ export default function PublicConfirmPage() {
 
   // pageState === 'pending'
   const equipe = settings.nomeEquipe ?? 'CEPRAEA'
-  const syncConfigured = !!(settings.syncEndpointUrl && settings.syncSecret)
+  const syncConfigured = usingSupabaseToken || !!(settings.syncEndpointUrl && settings.syncSecret)
 
   return (
     <div className="min-h-dvh bg-cep-purple-950 flex flex-col items-center justify-center px-6">
@@ -169,26 +199,28 @@ export default function PublicConfirmPage() {
 
         <div className="p-6 space-y-4">
           <div className="text-center">
-            <p className="text-xl font-black text-cep-white">{athlete?.nome.split(' ')[0]}</p>
-            <p className="text-sm text-cep-muted mt-0.5">{athlete?.nome}</p>
+            <p className="text-xl font-black text-cep-white">{usingSupabaseToken ? 'Atleta' : athlete?.nome.split(' ')[0]}</p>
+            <p className="text-sm text-cep-muted mt-0.5">{usingSupabaseToken ? 'Confirme sua presença pelo link seguro.' : athlete?.nome}</p>
           </div>
 
-          <div className="bg-cep-purple-850 rounded-xl border border-cep-purple-700 p-4 space-y-2">
-            <div className="flex items-center gap-2 text-sm text-cep-white">
-              <span>📅</span>
-              <span className="capitalize">{formatDateLong(training!.data)}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-cep-muted">
-              <span>⏰</span>
-              <span>{training!.horaInicio} às {training!.horaFim}</span>
-            </div>
-            {training!.local && (
-              <div className="flex items-center gap-2 text-sm text-cep-muted">
-                <span>📍</span>
-                <span>{training!.local}</span>
+          {!usingSupabaseToken && training && (
+            <div className="bg-cep-purple-850 rounded-xl border border-cep-purple-700 p-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm text-cep-white">
+                <span>📅</span>
+                <span className="capitalize">{formatDateLong(training.data)}</span>
               </div>
-            )}
-          </div>
+              <div className="flex items-center gap-2 text-sm text-cep-muted">
+                <span>⏰</span>
+                <span>{training.horaInicio} às {training.horaFim}</span>
+              </div>
+              {training.local && (
+                <div className="flex items-center gap-2 text-sm text-cep-muted">
+                  <span>📍</span>
+                  <span>{training.local}</span>
+                </div>
+              )}
+            </div>
+          )}
 
           <p className="text-sm text-center text-cep-muted">
             Você vai comparecer a este treino?
