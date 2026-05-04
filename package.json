@@ -9,9 +9,13 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:supabase": "bash scripts/run-supabase-tests.sh",
+    "check:supabase-foundation-scope": "bash scripts/check-supabase-foundation-scope.sh",
+    "validate:supabase-foundation": "npm run check:supabase-foundation-scope && supabase db reset && npm run test:supabase && npm run build"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.87.1",
     "clsx": "^2.1.1",
     "idb": "^8.0.3",
     "lucide-react": "^0.511.0",
