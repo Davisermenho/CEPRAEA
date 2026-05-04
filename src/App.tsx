@@ -49,6 +49,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/atleta/login" element={<AtletaLoginPage />} />
           <Route path="/confirmar/:treinoId/:atletaId" element={<PublicConfirmPage />} />
+          <Route path="/confirmar-presenca" element={<PublicConfirmPage />} />
 
           {/* Atleta (protegidas) */}
           <Route element={<AtletaGuard />}>
