@@ -150,6 +150,17 @@ Decisão de segurança:
 
 A geração operacional de lotes pelo treinador ainda não foi conectada à UI, porque as RPCs administrativas exigem sessão Supabase autenticada e `team_id` operacional. A aplicação atual ainda usa PIN legado no painel do treinador. Forçar a geração agora violaria o critério de segurança.
 
+### Validação de produção do changelog
+
+O deploy de produção na Vercel foi confirmado como `Ready` para o commit:
+
+- `895ce1c97756cf5113a02362b493699c1583ee53`
+- mensagem: `docs: add project changelog and process log`
+
+Decisão de processo reiterada:
+
+- toda nova ação relevante deve atualizar este changelog.
+
 Próxima fase planejada:
 
 - adicionar autenticação/sessão Supabase mínima para treinador;
