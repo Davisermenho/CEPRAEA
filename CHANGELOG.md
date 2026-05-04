@@ -161,8 +161,42 @@ Decisão de processo reiterada:
 
 - toda nova ação relevante deve atualizar este changelog.
 
+### Fase: base mínima de sessão Supabase do treinador
+
+Iniciada a próxima fase planejada, com escopo técnico e não operacional.
+
+Alterações aplicadas:
+
+- `SupabaseAuthProvider` agora expõe:
+  - `authenticated`;
+  - `signInWithPassword(email, password)`;
+  - `signOut()`;
+  - `session`, `user`, `loading` e `configured`.
+- `SupabaseAuthProvider` foi conectado globalmente ao app em `src/App.tsx`.
+- criada configuração explícita de time Supabase em `src/features/presence-tokens/presenceTokenConfig.ts`.
+
+Nova variável de ambiente prevista:
+
+```text
+VITE_SUPABASE_TEAM_ID=<uuid-do-time>
+```
+
+Garantia desta fase:
+
+- não foi criada UI operacional de login Supabase;
+- não foi ligada geração/exportação/revogação de lotes no painel;
+- não houve migração de stores;
+- a configuração de `team_id` é validada como UUID e falha explicitamente quando ausente/inválida.
+
+Commits da fase:
+
+- `efc602dbf51598303e5c904bfbbce813a39be33f` — registra validação de produção do changelog;
+- `11341b4de69c3828943787556287300e64f3f2a6` — expõe sessão/autenticação Supabase mínima;
+- `5dff71810c32638d65064f7a985a0644c6a7ad61` — conecta o provider globalmente;
+- `dfb300253bbfec1c834d118de9fbbdd57e5b6955` — adiciona configuração explícita de `team_id` Supabase.
+
 Próxima fase planejada:
 
-- adicionar autenticação/sessão Supabase mínima para treinador;
-- definir explicitamente `team_id` operacional;
-- só depois ligar geração, exportação e revogação de lotes no painel.
+- documentar e validar o fluxo de sessão Supabase do treinador;
+- só depois criar UI controlada para autenticação Supabase ou outro mecanismo operacional equivalente;
+- em seguida, ligar geração, exportação e revogação de lotes no painel.
