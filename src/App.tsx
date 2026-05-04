@@ -22,6 +22,7 @@ const TrainingDetailPage     = lazy(() => import('@/features/trainings/pages/Tra
 const ReportsPage            = lazy(() => import('@/features/reports/pages/ReportsPage'))
 const ExportPage             = lazy(() => import('@/features/export/pages/ExportPage'))
 const SettingsPage           = lazy(() => import('@/features/settings/pages/SettingsPage'))
+const SupabaseSettingsPage   = lazy(() => import('@/features/settings/pages/SupabaseSettingsPage'))
 
 const WelcomePage            = lazy(() => import('@/features/welcome/WelcomePage'))
 const AtletaLoginPage        = lazy(() => import('@/features/atleta/pages/AtletaLoginPage'))
@@ -73,6 +74,7 @@ export default function App() {
                 <Route path="relatorios" element={<ReportsPage />} />
                 <Route path="exportar" element={<ExportPage />} />
                 <Route path="configuracoes" element={<SettingsPage />} />
+                <Route path="configuracoes/supabase" element={<SupabaseSettingsPage />} />
                 <Route path="scout" element={<ScoutGamesPage />} />
                 <Route path="scout/:id/ao-vivo" element={<ScoutLivePage />} />
                 <Route path="scout/:id/resumo" element={<ScoutSummaryPage />} />
