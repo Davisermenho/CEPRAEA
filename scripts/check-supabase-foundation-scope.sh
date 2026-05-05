@@ -31,6 +31,8 @@ is_allowed() {
     src/main.tsx) return 0 ;;
     src/App.tsx) return 0 ;;
     src/lib/seed.ts) return 0 ;;
+    src/lib/auth.ts) return 0 ;;
+    src/lib/__tests__/auth.test.ts) return 0 ;;
     src/lib/supabase.ts) return 0 ;;
     src/features/auth/SupabaseAuthProvider.tsx) return 0 ;;
     src/features/auth/pages/LoginPage.tsx) return 0 ;;
