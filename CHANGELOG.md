@@ -219,12 +219,17 @@ Decisão reiterada:
 - validação deve ocorrer em preview/staging ou ambiente controlado;
 - nenhum valor sensível deve ser registrado no repo.
 
-Commit:
+Commits:
 
 - `40b46696a00ee1ceebdc17e4793beda672c48fe2`
+- `9f99fc9e72eb6939fa05f67f68beebfd0a6112cd`
+
+Validação confirmada:
+
+- Vercel retornou `success` para `9f99fc9e72eb6939fa05f67f68beebfd0a6112cd`.
+- GitHub Actions confirmou workflows `Supabase Foundation #57` e `#58`, branch `main`, ambos com status de sucesso.
 
 Próxima fase:
 
-- confirmar Vercel/GitHub Actions para o checklist;
 - executar checklist em ambiente controlado;
 - depois decidir se avançamos para leitura mínima das confirmações Supabase no detalhe do treino.
