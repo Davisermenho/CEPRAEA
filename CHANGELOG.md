@@ -159,7 +159,23 @@ Validação confirmada:
 - Vercel retornou `success` para `c8cf97d77fa96faa0b5e9e575886b32fb5bd7b58`.
 - GitHub Actions confirmou workflow `Supabase Foundation #48`, branch `main`, commit `c8cf97d`, status `Sucesso`, job `foundation` concluído.
 
+### Validação de acesso owner/coach para Presence Tokens
+
+Implementada a validação de acesso antes de qualquer ativação operacional de lotes.
+
+Alterações:
+
+- criado `src/features/presence-tokens/presenceTokenAccess.ts`;
+- adicionada verificação de configuração Supabase, sessão, `team_id` e papel `owner` ou `coach` por RPC;
+- atualizada a tela `/configuracoes/supabase` para permitir validação manual de acesso;
+- a geração/exportação/revogação de lotes permanece bloqueada.
+
+Commits:
+
+- `07b6e3663be4ecd5497e5a0c572739be9778db99`
+- `30f9643a44005c4643c5b85b7d3806ffc87f764a`
+
 Próxima fase:
 
-- validar papel `owner` ou `coach` do usuário Supabase contra `VITE_SUPABASE_TEAM_ID`;
-- só depois conectar geração, exportação e revogação de lotes no painel.
+- confirmar Vercel/GitHub Actions para o commit final desta fase;
+- depois conectar geração, exportação e revogação de lotes no painel, ainda atrás de validação de acesso e feature flag.
