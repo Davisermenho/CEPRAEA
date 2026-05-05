@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronLeft, CheckCircle2, MessageCircle, Copy, Send,
-  UserCheck, RefreshCw, Wifi, WifiOff,
+  UserCheck, RefreshCw, Wifi, WifiOff, Shield, Link2, Ban,
 } from 'lucide-react'
 import { useTrainingStore } from '@/stores/trainingStore'
 import { useAthleteStore } from '@/stores/athleteStore'
@@ -21,6 +21,16 @@ import {
   copiarTexto,
 } from '@/lib/whatsapp'
 import { pullConfirmations, pushConfirmation, loadSyncConfig } from '@/lib/sync'
+import { isSupabasePresenceTokensEnabled } from '@/features/presence-tokens/presenceTokenFeatureFlag'
+import { assertSupabaseTeamId } from '@/features/presence-tokens/presenceTokenConfig'
+import { validatePresenceTokenCoachAccess } from '@/features/presence-tokens/presenceTokenAccess'
+import {
+  buildPresenceTokenUrl,
+  createPresenceTokenBatch,
+  markPresenceTokenBatchExported,
+  revokePresenceTokenBatch,
+} from '@/features/presence-tokens/presenceTokenApi'
+import type { PresenceTokenBatchLink } from '@/features/presence-tokens/presenceTokenTypes'
 import type { AppSettings, AttendanceStatus } from '@/types'
 import { cn } from '@/lib/utils'
 
@@ -46,6 +56,11 @@ export default function TrainingDetailPage() {
   const [syncing, setSyncing] = useState(false)
   const [syncStatus, setSyncStatus] = useState<'idle' | 'ok' | 'error'>('idle')
   const [lastSyncAt, setLastSyncAt] = useState<string | null>(null)
+  const [presenceBatchLoading, setPresenceBatchLoading] = useState(false)
+  const [presenceBatchLinks, setPresenceBatchLinks] = useState<PresenceTokenBatchLink[]>([])
+  const [presenceBatchId, setPresenceBatchId] = useState<string | null>(null)
+  const [presenceBatchModal, setPresenceBatchModal] = useState(false)
+  const [presenceBatchStatus, setPresenceBatchStatus] = useState<{ ok: boolean; msg: string } | null>(null)
 
   useEffect(() => {
     if (id) loadForTraining(id)
@@ -66,14 +81,110 @@ export default function TrainingDetailPage() {
   }
 
   const activeAthletes = athletes.filter((a) => a.status === 'ativo')
+  const athleteById = new Map(activeAthletes.map((a) => [a.id, a]))
   const trainingRecords = records.filter((r) => r.treinoId === training.id)
   const summary = getTrainingSummary(training.id, activeAthletes.length)
   const trainingLocal = training.local || settings.localPadrao
   const syncConfigured = !!(settings.syncEndpointUrl && settings.syncSecret)
+  const supabasePresenceTokensEnabled = isSupabasePresenceTokensEnabled()
 
   const getStatus = (atletaId: string): AttendanceStatus => {
     const r = trainingRecords.find((r) => r.atletaId === atletaId)
     return r?.status ?? 'pendente'
+  }
+
+  const buildBatchText = (links: PresenceTokenBatchLink[]) => {
+    const appUrl = settings.appUrl ?? window.location.origin
+    const data = formatDateLong(training.data)
+    const header = `✅ Confirmação de presença — ${settings.nomeEquipe ?? 'CEPRAEA'}\nTreino: ${data} — ${training.horaInicio} às ${training.horaFim}\n`
+    const rows = links.map((link) => {
+      const athlete = athleteById.get(link.athleteId)
+      const name = athlete?.nome ?? link.athleteId
+      return `• ${name}: ${buildPresenceTokenUrl(appUrl, link.token)}`
+    })
+    return `${header}\n${rows.join('\n')}`
+  }
+
+  const handleGeneratePresenceTokenBatch = async () => {
+    if (!supabasePresenceTokensEnabled) return
+
+    setPresenceBatchLoading(true)
+    setPresenceBatchStatus(null)
+
+    try {
+      const access = await validatePresenceTokenCoachAccess()
+      if (!access.authorized) {
+        setPresenceBatchStatus({ ok: false, msg: access.message })
+        return
+      }
+
+      const teamId = assertSupabaseTeamId()
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      const links = await createPresenceTokenBatch({
+        teamId,
+        trainingId: training.id,
+        expiresAt,
+      })
+
+      setPresenceBatchLinks(links)
+      setPresenceBatchId(links[0]?.batchId ?? null)
+      setPresenceBatchModal(true)
+      setPresenceBatchStatus({ ok: true, msg: `${links.length} link(s) gerado(s).` })
+    } catch (error) {
+      setPresenceBatchStatus({
+        ok: false,
+        msg: error instanceof Error ? error.message : 'Falha ao gerar lote de presença.',
+      })
+    } finally {
+      setPresenceBatchLoading(false)
+    }
+  }
+
+  const handleCopyPresenceTokenBatch = async () => {
+    if (presenceBatchLinks.length === 0) return
+
+    const ok = await copiarTexto(buildBatchText(presenceBatchLinks))
+    if (ok && presenceBatchId) {
+      try {
+        await markPresenceTokenBatchExported(presenceBatchId)
+        setPresenceBatchStatus({ ok: true, msg: 'Links copiados e lote marcado como exportado.' })
+      } catch (error) {
+        setPresenceBatchStatus({
+          ok: false,
+          msg: error instanceof Error ? error.message : 'Links copiados, mas falha ao marcar lote como exportado.',
+        })
+      }
+    } else {
+      setPresenceBatchStatus({ ok, msg: ok ? 'Links copiados.' : 'Não foi possível copiar os links.' })
+    }
+  }
+
+  const handleRevokePresenceTokenBatch = async () => {
+    if (!presenceBatchId) return
+
+    setPresenceBatchLoading(true)
+    setPresenceBatchStatus(null)
+
+    try {
+      const access = await validatePresenceTokenCoachAccess()
+      if (!access.authorized) {
+        setPresenceBatchStatus({ ok: false, msg: access.message })
+        return
+      }
+
+      await revokePresenceTokenBatch(presenceBatchId)
+      setPresenceBatchLinks([])
+      setPresenceBatchId(null)
+      setPresenceBatchModal(false)
+      setPresenceBatchStatus({ ok: true, msg: 'Lote revogado.' })
+    } catch (error) {
+      setPresenceBatchStatus({
+        ok: false,
+        msg: error instanceof Error ? error.message : 'Falha ao revogar lote.',
+      })
+    } finally {
+      setPresenceBatchLoading(false)
+    }
   }
 
   const handleStatusToggle = async (atletaId: string, current: AttendanceStatus) => {
@@ -317,6 +428,40 @@ export default function TrainingDetailPage() {
           ))}
         </div>
 
+        {supabasePresenceTokensEnabled && (
+          <div className="mx-4 mb-4 rounded-2xl border border-cep-purple-700 bg-cep-purple-850 p-4 space-y-3">
+            <div>
+              <h2 className="text-xs font-bold text-cep-muted uppercase tracking-wide">Tokens Supabase</h2>
+              <p className="text-xs text-cep-muted/70 mt-1">
+                Geração de lote protegida por feature flag e validação owner/coach.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="secondary" onClick={handleGeneratePresenceTokenBatch} loading={presenceBatchLoading}>
+                <Link2 className="h-4 w-4" />
+                Gerar lote de links
+              </Button>
+              {presenceBatchLinks.length > 0 && (
+                <Button size="sm" variant="ghost" onClick={() => setPresenceBatchModal(true)}>
+                  <Copy className="h-4 w-4" />
+                  Ver lote atual
+                </Button>
+              )}
+              {presenceBatchId && (
+                <Button size="sm" variant="danger" onClick={handleRevokePresenceTokenBatch} loading={presenceBatchLoading}>
+                  <Ban className="h-4 w-4" />
+                  Revogar lote
+                </Button>
+              )}
+            </div>
+            {presenceBatchStatus && (
+              <p className={`text-xs ${presenceBatchStatus.ok ? 'text-cep-lime-400' : 'text-red-400'}`}>
+                {presenceBatchStatus.msg}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Athlete attendance list */}
         <div className="px-4 pb-6">
           <h2 className="text-xs font-bold text-cep-muted uppercase tracking-wide mb-2">
@@ -398,6 +543,33 @@ export default function TrainingDetailPage() {
               >
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Supabase presence token batch modal */}
+      {presenceBatchModal && (
+        <Modal open={true} onClose={() => setPresenceBatchModal(false)} title="Lote de links Supabase">
+          <div className="p-4 space-y-4">
+            <textarea
+              readOnly
+              value={buildBatchText(presenceBatchLinks)}
+              rows={10}
+              className="w-full rounded-xl bg-cep-purple-950 border border-cep-purple-700 px-3 py-2 text-sm font-mono text-cep-white resize-none focus:outline-none"
+            />
+            {presenceBatchStatus && (
+              <p className={`text-xs ${presenceBatchStatus.ok ? 'text-cep-lime-400' : 'text-red-400'}`}>{presenceBatchStatus.msg}</p>
+            )}
+            <div className="flex gap-2">
+              <Button variant="secondary" fullWidth onClick={handleCopyPresenceTokenBatch}>
+                <Copy className="h-4 w-4" />
+                Copiar e marcar exportado
+              </Button>
+              <Button variant="danger" fullWidth onClick={handleRevokePresenceTokenBatch} loading={presenceBatchLoading} disabled={!presenceBatchId}>
+                <Ban className="h-4 w-4" />
+                Revogar
               </Button>
             </div>
           </div>
