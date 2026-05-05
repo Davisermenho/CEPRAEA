@@ -37,6 +37,8 @@ is_allowed() {
     src/features/auth/SupabaseAuthProvider.tsx) return 0 ;;
     src/features/auth/pages/LoginPage.tsx) return 0 ;;
     src/shared/layouts/AuthGuard.tsx) return 0 ;;
+    src/shared/layouts/AtletaGuard.tsx) return 0 ;;
+    src/features/settings/pages/SettingsPage.tsx) return 0 ;;
     src/features/settings/pages/SupabaseSettingsPage.tsx) return 0 ;;
     src/features/confirm/pages/PublicConfirmPage.tsx) return 0 ;;
     src/features/trainings/pages/TrainingDetailPage.tsx) return 0 ;;
