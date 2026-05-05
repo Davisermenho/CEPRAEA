@@ -12,6 +12,43 @@ Não registrar valores sensíveis de ambiente.
 
 ---
 
+## 2026-05-05
+
+### Login do treinador migrado para Supabase Auth
+
+PR #5 foi validado e mergeado em `main`.
+
+Decisão: iniciar a migração completa removendo o ponto de entrada legado por PIN antes do lançamento do sistema, já que não há usuários ou dados reais dependentes do modelo anterior.
+
+Alterações promovidas:
+
+- `/login` passa a pedir email e senha;
+- submit usa `signInWithPassword` via `SupabaseAuthProvider`;
+- `AuthGuard` passa a proteger rotas do treinador usando sessão Supabase;
+- tela de login deixa de ler `pinHash` do IndexedDB;
+- tela de login deixa de criar sessão local legada;
+- allowlist do workflow foi expandida para cobrir o escopo de migração de autenticação.
+
+Merge commit:
+
+- `972fee6efc0538cb2aa74a4e44ac9891d9764e99`
+
+Validação:
+
+- workflow `Supabase Foundation #69` concluído com sucesso na branch `migration/supabase-auth-cleanup`;
+- PR #5 ficou mergeável após ajuste de escopo;
+- merge realizado por squash para `main`.
+
+Próxima fase aprovada:
+
+- remover seed automático de PIN/sync;
+- remover autenticação local do treinador quando não houver mais referência;
+- remover integração App Script/Google Sheets e sincronização legada;
+- reduzir IndexedDB ao que ainda for necessário, ou substituí-lo por Supabase;
+- limpar testes e documentação presos ao fluxo de PIN.
+
+---
+
 ## 2026-05-04
 
 ### Fundação Supabase promovida para `main`
