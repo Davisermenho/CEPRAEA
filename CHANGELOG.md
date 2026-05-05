@@ -264,9 +264,15 @@ Decisão:
 - manter produção em `legacy`;
 - executar itens pendentes em preview/staging ou ambiente controlado com sessão Supabase válida.
 
-Commit:
+Commits:
 
 - `71f9c32e87f28e70a17c0c14e01c532cecf1dfbe`
+- `ae2479407d097938f76ae4dced53340144d560a0`
+
+Validação confirmada:
+
+- Vercel retornou `success` para `ae2479407d097938f76ae4dced53340144d560a0`.
+- GitHub Actions confirmou workflows `Supabase Foundation #60` e `#61`, branch `main`, ambos com status de sucesso.
 
 Próxima fase:
 
