@@ -47,6 +47,39 @@ Próxima fase aprovada:
 - reduzir IndexedDB ao que ainda for necessário, ou substituí-lo por Supabase;
 - limpar testes e documentação presos ao fluxo de PIN.
 
+### Seed legado de PIN e sincronização removido
+
+PR #6 foi validado e mergeado em `main`.
+
+Decisão: remover o bootstrap que semeava automaticamente PIN e configurações de sincronização no IndexedDB, preservando temporariamente o pull automático de sincronização já configurado para ser removido em corte próprio.
+
+Alterações promovidas:
+
+- removida a chamada a `seedDefaults()` em `src/main.tsx`;
+- removido `src/lib/seed.ts`;
+- eliminado o seed automático de `pinHash`;
+- eliminado o seed automático de `syncEndpointUrl` e `syncSecret` via env vars;
+- preservado `loadSyncConfig().then(...syncFromRemote...)` no startup para não misturar remoção de seed com remoção da sincronização operacional;
+- allowlist do workflow foi expandida para permitir este corte de limpeza controlada.
+
+Merge commit:
+
+- `b0bec31dc96f56b7ae80feae3f996084eee77ad0`
+
+Validação:
+
+- workflow `Supabase Foundation #73` concluído com sucesso na branch `cleanup/remove-legacy-seed`;
+- Vercel Preview concluído com sucesso;
+- conversa de review automatizado foi atendida restaurando o pull de startup antes do merge;
+- PR #6 mergeado em `main`.
+
+Próxima fase aprovada:
+
+- mapear referências restantes a `src/lib/auth.ts` e sessão local;
+- remover autenticação local do treinador se não houver uso ativo;
+- mapear App Script/Google Sheets/sync para corte próprio;
+- substituir stores IndexedDB por fontes Supabase por domínio, evitando remoções amplas no mesmo PR.
+
 ---
 
 ## 2026-05-04
