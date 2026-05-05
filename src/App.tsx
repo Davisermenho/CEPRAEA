@@ -5,8 +5,7 @@ import { AuthGuard } from '@/shared/layouts/AuthGuard'
 import { AtletaGuard } from '@/shared/layouts/AtletaGuard'
 import { AtletaLayout } from '@/shared/layouts/AtletaLayout'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
-import { SupabaseAuthProvider } from '@/features/auth/SupabaseAuthProvider'
-import { isAuthenticated } from '@/lib/auth'
+import { SupabaseAuthProvider, useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
 import { isAtletaAuthenticated } from '@/lib/athleteAuth'
 
 const LoginPage              = lazy(() => import('@/features/auth/pages/LoginPage'))
@@ -34,9 +33,9 @@ function Loading() {
   return <LoadingSpinner />
 }
 
-/** Tela inicial: redireciona logados, mostra welcome para anônimos. */
 function WelcomeOrRedirect() {
-  if (isAuthenticated()) return <Navigate to="/" replace />
+  const { authenticated } = useSupabaseAuth()
+  if (authenticated) return <Navigate to="/" replace />
   if (isAtletaAuthenticated()) return <Navigate to="/atleta/treinos" replace />
   return <WelcomePage />
 }
@@ -47,14 +46,12 @@ export default function App() {
       <BrowserRouter>
         <Suspense fallback={<Loading />}>
           <Routes>
-            {/* Públicas */}
             <Route path="/welcome" element={<WelcomeOrRedirect />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/atleta/login" element={<AtletaLoginPage />} />
             <Route path="/confirmar/:treinoId/:atletaId" element={<PublicConfirmPage />} />
             <Route path="/confirmar-presenca" element={<PublicConfirmPage />} />
 
-            {/* Atleta (protegidas) */}
             <Route element={<AtletaGuard />}>
               <Route element={<AtletaLayout />}>
                 <Route path="/atleta/treinos" element={<AtletaTreinosPage />} />
@@ -63,7 +60,6 @@ export default function App() {
               </Route>
             </Route>
 
-            {/* Treinador (protegidas) */}
             <Route element={<AuthGuard />}>
               <Route element={<AppLayout />}>
                 <Route index element={<DashboardPage />} />
