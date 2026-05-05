@@ -195,12 +195,17 @@ Alterações:
 - a operação legada de WhatsApp/Apps Script continua preservada;
 - `attendanceStore` não foi migrado.
 
-Commit:
+Commits:
 
 - `e760667d2f76c13e855d3317dfa81d504b9b224e`
+- `b161f3bbdc93e10e9d05a0b502e9a4b75e34d231`
+
+Validação confirmada:
+
+- Vercel retornou `success` para `b161f3bbdc93e10e9d05a0b502e9a4b75e34d231`.
+- GitHub Actions confirmou workflows `Supabase Foundation #54` e `#55`, branch `main`, commits `e760667` e `b161f3b`, ambos com status de sucesso.
 
 Próxima fase:
 
-- confirmar Vercel/GitHub Actions para `e760667` e para este changelog;
 - validar manualmente a geração de lote em ambiente com Supabase configurado;
 - manter produção em `legacy` até validação explícita.
