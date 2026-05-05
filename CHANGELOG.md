@@ -181,6 +181,26 @@ Validação confirmada:
 - Vercel retornou `success` para `aa8a2dba8850ebccaf7a373c4b8e7b024716f3d3`.
 - GitHub Actions confirmou workflows `Supabase Foundation #50`, `#51` e `#52`, branch `main`, commits `07b6e36`, `30f9643` e `aa8a2db`, todos com status de sucesso.
 
+### Lotes de Presence Tokens no painel de treino
+
+Conectada a operação de lotes Supabase no painel de detalhe do treino, ainda atrás de feature flag e validação de acesso.
+
+Alterações:
+
+- adicionada seção `Tokens Supabase` em `TrainingDetailPage`;
+- geração de lote chama `createPresenceTokenBatch` somente quando `VITE_PRESENCE_TOKENS_BACKEND=supabase`;
+- antes de gerar ou revogar, o painel valida acesso owner/coach;
+- copiar o lote chama `markPresenceTokenBatchExported`;
+- revogação chama `revokePresenceTokenBatch`;
+- a operação legada de WhatsApp/Apps Script continua preservada;
+- `attendanceStore` não foi migrado.
+
+Commit:
+
+- `e760667d2f76c13e855d3317dfa81d504b9b224e`
+
 Próxima fase:
 
-- conectar geração, exportação e revogação de lotes no painel, ainda atrás de validação de acesso e feature flag.
+- confirmar Vercel/GitHub Actions para `e760667` e para este changelog;
+- validar manualmente a geração de lote em ambiente com Supabase configurado;
+- manter produção em `legacy` até validação explícita.
