@@ -205,7 +205,26 @@ Validação confirmada:
 - Vercel retornou `success` para `b161f3bbdc93e10e9d05a0b502e9a4b75e34d231`.
 - GitHub Actions confirmou workflows `Supabase Foundation #54` e `#55`, branch `main`, commits `e760667` e `b161f3b`, ambos com status de sucesso.
 
+### Checklist de validação manual dos lotes Supabase
+
+Criado checklist operacional para validar geração, exportação, confirmação pública e revogação de lotes em ambiente controlado com Supabase configurado.
+
+Documento:
+
+- `docs/presence-token-batch-validation.md`
+
+Decisão reiterada:
+
+- produção permanece em `legacy` até aprovação explícita;
+- validação deve ocorrer em preview/staging ou ambiente controlado;
+- nenhum valor sensível deve ser registrado no repo.
+
+Commit:
+
+- `40b46696a00ee1ceebdc17e4793beda672c48fe2`
+
 Próxima fase:
 
-- validar manualmente a geração de lote em ambiente com Supabase configurado;
-- manter produção em `legacy` até validação explícita.
+- confirmar Vercel/GitHub Actions para o checklist;
+- executar checklist em ambiente controlado;
+- depois decidir se avançamos para leitura mínima das confirmações Supabase no detalhe do treino.
