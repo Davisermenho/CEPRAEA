@@ -174,8 +174,13 @@ Commits:
 
 - `07b6e3663be4ecd5497e5a0c572739be9778db99`
 - `30f9643a44005c4643c5b85b7d3806ffc87f764a`
+- `aa8a2dba8850ebccaf7a373c4b8e7b024716f3d3`
+
+Validação confirmada:
+
+- Vercel retornou `success` para `aa8a2dba8850ebccaf7a373c4b8e7b024716f3d3`.
+- GitHub Actions confirmou workflows `Supabase Foundation #50`, `#51` e `#52`, branch `main`, commits `07b6e36`, `30f9643` e `aa8a2db`, todos com status de sucesso.
 
 Próxima fase:
 
-- confirmar Vercel/GitHub Actions para o commit final desta fase;
-- depois conectar geração, exportação e revogação de lotes no painel, ainda atrás de validação de acesso e feature flag.
+- conectar geração, exportação e revogação de lotes no painel, ainda atrás de validação de acesso e feature flag.
