@@ -152,9 +152,14 @@ Commits:
 - `4ba92e2afc9f75d02aed303bdcaa8b8b0dbb90d7`
 - `e9d49430906ac9358874015522fc1b2d6de19031`
 - `d8a427ab3ad2e44a57df873c8c54a8dff4dbbb7b`
+- `c8cf97d77fa96faa0b5e9e575886b32fb5bd7b58`
+
+Validação confirmada:
+
+- Vercel retornou `success` para `c8cf97d77fa96faa0b5e9e575886b32fb5bd7b58`.
+- GitHub Actions confirmou workflow `Supabase Foundation #48`, branch `main`, commit `c8cf97d`, status `Sucesso`, job `foundation` concluído.
 
 Próxima fase:
 
-- confirmar Vercel/GitHub Actions para o commit final desta fase;
 - validar papel `owner` ou `coach` do usuário Supabase contra `VITE_SUPABASE_TEAM_ID`;
 - só depois conectar geração, exportação e revogação de lotes no painel.
