@@ -274,6 +274,64 @@ Validação confirmada:
 - Vercel retornou `success` para `ae2479407d097938f76ae4dced53340144d560a0`.
 - GitHub Actions confirmou workflows `Supabase Foundation #60` e `#61`, branch `main`, ambos com status de sucesso.
 
+### Caminho automatizado seguro para validação remota de lotes
+
+Configurado caminho automatizado para executar os testes pendentes sem registrar valores sensíveis no repositório.
+
+Arquivos criados/alterados:
+
+- `scripts/validate-presence-token-batch.mjs`;
+- `package.json` com script `test:presence-token-batch:remote`;
+- `.github/workflows/presence-token-batch-remote-validation.yml`;
+- `docs/presence-token-batch-automated-validation.md`.
+
+Workflow manual criado:
+
+```text
+Presence Token Batch Remote Validation
+```
+
+Secrets necessários no GitHub Actions:
+
+```text
+SUPABASE_TEST_URL
+SUPABASE_TEST_ANON_KEY
+SUPABASE_TEST_TEAM_ID
+SUPABASE_TEST_EMAIL
+SUPABASE_TEST_PASSWORD
+```
+
+O script valida:
+
+- sessão de usuário de teste;
+- papel `owner/coach`;
+- criação de atleta de teste;
+- criação de treino de teste;
+- geração de lote;
+- marcação como exportado;
+- confirmação pública por token com cliente anônimo;
+- persistência da presença;
+- revogação do lote;
+- rejeição de token revogado;
+- rejeição de token inválido;
+- cleanup por revogação e soft-delete.
+
+Decisão de segurança:
+
+- token puro não é impresso;
+- valores de ambiente não são impressos;
+- produção permanece em `legacy`;
+- execução é manual via `workflow_dispatch`.
+
+Commits:
+
+- `82b922985cf7cb86e2aeaef014158208ad7f1420`
+- `3b45858c1e637165ca259bef50a45ae5534a11b1`
+- `a69bfd078ccc584198fcd4f89ee3e47aead74e97`
+- `71bf2898684ccb2db7525fa7848c9ecd349f0b46`
+
 Próxima fase:
 
-- obter evidência dos testes manuais pendentes ou configurar um caminho automatizado seguro para executar esses testes sem registrar valores sensíveis.
+- configurar os secrets no GitHub Actions;
+- executar manualmente o workflow `Presence Token Batch Remote Validation`;
+- registrar o resultado e decidir se a fase Supabase pode avançar para leitura mínima no painel.
