@@ -1,14 +1,27 @@
-import { ChevronLeft, Shield, Wifi, WifiOff } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronLeft, Shield, Wifi, WifiOff, RefreshCw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '@/shared/components/Button'
 import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
 import { getSupabaseTeamId, isSupabaseTeamConfigured } from '@/features/presence-tokens/presenceTokenConfig'
+import { validatePresenceTokenCoachAccess } from '@/features/presence-tokens/presenceTokenAccess'
+import type { PresenceTokenAccessResult } from '@/features/presence-tokens/presenceTokenAccess'
 
 export default function SupabaseSettingsPage() {
   const navigate = useNavigate()
   const { configured, authenticated, user, loading } = useSupabaseAuth()
   const teamId = getSupabaseTeamId()
   const teamConfigured = isSupabaseTeamConfigured()
-  const readyForNextPhase = configured && authenticated && teamConfigured
+  const [checkingAccess, setCheckingAccess] = useState(false)
+  const [accessResult, setAccessResult] = useState<PresenceTokenAccessResult | null>(null)
+  const readyForNextPhase = configured && authenticated && teamConfigured && accessResult?.authorized === true
+
+  const handleValidateAccess = async () => {
+    setCheckingAccess(true)
+    const result = await validatePresenceTokenCoachAccess()
+    setAccessResult(result)
+    setCheckingAccess(false)
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -47,10 +60,21 @@ export default function SupabaseSettingsPage() {
             </div>
           </div>
 
+          <Button type="button" variant="secondary" fullWidth onClick={handleValidateAccess} loading={checkingAccess} disabled={!configured || !authenticated || !teamConfigured}>
+            <RefreshCw className="h-4 w-4" />
+            Validar acesso owner/coach
+          </Button>
+
+          {accessResult && (
+            <div className={`rounded-xl border px-3 py-2 text-xs ${accessResult.authorized ? 'border-cep-lime-400/40 bg-cep-lime-400/10 text-cep-lime-400' : 'border-red-400/40 bg-red-400/10 text-red-400'}`}>
+              {accessResult.message}
+            </div>
+          )}
+
           <div className={`rounded-xl border px-3 py-2 text-xs ${readyForNextPhase ? 'border-cep-lime-400/40 bg-cep-lime-400/10 text-cep-lime-400' : 'border-cep-gold-400/40 bg-cep-gold-400/10 text-cep-gold-400'}`}>
             {readyForNextPhase
-              ? 'Base pronta para validar geração de lotes em uma próxima fase.'
-              : 'Ainda não liberar geração de lotes. É necessário Supabase configurado, sessão autenticada e Team ID válido.'}
+              ? 'Base autorizada para validar geração de lotes em uma próxima fase.'
+              : 'Ainda não liberar geração de lotes. É necessário Supabase configurado, sessão autenticada, Team ID válido e papel owner/coach confirmado.'}
           </div>
         </section>
 
