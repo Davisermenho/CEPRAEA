@@ -28,7 +28,9 @@ is_allowed() {
     .github/workflows/presence-token-batch-remote-validation.yml) return 0 ;;
     scripts/check-supabase-foundation-scope.sh) return 0 ;;
     scripts/validate-presence-token-batch.mjs) return 0 ;;
+    src/main.tsx) return 0 ;;
     src/App.tsx) return 0 ;;
+    src/lib/seed.ts) return 0 ;;
     src/lib/supabase.ts) return 0 ;;
     src/features/auth/SupabaseAuthProvider.tsx) return 0 ;;
     src/features/auth/pages/LoginPage.tsx) return 0 ;;
