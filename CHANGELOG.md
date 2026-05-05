@@ -229,7 +229,45 @@ Validação confirmada:
 - Vercel retornou `success` para `9f99fc9e72eb6939fa05f67f68beebfd0a6112cd`.
 - GitHub Actions confirmou workflows `Supabase Foundation #57` e `#58`, branch `main`, ambos com status de sucesso.
 
+### Execução inicial do checklist em ambiente controlado
+
+Criado relatório formal de execução inicial do checklist.
+
+Documento:
+
+- `docs/presence-token-batch-validation-run-2026-05-04.md`
+
+Resultado:
+
+- parcialmente aprovado.
+
+Aprovado por evidência de repo/CI/código:
+
+- Vercel verde;
+- GitHub Actions previamente verde;
+- gate por feature flag presente;
+- validação de acesso antes de gerar lote;
+- validação de acesso antes de revogar lote;
+- preservação do fluxo legado.
+
+Pendente por exigir interação real no app/Supabase:
+
+- geração real de lote;
+- cópia/exportação real;
+- confirmação pública real;
+- revogação real;
+- testes negativos com sessão, papel, team_id e token.
+
+Decisão:
+
+- não ativar Supabase em produção;
+- manter produção em `legacy`;
+- executar itens pendentes em preview/staging ou ambiente controlado com sessão Supabase válida.
+
+Commit:
+
+- `71f9c32e87f28e70a17c0c14e01c532cecf1dfbe`
+
 Próxima fase:
 
-- executar checklist em ambiente controlado;
-- depois decidir se avançamos para leitura mínima das confirmações Supabase no detalhe do treino.
+- obter evidência dos testes manuais pendentes ou configurar um caminho automatizado seguro para executar esses testes sem registrar valores sensíveis.
