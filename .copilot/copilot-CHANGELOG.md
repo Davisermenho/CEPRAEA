@@ -485,3 +485,62 @@ Commit: `c7674d8`
 - Revisar e mergear PR #9;
 - Remover `athleteAuth.ts` e testes legados após migração completa das páginas dependentes;
 - Mergear `fix/security-vulnerabilities` → `main` (CEPR-0027/0028).
+
+---
+
+## CEPR-0030 — Migração MVP Supabase-first (T02→T05) — 2025-07-14
+
+**Branch:** `migration/athlete-auth-foundation`  
+**PR:** #9  
+**Commits:** `f221097` (T02), `b9f69b2` (T03), `cfd3ad7` (T04), `9ff7efa` (T05)
+
+### T02 — Contrato SQL de escrita de presença
+
+**Migration `0007_attendance_write_rpcs.sql`:**
+- ALTER TABLE `audit_logs`: adiciona `'athlete'` ao CHECK de `actor_type`
+- RPC `get_current_athlete_id()` — SECURITY DEFINER, retorna `athletes.id` para `auth.uid()`
+- RPC `upsert_own_attendance(input_training_id, input_status, input_justification)` — validação de time, upsert em `attendance_records`, audit_log com `actor_type='athlete'`
+- RPC `upsert_coach_attendance(input_team_id, input_training_id, input_athlete_id, input_status, input_justification, input_confirmed_by_athlete)` — validates `has_team_role('owner','coach')`, upsert + audit_log com `actor_type='coach'`
+- GRANT EXECUTE nas 3 RPCs para `authenticated`
+
+**Teste `supabase/tests/rpc_attendance_write.test.sql`:**
+- 7 testes SQL: get_current_athlete_id, upsert_own, idempotência, RLS cross-athlete, upsert_coach, cross-team rejeitado, audit_log entry
+
+### T03 — athleteStore migrado para Supabase-first
+
+**`src/features/athletes/athleteApi.ts`** (novo):
+- `fetchAthletes()`, `createAthlete()`, `updateAthlete()`, `deleteAthlete()` (soft), `toggleAthleteStatus()`
+- Usa `assertSupabaseTeamId()` e mapeia `AthleteRow` → `Athlete`
+
+**`src/stores/athleteStore.ts`** (reescrito):
+- Remove: `getDB`, `@/db`, `loadSyncConfig`, `pullAthletes`, `pushAthlete`, `deleteAthleteRemote`, `syncFromRemote`, `pushAllToRemote`
+- Interface preservada: `{ athletes, isLoading, error, loadAll, add, update, remove, toggleStatus, getById }`
+
+### T04 — trainingStore migrado para Supabase-first
+
+**`src/features/trainings/trainingApi.ts`** (novo):
+- `fetchTrainings()`, `createTraining()`, `updateTraining()`, `deleteTraining()` (soft), `generateRecurringViaRPC(schedules, weeksAhead)` — chama RPC `generate_trainings` por schedule
+
+**`src/stores/trainingStore.ts`** (reescrito):
+- Remove: `getDB`, `getSetting`, `loadSyncConfig`, `pullTrainings`, `pushTraining`, `deleteTrainingRemote`, `syncFromRemote`, `pushAllToRemote`, `generateRecurringDrafts`, `buildExistingKeys`
+- `generateRecurring` agora chama RPC SQL; interface pública preservada
+
+**`src/features/trainings/pages/TrainingsPage.tsx`:**
+- Remove referência a `synced` (obsoleta) no retorno de `generateRecurring`
+
+### T05 — attendanceStore + TrainingDetailPage migrados para Supabase-first
+
+**`src/stores/attendanceStore.ts`** (reescrito):
+- Remove: `getDB`, `pullConfirmations`, `SyncConfig`, `syncFromRemote`
+- `loadAll()`: lê `attendance_records` via Supabase join com `trainings`
+- `loadForTraining(id)`: lê registros por `training_id`
+- `upsert()`: chama RPC `upsert_coach_attendance`; status `'pendente'` remove da store local sem persistência
+- Mantém: `getForTraining`, `getForAthlete`, `getTrainingSummary`, `getFrequencyReports`, `getAthleteFrequency`
+
+**`src/features/trainings/pages/TrainingDetailPage.tsx`:**
+- Remove imports: `pullConfirmations`, `pushConfirmation`, `loadSyncConfig`, `getSetting`, `AppSettings`, `formatTime`, `RefreshCw`, `WifiOff`
+- Remove: estado `settings`, `syncing`, `syncStatus`, `lastSyncAt`
+- Remove: `handleSync`, bloco "Sync bar" da UI, blocos de push remoto nos handlers
+- Valores de settings substituídos por padrões: `settings.appUrl` → `window.location.origin`, `settings.nomeEquipe` → `'CEPRAEA'`, `settings.telefoneTecnico` → `undefined`, `settings.localPadrao` → removido
+
+**npm run typecheck → exit 0** em todos os tasks.

@@ -643,3 +643,41 @@ Eliminar as 4 vulnerabilidades `high` reportadas por `npm audit` sem breaking ch
 ---
 
 *Próxima entrada: CEPR-0024*
+
+---
+
+## CEPR-0030 — Sessão de Migração MVP T02→T05 — 2025-07-14
+
+**Agente:** GitHub Copilot (Claude Sonnet 4.6)  
+**Branch:** `migration/athlete-auth-foundation` → PR #9  
+**Duração:** ~2 sessões acumuladas (compactação entre T03 e T04)
+
+### Execução
+
+| Task | Commit | Status |
+|------|--------|--------|
+| T00 — Malha de validação MVP | `3abc632` | ✅ |
+| T01 — Correção de dependências | `af7631f` | ✅ |
+| T02 — RPCs SQL de presença | `f221097` | ✅ |
+| T03 — athleteStore Supabase-first | `b9f69b2` | ✅ |
+| T04 — trainingStore Supabase-first | `cfd3ad7` | ✅ |
+| T05 — attendanceStore + TrainingDetailPage | `9ff7efa` | ✅ |
+
+### Decisões Tomadas
+
+- **attendanceStore.upsert('pendente')**: status 'pendente' não persiste no Supabase (sem conceito de "limpar" via RPC); remove da store local apenas. Alinhado com o modelo onde pendente = ausência de registro.
+- **TrainingDetailPage settings**: ao remover IndexedDB, valores de configuração do coach (`localPadrao`, `nomeEquipe`, `appUrl`, `telefoneTecnico`) passaram a usar padrões em código. A SettingsPage (T08 ou T09) deverá migrar settings para Supabase para restaurar configurabilidade.
+- **trainingApi.generateRecurringViaRPC**: chama RPC `generate_trainings` uma vez por schedule (não em batch), acumulando `created_count`. Simples e correto para o MVP.
+- **WSL constraint**: todos os arquivos editados via `python3 - << 'PYEOF'` no terminal. Ferramentas `create_file`/`replace_string_in_file` falham em paths WSL.
+
+### Checklist Scope Lock
+
+- [x] npm run typecheck → exit 0 após cada task
+- [x] Commits atômicos por task
+- [x] Nenhum arquivo fora do escopo comprometido
+- [x] Push realizado: `35e3116..9ff7efa`
+- [x] CHANGELOG e EXECUTION_LOG atualizados
+
+**Status Final:** ✅ COMPLIANT
+
+*Próxima entrada: CEPR-0031 (T06→T10)*
