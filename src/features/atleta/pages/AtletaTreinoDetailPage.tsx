@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ChevronLeft, CheckCircle, XCircle, AlertCircle, Calendar, Clock, MapPin } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
@@ -6,39 +6,29 @@ import { Modal } from '@/shared/components/Modal'
 import { useTrainingStore } from '@/stores/trainingStore'
 import { useAthleteStore } from '@/stores/athleteStore'
 import { useAttendanceStore } from '@/stores/attendanceStore'
-import { getAtletaSession } from '@/lib/athleteAuth'
-import { loadAtletaSyncConfig, pushConfirmation } from '@/lib/sync'
+import { supabase } from '@/lib/supabase'
 import { formatDateLong, todayISO, cn } from '@/lib/utils'
 import type { AttendanceStatus } from '@/types'
+import { useCurrentAthlete } from '@/features/atleta/useCurrentAthlete'
 
 export default function AtletaTreinoDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const session = getAtletaSession()
+  const { athlete: me, loading: athleteLoading } = useCurrentAthlete()
   const training = useTrainingStore((s) => s.getById(id ?? ''))
   const athletes = useAthleteStore((s) => s.athletes)
   const records = useAttendanceStore((s) => s.records)
   const upsert = useAttendanceStore((s) => s.upsert)
-  const syncAttendances = useAttendanceStore((s) => s.syncFromRemote)
 
   const [saving, setSaving] = useState(false)
   const [showJustify, setShowJustify] = useState(false)
   const [justifyText, setJustifyText] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!session || !id) return
-    void (async () => {
-      const config = await loadAtletaSyncConfig(session.token)
-      if (!config) return
-      await syncAttendances(config, { treinoId: id })
-    })()
-  }, [id, session, syncAttendances])
-
   const trainingRecords = useMemo(
     () => records.filter((r) => r.treinoId === id),
     [records, id]
   )
-  const myRecord = trainingRecords.find((r) => r.atletaId === session?.atletaId)
+  const myRecord = trainingRecords.find((r) => r.atletaId === me?.id)
   const myStatus: AttendanceStatus = myRecord?.status ?? 'pendente'
 
   // Agrupa por status, com nome
@@ -61,7 +51,8 @@ export default function AtletaTreinoDetailPage() {
     return { presentes, ausentes, justificados, semResposta }
   }, [athletes, trainingRecords])
 
-  if (!session) return null
+  if (athleteLoading) return null
+  if (!me) return null
   if (!training) {
     return (
       <div className="px-4 py-8 text-center">
@@ -77,26 +68,32 @@ export default function AtletaTreinoDetailPage() {
   const canEdit = isFuture
 
   const respond = async (status: AttendanceStatus, justificativa?: string) => {
-    if (!session || !training) return
+    if (!training) return
     setSaving(true)
     setFeedback(null)
-    await upsert(training.id, session.atletaId, status, {
+    await upsert(training.id, me.id, status, {
       confirmadoPelaAtleta: true,
       justificativa,
     })
-    const config = await loadAtletaSyncConfig(session.token)
-    if (config) {
-      const ok = await pushConfirmation(config, {
-        treinoId: training.id,
-        atletaId: session.atletaId,
-        nomeAtleta: session.nome,
+
+    if (me.teamId) {
+      const { error } = await supabase.from('attendance_records').upsert({
+        team_id: me.teamId,
+        training_id: training.id,
+        athlete_id: me.id,
         status,
-        origem: 'link',
+        justification: justificativa ?? null,
+        confirmed_by_athlete: true,
+        registered_at: new Date().toISOString(),
+      }, {
+        onConflict: 'training_id,athlete_id',
       })
-      setFeedback(ok ? 'Sua resposta foi sincronizada!' : 'Resposta salva. Sincronizará quando online.')
+
+      setFeedback(error ? 'Resposta salva neste dispositivo.' : 'Sua resposta foi registrada.')
     } else {
-      setFeedback('Resposta salva localmente.')
+      setFeedback('Resposta salva neste dispositivo.')
     }
+
     setSaving(false)
     setShowJustify(false)
     setJustifyText('')

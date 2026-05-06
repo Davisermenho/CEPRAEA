@@ -27,7 +27,11 @@ is_allowed() {
     src/App.tsx) return 0 ;;
     src/features/athletes/components/AthleteForm.tsx) return 0 ;;
     src/features/athletes/athleteApi.ts) return 0 ;;
+    src/features/athletes/pages/AthletesPage.tsx) return 0 ;;
     src/features/atleta/pages/AtletaLoginPage.tsx) return 0 ;;
+    src/features/atleta/pages/AtletaTreinoDetailPage.tsx) return 0 ;;
+    src/features/atleta/pages/AtletaTreinosPage.tsx) return 0 ;;
+    src/features/atleta/useCurrentAthlete.ts) return 0 ;;
     src/features/atleta/pages/AtletaNovaSenhaPage.tsx) return 0 ;;
     src/lib/export.ts) return 0 ;;
     src/lib/supabase.ts) return 0 ;;

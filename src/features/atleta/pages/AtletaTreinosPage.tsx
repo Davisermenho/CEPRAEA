@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, CheckCircle, XCircle, AlertCircle, Clock, RefreshCw } from 'lucide-react'
+import { Calendar, CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react'
 import { useTrainingStore } from '@/stores/trainingStore'
 import { useAttendanceStore } from '@/stores/attendanceStore'
-import { useAthleteStore } from '@/stores/athleteStore'
-import { getAtletaSession } from '@/lib/athleteAuth'
-import { loadAtletaSyncConfig } from '@/lib/sync'
 import { formatDateCompact, parseLocalDate, todayISO } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import type { AttendanceStatus, Training } from '@/types'
+import { useCurrentAthlete } from '@/features/atleta/useCurrentAthlete'
 
 type Tab = 'proximos' | 'historico'
 
@@ -20,37 +18,13 @@ const STATUS_CONFIG: Record<AttendanceStatus, { label: string; color: string; ic
 }
 
 export default function AtletaTreinosPage() {
-  const session = getAtletaSession()
+  const { athlete: me, loading: athleteLoading } = useCurrentAthlete()
   const trainings = useTrainingStore((s) => s.trainings)
   const records = useAttendanceStore((s) => s.records)
-  const syncTrainings = useTrainingStore((s) => s.syncFromRemote)
-  const syncAttendances = useAttendanceStore((s) => s.syncFromRemote)
-  const syncAthletes = useAthleteStore((s) => s.syncFromRemote)
 
   const [tab, setTab] = useState<Tab>('proximos')
-  const [syncing, setSyncing] = useState(false)
-  const [lastSync, setLastSync] = useState<string | null>(null)
 
   const today = todayISO()
-
-  const handleSync = async () => {
-    if (!session) return
-    setSyncing(true)
-    const config = await loadAtletaSyncConfig(session.token)
-    if (!config) {
-      setSyncing(false)
-      return
-    }
-    await Promise.all([syncTrainings(config), syncAthletes(config), syncAttendances(config)])
-    setLastSync(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
-    setSyncing(false)
-  }
-
-  // Sincroniza ao montar
-  useEffect(() => {
-    void handleSync()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const proximos = useMemo(
     () => trainings.filter((t) => t.data >= today && t.status !== 'cancelado'),
@@ -63,23 +37,23 @@ export default function AtletaTreinosPage() {
 
   const list = tab === 'proximos' ? proximos : historico
 
-  if (!session) return null
+  if (athleteLoading) return null
+
+  if (!me) {
+    return (
+      <div className="px-4 py-8 text-center">
+        <p className="text-sm text-cep-muted">Seu perfil ainda não foi carregado neste dispositivo.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="px-4 py-5">
       <div className="flex items-start justify-between mb-4">
         <div>
           <p className="text-xs text-cep-muted uppercase tracking-wider">Olá,</p>
-          <h1 className="text-xl font-black text-cep-white">{session.nome.split(' ')[0]}</h1>
+          <h1 className="text-xl font-black text-cep-white">{me.nome.split(' ')[0]}</h1>
         </div>
-        <button
-          onClick={handleSync}
-          disabled={syncing}
-          className="flex items-center gap-1.5 rounded-full bg-cep-purple-850 border border-cep-purple-700 px-3 py-1.5 text-xs text-cep-muted hover:text-cep-white"
-        >
-          <RefreshCw className={cn('h-3.5 w-3.5', syncing && 'animate-spin')} />
-          {syncing ? 'Sincronizando' : lastSync ? `Sync ${lastSync}` : 'Sincronizar'}
-        </button>
       </div>
 
       {/* Tabs */}
@@ -115,7 +89,7 @@ export default function AtletaTreinosPage() {
 
       <div className="space-y-2.5">
         {list.map((t) => (
-          <TrainingCard key={t.id} training={t} atletaId={session.atletaId} records={records} />
+          <TrainingCard key={t.id} training={t} atletaId={me.id} records={records} />
         ))}
       </div>
     </div>
