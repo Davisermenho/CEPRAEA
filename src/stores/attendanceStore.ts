@@ -1,10 +1,41 @@
+// attendanceStore.ts — Supabase-first. Sem IndexedDB nem sync.ts.
+
 import { create } from 'zustand'
-import { getDB } from '@/db'
+import { supabase } from '@/lib/supabase'
+import { assertSupabaseTeamId } from '@/features/presence-tokens/presenceTokenConfig'
 import type { AttendanceRecord, AttendanceStatus, FrequencyReport, TrainingSummary } from '@/types'
 import { useAthleteStore } from './athleteStore'
 import { useTrainingStore } from './trainingStore'
-import { pullConfirmations, type SyncConfig } from '@/lib/sync'
 
+// ---------------------------------------------------------------------------
+// Tipos internos da tabela attendance_records no Supabase
+// ---------------------------------------------------------------------------
+type AttendanceRow = {
+  id: string
+  training_id: string
+  athlete_id: string
+  status: string
+  justification: string | null
+  confirmed_by_athlete: boolean
+  created_at: string
+  updated_at: string
+}
+
+function mapRow(row: AttendanceRow): AttendanceRecord {
+  return {
+    id: `${row.training_id}::${row.athlete_id}`,
+    treinoId: row.training_id,
+    atletaId: row.athlete_id,
+    status: row.status as AttendanceStatus,
+    justificativa: row.justification ?? undefined,
+    confirmadoPelaAtleta: row.confirmed_by_athlete,
+    registradoEm: row.updated_at || row.created_at,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Interface do store
+// ---------------------------------------------------------------------------
 interface AttendanceStore {
   records: AttendanceRecord[]
   isLoading: boolean
@@ -21,45 +52,86 @@ interface AttendanceStore {
   getTrainingSummary: (treinoId: string, totalAtivos: number) => TrainingSummary
   getFrequencyReports: (fromISO?: string, toISO?: string) => FrequencyReport[]
   getAthleteFrequency: (atletaId: string, fromISO?: string, toISO?: string) => FrequencyReport
-  syncFromRemote: (config: SyncConfig, opts?: { treinoId?: string; since?: string }) => Promise<{ ok: boolean; merged: number; error?: string }>
 }
 
+// ---------------------------------------------------------------------------
+// Implementação
+// ---------------------------------------------------------------------------
 export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
   records: [],
   isLoading: false,
 
   loadAll: async () => {
     set({ isLoading: true })
-    const db = await getDB()
-    const records = await db.getAll('attendance')
-    set({ records, isLoading: false })
+    try {
+      const teamId = assertSupabaseTeamId()
+      // attendance_records usa training_id → join com trainings para filtrar por team
+      const { data, error } = await supabase
+        .from('attendance_records')
+        .select('id, training_id, athlete_id, status, justification, confirmed_by_athlete, created_at, updated_at, trainings!inner(team_id)')
+        .eq('trainings.team_id', teamId)
+
+      if (error) throw new Error(error.message)
+      const rows = (data ?? []) as unknown as AttendanceRow[]
+      set({ records: rows.map((r) => mapRow(r)), isLoading: false })
+    } catch (err) {
+      set({ isLoading: false })
+      throw err
+    }
   },
 
   loadForTraining: async (treinoId) => {
-    const db = await getDB()
-    const records = await db.getAllFromIndex('attendance', 'by-treino', treinoId)
+    const teamId = assertSupabaseTeamId()
+    const { data, error } = await supabase
+      .from('attendance_records')
+      .select('id, training_id, athlete_id, status, justification, confirmed_by_athlete, created_at, updated_at')
+      .eq('training_id', treinoId)
+
+    if (error) throw new Error(error.message)
+    const rows = (data ?? []) as AttendanceRow[]
+    const loaded = rows.map((r) => mapRow(r))
+
     set((s) => {
       const existing = s.records.filter((r) => r.treinoId !== treinoId)
-      return { records: [...existing, ...records] }
+      return { records: [...existing, ...loaded] }
     })
   },
 
   upsert: async (treinoId, atletaId, status, opts = {}) => {
-    const id = `${treinoId}::${atletaId}`
-    const now = new Date().toISOString()
+    // Usa a RPC upsert_coach_attendance criada em T02.
+    // Confirma presença como coach; RLS garante que só coach pode chamar esta RPC.
+    const teamId = assertSupabaseTeamId()
+
+    if (status === 'pendente') {
+      // "pendente" remove o registro (soft-reset): delete ou update para null não existe no modelo.
+      // Por convenção, não persistimos "pendente" — apenas removemos da store local.
+      set((s) => ({
+        records: s.records.filter((r) => !(r.treinoId === treinoId && r.atletaId === atletaId)),
+      }))
+      return
+    }
+
+    const { error } = await supabase.rpc('upsert_coach_attendance', {
+      input_team_id: teamId,
+      input_training_id: treinoId,
+      input_athlete_id: atletaId,
+      input_status: status,
+      input_justification: opts.justificativa ?? null,
+      input_confirmed_by_athlete: opts.confirmadoPelaAtleta ?? false,
+    })
+    if (error) throw new Error(error.message)
+
     const record: AttendanceRecord = {
-      id,
+      id: `${treinoId}::${atletaId}`,
       treinoId,
       atletaId,
       status,
       justificativa: opts.justificativa,
       confirmadoPelaAtleta: opts.confirmadoPelaAtleta ?? false,
-      registradoEm: now,
+      registradoEm: new Date().toISOString(),
     }
-    const db = await getDB()
-    await db.put('attendance', record)
     set((s) => {
-      const without = s.records.filter((r) => r.id !== id)
+      const without = s.records.filter((r) => r.id !== record.id)
       return { records: [...without, record] }
     })
   },
@@ -96,7 +168,6 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
           (!fromISO || t.data >= fromISO) &&
           (!toISO || t.data <= toISO)
       )
-
     const trainingIds = new Set(trainings.map((t) => t.id))
     const records = get().records.filter((r) => trainingIds.has(r.treinoId))
 
@@ -116,49 +187,6 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
         percentualPresenca: total > 0 ? Math.round((presentes / total) * 100) : 0,
       }
     })
-  },
-
-  syncFromRemote: async (config, opts) => {
-    const result = await pullConfirmations(config, opts)
-    if (!result.ok) return { ok: false, merged: 0, error: result.error }
-
-    const remote = result.records ?? []
-    const db = await getDB()
-    const local = await db.getAll('attendance')
-    const localById = new Map(local.map((r) => [r.id, r]))
-
-    let merged = 0
-    const tx = db.transaction('attendance', 'readwrite')
-    const promises: Promise<unknown>[] = []
-    for (const r of remote) {
-      const id = `${r.treinoId}::${r.atletaId}`
-      const existing = localById.get(id)
-      const isFromAthlete = r.origem === 'link'
-      // Regra (mantém a do TrainingDetailPage atual): override se vazio, ou pendente local,
-      // ou remote veio do link (atleta confirmou).
-      const shouldOverride = !existing || existing.status === 'pendente' || isFromAthlete
-      if (!shouldOverride) continue
-      if (r.status !== 'presente' && r.status !== 'ausente' && r.status !== 'justificado') continue
-
-      const next: AttendanceRecord = {
-        id,
-        treinoId: r.treinoId,
-        atletaId: r.atletaId,
-        status: r.status,
-        justificativa: existing?.justificativa,
-        confirmadoPelaAtleta: isFromAthlete,
-        registradoEm: r.timestamp || new Date().toISOString(),
-      }
-      promises.push(tx.store.put(next))
-      merged++
-    }
-    await Promise.all(promises)
-    await tx.done
-
-    if (merged > 0) {
-      await get().loadAll()
-    }
-    return { ok: true, merged }
   },
 
   getAthleteFrequency: (atletaId, fromISO, toISO) => {
