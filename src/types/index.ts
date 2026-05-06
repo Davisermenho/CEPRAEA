@@ -5,6 +5,7 @@ export type AthleteStatus = 'ativo' | 'inativo'
 export interface Athlete {
   id: string
   nome: string
+  email: string
   telefone: string
   categoria?: string
   nivel?: string

@@ -6,7 +6,6 @@ import { AtletaGuard } from '@/shared/layouts/AtletaGuard'
 import { AtletaLayout } from '@/shared/layouts/AtletaLayout'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { SupabaseAuthProvider, useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
-import { isAtletaAuthenticated } from '@/lib/athleteAuth'
 
 const LoginPage              = lazy(() => import('@/features/auth/pages/LoginPage'))
 const PublicConfirmPage      = lazy(() => import('@/features/confirm/pages/PublicConfirmPage'))
@@ -25,6 +24,7 @@ const SupabaseSettingsPage   = lazy(() => import('@/features/settings/pages/Supa
 
 const WelcomePage            = lazy(() => import('@/features/welcome/WelcomePage'))
 const AtletaLoginPage        = lazy(() => import('@/features/atleta/pages/AtletaLoginPage'))
+const AtletaNovaSenhaPage    = lazy(() => import('@/features/atleta/pages/AtletaNovaSenhaPage'))
 const AtletaTreinosPage      = lazy(() => import('@/features/atleta/pages/AtletaTreinosPage'))
 const AtletaTreinoDetailPage = lazy(() => import('@/features/atleta/pages/AtletaTreinoDetailPage'))
 const AtletaPerfilPage       = lazy(() => import('@/features/atleta/pages/AtletaPerfilPage'))
@@ -36,7 +36,6 @@ function Loading() {
 function WelcomeOrRedirect() {
   const { authenticated } = useSupabaseAuth()
   if (authenticated) return <Navigate to="/" replace />
-  if (isAtletaAuthenticated()) return <Navigate to="/atleta/treinos" replace />
   return <WelcomePage />
 }
 
@@ -49,6 +48,7 @@ export default function App() {
             <Route path="/welcome" element={<WelcomeOrRedirect />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/atleta/login" element={<AtletaLoginPage />} />
+            <Route path="/atleta/nova-senha" element={<AtletaNovaSenhaPage />} />
             <Route path="/confirmar/:treinoId/:atletaId" element={<PublicConfirmPage />} />
             <Route path="/confirmar-presenca" element={<PublicConfirmPage />} />
 

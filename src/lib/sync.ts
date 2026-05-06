@@ -14,6 +14,7 @@ export interface RemoteRecord {
 export interface RemoteAthlete {
   id: string
   nome: string
+  email?: string
   categoria?: string
   nivel?: string
   status: 'ativo' | 'inativo'

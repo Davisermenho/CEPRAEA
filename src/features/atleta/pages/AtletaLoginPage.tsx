@@ -1,49 +1,94 @@
 import { useEffect, useState } from 'react'
+import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Phone, KeyRound } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
 import { CepraeaLogomarca } from '@/shared/components/CepraeaLogomarca'
-import { isAtletaAuthenticated, loginAtleta } from '@/lib/athleteAuth'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
 
-function formatPhoneInput(raw: string): string {
-  const d = raw.replace(/\D/g, '').slice(0, 11)
-  if (d.length <= 2) return d
-  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`
-  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
-}
+type Mode = 'login' | 'register' | 'reset'
 
 export default function AtletaLoginPage() {
   const navigate = useNavigate()
-  const [telefone, setTelefone] = useState('')
-  const [pin, setPin] = useState('')
+  const { authenticated } = useSupabaseAuth()
+  const configured = isSupabaseConfigured()
+
+  const [mode, setMode] = useState<Mode>('login')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [info, setInfo] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (isAtletaAuthenticated()) navigate('/atleta/treinos', { replace: true })
-  }, [navigate])
+    // Athlete already has a session — but AtletaGuard will confirm they're a real athlete.
+    // This redirect is handled there; here we just avoid showing the form to logged-in users.
+    if (authenticated) navigate('/atleta/treinos', { replace: true })
+  }, [authenticated, navigate])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const reset = () => { setError(''); setInfo('') }
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    const digits = telefone.replace(/\D/g, '')
-    if (digits.length < 10) {
-      setError('Digite um telefone válido com DDD.')
+    reset()
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail || !normalizedEmail.includes('@')) {
+      setError('Informe um email válido.')
       return
     }
-    if (pin.length < 4) {
-      setError('PIN deve ter pelo menos 4 dígitos.')
+
+    if (mode === 'reset') {
+      setSubmitting(true)
+      const { error: err } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${window.location.origin}/atleta/nova-senha`,
+      })
+      setSubmitting(false)
+      if (err) {
+        setError('Não foi possível enviar o email. Tente novamente.')
+      } else {
+        setInfo('Email de redefinição enviado! Verifique sua caixa de entrada.')
+      }
       return
     }
-    setLoading(true)
-    setError('')
-    const result = await loginAtleta(digits, pin)
-    setLoading(false)
-    if (!result.ok) {
-      setError(result.error ?? 'Erro de login')
+
+    if (!password) { setError('Informe a senha.'); return }
+
+    setSubmitting(true)
+
+    if (mode === 'register') {
+      const { error: err } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password,
+        options: { data: { role: 'athlete' } },
+      })
+      setSubmitting(false)
+      if (err) {
+        setError(err.message === 'User already registered'
+          ? 'Este email já está cadastrado. Faça login.'
+          : 'Não foi possível criar a conta. Verifique os dados.')
+      } else {
+        setInfo('Conta criada! Verifique seu email para confirmar o cadastro e depois faça login.')
+        setMode('login')
+      }
       return
     }
-    navigate('/atleta/treinos', { replace: true })
+
+    // login
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    })
+    setSubmitting(false)
+    if (err) {
+      setError('Email ou senha incorretos.')
+    }
+    // on success the onAuthStateChange listener in SupabaseAuthProvider updates session
+    // and the useEffect above will redirect to /atleta/treinos
   }
+
+  const disabled = submitting || !configured
 
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center bg-cep-purple-950 px-6 relative overflow-hidden">
@@ -55,60 +100,109 @@ export default function AtletaLoginPage() {
       <div className="w-full max-w-sm relative z-10">
         <div className="flex flex-col items-center mb-8">
           <CepraeaLogomarca className="h-10 w-auto text-cep-lime-400 mb-3" />
-          <p className="text-cep-muted text-sm mt-2">Acesso da atleta</p>
+          <p className="text-cep-muted text-sm mt-2">
+            {mode === 'login' && 'Acesso da atleta'}
+            {mode === 'register' && 'Primeiro acesso'}
+            {mode === 'reset' && 'Redefinir senha'}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-cep-muted mb-1.5 tracking-wide uppercase">
-              Telefone
+            <label htmlFor="atleta-email" className="block text-xs font-semibold text-cep-muted mb-1.5 tracking-wide uppercase">
+              Email
             </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-cep-muted" />
-              <input
-                type="tel"
-                inputMode="numeric"
-                value={telefone}
-                onChange={(e) => setTelefone(formatPhoneInput(e.target.value))}
-                placeholder="(21) 99999-9999"
-                className="w-full h-12 rounded-xl bg-cep-purple-850 border border-cep-purple-700 text-cep-white placeholder-cep-muted/40 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent"
-                autoFocus
-              />
-            </div>
+            <input
+              id="atleta-email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full h-12 rounded-xl bg-cep-purple-850 border border-cep-purple-700 text-cep-white placeholder-cep-muted/40 px-4 text-base focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent"
+            />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-cep-muted mb-1.5 tracking-wide uppercase">
-              PIN
-            </label>
-            <div className="relative">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-cep-muted" />
-              <input
-                type="password"
-                inputMode="numeric"
-                value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="••••"
-                maxLength={6}
-                className="w-full h-12 rounded-xl bg-cep-purple-850 border border-cep-purple-700 text-cep-white placeholder-cep-muted/40 pl-11 pr-4 text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent"
-              />
+          {mode !== 'reset' && (
+            <div>
+              <label htmlFor="atleta-password" className="block text-xs font-semibold text-cep-muted mb-1.5 tracking-wide uppercase">
+                Senha
+              </label>
+              <div className="relative">
+                <input
+                  id="atleta-password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-12 rounded-xl bg-cep-purple-850 border border-cep-purple-700 text-cep-white placeholder-cep-muted/40 px-4 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-cep-muted hover:text-cep-white"
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                </button>
+              </div>
+              {mode === 'register' && (
+                <p className="text-xs text-cep-muted/60 mt-1">Mínimo 6 caracteres.</p>
+              )}
             </div>
-          </div>
+          )}
 
+          {!configured && (
+            <div className="rounded-xl bg-red-500/20 border border-red-500/40 px-4 py-2.5">
+              <p className="text-red-400 text-sm text-center">Sistema não configurado. Avise o treinador.</p>
+            </div>
+          )}
           {error && (
             <div className="rounded-xl bg-red-500/20 border border-red-500/40 px-4 py-2.5">
               <p className="text-red-400 text-sm text-center">{error}</p>
             </div>
           )}
+          {info && (
+            <div className="rounded-xl bg-cep-lime-400/10 border border-cep-lime-400/30 px-4 py-2.5">
+              <p className="text-cep-lime-400 text-sm text-center">{info}</p>
+            </div>
+          )}
 
-          <Button type="submit" fullWidth size="lg" loading={loading} className="mt-2">
-            Entrar
+          <Button type="submit" fullWidth size="lg" disabled={disabled} loading={submitting} className="mt-2">
+            {mode === 'login' && 'Entrar'}
+            {mode === 'register' && 'Criar conta'}
+            {mode === 'reset' && 'Enviar email de redefinição'}
           </Button>
-
-          <p className="text-center text-xs text-cep-muted/70 pt-2">
-            Esqueceu o PIN? Peça ao treinador para resetar.
-          </p>
         </form>
+
+        <div className="mt-6 flex flex-col items-center gap-3 text-sm">
+          {mode === 'login' && (
+            <>
+              <button
+                type="button"
+                onClick={() => { setMode('register'); reset() }}
+                className="text-cep-muted/70 hover:text-cep-white transition-colors"
+              >
+                Primeiro acesso? Criar conta
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMode('reset'); reset() }}
+                className="text-cep-muted/70 hover:text-cep-white transition-colors"
+              >
+                Esqueci minha senha
+              </button>
+            </>
+          )}
+          {mode !== 'login' && (
+            <button
+              type="button"
+              onClick={() => { setMode('login'); reset() }}
+              className="text-cep-muted/70 hover:text-cep-white transition-colors"
+            >
+              Já tenho conta — Entrar
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -108,6 +108,7 @@ export const useAthleteStore = create<AthleteStore>((set, get) => ({
       const next: Athlete = {
         id: r.id,
         nome: r.nome,
+        email: r.email ?? localAthlete?.email ?? '',
         telefone: localAthlete?.telefone ?? '',
         categoria: r.categoria || undefined,
         nivel: r.nivel || undefined,
