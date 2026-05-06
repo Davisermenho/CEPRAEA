@@ -83,7 +83,7 @@ export async function exportToXlsx(
   records: AttendanceRecord[],
   frequencyReports: FrequencyReport[],
 ): Promise<void> {
-  const { utils, writeFile } = await import('xlsx')
+  const { utils, writeFile } = await import('@e965/xlsx')
 
   const trainingMap = new Map(trainings.map((t) => [t.id, t]))
   const athleteMap = new Map(athletes.map((a) => [a.id, a]))

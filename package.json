@@ -24,6 +24,7 @@
     "validate:mvp:v1": "bash scripts/validate-mvp-v1.sh"
   },
   "dependencies": {
+    "@e965/xlsx": "^0.20.3",
     "@supabase/supabase-js": "^2.87.1",
     "clsx": "^2.1.1",
     "idb": "^8.0.3",
@@ -32,7 +33,6 @@
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.0",
     "tailwind-merge": "^3.3.0",
-    "xlsx": "^0.18.5",
     "zustand": "^5.0.4"
   },
   "devDependencies": {
@@ -49,7 +49,7 @@
     "tailwindcss": "^4.1.6",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
-    "vite-plugin-pwa": "^1.0.0",
+    "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.5",
     "workbox-window": "^7.3.0"
   }
