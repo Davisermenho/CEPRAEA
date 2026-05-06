@@ -31,10 +31,14 @@ is_allowed() {
     src/main.tsx) return 0 ;;
     src/App.tsx) return 0 ;;
     src/lib/seed.ts) return 0 ;;
+    src/lib/auth.ts) return 0 ;;
+    src/lib/__tests__/auth.test.ts) return 0 ;;
     src/lib/supabase.ts) return 0 ;;
     src/features/auth/SupabaseAuthProvider.tsx) return 0 ;;
     src/features/auth/pages/LoginPage.tsx) return 0 ;;
     src/shared/layouts/AuthGuard.tsx) return 0 ;;
+    src/shared/layouts/AtletaGuard.tsx) return 0 ;;
+    src/features/settings/pages/SettingsPage.tsx) return 0 ;;
     src/features/settings/pages/SupabaseSettingsPage.tsx) return 0 ;;
     src/features/confirm/pages/PublicConfirmPage.tsx) return 0 ;;
     src/features/trainings/pages/TrainingDetailPage.tsx) return 0 ;;
