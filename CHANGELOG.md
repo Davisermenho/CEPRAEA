@@ -80,6 +80,41 @@ Próxima fase aprovada:
 - mapear App Script/Google Sheets/sync para corte próprio;
 - substituir stores IndexedDB por fontes Supabase por domínio, evitando remoções amplas no mesmo PR.
 
+### Autenticação local legada do treinador removida
+
+PR #7 foi validado e mergeado em `main`.
+
+Decisão: remover o módulo local de autenticação do treinador baseado em PIN e `sessionStorage`, pois o login do treinador já foi migrado para Supabase Auth e o seed legado de PIN já havia sido removido.
+
+Alterações promovidas:
+
+- removido `src/lib/auth.ts`;
+- removido `src/lib/__tests__/auth.test.ts`;
+- removidos imports residuais de `@/lib/auth` em `src/App.tsx`, `src/shared/layouts/AtletaGuard.tsx` e `src/features/settings/pages/SettingsPage.tsx`;
+- `WelcomeOrRedirect` passa a usar sessão Supabase para detectar treinador autenticado;
+- `AtletaGuard` deixa de consultar sessão local do treinador;
+- removido o bloco `Alterar PIN de acesso` das configurações;
+- logout do treinador passa a usar `signOut()` via `SupabaseAuthProvider`;
+- allowlist do workflow foi expandida para cobrir este corte de limpeza.
+
+Merge commit:
+
+- `651beea90085641cfd83be94c0b29bbcbc1802de`
+
+Validação:
+
+- Vercel Preview concluído com sucesso;
+- workflow `Supabase Foundation` concluído com sucesso na branch `cleanup/remove-local-coach-auth`;
+- checks automatizados `Continuous AI` concluídos sem mudanças necessárias;
+- PR #7 mergeado em `main`.
+
+Próxima fase aprovada:
+
+- mapear integração App Script/Google Sheets e sincronização remota;
+- remover a sincronização legada em PR própria;
+- iniciar migração dos stores IndexedDB por domínio para Supabase;
+- manter autenticação de atleta fora deste corte até existir modelo Supabase específico para atletas.
+
 ---
 
 ## 2026-05-04
