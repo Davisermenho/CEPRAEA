@@ -38,12 +38,6 @@ is_allowed() {
     src/features/auth/pages/LoginPage.tsx) return 0 ;;
     src/shared/layouts/AuthGuard.tsx) return 0 ;;
     src/shared/layouts/AtletaGuard.tsx) return 0 ;;
-    src/features/atleta/pages/AtletaLoginPage.tsx) return 0 ;;
-    src/features/atleta/pages/AtletaNovaSenhaPage.tsx) return 0 ;;
-    src/features/athletes/components/AthleteForm.tsx) return 0 ;;
-    src/types/index.ts) return 0 ;;
-    src/lib/sync.ts) return 0 ;;
-    src/stores/athleteStore.ts) return 0 ;;
     src/features/settings/pages/SettingsPage.tsx) return 0 ;;
     src/features/settings/pages/SupabaseSettingsPage.tsx) return 0 ;;
     src/features/confirm/pages/PublicConfirmPage.tsx) return 0 ;;

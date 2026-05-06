@@ -13,7 +13,10 @@
     "test:supabase": "bash scripts/run-supabase-tests.sh",
     "test:presence-token-batch:remote": "node scripts/validate-presence-token-batch.mjs",
     "check:supabase-foundation-scope": "bash scripts/check-supabase-foundation-scope.sh",
-    "validate:supabase-foundation": "npm run check:supabase-foundation-scope && supabase db reset && npm run test:supabase && npm run build"
+    "validate:supabase-foundation": "npm run check:supabase-foundation-scope && supabase db reset && npm run test:supabase && npm run build",
+    "check:athlete-auth-foundation-scope": "bash scripts/check-athlete-auth-foundation-scope.sh",
+    "test:athlete-auth": "bash scripts/run-athlete-auth-tests.sh",
+    "validate:athlete-auth-foundation": "npm run check:athlete-auth-foundation-scope && supabase db reset && npm run test:athlete-auth && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.87.1",
