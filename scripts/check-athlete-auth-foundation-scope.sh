@@ -26,22 +26,41 @@ is_allowed() {
     # Código frontend de athlete auth
     src/App.tsx) return 0 ;;
     src/features/athletes/components/AthleteForm.tsx) return 0 ;;
+    src/features/athletes/athleteApi.ts) return 0 ;;
     src/features/atleta/pages/AtletaLoginPage.tsx) return 0 ;;
     src/features/atleta/pages/AtletaNovaSenhaPage.tsx) return 0 ;;
+    src/lib/export.ts) return 0 ;;
     src/lib/supabase.ts) return 0 ;;
     src/lib/sync.ts) return 0 ;;
     src/shared/layouts/AtletaGuard.tsx) return 0 ;;
     src/stores/athleteStore.ts) return 0 ;;
     src/types/index.ts) return 0 ;;
 
+    # T04 — trainingStore Supabase-first
+    src/features/trainings/trainingApi.ts) return 0 ;;
+    src/features/trainings/pages/TrainingsPage.tsx) return 0 ;;
+    src/stores/trainingStore.ts) return 0 ;;
+
+    # T05 — attendanceStore Supabase-first
+    src/features/trainings/pages/TrainingDetailPage.tsx) return 0 ;;
+    src/stores/attendanceStore.ts) return 0 ;;
+
+    # T02 — RPCs de attendance
+    supabase/migrations/0007_attendance_write_rpcs.sql) return 0 ;;
+    supabase/tests/rpc_attendance_write.test.sql) return 0 ;;
+
     # Infraestrutura do PR (package, workflow, scripts)
+    .gitignore) return 0 ;;
     package.json) return 0 ;;
     package-lock.json) return 0 ;;
     .github/workflows/athlete-auth-foundation.yml) return 0 ;;
     .github/workflows/supabase-foundation.yml) return 0 ;;
     scripts/check-athlete-auth-foundation-scope.sh) return 0 ;;
     scripts/check-supabase-foundation-scope.sh) return 0 ;;
+    scripts/check-runtime-legacy.sh) return 0 ;;
     scripts/run-athlete-auth-tests.sh) return 0 ;;
+    scripts/run-supabase-tests.sh) return 0 ;;
+    scripts/validate-mvp-v1.sh) return 0 ;;
 
     # Documentação
     CEPRAEA.md) return 0 ;;
