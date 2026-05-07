@@ -4,7 +4,7 @@ import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
 import { supabase } from '@/lib/supabase'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 
-type AthleteCheck = 'loading' | 'found' | 'not-found' | 'unauthenticated'
+type AthleteCheck = 'loading' | 'found' | 'not-found' | 'unauthenticated' | 'error'
 
 export function AtletaGuard() {
   const { authenticated, loading: authLoading, user } = useSupabaseAuth()
@@ -23,26 +23,22 @@ export function AtletaGuard() {
       if (!user) return
 
       // Fast path: user_id already linked (all logins after the first)
-      const { data: byUserId } = await supabase
+      const { data: byUserId, error: selectError } = await supabase
         .from('athletes')
         .select('id')
         .eq('user_id', user.id)
         .eq('status', 'ativo')
         .maybeSingle()
 
-      if (byUserId) {
-        setCheck('found')
-        return
-      }
+      if (selectError) { setCheck('error'); return }
+      if (byUserId) { setCheck('found'); return }
 
       // First-login path: claim the athlete record via SECURITY DEFINER RPC.
       // The RPC exclusively sets user_id = auth.uid(), preventing a client from
       // modifying team_id or other columns in the same request.
-      const { data: linkedId } = await supabase.rpc('link_athlete_user_id')
-      if (linkedId) {
-        setCheck('found')
-        return
-      }
+      const { data: linkedId, error: rpcError } = await supabase.rpc('link_athlete_user_id')
+      if (rpcError) { setCheck('error'); return }
+      if (linkedId) { setCheck('found'); return }
 
       setCheck('not-found')
     }
@@ -56,6 +52,24 @@ export function AtletaGuard() {
 
   if (check === 'unauthenticated') {
     return <Navigate to="/atleta/login" replace />
+  }
+
+  if (check === 'error') {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center bg-cep-purple-950 px-6 text-center">
+        <p className="text-cep-white font-semibold mb-2">Erro temporário</p>
+        <p className="text-cep-muted text-sm max-w-xs">
+          Não foi possível verificar seu acesso. Tente novamente.
+        </p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="mt-6 text-cep-lime-400 text-sm underline"
+        >
+          Tentar novamente
+        </button>
+      </div>
+    )
   }
 
   if (check === 'not-found') {

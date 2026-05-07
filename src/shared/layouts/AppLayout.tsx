@@ -6,7 +6,6 @@ import {
   Dumbbell,
   BarChart2,
   Settings,
-  Crosshair,
 } from 'lucide-react'
 import { CepraeaLogomarca } from '@/shared/components/CepraeaLogomarca'
 import { cn } from '@/lib/utils'
@@ -23,7 +22,6 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/',             label: 'Início',    icon: LayoutDashboard },
   { to: '/atletas',      label: 'Atletas',   icon: Users },
   { to: '/treinos',      label: 'Treinos',   icon: Dumbbell },
-  { to: '/scout',        label: 'Scout',     icon: Crosshair },
   { to: '/relatorios',   label: 'Relatórios', icon: BarChart2 },
   { to: '/configuracoes', label: 'Config',   icon: Settings },
 ]

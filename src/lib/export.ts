@@ -1,5 +1,4 @@
 import type { Athlete, Training, AttendanceRecord, FrequencyReport } from '@/types'
-import { getDB } from '@/db'
 
 // ─── CSV ───────────────────────────────────────────────────────────────────────
 
@@ -149,49 +148,6 @@ export async function exportToXlsx(
 
   const date = new Date().toISOString().slice(0, 10)
   writeFile(wb, `cepraea-${date}.xlsx`)
-}
-
-// ─── Backup JSON ───────────────────────────────────────────────────────────────
-
-export async function exportFullBackup(): Promise<void> {
-  const db = await getDB()
-  const backup = {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    athletes: await db.getAll('athletes'),
-    trainings: await db.getAll('trainings'),
-    attendance: await db.getAll('attendance'),
-    settings: await db.getAll('settings'),
-  }
-  const json = JSON.stringify(backup, null, 2)
-  const blob = new Blob([json], { type: 'application/json' })
-  const date = new Date().toISOString().slice(0, 10)
-  triggerDownload(blob, `cepraea-backup-${date}.json`)
-}
-
-export async function importFullBackup(json: string): Promise<void> {
-  const data = JSON.parse(json)
-  if (data.version !== 1) throw new Error('Versão de backup incompatível')
-
-  const db = await getDB()
-  const tx = db.transaction(['athletes', 'trainings', 'attendance', 'settings'], 'readwrite')
-
-  await Promise.all([
-    tx.objectStore('athletes').clear(),
-    tx.objectStore('trainings').clear(),
-    tx.objectStore('attendance').clear(),
-  ])
-
-  await Promise.all([
-    ...(data.athletes ?? []).map((a: Athlete) => tx.objectStore('athletes').put(a)),
-    ...(data.trainings ?? []).map((t: Training) => tx.objectStore('trainings').put(t)),
-    ...(data.attendance ?? []).map((r: AttendanceRecord) => tx.objectStore('attendance').put(r)),
-    ...(data.settings ?? []).map((s: { key: string; value: unknown }) =>
-      tx.objectStore('settings').put(s)
-    ),
-  ])
-
-  await tx.done
 }
 
 function triggerDownload(blob: Blob, filename: string): void {

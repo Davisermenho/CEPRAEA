@@ -1,2510 +1,899 @@
-# CEPRAEA — Arquitetura Técnica e Especificações de Sistema
+---
+tipo: PRD
+nome: "CEPRAEA — Documento de Produto Oficial"
+papel: "Define O QUÊ o CEPRAEA é, quem usa, o que faz parte do MVP e os critérios de sucesso do produto — não descreve estado de implementação."
+autoridade: "Hierarquia 3/4 — vence interpretação livre de agente sobre escopo; perde para código real (estado atual) e para plan.md (sequência de execução)."
+lido_por: "Claude, Codex, Copilot"
+quando_ler: "antes de propor nova feature; ao avaliar se algo é ou não escopo do MVP; ao definir critério de aceite de produto"
+atualizado_por: "Humano (decisão de produto)"
+quando_atualizar: "mudança de objetivo, escopo funcional, critério de sucesso ou fronteira MVP/pós-MVP"
+validade: "2026-05-06"
+status: ATUAL
+status_nota: "PARCIAL para Seção 6 — estado atual do sistema pode divergir do código; verificar código antes de agir"
+conflito: "CEPRAEA.md define O QUÊ construir. Se contradiz código → código prevalece para estado atual; se define escopo e agente discorda → CEPRAEA.md prevalece até decisão humana contrária."
+proibido:
+  - "Agentes NÃO devem alterar este documento para justificar implementação já feita"
+  - "NÃO devem tratar Seção 6 como verdade do estado atual sem verificar código"
+nao_cobre: "Sequência de tarefas, provas de implementação, status de progresso técnico, histórico de execução"
+---
 
-**Versão:** 1.2.0  
-**Data:** 2 de maio de 2026  
-**Escopo:** Sistema PWA para Gestão de Treinos, Controle de Presença e Scout Tático  
-**Status:** Produção
+# CEPRAEA — PRD Oficial do Produto
+
+**Versão:** 2.0.0  
+**Data:** 6 de maio de 2026  
+**Status:** Ativo  
+**Escopo:** Produto, MVP v1.0, direção arquitetural e critérios de produto
 
 ---
 
-## 1. Visão Geral do Sistema
+## 1. Finalidade deste documento
 
-### 1.1 Objetivo do Sistema
+Este documento é o **PRD oficial** do CEPRAEA.
 
-CEPRAEA é uma **Progressive Web Application (PWA)** de código aberto destinada a treinar, rastrear presença e gerenciar atletas de forma colaborativa e sem restrições técnicas ou de infraestrutura.
+Ele define:
 
-O sistema oferece:
-- **Gestão de atletas** com categorias, níveis e status de atividade
-- **Agendamento inteligente de treinos** com detecção automática de conflitos com feriados
-- **Controle de presença** com confirmação via link público ou painel administrativo
-- **Relatórios de frequência** e análise de participação
-- **Scout Tático** com registro de eventos de jogo em tempo real (fases, sistemas, ações individuais)
-- **Sincronização remota** com Google Apps Script para armazenamento centralizado
-- **Integração com WhatsApp** para comunicação com atletas
-- **Exportação de dados** em CSV e Excel
-- **Autenticação por PIN** para acesso simples
-- **Funcionalidade offline** via cache e IndexedDB
-- **Identidade visual oficial** com logo/logomarca CEPRAEA integrados
+- o problema do produto;
+- os usuários do sistema;
+- o escopo do MVP v1.0;
+- os fluxos obrigatórios;
+- os requisitos funcionais;
+- os requisitos não funcionais;
+- a direção arquitetural do produto;
+- os critérios de sucesso do MVP;
+- os limites do produto nesta fase.
 
-### 1.2 Problema que Resolve
+Este documento **não** é:
 
-Treinos comunitários, associações desportivas e pequenos times precisam rastrear presença sem:
-- Infraestrutura de servidor complexa
-- Custo financeiro ou configuração técnica elaborada
-- Dependência de terceiros para armazenamento
-- Perda de dados offline
+- contrato de execução por tarefa;
+- checklist de implementação;
+- changelog técnico;
+- inventário completo de todo arquivo existente no repositório.
 
-CEPRAEA resolve isso sendo **totalmente funcional offline**, sincronizando opcionalmente com planilhas Google, e requerendo apenas um navegador.
+### 1.1 Hierarquia oficial de documentos
 
-### 1.3 Público-Alvo
+O CEPRAEA usa esta separação:
 
-- **Técnicos e treinadores** de equipes amadores ou profissionais
-- **Gestores de centros de treinamento**
-- **Comunidades desportivas** em regiões com conectividade limitada
-- **Pequenas e médias organizações** que não podem investir em SaaS
+- `CEPRAEA.md`: PRD oficial do produto.
+- `plan.md`: contrato oficial de execução técnica até o MVP.
+- `docs/*.md`: documentação técnica temática.
+- código fonte: comportamento real implementado.
 
-### 1.4 Principais Casos de Uso
+Se houver conflito:
 
-| Caso de Uso | Ator | Descrição |
-|---|---|---|
-| Cadastrar Atletas | Técnico | Adicionar nome, telefone, categoria, nível e status |
-| Gerar Treinos | Técnico | Criar automaticamente treinos recorrentes baseado em calendário |
-| Marcar Presença | Técnico | Registrar presença/ausência/justificativa após treino |
-| Confirmar Presença (Link) | Atleta | Acessar link público para confirmar/rejeitar presença |
-| Visualizar Dashboard | Técnico | Ver resumo: treinos, atletas, conflitos com feriados, frequência |
-| Consultar Relatórios | Técnico | Gerar relatórios de frequência por período |
-| Exportar Dados | Técnico | Baixar CSV/Excel com dados de treinos, presença |
-| Sincronizar Remoto | Técnico | Enviar confirmações de presença para Google Apps Script |
-| Configurar Sistema | Técnico | Definir PIN, nome da equipe, técnico responsável, URL do app |
-| Scout de Jogo | Técnico | Criar jogo e registrar eventos táticos ao vivo (fase, sistema, atletas, resultado) |
-| Revisar Scout | Técnico | Visualizar timeline de eventos de um jogo registrado |
+1. o comportamento real do código prevalece sobre descrição abstrata;
+2. `plan.md` prevalece para execução;
+3. `CEPRAEA.md` prevalece para intenção de produto e escopo.
 
-### 1.5 Escopo Funcional e Não Funcional
+### 1.2 Regra de atualização
 
-#### Escopo Funcional
-- ✅ Cadastro, atualização e remoção de atletas
-- ✅ Criação automática de treinos recorrentes (quinta + domingo)
-- ✅ Alertas de conflito com feriados nacionais, estaduais e municipais
-- ✅ Registro de presença com múltiplos status (presente, ausente, justificado, pendente)
-- ✅ Link público de confirmação por atleta
-- ✅ Relatórios de frequência por atleta e por treino
-- ✅ Exportação em CSV e Excel
-- ✅ Sincronização com Google Sheets via Apps Script
-- ✅ Notificações via WhatsApp (links de confirmação)
-- ✅ Autenticação PIN com hash SHA-256
-- ✅ Scout Tático: criação de jogos e registro de eventos ao vivo (fase, sistema, atletas, placar, análise)
-- ✅ Identidade visual oficial (logo/logomarca SVG) em Login, Sidebar, LoadingSpinner, ExportPage e ícones PWA
+`CEPRAEA.md` deve ser atualizado quando houver mudança em pelo menos um dos itens abaixo:
 
-#### Escopo Não Funcional
-- ✅ Funcionalidade offline completa
-- ✅ PWA com instalação em dispositivos móveis
-- ✅ Responsivo (mobile-first)
-- ✅ Performance: carregamento < 3s em 4G
-- ✅ Armazenamento local (IndexedDB) - sem limite dependendo do dispositivo
-- ✅ Compatibilidade: Chrome, Firefox, Safari, Edge (últimas 2 versões)
-- ✅ Acessibilidade básica (WCAG 2.1 AA parcial)
+- objetivo do MVP;
+- escopo funcional do produto;
+- regra de acesso de usuários;
+- integração oficial do sistema;
+- definição de sucesso do MVP;
+- fronteira entre MVP e pós-MVP;
+- direção arquitetural oficial.
 
-#### Out of Scope
-- ❌ Autenticação OAuth/SAML
-- ❌ Controle de permissões por função (apenas administrativo)
-- ❌ Integração com sistemas de folha de pagamento
-- ❌ Análise preditiva ou machine learning
-- ❌ Suporte a múltiplos idiomas (apenas português)
-- ❌ API GraphQL
+Mudança local de implementação sem impacto no produto não exige alteração deste PRD.
 
 ---
 
-## 2. Arquitetura Geral
+## 2. Resumo executivo
 
-### 2.1 Descrição da Arquitetura
+CEPRAEA é um sistema PWA para gestão de atletas, treinos, presença e scout tático para handebol de praia.
 
-CEPRAEA adota uma arquitetura **cliente-centric offline-first** com sincronização opcional:
+O produto deve permitir que treinador e atletas operem os fluxos principais de treino e presença com autenticação segura, baixa fricção operacional e base de dados centralizada.
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Browser/PWA App                       │
-│ ┌──────────────────────────────────────────────────────┐ │
-│ │              React SPA (Vite + React 19)             │ │
-│ │ ┌──────────────────────────────────────────────────┐ │ │
-│ │ │           Pages (Lazy-loaded)                   │ │ │
-│ │ │ • Dashboard • Athletes • Trainings • Reports    │ │ │
-│ │ │ • Scout • Atleta (login, perfil, treinos)       │ │ │
-│ │ └────────────────────────┬─────────────────────────┘ │ │
-│ │                          ↓                            │ │
-│ │ ┌──────────────────────────────────────────────────┐ │ │
-│ │ │        Zustand Global State (Stores)            │ │ │
-│ │ │ • AthleteStore • TrainingStore • AttendanceStore│ │ │
-│ │ └────────────────────────┬─────────────────────────┘ │ │
-│ │                          ↓                            │ │
-│ │ ┌──────────────────────────────────────────────────┐ │ │
-│ │ │       IndexedDB (Local Persistence)             │ │ │
-│ │ │ • athletes • trainings • attendance • settings   │ │ │
-│ └────────────────────────┬─────────────────────────┘ │ │
-│                          ↓                            │ │
-│ ┌──────────────────────────────────────────────────┐ │ │
-│ │              Service Worker (Workbox)            │ │ │
-│ │ • Cache-first strategy • Offline support         │ │ │
-│ └────────────────────────┬─────────────────────────┘ │ │
-└─────────────────────────│──────────────────────────────┘
-                          │
-              ┌───────────┴───────────┐
-              │                       │
-              ↓ (Auth + DB)           ↓ (Optional Sync)
-┌─────────────────────────┐  ┌──────────────────────────┐
-│  Supabase (PostgreSQL)   │  │  Google Apps Script       │
-│  • Auth (email+senha)    │  │  (Sync Endpoint legado)   │
-│  • RLS por equipe        │  │  • Validate Secret        │
-│  • athletes.user_id      │  │  • Store to Google Sheets │
-│  • get_athlete_team_id() │  │  • Return Records         │
-└──────────────────────────┘  └──────────────────────────┘
-```
+O produto existe para substituir um processo manual que consome tempo demais do treinador, gera erro operacional e empurra a equipe para uma rotina improvisada de planilhas, mensagens soltas e retrabalho.
 
-### 2.2 Componentes Principais
+O **MVP v1.0** existe quando o sistema:
 
-| Componente | Responsabilidade | Tecnologia | Estado |
-|---|---|---|---|
-| **Frontend (SPA)** | Interface de usuário, navegação, formulários | React 19, React Router 7, Tailwind CSS | Local |
-| **Global State** | Gerenciar estado global (atletas, treinos, presença, scout) | Zustand 5 | Memory + IndexedDB |
-| **Persistência Local** | Armazenamento durável offline | IndexedDB (idb v8) | Dispositivo |
-| **Auth do Técnico** | Validação de acesso via PIN com hash SHA-256 | Web Crypto API | SessionStorage |
-| **Auth do Atleta** | Login email+senha via Supabase Auth, lazy-link por email | @supabase/supabase-js | Supabase JWT |
-| **Banco Remoto** | Atletas, presenças, treinos com RLS por equipe | Supabase PostgreSQL | Supabase Cloud |
-| **Lógica de Negócio** | Cálculos, validações, geração de dados | TypeScript | Determinístico |
-| **Sincronização** | Push/Pull com endpoint remoto (técnico) | Fetch API | Async |
-| **PWA** | Instalação, offline, atualização automática | Workbox v7, vite-plugin-pwa (`autoUpdate`) | Auto |
-| **Integração WhatsApp** | Geração de links e mensagens | WhatsApp Web URLs | Web |
-| **Exportação** | CSV/Excel | XLSX v0.18 | Blob Download |
-| **Identidade Visual** | Logo e logomarca CEPRAEA como componentes React inline SVG | CepraeaLogo.tsx, CepraeaLogomarca.tsx | Tailwind currentColor |
-
-### 2.3 Responsabilidades de Cada Componente
-
-#### **App.tsx** (Orquestrador de Rotas)
-- Define estrutura de rotas (login, dashboard, atlas, treinos, etc.)
-- Implementa lazy loading de páginas
-- Aplica guards de autenticação
-- Suspense boundaries para feedback de carregamento
-
-#### **Stores (Zustand)**
-- **AthleteStore**: CRUD de atletas, ordenação alfabética, status toggle
-- **TrainingStore**: CRUD de treinos, geração de recorrentes, detecção de conflitos
-- **AttendanceStore**: Upsert de presença, cálculo de frequência, summaries
-- **ScoutStore**: CRUD de jogos e eventos de scout, persistência em IndexedDB
-
-#### **Database (IndexedDB)**
-- Armazenamento primário offline
-- Transações atômicas para integridade
-- Índices em `trainings.data`, `attendance.treinoId`, `attendance.atletaId`
-
-#### **AuthGuard**
-- Middleware que valida `sessionStorage`
-- Redireciona para login se não autenticado
-- Carrega stores na bootstrap
-
-#### **Lib (Lógica de Negócio)**
-- `auth.ts`: Hash PIN, gerenciamento de sessão
-- `holidays.ts`: Cálculo de Páscoa (Meeus/Jones/Butcher), mapa de feriados
-- `recurrence.ts`: Geração de treinos recorrentes (quinta/domingo)
-- `sync.ts`: Push/Pull com endpoint remoto
-- `export.ts`: Formatação CSV/XLSX
-- `whatsapp.ts`: Geração de mensagens e links
-- `utils.ts`: Formatação de datas, telefone, percentuais
-
-#### **Features (Módulos por Domínio)**
-- `auth/`: Login com PIN
-- `dashboard/`: Visão geral, alertas, próximo treino
-- `athletes/`: Lista, detalhes, CRUD
-- `trainings/`: Agenda, criação, detecção de conflitos
-- `attendance/`: Marcação de presença por treino
-- `reports/`: Relatórios de frequência, filtros por período
-- `export/`: Download de dados
-- `settings/`: Configuração de PIN, URLs, sincronização
-- `confirm/`: Página pública de confirmação de presença
-- `scout/`: Scout tático — lista de jogos, registro ao vivo de eventos (fase, sistema, atletas, placar, análise)
-
-### 2.4 Fluxo de Dados Entre Módulos
-
-```
-Usuário (Browser)
-    ↓
-Components (React)
-    ↓ dispatch actions
-Zustand Stores
-    ├→ Update Memory State
-    └→ Persist to IndexedDB
-    ↓ query via hooks
-Components (React) → Render
-    ↓ (optional)
-Sync Library
-    └→ Fetch (Google Apps Script)
-    └→ Push Confirmations
-    └→ Pull Remote Records
-    ↓
-Local Stores Updated
-    ↓
-UI Re-renders
-```
-
-**Exemplo: Registrar Presença**
-
-1. Usuário clica "Confirmado" no formulário de presença
-2. Componente chama `attendanceStore.upsert(treinoId, atletaId, 'presente')`
-3. Store cria objeto `AttendanceRecord` com `id = "treinoId::atletaId"`
-4. Store persiste em IndexedDB (`attendance` store)
-5. Store atualiza estado React (re-render)
-6. (Opcional) Se sincronização ativa, chama `pushConfirmation()` ao Google Apps Script
-
-### 2.5 Diagrama da Arquitetura em Mermaid
-
-```mermaid
-graph TB
-    subgraph "Cliente (Browser)"
-        UI["React Components<br/>(Pages + Shared)"]
-        STORE["Zustand Stores<br/>(Athlete, Training, Attendance)"]
-        DB["IndexedDB<br/>(Persistent)"]
-        SW["Service Worker<br/>(Offline Support)"]
-    end
-    
-    subgraph "Lógica de Negócio"
-        AUTH["Authentication<br/>(PIN Hash)"]
-        BUSINESS["Business Logic<br/>(Recurrence, Holidays, Frequency)"]
-        EXPORT["Export Engine<br/>(CSV/Excel)"]
-    end
-    
-    subgraph "Integrações Externas"
-        GAS["Google Apps Script<br/>(Sync Endpoint)"]
-        WA["WhatsApp API<br/>(Links)"]
-        SHEETS["Google Sheets<br/>(Data)"]
-    end
-    
-    UI -->|Actions| STORE
-    STORE -->|Persist| DB
-    STORE -->|Query| DB
-    UI -->|Dispatch| AUTH
-    STORE -->|Use| BUSINESS
-    STORE -->|Use| EXPORT
-    UI -.->|Optional Sync| GAS
-    GAS -->|Store Data| SHEETS
-    EXPORT -.->|WhatsApp Links| WA
-    SW -->|Intercept| STORE
-```
-
-### 2.6 Justificativa das Decisões Arquiteturais
-
-#### Por que **Offline-First**?
-- Comunidades desportivas podem estar em regiões com conectividade fraca
-- Necessidade de registrar presença no local do treino sem depender de rede
-- Reduz latência e melhora UX
-
-#### Por que **IndexedDB**?
-- Oferece armazenamento local até ~50MB sem solicitar permissão
-- Suporta índices e queries eficientes
-- Totalmente offline
-- Alternativa: localStorage (5MB) seria insuficiente
-
-#### Por que **Zustand**?
-- Minimalista (7KB gzipped), ideal para PWA
-- Sem boilerplate (comparado a Redux)
-- Integração fácil com IndexedDB
-- Alternativa: Pinia (mais complexa), Recoil (mais verbosa)
-
-#### Por que **Vite**?
-- Build time < 1s em desenvolvimento
-- Estouro de bundling otimizado
-- HMR nativo (melhor DX)
-- Alternativa: Webpack (mais lento, mais verboso)
-
-#### Por que **Tailwind CSS**?
-- Utility-first, sem CSS custom
-- PWA com restricações precisa ser leve (classe > CSS-in-JS)
-- Suporte nativo a dark mode
-- Alternativa: Material UI (heavier)
-
-#### Por que **Google Apps Script + Sheets** (sincronização legada)?
-- Endpoint gratuito (não requer servidor)
-- Dados centralizados em Sheets (acesso simples)
-- Sem autenticação complexa (secret + URL suficientes)
-- Mantido para compatibilidade com fluxo de sync do técnico
-
-#### Por que **Supabase**?
-- PostgreSQL gerenciado com RLS nativo — isolamento por equipe sem lógica extra no cliente
-- Auth integrado (email+senha, JWT, magic link) — sem implementar servidor de auth
-- `@supabase/supabase-js` substituiu acesso direto ao IndexedDB para atletas
-- CLI (`supabase db push`) permite versionamento de migrations com CI/CD
-- Plano gratuito suficiente para o porte atual (1 equipe, ~30 atletas)
-- Alternativa: Firebase (vendor lock-in Google, NoSQL), PlanetScale (sem RLS nativo)
-
-#### Por que **PWA com Workbox**?
-- Instalação nativa em mobile
-- Funcionalidade offline automática
-- Sem App Store
-- Alternativa: Electron (desktop only)
+1. autentica treinador e atleta com segurança;
+2. centraliza os dados operacionais do MVP no Supabase;
+3. registra presença manual e por confirmação da atleta no mesmo modelo de dados;
+4. permite uso real por atletas e treinador sem dependência do legado;
+5. pode ser validado por testes reais e critérios objetivos.
 
 ---
 
-## 3. Engenharia do Sistema
+## 3. Problema do produto
 
-### 3.1 Stack Tecnológico
+Equipes e centros de treino pequenos precisam controlar:
 
-#### Frontend
-- **Framework**: React ^19.1.0
-- **Build Tool**: Vite ^6.3.5
-- **Linguagem**: TypeScript ^5.8.3
-- **CSS**: Tailwind CSS ^4.1.6 + Tailwind Merge ^3.3.0
-- **Ícones**: Lucide React ^0.511.0
-- **Roteamento**: React Router DOM ^7.6.0
-- **Estado Global**: Zustand ^5.0.4
-- **PWA**: vite-plugin-pwa ^1.0.0 + Workbox ^7.3.0
-- **Persistência**: IDB ^8.0.3
+- atletas ativas e inativas;
+- agenda recorrente de treinos;
+- presença e ausência;
+- comunicação operacional com atletas;
+- histórico de frequência;
+- observação tática básica.
 
-#### Backend
-- **Auth + Banco**: Supabase (PostgreSQL + RLS) — `@supabase/supabase-js ^2.87.1`
-- **Sincronização legada**: Google Apps Script (JavaScript 1.0)
-- **Armazenamento legado**: Google Sheets (API v4)
+### 3.1 Dor operacional real do treinador
 
-#### Utilitários
-- **Formatação**: clsx ^2.1.1 (classname merger)
-- **Exportação**: XLSX ^0.18.5 (Excel/CSV)
-- **Criptografia**: Web Crypto API (nativa)
-- **HTTP**: Fetch API (nativa) + Supabase client
+Antes do CEPRAEA, o processo operacional do treinador dependia de:
 
-#### Testes
-- **Unit/Integration**: Vitest ^4.1.5 + jsdom ^29.1.1
-- **Cobertura**: @vitest/coverage-v8 ^4.1.5
-- **E2E**: Playwright (playwright.config.ts)
-- **SQL**: psql + arquivos `.test.sql` (RLS, migrations)
+- criação manual de planilhas para cada período de treino;
+- atualização recorrente de planilhas para marcar presença;
+- manutenção de histórico em Google Sheets por longos períodos;
+- mensagens no grupo de WhatsApp pedindo confirmação;
+- leitura manual das respostas das atletas em meio à conversa do grupo;
+- consolidação manual da informação para saber quem vai ao treino;
+- revisão manual de horários e datas dos treinos;
+- correção manual de treino marcado errado em feriado.
 
-#### DevOps
-- **Hospedagem**: Vercel
-- **Banco remoto**: Supabase Cloud (`fcnyjmrknqaomamdzabt.supabase.co`)
-- **CLI banco**: Supabase CLI ^2.98.1
-- **VCS**: Git/GitHub
-- **CI**: GitHub Actions (supabase-foundation.yml)
-- **Container**: Não utiliza (edge function via Vercel)
+Esse processo gerava um custo recorrente e improdutivo:
 
-### 3.2 Estrutura de Pastas e Organização do Código
+- o treinador gastava tempo atualizando planilhas há anos;
+- a conversa no WhatsApp enterrava a informação conforme novas mensagens apareciam;
+- a confirmação de presença perdia rastreabilidade;
+- os treinos exigiam atenção manual constante para não haver erro de agenda;
+- o treinador gastava energia com operação em vez de planejar treino, estudar e organizar melhor a equipe.
 
-```
-cepraea-pwa/
-├── public/                      # Assets estáticos
-│   ├── robots.txt
-│   ├── cepraea-logo.svg         # Logo CEPRAEA (fill=currentColor)
-│   └── cepraea-logomarca.svg    # Logomarca CEPRAEA (fill=currentColor)
-├── src/
-│   ├── App.tsx                  # Orquestrador de rotas (SPA root)
-│   ├── main.tsx                 # Entry point (React bootstrap)
-│   ├── index.css                # Tailwind + Custom styles
-│   ├── vite-env.d.ts           # Vite types
-│   │
-│   ├── assets/
-│   │   └── brand/              # Fontes SVG originais (fill="black")
-│   │       ├── CEPRAEA LOGO.svg
-│   │       └── CEPRAEA LOGOMARCA.svg
-│   │
-│   ├── db/
-│   │   └── index.ts            # IndexedDB schema v2 + operations
-│   │
-│   ├── types/
-│   │   └── index.ts            # Interfaces (Athlete, Training, Scout, etc.)
-│   │
-│   ├── lib/                     # Business logic (pure functions)
-│   │   ├── auth.ts             # PIN hash + session
-│   │   ├── holidays.ts         # Feriados + Páscoa
-│   │   ├── recurrence.ts       # Geração de treinos
-│   │   ├── sync.ts             # Push/Pull com Apps Script
-│   │   ├── export.ts           # CSV/Excel generation
-│   │   ├── whatsapp.ts         # WhatsApp messages
-│   │   └── utils.ts            # Formatação de datas/telefone
-│   │
-│   ├── stores/                  # Zustand stores (state + persistence)
-│   │   ├── athleteStore.ts
-│   │   ├── trainingStore.ts
-│   │   ├── attendanceStore.ts
-│   │   └── scoutStore.ts       # Scout: jogos + eventos
-│   │
-│   ├── features/                # Feature modules (by domain)
-│   │   ├── auth/
-│   │   │   └── pages/LoginPage.tsx
-│   │   ├── dashboard/
-│   │   │   └── pages/DashboardPage.tsx
-│   │   ├── athletes/
-│   │   │   ├── components/AthleteForm.tsx
-│   │   │   └── pages/
-│   │   │       ├── AthletesPage.tsx
-│   │   │       └── AthleteDetailPage.tsx
-│   │   ├── trainings/
-│   │   │   ├── components/TrainingForm.tsx + HolidayAlert.tsx
-│   │   │   └── pages/
-│   │   │       ├── TrainingsPage.tsx
-│   │   │       └── TrainingDetailPage.tsx
-│   │   ├── reports/
-│   │   │   └── pages/ReportsPage.tsx
-│   │   ├── export/
-│   │   │   └── pages/ExportPage.tsx
-│   │   ├── settings/
-│   │   │   └── pages/SettingsPage.tsx
-│   │   ├── confirm/
-│   │   │   └── pages/PublicConfirmPage.tsx
-│   │   └── scout/
-│   │       ├── constants.ts    # Sets, equipes, fases, sistemas, ações
-│   │       ├── components/EventForm.tsx
-│   │       └── pages/
-│   │           ├── ScoutGamesPage.tsx   # Lista de jogos
-│   │           └── ScoutLivePage.tsx    # Registro ao vivo de eventos
-│   │
-│   └── shared/
-│       ├── components/          # Reusable UI components
-│       │   ├── Badge.tsx
-│       │   ├── Button.tsx
-│       │   ├── CepraeaLogo.tsx      # SVG inline: símbolo CEPRAEA
-│       │   ├── CepraeaLogomarca.tsx # SVG inline: logomarca completa
-│       │   ├── ConfirmDialog.tsx
-│       │   ├── EmptyState.tsx
-│       │   ├── LoadingSpinner.tsx
-│       │   ├── Modal.tsx
-│       │   └── UpdatePrompt.tsx
-│       └── layouts/
-│           ├── AppLayout.tsx    # Header + Nav (com CepraeaLogomarca) + Outlet
-│           └── AuthGuard.tsx    # Middleware de autenticação
-│
-├── apps-script/
-│   └── Code.gs                  # Google Apps Script (endpoint)
-│
-├── icons/                       # PWA icons regenerados com identidade visual
-│   ├── icon-192.png            # Fundo roxo #1e1040 + logo lime #a3e635
-│   ├── icon-512.png
-│   ├── icon-maskable-192.png
-│   └── icon-maskable-512.png
-│
-├── .files/                      # Arquivos de referência do projeto (rastreados no git)
-│   └── scout.xlsx              # Planilha-base de referência para o módulo Scout
-│                               # Define estruturas de eventos, fases, sistemas e ações
-│
-├── .gitignore
-├── .gitattributes
-├── index.html                   # HTML base
-├── package.json                 # Dependências
-├── tsconfig.json               # TypeScript config
-├── tsconfig.node.json          # TypeScript config (build)
-├── vite.config.ts              # Vite config
-├── vercel.json                 # Vercel deployment
-└── CEPRAEA.md                  # Este documento
-```
+### 3.2 Problemas que o produto precisa resolver
 
-### 3.3 Padrões de Projeto Aplicados
+Os problemas atuais desse contexto são:
 
-| Padrão | Implementação | Benefício |
-|---|---|---|
-| **Repository Pattern** | IndexedDB abstrato via `db/index.ts` | Desacoplamento de persistência |
-| **Observer Pattern** | Zustand stores + React hooks | Reatividade automática |
-| **Factory Pattern** | Store methods (`add()`, `update()`) | Criação controlada de entidades |
-| **Singleton Pattern** | `getDB()` com lazy initialization | Única conexão IndexedDB |
-| **Module Pattern** | Lib functions (auth, holidays, sync) | Encapsulamento de lógica |
-| **Strategy Pattern** | Export functions (CSV vs XLSX) | Polimorfismo de formatação |
-| **Guard Pattern** | `AuthGuard` middleware | Validação de rotas |
-| **Provider Pattern** | Zustand stores como "providers" | Injeção de dependências |
+- processo manual e fragmentado;
+- baixa rastreabilidade;
+- alto risco de inconsistência entre presença informada e presença registrada;
+- dificuldade para operar com segurança sem uma base central;
+- dependência de soluções improvisadas para login, sync e confirmação.
 
-### 3.4 Estratégia de Modularização
+### 3.3 Exemplo concreto de erro recorrente
 
-O projeto segue **modularização por domínio (DDD-light)**:
+Treinos em feriado devem acontecer pela manhã.
 
-```
-Domínios:
-├── Auth (Autenticação)
-│   └── Responsabilidade: Hash PIN, sessão
-│   └── Arquivo: lib/auth.ts
-│
-├── Athlete (Atletas)
-│   ├── Store: athleteStore.ts
-│   ├── Types: Athlete, AthleteStatus
-│   └── Features: AthletesPage, AthleteForm, AthleteDetailPage
-│
-├── Training (Treinos)
-│   ├── Store: trainingStore.ts
-│   ├── Types: Training, TrainingStatus, TrainingType
-│   ├── Business: recurrence.ts, holidays.ts
-│   └── Features: TrainingsPage, TrainingForm, HolidayAlert
-│
-├── Attendance (Presença)
-│   ├── Store: attendanceStore.ts
-│   ├── Types: AttendanceRecord, AttendanceStatus
-│   └── Features: PublicConfirmPage (link público)
-│
-├── Reporting (Relatórios)
-│   ├── Calculations: attendanceStore methods
-│   ├── Types: FrequencyReport, TrainingSummary
-│   └── Features: ReportsPage
-│
-├── Scout (Reconhecimento Tático)
-│   ├── Store: scoutStore.ts
-│   ├── Types: ScoutGame, ScoutEvent, ScoutAthleteBlock, ScoutGameStatus
-│   ├── Constants: sets, equipes, fases, sistemas, laçados, resultados
-│   │             (fonte de verdade: .files/scout.xlsx)
-│   └── Features: ScoutGamesPage, ScoutLivePage, EventForm
-│
-├── Sync (Sincronização)
-│   ├── Business: sync.ts
-│   └── Features: SettingsPage (config)
-│
-├── Export (Exportação)
-│   ├── Business: export.ts
-│   └── Features: ExportPage
-│
-└── Shared (Componentes Reutilizáveis)
-    ├── UI: Button, Modal, Badge, CepraeaLogo, CepraeaLogomarca, etc.
-    └── Layout: AppLayout, AuthGuard
-```
+Sem apoio do sistema, o treinador pode marcar por engano um treino à noite, porque a agenda é montada manualmente. Quando isso acontece:
 
-**Benefício**: Fácil localizar código relacionado, reuso de tipos, escalabilidade.
+- as atletas já começam a se programar com base no horário errado;
+- o treinador precisa corrigir a informação depois;
+- em alguns casos precisa mudar o treino ou cancelar;
+- a confiança operacional da equipe cai;
+- tempo adicional é gasto apenas para reparar um erro evitável.
 
-### 3.5 Dependências Internas e Externas
+O CEPRAEA existe para resolver esse problema com um produto simples de operar, seguro o bastante para uso real e preparado para evolução.
 
-#### Externas (npm packages)
-```
-react@^19.1.0                    ← Framework principal
-react-dom@^19.1.0               ← Renderização DOM
-react-router-dom@^7.6.0         ← Roteamento SPA
-zustand@^5.0.4                  ← Estado global
-idb@^8.0.3                      ← IndexedDB wrapper
-@supabase/supabase-js@^2.87.1  ← Auth + banco remoto (Supabase)
-tailwindcss@^4.1.6              ← CSS framework
-tailwind-merge@^3.3.0           ← Classe merger
-lucide-react@^0.511.0           ← Ícones
-clsx@^2.1.1                     ← className utility
-xlsx@^0.18.5                    ← Excel/CSV export
-vite-plugin-pwa@^1.0.0          ← PWA builder
-workbox-window@^7.3.0           ← Service Worker
-typescript@^5.8.3               ← Type checking
-vite@^6.3.5                     ← Build tool
-@tailwindcss/vite@^4.1.6        ← Tailwind plugin
-@vitejs/plugin-react@^4.5.0     ← React HMR
-vitest@^4.1.5                   ← Testes unitários
-@vitest/coverage-v8@^4.1.5      ← Cobertura de testes
-jsdom@^29.1.1                   ← DOM simulado para testes
-@resvg/resvg-js@^2.6.2         ← Geração de ícones PWA
-```
+### 3.4 Valor gerado pelo produto
 
-#### Internas (módulos TypeScript)
-```
-src/db/
-  ↓ importado por
-src/stores/*
-  ↓ importado por
-src/features/*/pages/*.tsx
+O CEPRAEA deve gerar valor direto nestes pontos:
 
-src/lib/*
-  ↓ importado por
-src/features/* + src/stores/*
-
-src/types/index.ts
-  ↓ importado por
-tudo (tipos compartilhados)
-
-src/shared/
-  ↓ importado por
-src/features/* (componentes reutilizáveis)
-
-src/features/scout/constants.ts
-  ↓ importado por
-src/features/scout/pages/*.tsx + components/*.tsx
-```
-
-#### Dependências Assíncronas (Runtime)
-- **Supabase** (auth + banco): `fcnyjmrknqaomamdzabt.supabase.co` — requerido para atletas
-- **Google Apps Script** (optional): endpoint remoto para sync do técnico
-- **Google Fonts**: via Workbox cache
-- **WhatsApp Web**: links HTTPS para abrir chats
+- ganhar tempo operacional do treinador;
+- reduzir erro humano de agenda e presença;
+- preservar informação importante sem perdê-la no fluxo do WhatsApp;
+- organizar a equipe com mais clareza;
+- melhorar a comunicação de presença;
+- liberar tempo do treinador para atividades mais produtivas para a equipe.
 
 ---
 
-## 4. Backend (Lógica de Negócio)
+## 4. Usuários e perfis
 
-### 4.1 Arquitetura de Negócio
+### 4.1 Treinador
 
-CEPRAEA adota uma arquitetura **híbrida**: lógica de negócio no cliente com persistência local (IndexedDB), auth e banco centralizado via Supabase para atletas, e sincronização opcional com Google Apps Script para o técnico.
+Responsabilidades:
 
-```
-┌─ Local (Browser) ───┐    ┌─ Supabase (Cloud) ──────────┐
-│ IndexedDB           │    │ PostgreSQL + Auth            │
-│ • Lógica CRUD coach │    │ • athletes (email, user_id)  │
-│ • Cálculos          │←→  │ • RLS policies por equipe    │
-│ • Validações        │    │ • get_athlete_team_id() RPC  │
-└─────────────────────┘    └─────────────────────────────┘
-                                      ↑
-                              AtletaGuard (lazy-link)
-                                      │
-                            ┌─ Remote (Optional) ─┐
-                            │ Google Apps Script   │
-                            │ • Sync técnico       │
-                            │ • Persist to Sheets  │
-                            └──────────────────────┘
-```
+- entrar no painel administrativo;
+- cadastrar e manter atletas;
+- gerar e manter treinos;
+- registrar presença manual;
+- acompanhar frequência;
+- disparar fluxos de confirmação;
+- operar scout tático.
 
-### 4.2 Serviços e Operações de Negócio
+### 4.2 Atleta
 
-#### **CRUD de Atletas** (`athleteStore.ts`)
+Responsabilidades:
 
-```typescript
-// Read
-loadAll(): Promise<void>
-getById(id: string): Athlete | undefined
+- entrar no portal da atleta;
+- acessar seus treinos;
+- confirmar presença;
+- informar ausência quando permitido;
+- redefinir senha;
+- consultar seu próprio contexto.
 
-// Create
-add(data: Omit<Athlete, 'id' | 'createdAt' | 'updatedAt'>): Promise<Athlete>
+### 4.3 Administrador técnico do sistema
 
-// Update
-update(id: string, data: Partial<Athlete>): Promise<void>
-toggleStatus(id: string): Promise<void>
+Responsabilidades:
 
-// Delete
-remove(id: string): Promise<void>
+- configurar ambiente;
+- manter credenciais;
+- operar Supabase;
+- acompanhar rollout;
+- validar migração;
+- garantir integridade técnica do sistema.
 
-// Sync
-// Pull-before-push: só envia registros onde local.updatedAt > remote.updatedAt
-pushAllToRemote(config: SyncConfig): Promise<{ pushed: number; skipped: number }>
-syncFromRemote(config: SyncConfig): Promise<void>
-```
-
-#### **CRUD de Treinos** (`trainingStore.ts`)
-
-```typescript
-// Read
-loadAll(): Promise<void>
-getById(id: string): Training | undefined
-
-// Create
-add(data: Omit<Training, 'id' | 'createdAt' | 'updatedAt'>): Promise<Training>
-addExtra(data: omit): Promise<Training>
-// count = treinos gerados; synced = false se syncConfig ausente (sem credenciais)
-generateRecurring(): Promise<{ count: number; synced: boolean }>
-
-// Update
-update(id: string, data: Partial<Training>): Promise<void>
-updateStatus(id: string, status: TrainingStatus): Promise<void>
-
-// Delete
-remove(id: string): Promise<void>
-
-// Business Logic
-getConflicts(): HolidayConflict[]  // Treinos em feriados
-
-// Sync
-// Pull-before-push: só envia registros onde local.updatedAt > remote.updatedAt
-pushAllToRemote(config: SyncConfig): Promise<{ pushed: number; skipped: number }>
-syncFromRemote(config: SyncConfig): Promise<void>
-```
-
-#### **Registro de Presença** (`attendanceStore.ts`)
-
-```typescript
-// Read
-loadAll(): Promise<void>
-loadForTraining(treinoId: string): Promise<void>
-getForTraining(treinoId: string): AttendanceRecord[]
-getForAthlete(atletaId: string): AttendanceRecord[]
-
-// Create/Update
-upsert(
-  treinoId: string,
-  atletaId: string,
-  status: AttendanceStatus,
-  opts?: { justificativa?: string; confirmadoPelaAtleta?: boolean }
-): Promise<void>
-
-// Analytics
-getTrainingSummary(treinoId: string, totalAtivos: number): TrainingSummary
-getFrequencyReports(fromISO?: string, toISO?: string): FrequencyReport[]
-getAthleteFrequency(atletaId: string, fromISO?: string, toISO?: string): FrequencyReport
-```
-
-### 4.3 Modelos de Dados
-
-#### **Atleta**
-```typescript
-interface Athlete {
-  id: string              // UUID v4
-  nome: string            // Obrigatório
-  telefone: string        // Formato: 11987654321
-  categoria?: string      // Ex: "Sub-18", "Senior"
-  nivel?: string          // Ex: "Iniciante", "Intermediário"
-  status: AthleteStatus   // 'ativo' | 'inativo'
-  observacoes?: string    // Notas livres
-  createdAt: string       // ISO 8601
-  updatedAt: string       // ISO 8601
-}
-```
-
-#### **Treino**
-```typescript
-interface Training {
-  id: string              // UUID v4
-  tipo: TrainingType      // 'recorrente' | 'extra'
-  status: TrainingStatus  // 'agendado' | 'realizado' | 'cancelado'
-  data: string            // YYYY-MM-DD
-  horaInicio: string      // HH:MM
-  horaFim: string         // HH:MM
-  local?: string          // Descrição do local
-  observacoes?: string    // Notas
-  feriadoOrigem?: string  // Se em feriado, data ISO do feriado
-  criadoManualmente: boolean  // true se usuário criou, false se recorrente
-  createdAt: string       // ISO 8601
-  updatedAt: string       // ISO 8601
-}
-```
-
-#### **Registro de Presença**
-```typescript
-interface AttendanceRecord {
-  id: string              // Deterministico: "treinoId::atletaId"
-  treinoId: string        // Foreign key para Training
-  atletaId: string        // Foreign key para Athlete
-  status: AttendanceStatus // 'presente' | 'ausente' | 'justificado' | 'pendente'
-  justificativa?: string  // Motivo da ausência/justificativa
-  confirmadoPelaAtleta: boolean  // true se veio de link público
-  registradoEm: string    // ISO 8601 (timestamp do registro)
-}
-```
-
-#### **Feriado**
-```typescript
-interface Holiday {
-  data: string            // YYYY-MM-DD
-  nome: string            // Descrição
-  tipo: HolidayType       // 'nacional' | 'estadual' | 'municipal'
-}
-```
-
-#### **Scout — Jogo**
-```typescript
-type ScoutGameStatus = 'em_andamento' | 'finalizado'
-
-interface ScoutGame {
-  id: string
-  data: string              // "YYYY-MM-DD"
-  equipeAnalisada: string   // Ex: "CEPRAEA"
-  adversario: string        // Ex: "ADM Maricá"
-  local?: string
-  observacoes?: string
-  status: ScoutGameStatus
-  createdAt: string         // ISO 8601
-  updatedAt: string         // ISO 8601
-}
-```
-
-#### **Scout — Evento de Jogo**
-```typescript
-interface ScoutAthleteBlock {
-  atleta?: string
-  funcao?: string
-  categoria?: string
-  acao?: string
-  resultadoInd?: string
-}
-
-interface ScoutEvent {
-  id: string
-  jogoId: string             // Foreign key para ScoutGame
-  tempoJogo?: string         // Ex: "13:45"
-  set?: string               // Ex: "1º SET"
-  controleJogo?: string      // Ex: "FIM DO SET"
-  placarCEPRAEA: number
-  placarAdversario: number
-  posse?: string             // 'CEPRAEA' | 'Adversário'
-  faseJogo?: string          // Ex: "Ataque posicionado"
-  sistema?: string           // Ex: "Ataque 3:1 ESP central + pivô destra"
-  ladoAcao?: string
-  goleira?: string
-  reposicao?: string
-  ataques: ScoutAthleteBlock[]   // até 4
-  defesas: ScoutAthleteBlock[]   // até 3
-  analise?: string           // 'Positiva' | 'Neutra' | 'Negativa' | 'Revisar'
-  resultadoColetivo?: string // Ex: "Gol 2 pontos"
-  observacao?: string
-  revisarVideo: boolean
-  createdAt: string          // ISO 8601
-}
-```
-
-#### **Configurações da Aplicação**
-```typescript
-interface AppSettings {
-  nomeEquipe: string
-  nomeTecnico: string
-  telefoneTecnico: string
-  localPadrao: string
-  semanasFuturas: number  // Quantas semanas gerar treinos automáticos
-  pinHash: string         // SHA-256 do PIN
-  appUrl: string          // URL do app (para links públicos)
-  syncEndpointUrl?: string
-  syncSecret?: string
-  lastSyncAt?: string
-}
-```
-
-### 4.4 Regras de Negócio
-
-#### Geração de Treinos Recorrentes
-- **Padrão fixo**:
-  - Quinta-feira às 20:00-21:30
-  - Domingo às 07:30-09:00
-- **Prospectiva**: Próximas `semanasFuturas` (padrão 12)
-- **Não gerar**: Treinos no passado, duplicatas em mesma data/hora
-- **Marcação**: Se cair em feriado, marca `feriadoOrigem` para alertar
-
-#### Detecção de Conflitos com Feriados
-- **Algoritmo de Páscoa**: Meeus/Jones/Butcher para datas móveis
-- **Feriados cobertos**:
-  - Nacionais fixos (13) + móveis (5) = 18 por ano
-  - Estaduais (RJ): São Jorge (23/04)
-  - Municipais (Rio): São Sebastião (20/01)
-- **Sugestão de alternativas**: Sábado/segunda/domingo seguinte
-
-#### Cálculo de Frequência
-```
-Frequência % = (Presentes / Total de Treinos Realizados) * 100
-
-Período: Configurável por data início e fim (ISO 8601)
-Filtros: 
-  - Apenas treinos com status 'realizado'
-  - Apenas atletas com status 'ativo'
-  - Apenas registros com status final (não 'pendente')
-```
-
-#### Confirmação de Presença
-- **Via formulário admin**: Registra presença manualmente
-- **Via link público**: Atleta acessa `/confirmar/:treinoId/:atletaId`
-  - Marca `confirmadoPelaAtleta: true`
-  - Sincroniza se endpoint configurado
-- **Status disponíveis**: presente, ausente, justificado
-
-### 4.5 Validações
-
-#### Validação de Atleta
-```
-✓ Nome: obrigatório, min 3 chars, max 100
-✓ Telefone: obrigatório, 10-11 dígitos
-✓ Categoria: opcional
-✓ Nível: opcional
-✓ Status: enum (ativo | inativo)
-```
-
-#### Validação de Treino
-```
-✓ Data: obrigatório, YYYY-MM-DD, não no passado
-✓ Hora início: obrigatório, HH:MM, válido (00:00-23:59)
-✓ Hora fim: obrigatório, HH:MM, > hora início
-✓ Local: opcional
-✓ Tipo: enum (recorrente | extra)
-✓ Status: enum (agendado | realizado | cancelado)
-```
-
-#### Validação de PIN
-```
-✓ Comprimento: min 4 chars
-✓ Hashado com SHA-256 + salt "cepraea_salt_2025"
-✓ Comparação de hash para login
-```
-
-### 4.6 Sincronização Remota (Opcional)
-
-#### Google Apps Script Endpoint
-
-**Setup obrigatório**:
-1. Criar projeto em script.google.com
-2. Cole `apps-script/Code.gs`
-3. Gerar secret: `generateSecret()` (32 hex chars)
-4. Deploy como "Aplicativo da Web"
-5. Configurar em Settings > Sync
-
-**Protocolo**:
-```
-URL: https://script.google.com/macros/d/{...}/usercallback?...
-Query Params:
-  ├── secret: string (validação)
-  ├── action: string (ping | confirm | list)
-  └── [params específicos por ação]
-
-Ações:
-  ├── ping: Valida conexão e secret
-  ├── confirm: Envia 1 registro de presença (upsert)
-  └── list: Retorna registros remotos desde timestamp
-```
-
-**Exemplo: Confirmar Presença**
-```
-POST https://script.google.com/macros/d/.../usercallback
-?secret=abc123def...
-&action=confirm
-&treinoId=uuid-training
-&atletaId=uuid-athlete
-&nomeAtleta=Maria Silva
-&status=presente
-&timestamp=2025-04-29T14:30:00Z
-&origem=link
-
-Response:
-{
-  "ok": true,
-  "action": "created" | "updated"
-}
-```
-
-#### Estratégia de Sincronização
-- **Direção**: Bidirecional (push + pull)
-- **Push local → remoto**: Via `pushAllToRemote()` nos stores — padrão _pull-before-push_: busca `updatedAt` remotos, só envia registros onde `local.updatedAt > remote.updatedAt`. Evita sobrescrita de dados mais recentes no servidor.
-- **Pull remoto → local**: `syncFromRemote()` nos stores — baixa todos os registros remotos e faz upsert local
-- **Disparo manual**: Settings > "Sincronizar tudo agora" — executa push (athletes + trainings) **depois** pull (athletes + trainings + attendance). Exibe contagem separada: "X enviado(s), Y recebido(s)".
-- **Disparo automático no boot**: `main.tsx` inicia pull em background após renderização inicial (não-bloqueante). Se `syncConfig` não estiver configurado, o pull é silenciosamente pulado.
-- **Conflito**: Pull-before-push no envio. No recebimento: remoto sobrescreve local (last write wins por `updatedAt`).
-- **Aviso de sincronização pendente**: `generateRecurring()` retorna `{ synced: false }` quando `syncConfig` ausente; `TrainingsPage` exibe toast de 5s orientando o usuário a ir em Configurações.
-
-> **Nota:** O Apps Script (`Code.gs`) **não compara `updatedAt`** antes de sobrescrever — aceita qualquer upsert recebido. A proteção contra sobrescrita indevida é responsabilidade do cliente via `pushAllToRemote()`.
-
-### 4.7 Eventos do Sistema
-
-| Evento | Trigger | Ação |
-|---|---|---|
-| `athlete:created` | usuário cria atleta | Log + Store + IndexedDB |
-| `athlete:updated` | usuário edita atleta | Log + Store + IndexedDB |
-| `athlete:deleted` | usuário remove atleta | Log + Store + IndexedDB |
-| `training:generated` | generar recorrentes | Count + Store + IndexedDB |
-| `training:conflict` | treino em feriado | Alert no Dashboard |
-| `attendance:confirmed` | presença registrada | Sync push (opcional) |
-| `attendance:pendente` | treino realizado mas sem presença | Alerta visual |
-| `sync:success` | push para Apps Script bem-sucedido | Update lastSyncAt |
-| `sync:error` | falha na sincronização | Toast error |
-| `training:sync-pending` | `generateRecurring()` sem syncConfig | Toast 5s orientando a ir em Configurações |
-| `sw:updated` | Service Worker novo ativou automaticamente | Toast 4s: "App atualizado para a versão mais recente." |
+Esse perfil não precisa existir como papel separado dentro do produto no MVP. Ele pode ser exercido pelo próprio time técnico.
 
 ---
 
-## 5. Frontend
+## 5. Princípios do produto
 
-### 5.1 Estrutura da Interface
+O CEPRAEA deve seguir estes princípios:
 
-```
-App (Router)
-├── LoginPage (pública)
-│   └── PIN form + CepraeaLogo
-│
-├── AuthGuard (private)
-│   └── AppLayout
-│       ├── Sidebar desktop (CepraeaLogomarca + nav)
-│       ├── Navigation (bottom tabs mobile)
-│       └── Content Area (rotas privadas)
-│           ├── DashboardPage
-│           ├── AthletesPage
-│           │   └── AthleteDetailPage
-│           ├── TrainingsPage
-│           │   └── TrainingDetailPage
-│           ├── ScoutGamesPage  (/scout)
-│           │   └── ScoutLivePage (/scout/:id/ao-vivo)
-│           ├── ReportsPage
-│           ├── ExportPage (CepraeaLogomarca no header)
-│           └── SettingsPage
-│
-└── PublicConfirmPage (link: /confirmar/:treinoId/:atletaId)
-    └── Formulário de confirmação
-```
-
-### 5.2 Fluxos Principais de Navegação
-
-#### **Fluxo 1: Primeiro Acesso (Setup)**
-```
-Acessa app → LoginPage → Insere PIN 2x → Valida confirmação → Home → DashboardPage
-```
-
-#### **Fluxo 2: Login Diário**
-```
-Acessa app → LoginPage → Insere PIN → Valida hash → Home → DashboardPage
-```
-
-#### **Fluxo 3: Gerenciar Treinos**
-```
-DashboardPage → "Treinos" → TrainingsPage
-  ├── Gerar automáticos → Upsert N treinos → Refresh lista
-  ├── Criar manual → TrainingForm → Upsert 1 treino
-  ├── Resolver conflito → HolidayAlert → Sugerir datas
-  └── Editar/Deletar → TrainingDetailPage → Update/Remove
-```
-
-#### **Fluxo 4: Registrar Presença**
-```
-TrainingDetailPage → Formulário de atletas → Checkbox status → Upsert attendanceStore → Sync (opcional)
-```
-
-#### **Fluxo 5: Atleta Confirma (Link Público)**
-```
-Recebe link WhatsApp → /confirmar/:treinoId/:atletaId → PublicConfirmPage → Botões (Vou/Não vou) → Upsert + Sync → Sucesso
-```
-
-#### **Fluxo 6: Consultar Relatórios**
-```
-DashboardPage → "Relatórios" → ReportsPage → Filtro período → Calcula frequência % → Exibe tabela
-```
-
-#### **Fluxo 7: Exportar Dados**
-```
-DashboardPage → "Exportar" → ExportPage → Seleciona tipo (CSV/Excel) → Download
-```
-
-### 5.3 Componentes Principais
-
-#### **Compartilhados** (`shared/components/`)
-
-| Componente | Props | Casos de Uso |
-|---|---|---|
-| `Button` | `variant` (primary, secondary, warning), `size` (sm, md, lg), `disabled` | CTA, submit, delete |
-| `Modal` | `open`, `onClose`, `title`, `children` | Formulários, confirmações |
-| `Badge` | `variant` (success, warning, error, neutral, lime, yellow, red, gray), `children` | Status labels, análise scout |
-| `ConfirmDialog` | `open`, `onConfirm`, `title`, `description` | Delete, cancel actions |
-| `LoadingSpinner` | `size` (sm, md, lg) | Async operations (exibe CepraeaLogo acima) |
-| `EmptyState` | `title`, `description`, `icon` | Listas vazias |
-| `UpdatePrompt` | Toast informativo pós-atualização automática do SW | Exibido 4s após reload por novo SW (`autoUpdate`) |
-| `CepraeaLogo` | `className?` | Símbolo/ícone CEPRAEA (SVG inline, `fill=currentColor`) |
-| `CepraeaLogomarca` | `className?` | Logomarca completa CEPRAEA (SVG inline, `fill=currentColor`) |
-
-#### **Layout** (`shared/layouts/`)
-
-| Componente | Responsabilidade |
-|---|---|
-| `AppLayout` | Header + Navigation + Outlet |
-| `AuthGuard` | Validate session + redirect |
-
-#### **Feature Específicos**
-
-| Feature | Componentes |
-|---|---|
-| auth | LoginPage (com CepraeaLogo), PIN form |
-| athletes | AthletesPage, AthleteDetailPage, AthleteForm |
-| trainings | TrainingsPage, TrainingDetailPage, TrainingForm, HolidayAlert |
-| reports | ReportsPage (com filtros de período) |
-| export | ExportPage (cabeçalho com CepraeaLogomarca, CSV/Excel) |
-| settings | SettingsPage (PIN, URLs, sync config) |
-| confirm | PublicConfirmPage (link público) |
-| scout | ScoutGamesPage (lista de jogos), ScoutLivePage (registro ao vivo), EventForm |
-
-### 5.4 Gerenciamento de Estado
-
-#### **Global State (Zustand Stores)**
-```typescript
-// Hook usage
-const athletes = useAthleteStore((s) => s.athletes)
-const { add, update, remove } = useAthleteStore()
-
-// Persist automaticamente em IndexedDB
-// Carregado na bootstrap via loadAll()
-```
-
-#### **Local State (React.useState)**
-- Formulários (validação, erros)
-- UI (modais abertos, abas ativas)
-- Filtros (período, busca)
-
-#### **Cache de Queries**
-- `useMemo` para cálculos derivados (frequência, summaries)
-- Recomputa quando stores mudam
-
-### 5.5 Integração com APIs
-
-#### **Leitura de Store**
-```typescript
-// Em componentes
-const athletes = useAthleteStore((s) => s.athletes)
-const training = useTrainingStore((s) => s.getById(id))
-const summary = useAttendanceStore((s) => s.getTrainingSummary(id, count))
-```
-
-#### **Escrita de Store**
-```typescript
-// Chama action que faz persist em IndexedDB
-await useAthleteStore.getState().add({ nome, telefone, ... })
-await useTrainingStore.getState().generateRecurring()
-await useAttendanceStore.getState().upsert(treinoId, atletaId, 'presente')
-```
-
-#### **Sincronização Remota**
-```typescript
-// Em components que precisam sync
-import { pushConfirmation } from '@/lib/sync'
-
-await pushConfirmation(config, {
-  treinoId: training.id,
-  atletaId: athlete.id,
-  nomeAtleta: athlete.nome,
-  status: 'presente',
-  origem: 'link'
-})
-```
-
-### 5.6 Responsividade e Acessibilidade
-
-#### Responsive Design
-- **Mobile-first**: Tailwind breakpoints (sm, md, lg, xl)
-- **Viewport**: `<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />`
-- **Safe areas**: iOS notch support via `viewport-fit=cover`
-
-#### Acessibilidade
-- ✓ Alt text em ícones (via `aria-hidden` em decorativos)
-- ✓ Contraste WCAG AA em cores principais (azul/branco)
-- ✓ Tamanho mínimo de botão: 44x44px (thumb-friendly)
-- ✓ Rótulos em formulários (`<label htmlFor>`)
-- ⚠️ Pendente: Testes com screen readers, ARIA roles completos
-
-#### Temas
-- Dark mode: Suportado via Tailwind (classe `dark:`)
-- Light mode: Padrão (cores em `tailwind.config.ts`)
+1. **Fonte de verdade única:** dados operacionais do MVP não podem depender de múltiplas verdades concorrentes.
+2. **Segurança pragmática:** autenticação real, escopo de dados por usuário e ausência de segredos no frontend.
+3. **Fluxo real antes de conveniência:** o produto não pode simular comportamento para “parecer pronto”.
+4. **Baixa fricção para atleta:** login, primeiro acesso e confirmação de presença devem ser simples.
+5. **Operação clara para treinador:** o treinador deve entender quem está vinculada, quem confirmou e o estado real de cada treino.
+6. **Evolução segura:** o MVP deve permitir expansão sem reabrir a base de auth e presença.
+7. **Economia real de tempo:** o sistema só cumpre seu papel se reduzir trabalho manual recorrente do treinador.
+8. **Informação encontrável:** presença e agenda não podem depender de memória de grupo de WhatsApp.
 
 ---
 
-## 6. Banco de Dados
+## 6. Estado atual do produto em maio de 2026
 
-### 6.1 Modelo Conceitual
+Esta seção existe para impedir documentação mentirosa.
 
-> O sistema possui dois níveis de persistência: **IndexedDB** (local, no dispositivo do técnico) e **Supabase PostgreSQL** (remoto, para auth + RLS de atletas).
+### 6.1 O que já está estabelecido
 
-#### IndexedDB (local — coach)
+- autenticação do treinador por email e senha via Supabase;
+- autenticação da atleta por email e senha via Supabase;
+- redefinição de senha da atleta via fluxo padrão do Supabase;
+- `AtletaGuard` com vínculo por `user_id` e fallback de primeiro login por email;
+- rotas dedicadas para portal da atleta;
+- camada Supabase com schema, RLS e RPCs já existente;
+- fluxo público de confirmação por token Supabase já presente no produto;
+- exportação local de dados;
+- módulo de scout tático no frontend.
 
-```
-┌─────────────┐
-│   Athlete   │
-├─────────────┤
-│ id (PK)     │
-│ nome        │
-│ telefone    │
-│ email       │ ← novo (migration 0006)
-│ categoria   │
-│ nível       │
-│ status      │
-│ createdAt   │
-│ updatedAt   │
-└──────┬──────┘
-       │ 1
-       │
-       ├──────────────┐
-       │              │
-       │ 1..N         │ 1..N
-       ↓              ↓
-┌──────────────┐  ┌─────────────────┐
-│   Training   │  │ AttendanceRecord│
-├──────────────┤  ├─────────────────┤
-│ id (PK)      │  │ id (PK)         │
-│ tipo         │  │ treinoId (FK)   │
-│ status       │  │ atletaId (FK)   │
-│ data (IDX)   │  │ status          │
-│ horaInicio   │  │ justificativa   │
-│ horaFim      │  │ confirmadoAtleta│
-│ local        │  │ registradoEm    │
-│ feriadoOrigem│  └─────────────────┘
-│ criadoManual │
-│ createdAt    │
-│ updatedAt    │
-└──────────────┘
-       ↓
-     1│
-      └──────────────┐
-                     │ múltiplos
-                     ↓
-            ┌─────────────────┐
-            │   Holiday       │
-            ├─────────────────┤
-            │ data (PK)       │
-            │ nome            │
-            │ tipo (nacional  │
-            │      estadual   │
-            │      municipal) │
-            └─────────────────┘
-```
+### 6.2 O que ainda não está concluído
 
-#### Supabase PostgreSQL (remoto — atletas)
+- migração de `athletes`, `trainings` e `attendance` para Supabase como fonte principal de operação;
+- remoção completa do caminho legado de sync;
+- cutover final de dados legados;
+- endurecimento final dos E2E do MVP;
+- limpeza final de runtime legado.
 
-```
-┌──────────────────────────┐    ┌───────────────────┐
-│ athletes (Supabase)      │    │  auth.users       │
-├──────────────────────────┤    ├───────────────────┤
-│ id          uuid PK      │    │ id   uuid PK      │
-│ team_id     uuid FK      │    │ email text        │
-│ nome        text         │←→  │ encrypted_password│
-│ email       text         │    │ ...               │
-│ user_id     uuid NULL FK │    └───────────────────┘
-│ telefone    text         │
-│ categoria   text         │    7 RLS Policies:
-│ nivel       text         │    • athlete_select_own_record
-│ status      text         │    • athlete_select_by_email_for_linking
-│ created_at  timestamptz  │    • athlete_link_user_id
-│ updated_at  timestamptz  │    • athlete_select_team_athletes
-└──────────────────────────┘    • athlete_select_team_trainings
-                                • athlete_insert_own_attendance
-                                • athlete_update_own_attendance
+### 6.3 O que não faz parte do contrato oficial do produto
 
-Índices:
-• athletes_user_id_key  — UNIQUE(user_id) NULLS NOT DISTINCT
-• athletes_team_email_key — UNIQUE(team_id, lower(email))
+As implementações legadas abaixo podem ainda existir no repositório durante a migração, mas **não fazem parte do contrato oficial do produto final**:
 
-RPC:
-• get_athlete_team_id() SECURITY DEFINER → uuid
-```
-
-### 6.2 Entidades Principais
-
-| Entidade | Chave Primária | Índices | Relacionamento |
-|---|---|---|---|
-| **Athlete** (IndexedDB) | `id` (UUID) | - | 1:N com Attendance |
-| **Training** (IndexedDB) | `id` (UUID) | `data` (query por período) | 1:N com Attendance |
-| **AttendanceRecord** (IndexedDB) | `id` (composto: `treinoId::atletaId`) | `treinoId`, `atletaId` | N:1 com Athlete + Training |
-| **Settings** (IndexedDB) | `key` (string) | - | Key-value store |
-| **athletes** (Supabase) | `id` (UUID) | `user_id` UNIQUE, `(team_id, lower(email))` UNIQUE | N:1 com auth.users |
-
-### 6.3 Schema IndexedDB
-
-#### Object Store: `athletes`
-```typescript
-createObjectStore('athletes', { keyPath: 'id' })
-
-Índices: Nenhum (queries por ID apenas)
-Registros típicos: 50-500
-```
-
-#### Object Store: `trainings`
-```typescript
-createObjectStore('trainings', { keyPath: 'id' })
-  .createIndex('by-data', 'data')  // Para queries de período
-
-Índices:
-  - by-data: Permite buscar treinos entre 2 datas
-Registros típicos: 100-1000 (12 semanas * 2 treinos/semana * N anos)
-```
-
-#### Object Store: `attendance`
-```typescript
-createObjectStore('attendance', { keyPath: 'id' })
-  .createIndex('by-treino', 'treinoId')  // Para listar atletas num treino
-  .createIndex('by-atleta', 'atletaId')  // Para listar treinos de 1 atleta
-
-Índices:
-  - by-treino: Queries tipo getTrainingSummary
-  - by-atleta: Queries tipo getAthleteFrequency
-Registros típicos: 5000-50000 (treinos * atletas)
-```
-
-#### Object Store: `settings`
-```typescript
-createObjectStore('settings', { keyPath: 'key' })
-
-Registros conhecidos:
-  - pinHash (string)
-  - appSettings (AppSettings)
-  - lastSyncAt (string)
-  - syncSecret (string)
-```
-
-#### Object Store: `scoutGames` _(novo — DB v2)_
-```typescript
-createObjectStore('scoutGames', { keyPath: 'id' })
-  .createIndex('by-data', 'data')  // Para ordenar/filtrar por data
-
-Índices:
-  - by-data: Listagem cronológica de jogos
-Registros típicos: 10-200
-```
-
-#### Object Store: `scoutEvents` _(novo — DB v2)_
-```typescript
-createObjectStore('scoutEvents', { keyPath: 'id' })
-  .createIndex('by-jogo', 'jogoId')  // Para buscar todos eventos de um jogo
-
-Índices:
-  - by-jogo: Timeline de eventos do ScoutLivePage
-Registros típicos: 50-2000 (jogos * eventos/jogo)
-```
-
-### 6.4 Operações de Query Comuns
-
-```typescript
-// Read single
-const athlete = await db.get('athletes', id)
-
-// Read all
-const athletes = await db.getAll('athletes')
-
-// Read by index
-const trainingsByDate = await db.getAllFromIndex('trainings', 'by-data')
-const attendanceForTraining = await db.getAllFromIndex('attendance', 'by-treino', treinoId)
-
-// Write
-await db.put('athletes', athleteObject)
-
-// Delete
-await db.delete('athletes', id)
-
-// Transaction
-const tx = db.transaction(['athletes', 'trainings'], 'readwrite')
-await tx.objectStore('athletes').put(athlete)
-await tx.objectStore('trainings').put(training)
-await tx.done
-```
-
-### 6.5 Índices
-
-| Store | Nome | Campo | Uso |
-|---|---|---|---|
-| trainings | `by-data` | `data` (YYYY-MM-DD) | Filtro período, paginação |
-| attendance | `by-treino` | `treinoId` | Resumo do treino, marcação presença |
-| attendance | `by-atleta` | `atletaId` | Histórico de frequência |
-| scoutGames | `by-data` | `data` (YYYY-MM-DD) | Lista cronológica de jogos |
-| scoutEvents | `by-jogo` | `jogoId` | Timeline de eventos de um jogo |
-
-### 6.6 Estratégia de Migração
-
-**Versão 1 (Inicial)**
-- DB_VERSION = 1
-- Object stores: `athletes`, `trainings`, `attendance`, `settings`
-
-**Versão 2 (Atual)**
-- DB_VERSION = 2
-- Adicionados: `scoutGames` (idx: by-data) e `scoutEvents` (idx: by-jogo)
-- IDB migrou automáticamente via `upgrade()` handler (sem perda de dados)
-
-**Futuro (v3+)**
-- Incrementar `DB_VERSION`
-- Adicionar novo object store em `upgrade()` handler
-- IDB auto-migra dados sem perda
-
-### 6.7 Estratégia de Backup e Retenção
-
-#### Backup Local
-- **Frequência**: Contínuo (cada operação escreve em IndexedDB)
-- **Retenção**: Até limite de cota do navegador (~50MB+)
-- **Exportação manual**: Via ExportPage (CSV/Excel)
-
-#### Backup Remoto (Opcional)
-- **Via Google Apps Script**: Confirmações de presença em Google Sheets
-- **Frequência**: Apenas de registros confirmados
-- **Retenção**: Indefinida (Google Sheets)
-
-#### Política de Retenção
-- **Dados locais**: Sem exclusão automática (usuário decide)
-- **Limpeza manual**: Settings > "Limpar dados locais" (pendente de implementação)
-- **Dados remotos**: Às vezes nos Sheets (usuário gerencia)
+- Google Apps Script como dependência operacional oficial;
+- Google Sheets como base oficial de dados;
+- login por PIN;
+- `sessionStorage` como mecanismo oficial de autenticação;
+- IndexedDB como fonte principal de verdade do MVP.
 
 ---
 
-## 7. Segurança
+## 7. Objetivo do MVP v1.0
 
-### 7.1 Autenticação
+O objetivo do MVP v1.0 é colocar o CEPRAEA em uso real para atletas e treinador com um núcleo confiável de operação.
 
-O sistema possui **dois modelos de autenticação** separados por perfil:
+No ponto de vista do treinador, o MVP precisa trocar um processo de:
 
-#### Autenticação do Técnico (coach)
-- **Tipo**: PIN + Hash SHA-256 (sem usuário/senha)
-- **Fluxo**:
-  1. Primeiro acesso: Insere PIN 2x (criação)
-  2. Acesso seguinte: Insere PIN 1x (verificação)
+- planilha manual;
+- mensagens dispersas;
+- conferência humana de resposta;
+- correção manual de agenda;
 
-```typescript
-// Hash
-const hash = await crypto.subtle.digest('SHA-256',
-  encoder.encode(pin + 'cepraea_salt_2025')
-)
-// Sessão — session-only, limpo ao fechar aba
-sessionStorage.setItem('cepraea_session', '1')
-```
+por um processo de:
 
-- ✓ SHA-256: 256-bit, resistente a collision
-- ✓ Salt: evita rainbow tables
-- ✓ SessionStorage: sem persistência entre sessões
-- ⚠️ PIN pode ser bruteforce se o salt for conhecido
+- cadastro único da atleta;
+- agenda organizada;
+- confirmação rastreável;
+- presença consolidada;
+- consulta rápida do estado real do treino.
 
-#### Autenticação do Atleta (migration 0006 — CEPR-0028/0029)
-- **Tipo**: Email + senha via Supabase Auth (JWT)
-- **Guard**: `AtletaGuard.tsx` — hook React com lazy-link automático
-- **Fluxo**:
-  1. `supabase.auth.signInWithPassword({ email, password })`
-  2. `AtletaGuard` busca atleta por `user_id` (fast path)
-  3. Se não encontrado → busca por `email` onde `user_id IS NULL` (first-login)
-  4. Se encontrado → `UPDATE athletes SET user_id = auth.user.id` (lazy-link)
-  5. Estados: `loading | found | not-found | unauthenticated`
-- **Reset de senha**: `/atleta/nova-senha` → `supabase.auth.updateUser`
+### 7.1 Resultado esperado
 
-```typescript
-// AtletaGuard — fast path
-const { data: { user } } = await supabase.auth.getUser()
-const { data: athlete } = await supabase
-  .from('athletes')
-  .select('id, team_id')
-  .eq('user_id', user.id)
-  .single()
-```
+Ao final do MVP v1.0:
 
-- ✓ JWT gerenciado pelo Supabase (sem tokens no código)
-- ✓ RLS no banco — atleta só acessa dados da própria equipe
-- ✓ Lazy-link: atletas criados antes da migration são vinculados no primeiro login
-- ✓ `VITE_SUPABASE_PUBLISHABLE_KEY` — chave anon pública (não secreta)
+- o treinador acessa o painel por Supabase Auth;
+- a atleta acessa seu portal por Supabase Auth;
+- o cadastro de atleta comporta vínculo de conta;
+- treinos do MVP têm persistência central;
+- presença manual e confirmação da atleta convergem no mesmo registro;
+- o painel reflete presença real sem divergência silenciosa;
+- o sistema pode ser validado por testes e scripts objetivos;
+- o legado não fica no caminho crítico.
 
-### 7.2 Autorização
+### 7.2 Definição de pronto do produto
 
-#### Técnico (sessão local)
-- **Modelo**: sem roles — acesso tudo ou nada via `AuthGuard`
-- **Controle**: `isAuthenticated()` verifica `sessionStorage`
+O MVP v1.0 só existe quando todas as condições abaixo forem verdadeiras:
 
-```typescript
-export function AuthGuard() {
-  if (!isAuthenticated()) return <Navigate to="/login" replace />
-  return <Outlet />
-}
-```
-
-#### Atleta (Supabase RLS)
-- **Modelo**: Row-Level Security no PostgreSQL por `team_id` e `user_id`
-- **Controle**: `AtletaGuard` + 7 políticas RLS na migration 0006
-
-| Política | Permite |
-|---|---|
-| `athlete_select_own_record` | Atleta lê apenas seu próprio registro |
-| `athlete_select_by_email_for_linking` | Busca por email (lazy-link) |
-| `athlete_link_user_id` | UPDATE próprio `user_id` (apenas uma vez) |
-| `athlete_select_team_athletes` | Lê atletas da mesma equipe |
-| `athlete_select_team_trainings` | Lê treinos da equipe |
-| `athlete_insert_own_attendance` | INSERT de presença própria |
-| `athlete_update_own_attendance` | UPDATE de presença própria |
-
-#### Rotas por perfil
-```
-Públicas:    /login, /atleta/login, /atleta/nova-senha,
-             /confirmar/:treinoId/:atletaId
-Técnico:     /dashboard, /atletas, /treinos, /relatorios, ...
-Atleta:      /atleta/treinos, /atleta/treinos/:id, /atleta/perfil
-```
-
-### 7.3 Controle de Acesso
-
-#### Nível de Aplicação
-- **Público**: LoginPage, PublicConfirmPage
-- **Privado**: Todas as outras rotas
-- **Verificação**: AuthGuard middleware
-
-#### Nível de API (Stores)
-- Sem autenticação adicional (store methods são síncronos)
-- Validação de dados em entrada (formulários)
-
-### 7.4 Criptografia
-
-#### Em Transit
-- **HTTPS obrigatório** em Vercel (SSL/TLS)
-- **Google Fonts**: Cache via HTTPS
-- **Sync**: HTTPS + secret em query (não ideal para dados sensíveis)
-
-#### Em Repouso
-- **IndexedDB**: Sem criptografia (storage local do navegador)
-- **PIN Hash**: SHA-256 (one-way)
-- **SessionStorage**: Sem criptografia (memória do navegador)
-
-#### Recomendação Futura
-- Adicionar criptografia AES-256-GCM para IndexedDB (crypto-js)
-- Usar Bearer token + HTTPS para sync (não query params)
-
-### 7.5 Proteção Contra Ataques Comuns
-
-| Ataque | Mitigação | Status |
-|---|---|---|
-| **XSS** | React sanitização automática + CSP headers | ✓ Implementado |
-| **CSRF** | GET-only sync endpoint (Apps Script) | ⚠️ Parcial |
-| **SQL Injection** | IndexedDB não permite queries SQL | ✓ N/A |
-| **Brute Force PIN** | Sem rate limiting (implementar futuro) | ⚠️ Pendente |
-| **Session Hijacking** | SessionStorage + HTTPS | ✓ Implementado |
-| **Man-in-the-Middle** | HTTPS obrigatório | ✓ Implementado |
-| **Insecure Deserialization** | JSON parsing seguro | ✓ Implementado |
-
-### 7.6 Gestão de Segredos
-
-#### Segredos Necessários
-- **syncSecret**: 32 hex chars (gerado aleatoriamente)
-- **pinHash**: SHA-256 (computado localmente)
-
-#### Armazenamento
-- **syncSecret**: IndexedDB (settings) + documentação setup (manual)
-- **pinHash**: IndexedDB (settings)
-- **Nenhum secret em código** (hardcoded): ✓ Implementado
-
-#### Rotação
-- **PIN**: Usuário pode alterar em Settings
-- **Sync Secret**: Regenerar em Settings e atualizar Apps Script
-
-### 7.7 LGPD/GDPR Compliance
-
-#### Dados Pessoais Coletados
-- Nome
-- Telefone
-- Status de atividade
-- Registros de presença
-- Data/hora
-
-#### Direitos do Usuário
-- **Acesso**: ExportPage permite baixar todos os dados
-- **Retificação**: Update em AthletesPage
-- **Exclusão**: Delete em AthletesPage (soft delete via status = inativo)
-- **Portabilidade**: ExportPage (CSV/Excel)
-
-#### Compliance
-- ✓ Consentimento: Implícito (PIN necessário)
-- ✓ Direito de esquecimento: Implementável (delete + purge IndexedDB)
-- ✓ Notificação**: Pendente (política de privacidade)
-- ✓ Data Protection Officer: Não aplicável (sem servidor central)
-
-#### Recomendações
-- Adicionar Política de Privacidade (site)
-- Implementar "Right to be forgotten" completo
-- Log de acessos para auditoria
-
-### 7.8 Auditoria e Rastreabilidade
-
-#### O que é Registrado
-- **Registros IndexedDB**: `createdAt`, `updatedAt` (timestamps)
-- **Sync**: Timestamp em cada confirmação
-- **Não há logs centralizados** (tudo local)
-
-#### Auditoria de Alterações
-- **Difícil rastrear quem alterou o quê** (sem multi-user)
-- **Solução**: Implementar journal/transaction log
-
-#### Recomendação Futura
-- Adicionar campo `editadoPor` em registros críticos
-- Manter histórico de alterações em tabela separada
+1. o sistema executa sem erro;
+2. o sistema aplica autenticação real para treinador e atleta;
+3. o sistema aplica isolamento de acesso coerente com o escopo do usuário;
+4. os dados operacionais do MVP usam Supabase como fonte principal;
+5. a presença por treinador, atleta e token converge no mesmo modelo;
+6. não há dependência operacional obrigatória de Apps Script ou Google Sheets;
+7. não há comportamento falso no lugar de persistência real;
+8. o sistema está validado por testes e gate final verificável;
+9. a documentação mínima de operação está atualizada;
+10. o produto está apto a uso real e evolução segura.
 
 ---
 
-## 8. Infraestrutura e DevOps
+## 8. Escopo do MVP v1.0
 
-### 8.1 Ambientes
+### 8.1 Incluído no MVP
 
-#### Desenvolvimento
-- **Hospedagem**: Local (localhost:5173 via Vite)
-- **Database local**: IndexedDB no navegador
-- **Database remoto**: Supabase local (`supabase start` → porta 54322)
-- **Sync legado**: Google Apps Script (configurável)
-- **Build**: `npm run dev`
-- **Env**: `.env.local` com `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_TEAM_ID`
+#### 8.1.1 Acesso e identidade
 
-#### Homologação (Staging)
-- **Sugestão**: Branch `staging`, deploy em Vercel preview + Supabase preview branch
+- login do treinador por email e senha;
+- login da atleta por email e senha;
+- primeiro acesso da atleta;
+- redefinição de senha da atleta;
+- vínculo de atleta com conta autenticada;
+- bloqueio de acesso quando a usuária autenticada não corresponde a uma atleta válida.
 
-#### Produção
-- **Hospedagem**: Vercel (zero-config, auto-deploy de `main`)
-- **Domain**: cepraea.vercel.app ou customizado
-- **Database local**: IndexedDB no dispositivo do técnico
-- **Database remoto**: Supabase Cloud `fcnyjmrknqaomamdzabt.supabase.co`
-- **Auth**: Supabase Auth (email+senha para atletas)
-- **Sync legado**: Google Apps Script endpoint (URL remota)
-- **Build**: `npm run build`
-- **Cache**: Vercel Edge + Workbox SW
-- **Migrations**: aplicadas via `supabase db push` (6 migrations — 0001→0006)
+#### 8.1.2 Gestão de atletas
 
-### 8.2 Cloud e Servidor
+- cadastro de atleta;
+- edição de atleta;
+- ativação e inativação;
+- armazenamento de nome, email, telefone, categoria, nível e observações;
+- visualização do estado de vínculo da conta da atleta.
 
-#### Hospedagem Principal
-- **Plataforma**: Vercel
-- **Região**: Automática (geo-distribuído)
-- **CDN**: Vercel Edge Network
-- **TLS/SSL**: Automático (Let's Encrypt)
-- **Uptime SLA**: 99.9%
+#### 8.1.3 Gestão de treinos
 
-#### Banco de Dados
-- **Local**: IndexedDB (cliente-centric, no dispositivo)
-- **Remoto**: Supabase PostgreSQL 15 (gerenciado)
-  - Região: `sa-east-1` (São Paulo)
-  - Plano: Free tier (suficiente para o porte atual)
-  - Backup: automático pelo Supabase (daily)
-- **Legado**: Google Sheets via Apps Script (sync opcional do técnico)
+- criação de treino;
+- edição de treino;
+- visualização de agenda;
+- geração recorrente de treinos;
+- detecção de conflito com feriados;
+- detalhamento do treino.
 
-#### Configuração DNS
-- **Vercel**: Automática ou custom
-- **Email**: Não aplicável
+#### 8.1.4 Presença
 
-### 8.3 Containers e Orquestração
+- marcação manual pelo treinador;
+- confirmação pela atleta no portal;
+- confirmação pública por token;
+- justificativa de ausência quando suportada pelo fluxo;
+- visualização consolidada de presença no detalhe do treino;
+- leitura de frequência e resumo em cima do mesmo conjunto final de dados.
 
-#### Docker (Opcional para desenvolvimento)
-```dockerfile
-FROM node:22-alpine
-WORKDIR /app
-COPY package.json .
-RUN npm install
-COPY . .
-EXPOSE 5173
-CMD ["npm", "run", "dev"]
-```
+#### 8.1.5 Relatórios
 
-#### Kubernetes
-- **Não necessário** (PWA estatística + Vercel)
+- resumo por treino;
+- frequência por atleta;
+- leitura de participação para o período.
 
-### 8.4 CI/CD
+#### 8.1.6 Exportação e contingência
 
-#### GitHub Actions (Recomendado)
-```yaml
-name: Build & Deploy
-on:
-  push:
-    branches: [main, staging]
+- exportação CSV;
+- exportação XLSX;
+- backup local em JSON;
+- restauração local de backup quando suportada pelo fluxo do produto.
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '22'
-      - run: npm ci
-      - run: npm run build
-      - run: npm run preview  # Verificar build
+#### 8.1.7 Scout tático
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v3
-      - uses: vercel/action@master
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-```
+- cadastro de jogo;
+- registro de eventos ao vivo;
+- resumo do jogo;
+- persistência do módulo de scout no escopo do MVP.
 
-#### Vercel Deploy
-- **Automático** ao push em `main`
-- **Preview** para branches de feature
-- **Revert** simples (rollback automático)
+### 8.2 Fora do escopo do MVP
 
-### 8.5 Deployment
-
-#### Build
-```bash
-npm run build
-# Output: dist/
-# Artifacts: index.html, *.js, *.css, sw.js
-```
-
-#### Deploy Steps
-1. Git push para `main`
-2. GitHub Actions dispara build
-3. Testes rodam (se configurado)
-4. Vercel reconstrói se novo commit
-5. Deploy automático em cepraea.vercel.app
-
-#### Configuração Vercel
-```json
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "env": {
-    "VITE_API_URL": "@vercel_api_url"
-  }
-}
-```
-
-### 8.6 Monitoramento
-
-#### Application Monitoring
-- **Sentry** (opcional): Rastreamento de erros
-- **Vercel Analytics**: Performance insights
-- **Google Analytics**: Trackear uso (opcional)
-
-#### Health Checks
-- **Endpoint**: https://cepraea.vercel.app/
-- **Verificação**: HTTP 200 + Manifest válido
-- **Frequência**: Manual ou 3rd-party (Uptime Monitor)
-
-#### Logs
-- **Vercel**: Build logs, Edge logs
-- **Browser Console**: Errors, warnings (DevTools)
-- **Nenhum server log** (serverless)
-
-### 8.7 Escalabilidade
-
-#### Horizontal
-- **Automaticamente escalável** (PWA estática no Vercel Edge)
-- **Limite**: Apenas download do bundle (~500KB gzipped)
-
-#### Vertical
-- **Performance IndexedDB**:
-  - Leitura: O(1) com índice, O(n) sem
-  - Escrita: O(1) amortizado
-  - Queridos 50K+ registros: Possível mas lento sem índices
-
-#### Otimizações Implementadas
-- ✓ Lazy loading de rotas
-- ✓ Code splitting automático (Vite)
-- ✓ Service Worker caching
-- ✓ Índices em IndexedDB
-
-#### Otimizações Futuras
-- Paginação em listas grandes
-- Virtual scrolling para 1000+ registros
-- IndexedDB batch operations
-
-### 8.8 Estratégia de Rollback
-
-#### Automática (Vercel)
-- **1-click rollback** para deploy anterior
-- **Tempo**: ~10 segundos
-
-#### Manual
-```bash
-# Local: revert code
-git revert <hash>
-git push origin main
-# Vercel redeploy automático
-```
-
-#### Service Worker
-- **Update prompt**: UpdatePrompt.tsx notifica usuário
-- **Hard refresh**: Ctrl+Shift+R para limpar cache
-- **Manifest update**: PWA checa novo manifest a cada 24h
+- múltiplas organizações no mesmo painel com governança completa;
+- permissões complexas por papel dentro da equipe;
+- pagamentos;
+- folha;
+- análise preditiva;
+- integração WhatsApp via API oficial;
+- notificações push;
+- BI avançado;
+- app nativo;
+- OAuth corporativo;
+- GraphQL;
+- painel administrativo de superusuário;
+- refatoração cosmética sem impacto de produto.
 
 ---
 
-## 9. Requisitos Técnicos
+## 9. Fluxos principais do produto
 
-### 9.1 Requisitos Funcionais
+### 9.1 Fluxo A — Login do treinador
 
-| ID | Requisito | Prioridade | Status |
-|---|---|---|---|
-| **RF-01** | Cadastrar atletas com nome, telefone, categoria, nível, status | Alta | ✅ Implementado |
-| **RF-02** | Editar dados de atleta | Alta | ✅ Implementado |
-| **RF-03** | Deletar atleta (soft delete via status) | Alta | ✅ Implementado |
-| **RF-04** | Listar atletas com ordenação alfabética | Alta | ✅ Implementado |
-| **RF-05** | Gerar treinos recorrentes (quinta + domingo) automaticamente | Alta | ✅ Implementado |
-| **RF-06** | Detectar conflito com feriados nacionais/estaduais/municipais | Alta | ✅ Implementado |
-| **RF-07** | Sugerir datas alternativas para treinos em feriado | Alta | ✅ Implementado |
-| **RF-08** | Criar treino manual (extra) | Alta | ✅ Implementado |
-| **RF-09** | Editar treino | Alta | ✅ Implementado |
-| **RF-10** | Deletar treino | Alta | ✅ Implementado |
-| **RF-11** | Marcar presença (presente/ausente/justificado) após treino | Alta | ✅ Implementado |
-| **RF-12** | Link público de confirmação por atleta | Alta | ✅ Implementado |
-| **RF-13** | Relatório de frequência por período | Alta | ✅ Implementado |
-| **RF-14** | Exportar dados em CSV | Alta | ✅ Implementado |
-| **RF-15** | Exportar dados em Excel (XLSX) | Alta | ✅ Implementado |
-| **RF-16** | Sincronização com Google Sheets (opcional) | Média | ✅ Implementado |
-| **RF-17** | Enviar mensagem WhatsApp com link | Média | ✅ Implementado |
-| **RF-18** | Autenticação PIN | Alta | ✅ Implementado |
-| **RF-19** | Dashboard com resumo do dia | Alta | ✅ Implementado |
-| **RF-20** | Configuração de PIN, nome equipe, URL do app | Alta | ✅ Implementado |
-| **RF-21** | Scout: criar e gerenciar jogos (data, equipes, local, status) | Alta | ✅ Implementado |
-| **RF-22** | Scout: registrar eventos ao vivo (fase, sistema, atletas, placar, análise) | Alta | ✅ Implementado |
-| **RF-23** | Scout: visualizar timeline de eventos com expand/collapse | Alta | ✅ Implementado |
-| **RF-24** | Scout: marcar evento para revisão de vídeo | Média | ✅ Implementado |
-| **RF-25** | Identidade visual oficial (logo/logomarca) em Login, Sidebar, Loading e Export | Média | ✅ Implementado |
+1. treinador acessa `/login`;
+2. informa email e senha;
+3. sessão Supabase é validada;
+4. `AuthGuard` libera o painel;
+5. treinador entra em dashboard, atletas, treinos e demais áreas protegidas.
 
-### 9.2 Requisitos Não Funcionais
+### 9.2 Fluxo B — Primeiro acesso da atleta
 
-| ID | Requisito | Métrica | Status |
-|---|---|---|---|
-| **RNF-01** | Performance: carregamento inicial < 3s em 4G | Lighthouse | ✅ ~2.5s |
-| **RNF-02** | Compatibilidade: Chrome, Firefox, Safari, Edge (últimas 2 versões) | Browserslist | ✅ ES2022 |
-| **RNF-03** | Responsividade: Mobile-first, funcional em 320px+ | Viewport tests | ✅ Testado |
-| **RNF-04** | Offline-first: Funciona 100% sem internet | SW coverage | ✅ Implementado |
-| **RNF-05** | Acessibilidade: WCAG 2.1 AA | Lighthouse | ⚠️ Parcial |
-| **RNF-06** | PWA: Instalável em mobile | Manifest check | ✅ Implementado |
-| **RNF-07** | Armazenamento: Até 50MB local (IndexedDB) | Quota storage | ✅ Configurado |
-| **RNF-08** | Escalabilidade: 50-500 atletas, 100-1000 treinos | Load test | ⚠️ Não testado |
-| **RNF-09** | Segurança: HTTPS obrigatório, PIN hash SHA-256 | SSL + crypto | ✅ Implementado |
-| **RNF-10** | Disponibilidade: 99.9% uptime (Vercel SLA) | Monitoring | ✅ Vercel |
+1. treinador cadastra atleta com email;
+2. atleta cria conta com esse mesmo email;
+3. atleta faz login;
+4. o sistema vincula `auth.user` ao registro da atleta;
+5. `AtletaGuard` libera o portal.
 
-### 9.3 Requisitos de Performance
+### 9.3 Fluxo C — Redefinição de senha da atleta
 
-| Métrica | Target | Atual | Status |
-|---|---|---|---|
-| **First Contentful Paint (FCP)** | < 1s | ~0.8s | ✅ OK |
-| **Largest Contentful Paint (LCP)** | < 2.5s | ~2.2s | ✅ OK |
-| **Time to Interactive (TTI)** | < 3.5s | ~2.8s | ✅ OK |
-| **Cumulative Layout Shift (CLS)** | < 0.1 | ~0.05 | ✅ OK |
-| **Bundle Size (gzipped)** | < 500KB | ~350KB | ✅ OK |
-| **IndexedDB Query (10K registros)** | < 100ms | ~50ms | ✅ OK |
+1. atleta acessa a tela de login da atleta;
+2. solicita redefinição;
+3. recebe link por email;
+4. abre a rota de nova senha;
+5. salva a nova senha;
+6. entra no portal da atleta.
 
-### 9.4 Requisitos de Disponibilidade
+### 9.4 Fluxo D — Cadastro e manutenção de atleta
 
-| Cenário | Target | Implementação |
-|---|---|---|
-| **Offline Duration** | Indefinido | SW caching |
-| **Recovery Time** | < 1min | Sync on reconnect |
-| **Data Durability** | 99% (IndexedDB) | Local backup |
-| **Backup Remoto** | 99.9% (Google Sheets) | Apps Script sync |
+1. treinador acessa a lista de atletas;
+2. cria ou edita atleta;
+3. atleta aparece imediatamente no painel;
+4. o sistema deve refletir o estado real de persistência do cadastro.
 
-### 9.5 Requisitos de Segurança
+### 9.5 Fluxo E — Criação de treino
 
-| Requisito | Implementação | Status |
-|---|---|---|
-| **HTTPS** | Vercel SSL | ✅ |
-| **Autenticação** | PIN + SHA-256 | ✅ |
-| **Autorização** | AuthGuard middleware | ✅ |
-| **XSS Protection** | React sanitização | ✅ |
-| **CSRF Token** | N/A (GET-only sync) | ⚠️ Parcial |
-| **Rate Limiting** | Não implementado | ❌ |
-| **Encriptação Dados** | HTTPS only (IndexedDB não) | ⚠️ Parcial |
+1. treinador cria treino único ou recorrente;
+2. o sistema grava o treino;
+3. o treino aparece na agenda;
+4. a atleta pode vê-lo no seu escopo quando aplicável.
 
-### 9.6 Requisitos de Compatibilidade
+### 9.6 Fluxo F — Presença manual do treinador
 
-#### Navegadores
-- ✅ Chrome 120+
-- ✅ Firefox 121+
-- ✅ Safari 17+
-- ✅ Edge 120+
+1. treinador abre o detalhe do treino;
+2. marca presença, ausência ou justificativa;
+3. o sistema grava o resultado;
+4. o resumo do treino e os relatórios passam a refletir esse mesmo dado.
 
-#### Sistemas Operacionais
-- ✅ iOS 15+
-- ✅ Android 8+
-- ✅ Windows 10+
-- ✅ macOS 11+
+### 9.7 Fluxo G — Confirmação pública por token
 
-#### Dispositivos
-- ✅ Desktop/Laptop
-- ✅ Tablet
-- ✅ Smartphone
-- ✅ PWA (instalável)
+1. treinador gera lote de links;
+2. atleta acessa o link;
+3. confirma presença ou ausência;
+4. o sistema grava no modelo oficial de presença;
+5. painel e portal da atleta mostram o mesmo resultado.
+
+### 9.8 Fluxo H — Consulta da atleta
+
+1. atleta entra no portal;
+2. vê seus treinos;
+3. abre o detalhe do treino;
+4. enxerga o status de presença;
+5. interage conforme o fluxo permitido.
 
 ---
 
-## 10. Especificações Detalhadas
+## 10. Requisitos funcionais
 
-### 10.1 Contratos de API (Stores)
+### 10.1 Requisitos de autenticação
 
-#### AthleteStore
-```typescript
-interface AthleteStore {
-  athletes: Athlete[]
-  isLoading: boolean
-  loadAll(): Promise<void>
-  add(data: NewAthleteData): Promise<Athlete>
-  update(id: string, data: PartialAthleteData): Promise<void>
-  remove(id: string): Promise<void>
-  toggleStatus(id: string): Promise<void>
-  getById(id: string): Athlete | undefined
-}
-```
+O sistema deve:
 
-#### TrainingStore
-```typescript
-interface TrainingStore {
-  trainings: Training[]
-  isLoading: boolean
-  loadAll(): Promise<void>
-  generateRecurring(): Promise<number>
-  add(data: NewTrainingData): Promise<Training>
-  addExtra(data: NewExtraTrainingData): Promise<Training>
-  update(id: string, data: PartialTrainingData): Promise<void>
-  remove(id: string): Promise<void>
-  updateStatus(id: string, status: TrainingStatus): Promise<void>
-  getById(id: string): Training | undefined
-  getConflicts(): HolidayConflict[]
-}
-```
+- autenticar treinador com Supabase Auth;
+- autenticar atleta com Supabase Auth;
+- manter sessão de forma compatível com o cliente web;
+- permitir logout explícito;
+- suportar redefinição de senha da atleta;
+- impedir acesso ao portal da atleta quando não houver atleta válida vinculada.
 
-#### AttendanceStore
-```typescript
-interface AttendanceStore {
-  records: AttendanceRecord[]
-  isLoading: boolean
-  loadAll(): Promise<void>
-  loadForTraining(treinoId: string): Promise<void>
-  upsert(
-    treinoId: string,
-    atletaId: string,
-    status: AttendanceStatus,
-    opts?: UpsertOptions
-  ): Promise<void>
-  getForTraining(treinoId: string): AttendanceRecord[]
-  getForAthlete(atletaId: string): AttendanceRecord[]
-  getTrainingSummary(treinoId: string, totalAtivos: number): TrainingSummary
-  getFrequencyReports(fromISO?: string, toISO?: string): FrequencyReport[]
-  getAthleteFrequency(atletaId: string, ...): FrequencyReport
-}
-```
+O sistema não deve:
 
-#### ScoutStore
-```typescript
-interface ScoutStore {
-  games: ScoutGame[]
-  events: ScoutEvent[]
-  isLoading: boolean
-  loadGames(): Promise<void>
-  loadEvents(jogoId: string): Promise<void>
-  addGame(data: Omit<ScoutGame, 'id' | 'createdAt' | 'updatedAt'>): Promise<ScoutGame>
-  updateGame(id: string, data: Partial<Omit<ScoutGame, 'id' | 'createdAt'>>): Promise<void>
-  removeGame(id: string): Promise<void>  // Remove jogo + todos eventos associados
-  addEvent(data: Omit<ScoutEvent, 'id' | 'createdAt'>): Promise<ScoutEvent>
-  updateEvent(id: string, data: Partial<Omit<ScoutEvent, 'id' | 'createdAt'>>): Promise<void>
-  removeEvent(id: string): Promise<void>
-  getGame(id: string): ScoutGame | undefined
-}
-```
+- exigir PIN como login oficial;
+- usar segredo privilegiado no frontend;
+- depender de autenticação local simulada para rotas protegidas.
 
-### 10.2 Formatos de Payload
+### 10.2 Requisitos de atletas
 
-#### Criar Atleta (Frontend → Store)
-```json
-{
-  "nome": "Maria Silva",
-  "telefone": "11987654321",
-  "categoria": "Sub-18",
-  "nivel": "Intermediário",
-  "status": "ativo"
-}
-```
+O sistema deve:
 
-#### Resposta Atleta Criado
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "nome": "Maria Silva",
-  "telefone": "11987654321",
-  "categoria": "Sub-18",
-  "nivel": "Intermediário",
-  "status": "ativo",
-  "observacoes": null,
-  "createdAt": "2025-04-29T14:30:00Z",
-  "updatedAt": "2025-04-29T14:30:00Z"
-}
-```
+- permitir criar, editar, inativar e consultar atletas;
+- armazenar email para suporte ao vínculo de conta;
+- identificar se a atleta já está vinculada a uma conta;
+- manter dados suficientes para presença, relatórios e contato operacional.
 
-#### Criar Treino Extra
-```json
-{
-  "tipo": "extra",
-  "status": "agendado",
-  "data": "2025-05-10",
-  "horaInicio": "14:00",
-  "horaFim": "15:30",
-  "local": "Quadra Central",
-  "observacoes": "Treino intensivo"
-}
-```
+### 10.3 Requisitos de treinos
 
-#### Registrar Presença
-```json
-{
-  "treinoId": "550e8400-e29b-41d4-a716-446655440001",
-  "atletaId": "550e8400-e29b-41d4-a716-446655440002",
-  "status": "presente",
-  "justificativa": null,
-  "confirmadoPelaAtleta": false
-}
-```
+O sistema deve:
 
-#### Sincronizar com Apps Script
-```
-GET https://script.google.com/macros/d/.../usercallback?secret=xyz&action=confirm&treinoId=...&atletaId=...&nomeAtleta=...&status=presente&timestamp=...&origem=link
-```
+- permitir criar treinos unitários;
+- permitir gerar treinos recorrentes;
+- permitir definir horário, data, local, tipo, observações e status;
+- suportar leitura por treinador e por atleta dentro do escopo permitido.
 
-**Resposta:**
-```json
-{
-  "ok": true,
-  "action": "created"
-}
-```
+### 10.4 Requisitos de presença
 
-### 10.3 Códigos de Erro
+O sistema deve:
 
-#### Erros de Validação (400)
+- permitir marcação manual pelo treinador;
+- permitir confirmação pela atleta;
+- permitir confirmação pública por token;
+- usar um modelo central de presença para os três fluxos;
+- refletir o mesmo estado em resumo, relatório e detalhe do treino.
 
-| Código | Mensagem | Contexto |
-|---|---|---|
-| `INVALID_NAME` | Nome deve ter 3-100 caracteres | AthleteForm |
-| `INVALID_PHONE` | Telefone deve ter 10-11 dígitos | AthleteForm |
-| `INVALID_PIN` | PIN deve ter min 4 caracteres | LoginPage |
-| `PIN_MISMATCH` | Os PINs não coincidem | LoginPage |
-| `INVALID_TIME` | Hora fim deve ser após hora início | TrainingForm |
-| `PAST_DATE` | Data não pode ser no passado | TrainingForm |
-| `MISSING_FIELD` | Campo obrigatório | Genérico |
+### 10.5 Requisitos de portal da atleta
 
-#### Erros de Autenticação (401)
+O sistema deve:
 
-| Código | Mensagem | Contexto |
-|---|---|---|
-| `AUTH_REQUIRED` | Autenticação necessária | AuthGuard |
-| `INVALID_PIN` | PIN incorreto | LoginPage |
-| `SESSION_EXPIRED` | Sessão expirou | AuthGuard |
+- ter login específico da atleta;
+- ter rotas próprias da atleta;
+- exibir apenas o que pertence à atleta autenticada;
+- impedir leitura de dados de outras atletas;
+- permitir saída da sessão.
 
-#### Erros de Recurso (404)
+### 10.6 Requisitos de presença por token
 
-| Código | Mensagem | Contexto |
-|---|---|---|
-| `ATHLETE_NOT_FOUND` | Atleta não encontrado | AthleteDetailPage |
-| `TRAINING_NOT_FOUND` | Treino não encontrado | TrainingDetailPage |
+O sistema deve:
 
-#### Erros de Sync (500)
+- suportar criação de lote;
+- suportar exportação/cópia de links;
+- suportar revogação de lote quando aplicável;
+- impedir uso indevido por escopo inválido;
+- gravar presença no banco final.
 
-| Código | Mensagem | Contexto |
-|---|---|---|
-| `SYNC_ERROR` | Erro ao sincronizar | sync.ts |
-| `UNAUTHORIZED_SECRET` | Secret incorreto | Google Apps Script |
-| `ENDPOINT_UNAVAILABLE` | Endpoint indisponível | sync.ts |
+### 10.7 Requisitos de relatórios
 
-### 10.4 Eventos do Sistema
+O sistema deve:
 
-| Evento | Payload | Observação |
-|---|---|---|
-| `athlete:created` | `Athlete` | Store emite, componente escuta |
-| `athlete:deleted` | `id: string` | - |
-| `training:generated` | `count: number` | - |
-| `training:conflict` | `HolidayConflict[]` | Trigger alerta visual |
-| `attendance:confirmed` | `AttendanceRecord` | Dispara sync (opcional) |
-| `sync:start` | `null` | Mostra loading |
-| `sync:complete` | `SyncResult` | Atualiza UI |
+- calcular frequência por atleta;
+- calcular resumo por treino;
+- operar a partir do mesmo dado final usado no painel;
+- evitar divergência entre leitura agregada e detalhe operacional.
 
-### 10.5 Regras de Cálculo
+### 10.8 Requisitos de exportação
 
-#### Frequência
-```
-Frequência % = (Presentes / Total de Treinos Realizados) × 100
+O sistema deve:
 
-Exemplo:
-  - Presentes: 8
-  - Ausentes: 1
-  - Justificados: 1
-  - Total realizados: 10
-  - Frequência: (8 / 10) × 100 = 80%
-```
+- exportar atletas, treinos e presenças;
+- gerar CSV;
+- gerar XLSX;
+- permitir backup JSON local.
 
-#### Resumo de Treino
-```
-Pendentes = Total Ativos - (Presentes + Ausentes + Justificados)
+### 10.9 Requisitos de scout
 
-Exemplo:
-  - Total Ativos: 15
-  - Presentes: 10
-  - Ausentes: 2
-  - Justificados: 1
-  - Pendentes: 15 - (10 + 2 + 1) = 2
-```
+O sistema deve:
 
-#### Detecção de Feriado
-```
-Se data(treino) ∈ HOLIDAYS
-  Then feriadoOrigem = data(treino)
-  Alert = HolidayAlert(treino, holiday, alternativas)
-```
-
-### 10.6 Permissões por Perfil
-
-#### Técnico/Admin (Único perfil atual)
-- ✅ Criar/editar/deletar atletas
-- ✅ Criar/editar/deletar treinos
-- ✅ Registrar presença
-- ✅ Ver relatórios
-- ✅ Exportar dados
-- ✅ Configurar sistema
-- ✅ Sincronizar
-
-#### Atleta (Futuro)
-- ❌ Criar/editar atleta (próprio perfil sim)
-- ❌ Criar/editar treino
-- ✅ Confirmar presença (via link público)
-- ✅ Ver própria frequência
+- permitir criação de jogos;
+- registrar eventos em tempo real;
+- manter resumo dos eventos;
+- preservar esse módulo sem quebrar o MVP de presença.
 
 ---
 
-## 11. Riscos e Limitações
+## 11. Requisitos não funcionais
 
-### 11.1 Riscos Técnicos
+### 11.1 Segurança
 
-| Risco | Probabilidade | Impacto | Mitigação |
-|---|---|---|---|
-| **IndexedDB limite de cota (50MB)** | Média | Alto | Implementar limpeza automática, alertar antes de atingir limite |
-| **Perda de dados local** | Baixa | Crítico | Backup automático em Google Sheets, exportar CSV periodicamente |
-| **Service Worker outdated** | Baixa | Médio | UpdatePrompt.tsx notifica usuário, hard refresh (Ctrl+Shift+R) |
-| **Falha de sync com Google Apps Script** | Média | Baixo | Retry automático, toasts de erro, dados continuam locais |
-| **PIN bruteforce (sem rate limiting)** | Média | Médio | Implementar bloqueio após 3 tentativas erradas |
-| **Navegador não suporta PWA** | Muito Baixa | Baixo | Funciona como SPA (sem instalação offline) |
-| **LGPD violação (dados pessoais)** | Baixa | Crítico | Política de privacidade, direito de esquecimento, consentimento |
+O sistema deve:
 
-### 11.2 Gargalos Conhecidos
+- usar Supabase Auth para o MVP;
+- usar RLS para limitar acesso por escopo;
+- evitar exposição de segredos sensíveis no frontend;
+- impedir que a atleta leia dados de outra atleta;
+- impedir que o usuário sem equipe leia dados protegidos;
+- manter separação entre chaves públicas e credenciais privilegiadas.
 
-#### Performance
-- **10K+ registros em IndexedDB**: Queries lentas sem índices
-- **1000+ atletas**: Listas não são paginadas (carrega tudo)
-- **Export XLSX**: Demora ~2s para 10K registros
+### 11.2 Robustez
 
-#### Funcionalidade
-- **Sem offline-sync**: Se perder conexão durante sync, dados local não são atualizados
-- **Sem conflict resolution**: Last write wins (pode sobrescrever remoto)
-- **Sem multi-user**: Apenas 1 técnico por dispositivo
+O sistema deve:
 
-#### UX
-- **PIN sem recovery**: Se esquecer, precisa limpar dados do navegador
-- **Sem backup automático**: Manual exportar ou sync
-- **Sync lento em 3G**: Endpoint Apps Script não otimizado
+- se comportar corretamente em reload;
+- evitar divergência entre telas que leem a mesma presença;
+- lidar com estados de sessão inválida;
+- não depender de múltiplas fontes principais de verdade;
+- ter rollback operacional claro para migrações de dados.
 
-### 11.3 Dívida Técnica
+### 11.3 Observabilidade mínima
 
-| Item | Descrição | Prioridade | Esforço |
-|---|---|---|---|
-| **Testes automatizados** | Sem testes unitários/E2E | Alta | Alto |
-| **Validação de formulário** | Validação básica, sem Zod/Valibot | Média | Médio |
-| **Error boundaries** | React Error Boundary não implementado | Média | Baixo |
-| **Logging centralizado** | Sem logs estruturados/Sentry | Média | Médio |
-| **Type safety** | TypeScript `any` em alguns places | Médio | Médio |
-| **Documentação de código** | Faltam comentários em lógica complexa | Baixa | Médio |
-| **Accessibility** | Apenas WCAG 2.1 AA parcial | Média | Alto |
-| **PWA offline-sync** | Sync não funciona offline | Alta | Alto |
+O sistema deve:
 
-### 11.4 Limitações Atuais
+- permitir auditoria de mudanças importantes no banco quando aplicável;
+- ter testes automatizados para regras críticas;
+- ter critérios objetivos de validação antes do release.
 
-#### Funcionais
-- ❌ Sem autenticação multi-device
-- ❌ Sem sincronização em tempo real
-- ❌ Sem notificações push (apenas WhatsApp)
-- ❌ Sem integração com calendários (Google Calendar, iCal)
-- ❌ Sem recorrência customizável (fixo quinta + domingo)
-- ❌ Sem campos customizados de atleta
-- ❌ Sem multiple técnicos/times
+### 11.4 Performance
 
-#### Técnicas
-- ❌ Sem backend API (Google Apps Script é endpoint simples)
-- ❌ Sem autoscaling (depende de Vercel + browser local)
-- ❌ Sem compressão de dados (pode atingir 50MB rápido)
-- ❌ Sem rate limiting no sync
-- ❌ Sem versionamento de schema IndexedDB
+O sistema deve:
 
-#### De Negócio
-- ❌ Sem suporte oficial (comunidade open-source)
-- ❌ Sem SLA customizado
-- ❌ Sem integrações premium (Slack, Teams)
-- ❌ Sem suporte a múltiplos idiomas
+- carregar de forma aceitável em ambiente móvel comum;
+- evitar dependência de processamento pesado no cliente para fluxos básicos;
+- manter UX responsiva nos fluxos de login, agenda e presença.
 
-### 11.5 Pontos de Atenção para Evolução Futura
+### 11.5 Compatibilidade
 
-#### Curto Prazo (1-3 meses)
-1. **Implementar testes E2E** (Playwright, Cypress)
-2. **Adicionar rate limiting** no PIN
-3. **Melhorar UX de sync** (progress bar, retry automático)
-4. **Documentar API** (Swagger/OpenAPI para Google Apps Script)
+O sistema deve funcionar no navegador moderno usado pelo público do projeto, com foco principal em ambiente móvel e desktop comuns.
 
-#### Médio Prazo (3-6 meses)
-1. **Backend básico** (Node.js + Express, Supabase ou Firebase)
-2. **Multi-user** (roles: técnico, assistente, atleta)
-3. **Recorrência customizável** (interface de regras)
-4. **Notificações push** (Web Push API)
-5. **Sincronização em tempo real** (WebSocket ou Supabase Realtime)
+### 11.6 Offline
 
-#### Longo Prazo (6-12 meses)
-1. **Análise avançada** (gráficos, heatmaps)
-2. **Integração de calendários** (Google Calendar sync)
-3. **Mobile apps nativas** (React Native)
-4. **Integrações** (Slack, Teams, Telegram)
-5. **Open-source monetization** (optional cloud backend)
+O produto pode manter recursos locais de cache e contingência, mas o MVP **não** será descrito como “totalmente offline”.
+
+O contrato oficial é:
+
+- auth depende de Supabase;
+- persistência oficial do MVP depende de Supabase;
+- cache local é acessório, não fonte principal.
 
 ---
 
-## 12. Roadmap Técnico
+## 12. Requisitos de segurança e privacidade
 
-### 12.1 Melhorias Recomendadas
+### 12.1 Dados tratados
 
-#### Sprint 1 (Estabilização)
-- [ ] Implementar testes unitários (Jest)
-- [ ] Adicionar E2E tests (Playwright)
-- [ ] Implementar error boundaries
-- [ ] Rate limiting para PIN (5 tentativas/5min)
-- [ ] Melhorar validação de formulários (Zod)
+O sistema trata:
 
-#### Sprint 2 (Escalabilidade)
-- [ ] Paginação em listas (AthletesPage, TrainingsPage)
-- [ ] Virtual scrolling para 1000+ registros
-- [ ] Batch operations em IndexedDB
-- [ ] Compress/archive de dados antigos
+- nome;
+- email;
+- telefone;
+- status esportivo;
+- histórico de presença;
+- observações funcionais do contexto esportivo;
+- eventos de scout.
 
-#### Sprint 3 (Observabilidade)
-- [ ] Integrar Sentry para rastreamento de erros
-- [ ] Implementar logging estruturado
-- [ ] Métricas de performance (Core Web Vitals)
-- [ ] Dashboard de uso (Google Analytics)
+### 12.2 Regras obrigatórias
 
-#### Sprint 4 (Backend) — parcialmente concluído
-- [ ] Migrar para backend Node.js (Express/Fastify) — não necessário (Supabase cobre)
-- [x] Banco de dados centralizado (PostgreSQL via Supabase) — ✅ CEPR-0028
-- [ ] API RESTful versioned — coberta por Supabase PostgREST
-- [x] Autenticação JWT + refresh tokens — ✅ Supabase Auth (atletas) — CEPR-0029
+- o frontend usa apenas credenciais públicas apropriadas ao cliente;
+- `service_role` é proibido no frontend;
+- o vínculo da atleta deve ser rastreável por usuário autenticado;
+- dados devem respeitar escopo por time e por atleta;
+- a documentação não deve instruir uso de legado como se fosse arquitetura oficial.
 
-### 12.2 Refatorações Futuras
+### 12.3 Ameaças prioritárias do MVP
 
-#### Modularização
-```
-Antes (feature-based):
-└── src/features/athletes/pages/AthletesPage.tsx
-
-Depois (layers + features):
-├── src/domain/athlete/
-│   ├── types.ts
-│   ├── repository.ts
-│   └── usecases/
-├── src/application/athlete/
-│   └── store.ts
-└── src/presentation/features/athletes/
-    └── pages/AthletesPage.tsx
-```
-
-#### State Management
-```
-Antes: Zustand + IndexedDB manual
-
-Depois: Redux Toolkit + RTK Query (com offline support)
-```
-
-#### Testing
-```
-Antes: Sem testes
-
-Depois:
-├── Unit tests (Jest) - 80% coverage
-├── Integration tests (Playwright) - principais fluxos
-└── E2E tests (Cypress) - cenários críticos
-```
-
-### 12.3 Evolução da Arquitetura
-
-```
-Versão 1.x:
-┌─ Browser (PWA) ─────────────────┐
-│ React + Zustand + IndexedDB      │
-└──────┬──────────────────────────┘
-       │ (optional)
-       ↓
-┌─ Google Apps Script ─────────────┐
-│ Simple endpoint + Google Sheets   │
-└──────────────────────────────────┘
-
-
-Versão 1.5 (Current — mai/2026):
-┌─ Browser (PWA) ─────────────────────┐
-│ React + Zustand + IndexedDB          │
-│ + @supabase/supabase-js              │
-└──────┬──────────────────────────────┘
-       │                  │ (auth + RLS)
-       │ (optional sync)  ↓
-       │         ┌─ Supabase ────────────┐
-       │         │ PostgreSQL + Auth      │
-       │         │ • athletes RLS         │
-       │         │ • 6 migrations         │
-       ↓         └────────────────────────┘
-┌─ Google Apps Script ─────────────┐
-│ Sync coach + Google Sheets        │
-└──────────────────────────────────┘
-
-
-Versão 2.x (Planejado):
-┌─ Browser (PWA) ──────────────────┐
-│ React + Zustand/RTK + Supabase   │
-└──────┬──────────────────────────┘
-       │
-       ↓ HTTPS + JWT (Supabase)
-┌─ Supabase (BaaS) ────────────────┐
-│ PostgreSQL + Auth + RLS + Realtime│
-│ • Multi-tenant (N equipes)        │
-│ • Edge Functions (lógica server)  │
-└──────┬──────────────────────────┘
-       │
-       ↓
-┌─ Externos ──────────────────────┐
-│ WhatsApp • Google Cal • etc.     │
-└─────────────────────────────────┘
-
-
-Versão 3.x (Infraestrutura Avançada):
-┌─ Microserviços ──────────────────┐
-│ • Auth Service                   │
-│ • Athlete Service                │
-│ • Training Service               │
-│ • Sync Service                   │
-│ • Notification Service           │
-└──────┬──────────────────────────┘
-       │
-       ↓ K8s (Kubernetes)
-┌─ Data Layer ─────────────────────┐
-│ • PostgreSQL (relational)        │
-│ • Redis (cache)                  │
-│ • Elasticsearch (logs)           │
-└──────────────────────────────────┘
-```
-
-### 12.4 Possíveis Integrações
-
-#### Comunicação
-- [ ] **WhatsApp Official API** (em vez de web links)
-- [ ] **Telegram Bot** (confirmação via chat)
-- [ ] **SMS** (fallback se não tem WhatsApp)
-- [ ] **Slack/Teams** (notificações para técnicos)
-
-#### Calendários
-- [ ] **Google Calendar** (sync automático de treinos)
-- [ ] **Apple Calendar** (iCal feed)
-- [ ] **Outlook Calendar** (integration)
-
-#### Análise
-- [ ] **Google Analytics 4** (tracking avançado)
-- [ ] **Mixpanel** (user behavior)
-- [ ] **Datadog** (monitoring)
-
-#### Pagamentos (futuro SaaS)
-- [ ] **Stripe** (billing, invoices)
-- [ ] **Pix** (pagamento local Brasil)
-
-#### Social
-- [ ] **Facebook Groups** (distribuição de links)
-- [ ] **Instagram** (stories de resultados)
-- [ ] **LinkedIn** (empresarial)
-
-### 12.5 Timeline Estimada
-
-| Versão | Data | Recursos Principais |
-|---|---|---|
-| **1.0** | ✅ Abril 2025 | MVP: Atletas, Treinos, Presença, Sync |
-| **1.1** | ✅ Dez 2025 | Testes Vitest + Playwright, E2E, perf |
-| **1.2** | ✅ Mar 2026 | Scout, ExportPage, Reports, WhatsApp |
-| **1.3** | ✅ Mai 2026 | Supabase Auth atleta, RLS, migrations 0001–0006 |
-| **1.5** | Jun 2026 | Migração completa atleta (remover athleteAuth.ts), multi-equipe |
-| **2.0** | Q3 2026 | Supabase multi-tenant, N equipes, Edge Functions |
-| **2.5** | Q1 2027 | Integrações (WhatsApp API, Google Cal), Realtime |
-| **3.0** | Q3 2027 | Microserviços, escalabilidade enterprise |
+- acesso indevido ao portal da atleta;
+- leitura cruzada de dados entre atletas;
+- escrita de presença fora do escopo;
+- divergência entre confirmação pública e painel;
+- release com dependência silenciosa do legado.
 
 ---
 
-## Conclusão
+## 13. Direção arquitetural oficial
 
-CEPRAEA é um sistema **offline-first, PWA, escalável e seguro** para gestão de treinos e presença. A arquitetura **cliente-centric** com persistência local reduz dependência de infraestrutura, enquanto a integração opcional com Google Sheets oferece sincronização sem custo.
+### 13.1 Arquitetura-alvo do MVP
 
-### Próximos Passos
-1. **Deploy em produção**: Vercel (cepraea.vercel.app)
-2. **Configurar Google Apps Script**: Para sincronização remota
-3. **Implementar testes**: E2E com Playwright
-4. **Documentação de setup**: Guia para técnicos
-5. **Feedback de usuários**: Beta testers na comunidade
+O produto deve convergir para esta estrutura:
 
-### Suporte e Contribuições
-- GitHub Issues: Relatórios de bugs
-- Discussions: Feature requests
-- Pull Requests: Contribuições comunitárias
+1. frontend React + rotas protegidas;
+2. Supabase Auth para sessão;
+3. Supabase PostgreSQL como fonte principal do MVP;
+4. RLS e RPCs para regras de acesso e escrita sensível;
+5. IndexedDB apenas como cache local explícito, quando mantido;
+6. exportação local como ferramenta operacional auxiliar.
 
----
+### 13.2 Integrações oficiais do produto
 
-**Documento Assinado**  
-**Arquiteto:** Sistema CEPRAEA  
-**Data:** 29 de abril de 2026  
-**Versão:** 1.0.0 (Production)
+Integrações oficiais:
 
----
+- Supabase;
+- URLs de WhatsApp como mecanismo de abertura de mensagem;
+- exportação local de arquivos.
 
-## Apêndice A: Glossário Técnico
+Integrações não oficiais do produto final:
 
-- **PWA**: Progressive Web App - aplicação web que funciona offline
-- **IndexedDB**: Banco de dados local do navegador (até 50MB+)
-- **Service Worker**: Script que roda em background, intercepta requisições
-- **Zustand**: Biblioteca leve de gerenciamento de estado
-- **Vite**: Build tool rápido para projetos frontend
-- **Tailwind CSS**: CSS framework utility-first
-- **SHA-256**: Algoritmo de hash criptográfico (256 bits)
-- **Apps Script**: Plataforma de scripting do Google (JavaScript)
-- **Workbox**: Biblioteca Google para implementar Service Workers
-- **Vercel**: Plataforma de deployment otimizada para Next.js/Vite
-- **WCAG 2.1 AA**: Padrão de acessibilidade web (nível AA)
-- **LGPD**: Lei Geral de Proteção de Dados (Brasil)
-- **Meeus/Jones/Butcher**: Algoritmo para calcular data da Páscoa
-- **UUID v4**: Identificador único aleatório (128 bits)
-- **idb**: Wrapper TypeScript para IndexedDB
-- **xlsx**: Biblioteca para ler/escrever Excel
+- Google Apps Script;
+- Google Sheets como armazenamento central.
+
+### 13.3 Caminho legado
+
+Se componentes legados ainda estiverem no repositório durante a migração, eles devem ser tratados apenas como:
+
+- contexto de transição;
+- material de rollback temporário;
+- fonte de importação de dados;
+- dívida a remover.
+
+Eles não devem aparecer como arquitetura oficial futura.
 
 ---
 
-**Fim do Documento**
+## 14. Requisitos de dados
 
+### 14.1 Entidades centrais do MVP
 
-Você tem três caminhos para testar no celular. O melhor depende se você quer testar localmente ou já testar como se estivesse publicado.
+- `athletes`
+- `trainings`
+- `attendance_records`
+- `presence_tokens`
+- `team_memberships`
+- `audit_logs`
 
-O caminho mais simples e correto agora é:
+### 14.2 Regras de consistência
 
-1. Rodar o CEPRAEA no computador.
-2. Abrir o endereço no celular pela mesma rede Wi-Fi.
-3. Testar layout, toque, PIN, PWA e responsividade.
+- uma atleta autenticada deve poder ser vinculada ao seu registro oficial;
+- o treinador deve operar dentro do escopo do time;
+- o mesmo treino deve alimentar painel, portal e relatórios;
+- a presença deve existir em formato único no banco final;
+- token público deve resultar em escrita observável no mesmo modelo final.
 
-Opção 1 — Testar localmente no celular pela mesma rede Wi-Fi
+---
 
-No terminal do projeto, rode:
+## 15. Escopo técnico oficial do produto
 
-npm install
-npm run dev -- --host 0.0.0.0
+Esta seção não substitui o `plan.md`, mas define a fronteira técnica esperada do MVP.
 
-O Vite deve mostrar algo parecido com:
+### 15.1 Obrigatório no MVP
 
-Local:   http://localhost:5173/
-Network: http://192.168.x.x:5173/
+- Supabase Auth ativo para treinador e atleta;
+- RLS compatível com escopo do produto;
+- stores do MVP convergindo para Supabase-first;
+- fluxo de confirmação pública integrado ao banco final;
+- testes relevantes para auth, guard, presença e acesso.
 
-No celular, conectado no mesmo Wi-Fi, abra o endereço Network, por exemplo:
+### 15.2 Proibido no MVP final
 
-http://192.168.1.20:5173/
+- PIN como login oficial;
+- Apps Script como caminho crítico;
+- Google Sheets como banco oficial;
+- presença apenas local;
+- comportamento que pareça persistência sem persistir de verdade;
+- documentação contraditória sobre fonte de verdade.
 
-Esse é o jeito mais rápido para testar a tela real no celular.
+---
 
-Se você estiver usando WSL/Ubuntu dentro do Windows, pode haver bloqueio de rede. Nesse caso, primeiro teste no navegador do computador:
+## 16. Critérios de sucesso do MVP
 
-http://localhost:5173/
+O MVP v1.0 será considerado bem-sucedido quando:
 
-Depois tente no celular usando o IP do Windows. Para descobrir o IP no Windows, abra o PowerShell e rode:
+1. treinador entra no sistema sem mecanismo legado de auth;
+2. atleta entra no sistema sem mecanismo legado de auth;
+3. atleta vê seus treinos e seu estado real;
+4. treinador marca presença e o resultado aparece de forma consistente;
+5. token público confirma presença no mesmo modelo oficial;
+6. o runtime não depende do legado para operar o fluxo principal;
+7. a validação técnica final retorna sucesso;
+8. o produto pode ser usado por atletas reais sem intervenção manual do time técnico a cada operação.
 
-ipconfig
+### 16.1 Critérios de sucesso percebidos pelo treinador
 
-Procure por algo como:
+O MVP também deve ser considerado bem-sucedido quando o treinador perceber, no uso real, que:
 
-Endereço IPv4 . . . . . . . . . . . : 192.168.1.20
+- não precisa mais manter planilhas recorrentes para presença;
+- não precisa procurar respostas antigas no WhatsApp para consolidar presença;
+- consegue saber rapidamente quem confirmou e quem não confirmou;
+- reduz erros de agendamento em feriados;
+- gasta menos tempo com operação e mais tempo com preparação da equipe.
 
-Então no celular acesse:
+---
 
-http://192.168.1.20:5173/
+## 17. Critérios de release do produto
 
-Se não abrir, provavelmente é firewall do Windows bloqueando a porta 5173.
+Antes do release do MVP:
 
-Opção 2 — Testar com build de produção no celular
+- build deve passar;
+- typecheck deve passar;
+- testes automatizados críticos devem passar;
+- validação SQL crítica deve passar;
+- fluxos reais prioritários devem ter cobertura objetiva;
+- a migração de dados do recorte do MVP deve estar reconciliada;
+- documentação mínima operacional deve estar coerente;
+- não deve existir dependência escondida de legado no caminho crítico.
 
-O teste com npm run dev é bom para desenvolvimento, mas o comportamento de PWA/cache fica mais próximo do real usando build.
+---
 
-Rode:
+## 18. Métricas de produto
 
-npm run build
-npm run preview -- --host 0.0.0.0
+### 18.1 Métricas de adoção
 
-O Vite vai servir a pasta final dist.
+- número de treinadores ativos;
+- número de atletas com conta vinculada;
+- número de confirmações feitas pelo portal ou por token;
+- taxa de treinos com presença registrada.
 
-No celular, acesse o endereço Network, geralmente algo como:
+### 18.1.1 Metas iniciais de adoção do MVP
 
-http://192.168.1.20:4173/
+Estas metas servem para validar se o produto começou a substituir o processo manual:
 
-Essa opção é melhor para testar:
+- pelo menos `1` equipe operando o fluxo principal no produto;
+- pelo menos `80%` das atletas ativas com conta vinculada;
+- pelo menos `80%` dos treinos novos criados dentro do sistema, e não fora dele;
+- pelo menos `70%` das confirmações de presença feitas pelo portal da atleta ou por token, e não por leitura manual do WhatsApp.
 
-PWA
-service worker
-manifest
-ícone
-instalação na tela inicial
-build final
+### 18.2 Métricas de qualidade
 
-Opção 3 — Publicar temporariamente e testar por link
+- falhas de login por sessão;
+- divergência entre painel e confirmação pública;
+- taxa de atletas não vinculadas após cadastro;
+- erros por fluxo de presença;
+- incidentes de acesso indevido.
 
-Você também pode publicar na Vercel, Netlify ou Cloudflare Pages e abrir no celular por uma URL pública.
+### 18.2.1 Metas iniciais de qualidade do MVP
 
-Exemplo:
+- `0` incidentes conhecidos de acesso cruzado entre atletas;
+- `0` dependências obrigatórias de PIN no fluxo oficial;
+- `0` dependências operacionais obrigatórias de Apps Script no fluxo principal;
+- menos de `5%` dos treinos com necessidade de correção manual por erro operacional do sistema;
+- `0` divergências aceitas entre presença exibida no painel e presença registrada no banco final.
 
-https://cepraea.vercel.app
+### 18.3 Métricas de ganho operacional
 
-Esse é o teste mais realista, porque já usa HTTPS. Para PWA, HTTPS é importante.
+Estas métricas existem para provar que o produto realmente reduz o trabalho do treinador:
 
-Para o CEPRAEA, o deploy geralmente seria:
+- tempo médio para registrar ou consolidar presença por treino;
+- número de passos manuais para abrir um treino e saber quem confirmou;
+- número de correções manuais de agenda por mês;
+- número de mensagens manuais necessárias no WhatsApp para cobrar presença;
+- quantidade de planilhas operacionais ainda mantidas em paralelo.
 
-Build command: `npm run build`
-Output directory: `dist`
-Framework: `Vite`
+### 18.3.1 Metas iniciais de ganho operacional
 
-# Teste no celular
+- reduzir para `0` a criação de novas planilhas operacionais para presença;
+- reduzir para `0` a necessidade de atualizar planilhas de presença para treinos do fluxo principal;
+- reduzir para no máximo `1` consulta operacional principal para saber o estado de presença de um treino;
+- reduzir de forma perceptível o uso do grupo de WhatsApp como fonte de verdade;
+- reduzir o retrabalho causado por informação perdida na conversa.
 
-1. A tela abre sem cortar a logo.
-2. A logo oficial aparece sem distorção.
-3. O fundo ocupa 100% da altura.
-4. O campo PIN fica confortável para tocar.
-5. O teclado numérico abre.
-6. O botão “Entrar” tem boa altura.
-7. O ícone de olho funciona.
-8. O erro aparece sem quebrar o layout.
-9. A tela funciona em orientação vertical.
-10. A instalação como PWA aparece no navegador.
+### 18.4 Métricas de entrega do MVP
 
-No Android/Chrome, abra o menu do navegador e procure:
+- porcentagem dos fluxos críticos validados por teste real;
+- tempo de execução do gate final;
+- quantidade de dependências legadas ainda ativas no runtime;
+- quantidade de contradições documentais abertas.
 
-Adicionar à tela inicial
+### 18.4.1 Metas iniciais de entrega do MVP
 
-No iPhone/Safari:
+- `100%` dos fluxos críticos do MVP cobertos por validação objetiva definida no `plan.md`;
+- `0` contradições abertas entre PRD, plano oficial e comportamento real conhecidas no release;
+- `0` tarefas críticas marcadas como prontas sem prova objetiva;
+- `0` dependências legadas no caminho crítico do runtime do MVP.
 
-Compartilhar → Adicionar à Tela de Início
+---
 
-Para o seu momento, eu recomendo esta ordem:
+## 19. Riscos e decisões abertas
 
-Primeiro: npm run dev -- --host 0.0.0.0
-Depois: npm run build + npm run preview
-Depois: deploy gratuito para testar com HTTPS
+### 19.1 Riscos
 
-Assim você valida a tela no celular antes de publicar qualquer coisa definitiva.
+- stores operacionais ainda híbridas durante a transição;
+- divergência temporária entre cache local e banco central;
+- cutover de dados mal reconciliado;
+- docs antigas induzirem agentes a reabrir legado;
+- E2E insuficientes esconderem falso positivo.
+
+### 19.2 Decisões que precisam continuar explícitas
+
+- política final de uso de IndexedDB após o MVP;
+- estratégia definitiva de onboarding da atleta;
+- nível de permanência do módulo scout na trilha principal de release;
+- política de exportação/importação após a migração completa.
+
+---
+
+## 20. Pós-MVP
+
+Ficam para pós-MVP, salvo decisão explícita em contrário:
+
+- multi-time completo;
+- notificações automatizadas mais sofisticadas;
+- permissões avançadas;
+- painéis analíticos mais profundos;
+- consolidação completa de todos os módulos não essenciais no Supabase;
+- integrações externas adicionais.
+
+---
+
+## 21. Mapa oficial de documentos
+
+### 21.1 Documento de produto
+
+- `CEPRAEA.md`
+
+### 21.2 Documento de execução
+
+- `plan.md`
+
+### 21.3 Documentação técnica temática
+
+- auth;
+- Supabase;
+- presence tokens;
+- cutover;
+- limpeza de legado;
+- testes e validação.
+
+---
+
+## 22. Regra final de interpretação
+
+Se um agente precisar decidir entre:
+
+- descrever o produto;
+- executar a migração;
+- validar o comportamento atual;
+
+deve usar:
+
+- `CEPRAEA.md` para **produto**;
+- `plan.md` para **execução**;
+- o código e os testes para **verdade implementada**.
+
+Este PRD só está correto se continuar:
+
+- útil para decisão de produto;
+- compatível com o MVP real;
+- livre de legado tratado como contrato oficial;
+- livre de promessas de implementação que ainda não aconteceram.

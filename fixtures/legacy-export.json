@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "exportedAt": "2026-05-07T00:00:00.000Z",
+  "athletes": [
+    {
+      "id": "b0000001-0000-4000-a000-000000000001",
+      "nome": "Ana Importada",
+      "email": "ana.importada@cepraea.test",
+      "telefone": "(21) 99000-0001",
+      "categoria": "adulto",
+      "nivel": "avancado",
+      "status": "ativo",
+      "observacoes": "Atleta importada do legado",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "b0000001-0000-4000-a000-000000000002",
+      "nome": "Bia Importada",
+      "email": "bia.importada@cepraea.test",
+      "telefone": "(21) 99000-0002",
+      "status": "ativo",
+      "createdAt": "2025-01-02T00:00:00.000Z",
+      "updatedAt": "2025-01-02T00:00:00.000Z"
+    }
+  ],
+  "trainings": [
+    {
+      "id": "c0000001-0000-4000-a000-000000000001",
+      "tipo": "recorrente",
+      "status": "realizado",
+      "data": "2025-03-06",
+      "horaInicio": "20:00",
+      "horaFim": "21:30",
+      "local": "Quadra CEPRAEA",
+      "criadoManualmente": false,
+      "createdAt": "2025-03-01T00:00:00.000Z",
+      "updatedAt": "2025-03-07T00:00:00.000Z"
+    },
+    {
+      "id": "c0000001-0000-4000-a000-000000000002",
+      "tipo": "extra",
+      "status": "realizado",
+      "data": "2025-03-09",
+      "horaInicio": "07:30",
+      "horaFim": "09:00",
+      "criadoManualmente": true,
+      "createdAt": "2025-03-05T00:00:00.000Z",
+      "updatedAt": "2025-03-10T00:00:00.000Z"
+    }
+  ],
+  "attendance": [
+    {
+      "id": "c0000001-0000-4000-a000-000000000001::b0000001-0000-4000-a000-000000000001",
+      "treinoId": "c0000001-0000-4000-a000-000000000001",
+      "atletaId": "b0000001-0000-4000-a000-000000000001",
+      "status": "presente",
+      "confirmadoPelaAtleta": false,
+      "registradoEm": "2025-03-06T21:35:00.000Z"
+    },
+    {
+      "id": "c0000001-0000-4000-a000-000000000001::b0000001-0000-4000-a000-000000000002",
+      "treinoId": "c0000001-0000-4000-a000-000000000001",
+      "atletaId": "b0000001-0000-4000-a000-000000000002",
+      "status": "ausente",
+      "confirmadoPelaAtleta": false,
+      "registradoEm": "2025-03-06T21:35:00.000Z"
+    },
+    {
+      "id": "c0000001-0000-4000-a000-000000000002::b0000001-0000-4000-a000-000000000001",
+      "treinoId": "c0000001-0000-4000-a000-000000000002",
+      "atletaId": "b0000001-0000-4000-a000-000000000001",
+      "status": "presente",
+      "confirmadoPelaAtleta": true,
+      "registradoEm": "2025-03-09T09:05:00.000Z"
+    }
+  ],
+  "settings": [
+    {
+      "nomeEquipe": "CEPRAEA",
+      "nomeTecnico": "Coach Legado",
+      "telefoneTecnico": "(21) 99000-9999",
+      "localPadrao": "Quadra CEPRAEA",
+      "semanasFuturas": 4
+    }
+  ]
+}

@@ -1,3 +1,20 @@
+---
+tipo: CHECKLIST-MANUAL
+nome: "Validação Operacional de Lotes de Presence Tokens"
+papel: "Roteiro de teste manual executado por humano em ambiente preview/staging antes de ativar tokens Supabase em produção."
+autoridade: "Operacional — não é normativo para agentes; é instrução para humano validador."
+lido_por: "Humano (QA, treinador, time técnico)"
+quando_ler: "antes de alterar VITE_PRESENCE_TOKENS_BACKEND de legacy para supabase em produção"
+atualizado_por: "Humano"
+quando_atualizar: "fluxo de tokens muda e novos itens de validação precisam ser cobertos"
+validade: "2026-05-04"
+status: ATUAL
+conflito: "Se checklist contradiz comportamento atual da aplicação → verificar código; não alterar o checklist para espelhar comportamento incorreto."
+proibido:
+  - "Agentes NÃO devem marcar itens deste checklist como aprovados sem execução real em ambiente com Supabase configurado"
+nao_cobre: "Validação automatizada (→ docs/presence-token-batch-automated-validation.md), fluxo de auth do treinador ou atleta"
+---
+
 # Validação manual — lotes de Presence Tokens Supabase
 
 ## Objetivo
@@ -17,7 +34,7 @@ A validação deve ocorrer em preview/staging ou ambiente controlado com:
 ```text
 VITE_PRESENCE_TOKENS_BACKEND=supabase
 VITE_SUPABASE_URL=<configurado>
-VITE_SUPABASE_ANON_KEY=<configurado>
+VITE_SUPABASE_PUBLISHABLE_KEY=<configurado>
 VITE_SUPABASE_TEAM_ID=<uuid-valido>
 ```
 

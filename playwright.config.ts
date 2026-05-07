@@ -4,13 +4,15 @@ import { fileURLToPath } from 'url'
 import path from 'path'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-dotenv.config({ path: path.resolve(__dirname, '.env.test') })
+dotenv.config({ path: path.resolve(__dirname, '.env.test'), override: true })
 
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
+  globalSetup: './e2e/global.setup.ts',
+  globalTeardown: './e2e/global.teardown.ts',
   reporter: [['html', { open: 'never' }], ['list']],
 
   use: {
@@ -23,24 +25,22 @@ export default defineConfig({
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: ['**/smoke.spec.ts', '**/athlete/**'],
+      testIgnore: ['**/athlete/**'],
     },
     {
       name: 'mobile',
       use: { ...devices['Pixel 5'] },
       testMatch: ['**/athlete/**'],
     },
-    {
-      name: 'smoke',
-      use: { ...devices['Desktop Chrome'], baseURL: 'https://cepraea.vercel.app' },
-      testMatch: ['**/smoke.spec.ts'],
-    },
   ],
 
   webServer: {
-    command: 'npm run dev',
+    command: 'npm run dev -- --mode test',
+    env: {
+      ...process.env,
+    },
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 30_000,
   },
 })

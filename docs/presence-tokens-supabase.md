@@ -1,3 +1,21 @@
+---
+tipo: SPEC-TÉCNICA
+nome: "Presence Tokens Supabase — Fase Inicial (Feature Flag)"
+papel: "Especifica a arquitetura isolada de confirmação pública por token Supabase com feature flag VITE_PRESENCE_TOKENS_BACKEND, incluindo RPCs, rotas e garantias de isolamento."
+autoridade: "Hierarquia 4/4 — referência temática para a feature de tokens; perde para código atual se implementação evoluiu além desta spec."
+lido_por: "Agente responsável por tokens de presença"
+quando_ler: "ao trabalhar em src/features/presence-tokens/, supabase/migrations/, ou PublicConfirmPage.tsx"
+atualizado_por: "Agente executor"
+quando_atualizar: "decisão arquitetural da feature muda (novo RPC, nova rota, mudança de feature flag)"
+validade: "2026-05-05"
+status: PARCIAL
+status_nota: "Verificar src/features/presence-tokens/ e PublicConfirmPage.tsx antes de assumir que spec reflete implementação atual"
+conflito: "Código prevalece; se spec proíbe algo que já foi implementado e aprovado, atualizar spec — não reverter código."
+proibido:
+  - "Agentes NÃO devem usar esta spec como justificativa para reverter implementações aprovadas de tokens Supabase"
+nao_cobre: "Migração de attendanceStore, remoção de Apps Script, fluxo legado de confirmação (/confirmar/:treinoId/:atletaId)"
+---
+
 # Presence Tokens Supabase — CEPRAEA
 
 ## Status

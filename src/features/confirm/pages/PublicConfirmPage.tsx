@@ -1,105 +1,39 @@
-import { useParams, useSearchParams } from 'react-router-dom'
-import { CheckCircle, XCircle, Dumbbell, Wifi, WifiOff } from 'lucide-react'
-import { useAthleteStore } from '@/stores/athleteStore'
-import { useTrainingStore } from '@/stores/trainingStore'
-import { useAttendanceStore } from '@/stores/attendanceStore'
+import { useSearchParams } from 'react-router-dom'
+import { CheckCircle, XCircle, Dumbbell, Wifi } from 'lucide-react'
 import { getSetting } from '@/db'
-import { formatDateLong } from '@/lib/utils'
-import { abrirWhatsApp } from '@/lib/whatsapp'
-import { pushConfirmation, loadSyncConfig } from '@/lib/sync'
 import { confirmPresenceByToken } from '@/features/presence-tokens/presenceTokenApi'
 import { isSupabasePresenceTokensEnabled } from '@/features/presence-tokens/presenceTokenFeatureFlag'
 import { useState, useEffect } from 'react'
 import type { AppSettings } from '@/types'
 import type { PresenceTokenStatus } from '@/features/presence-tokens/presenceTokenTypes'
 
-type PageState = 'loading' | 'pending' | 'sending' | 'synced' | 'fallback-wa' | 'error' | 'not-found'
+type PageState = 'loading' | 'pending' | 'sending' | 'synced' | 'not-found'
 
 export default function PublicConfirmPage() {
-  const { treinoId, atletaId } = useParams<{ treinoId: string; atletaId: string }>()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') ?? ''
   const usingSupabaseToken = isSupabasePresenceTokensEnabled() && token.length > 0
 
-  const training = useTrainingStore((s) => s.getById(treinoId ?? ''))
-  const athlete = useAthleteStore((s) => s.getById(atletaId ?? ''))
-  const upsert = useAttendanceStore((s) => s.upsert)
   const [pageState, setPageState] = useState<PageState>('loading')
   const [confirmed, setConfirmed] = useState<boolean | null>(null)
   const [settings, setSettings] = useState<Partial<AppSettings>>({})
-  const [waMsg, setWaMsg] = useState('')
-  const [waTel, setWaTel] = useState<string | undefined>(undefined)
   const [remoteMessage, setRemoteMessage] = useState('')
 
   useEffect(() => {
     getSetting<AppSettings>('appSettings').then((s) => {
       if (s) setSettings(s)
     })
+    setPageState(usingSupabaseToken ? 'pending' : 'not-found')
+  }, [usingSupabaseToken])
 
-    if (usingSupabaseToken) {
-      setPageState('pending')
-      return
-    }
-
-    if (training !== undefined && athlete !== undefined) {
-      setPageState(training && athlete ? 'pending' : 'not-found')
-    }
-  }, [training, athlete, usingSupabaseToken])
-
-  const handleSupabaseTokenConfirm = async (status: PresenceTokenStatus) => {
-    if (!token) return
-
+  const handleConfirm = async (presente: boolean) => {
+    if (!usingSupabaseToken) return
     setPageState('sending')
-    setConfirmed(status === 'presente')
-
+    setConfirmed(presente)
+    const status: PresenceTokenStatus = presente ? 'presente' : 'ausente'
     const result = await confirmPresenceByToken({ token, status })
     setRemoteMessage(result.message)
     setPageState(result.ok ? 'synced' : 'not-found')
-  }
-
-  const handleConfirm = async (presente: boolean) => {
-    if (usingSupabaseToken) {
-      await handleSupabaseTokenConfirm(presente ? 'presente' : 'ausente')
-      return
-    }
-
-    if (!treinoId || !atletaId || !training || !athlete) return
-
-    setPageState('sending')
-    setConfirmed(presente)
-
-    const status = presente ? 'presente' : 'ausente'
-
-    // 1. Salvar no IDB local (funciona mesmo sem endpoint)
-    await upsert(treinoId, atletaId, status, { confirmadoPelaAtleta: true })
-
-    // 2. Tentar enviar ao endpoint remoto
-    const syncConfig = await loadSyncConfig()
-    let syncOk = false
-
-    if (syncConfig) {
-      syncOk = await pushConfirmation(syncConfig, {
-        treinoId,
-        atletaId,
-        nomeAtleta: athlete.nome,
-        status,
-        origem: 'link',
-      })
-    }
-
-    if (syncOk) {
-      // Sincronizado com sucesso — não precisa de WhatsApp
-      setPageState('synced')
-    } else {
-      // Fallback: prepara mensagem mas não abre WA automaticamente
-      const equipe = settings.nomeEquipe ?? 'CEPRAEA'
-      const emoji = presente ? '✅' : '❌'
-      const acao = presente ? 'confirmou presença' : 'não poderá comparecer'
-      const msg = `${emoji} *${athlete.nome}* ${acao} no treino de *${equipe}* — ${formatDateLong(training.data)} às ${training.horaInicio}.`
-      setWaMsg(msg)
-      setWaTel(settings.telefoneTecnico?.replace(/\D/g, ''))
-      setPageState('fallback-wa')
-    }
   }
 
   if (pageState === 'loading') return null
@@ -149,42 +83,8 @@ export default function PublicConfirmPage() {
     )
   }
 
-  if (pageState === 'fallback-wa') {
-    const presente = confirmed === true
-    return (
-      <div className="min-h-dvh flex flex-col items-center justify-center bg-cep-purple-950 px-6 text-center space-y-4">
-        {presente ? (
-          <CheckCircle className="h-16 w-16 text-cep-lime-400" />
-        ) : (
-          <XCircle className="h-16 w-16 text-red-400" />
-        )}
-        <div>
-          <h1 className="text-xl font-black text-cep-white">
-            {presente ? 'Presença confirmada!' : 'Ausência registrada'}
-          </h1>
-          <p className="text-sm text-cep-muted mt-2 max-w-xs">
-            {presente ? 'Ótimo! Até o treino! 💪' : 'Sua ausência foi registrada. Até a próxima!'}
-          </p>
-        </div>
-        <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold bg-cep-gold-400/20 text-cep-gold-400">
-          <WifiOff className="h-3.5 w-3.5" /> Não foi possível sincronizar automaticamente
-        </div>
-        <p className="text-sm text-cep-muted max-w-xs">
-          Sua resposta foi salva. Toque no botão abaixo para avisar o treinador pelo WhatsApp.
-        </p>
-        <button
-          onClick={() => abrirWhatsApp(waMsg, waTel)}
-          className="flex items-center gap-2 rounded-xl bg-green-600 px-6 py-3 text-sm font-semibold text-white hover:bg-green-700 active:bg-green-800 transition-colors"
-        >
-          Enviar WhatsApp
-        </button>
-      </div>
-    )
-  }
-
   // pageState === 'pending'
   const equipe = settings.nomeEquipe ?? 'CEPRAEA'
-  const syncConfigured = usingSupabaseToken || !!(settings.syncEndpointUrl && settings.syncSecret)
 
   return (
     <div className="min-h-dvh bg-cep-purple-950 flex flex-col items-center justify-center px-6">
@@ -199,28 +99,9 @@ export default function PublicConfirmPage() {
 
         <div className="p-6 space-y-4">
           <div className="text-center">
-            <p className="text-xl font-black text-cep-white">{usingSupabaseToken ? 'Atleta' : athlete?.nome.split(' ')[0]}</p>
-            <p className="text-sm text-cep-muted mt-0.5">{usingSupabaseToken ? 'Confirme sua presença pelo link seguro.' : athlete?.nome}</p>
+            <p className="text-xl font-black text-cep-white">Atleta</p>
+            <p className="text-sm text-cep-muted mt-0.5">Confirme sua presença pelo link seguro.</p>
           </div>
-
-          {!usingSupabaseToken && training && (
-            <div className="bg-cep-purple-850 rounded-xl border border-cep-purple-700 p-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm text-cep-white">
-                <span>📅</span>
-                <span className="capitalize">{formatDateLong(training.data)}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-cep-muted">
-                <span>⏰</span>
-                <span>{training.horaInicio} às {training.horaFim}</span>
-              </div>
-              {training.local && (
-                <div className="flex items-center gap-2 text-sm text-cep-muted">
-                  <span>📍</span>
-                  <span>{training.local}</span>
-                </div>
-              )}
-            </div>
-          )}
 
           <p className="text-sm text-center text-cep-muted">
             Você vai comparecer a este treino?
@@ -244,9 +125,7 @@ export default function PublicConfirmPage() {
           </div>
 
           <p className="text-xs text-center text-cep-muted/60">
-            {syncConfigured
-              ? 'Sua resposta será enviada diretamente ao treinador.'
-              : 'Sua resposta abrirá o WhatsApp para avisar o treinador.'}
+            Sua resposta será enviada diretamente ao treinador.
           </p>
         </div>
       </div>

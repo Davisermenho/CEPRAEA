@@ -39,39 +39,50 @@ insert into public.presence_token_batches (
     'created'
   );
 
--- anon may only call the public token confirmation endpoint.
-set local role anon;
+-- Grant matrix for anon/authenticated.
+-- This test runs as postgres, so invoking a denied RPC directly would not simulate a real
+-- client permission boundary. Validate EXECUTE grants through the catalog instead.
 do $$
 begin
-  perform public.confirm_presence_by_token('invalid-token', 'presente', null);
+  if not has_function_privilege('anon', 'public.confirm_presence_by_token(text, text, text)', 'EXECUTE') then
+    raise exception 'anon should execute confirm_presence_by_token';
+  end if;
 
-  begin
-    perform public.generate_trainings('10000000-0000-0000-0000-000000000001', null, current_date, current_date, array[extract(dow from current_date)::int], '20:00'::time, '21:30'::time, 'America/Sao_Paulo', 'recorrente', 'Teste');
-    raise exception 'anon executed generate_trainings unexpectedly';
-  exception when insufficient_privilege then
-    null;
-  end;
+  if has_function_privilege('anon', 'public.generate_trainings(uuid, uuid, date, date, integer[], time without time zone, time without time zone, text, text, text)', 'EXECUTE') then
+    raise exception 'anon should not execute generate_trainings';
+  end if;
 
-  begin
-    perform public.create_presence_token_batch('10000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000201', now() + interval '7 days');
-    raise exception 'anon executed create_presence_token_batch unexpectedly';
-  exception when insufficient_privilege then
-    null;
-  end;
+  if has_function_privilege('anon', 'public.create_presence_token_batch(uuid, uuid, timestamp with time zone)', 'EXECUTE') then
+    raise exception 'anon should not execute create_presence_token_batch';
+  end if;
 
-  begin
-    perform public.mark_presence_token_batch_exported('50000000-0000-0000-0000-000000000201');
-    raise exception 'anon executed mark_presence_token_batch_exported unexpectedly';
-  exception when insufficient_privilege then
-    null;
-  end;
+  if has_function_privilege('anon', 'public.mark_presence_token_batch_exported(uuid)', 'EXECUTE') then
+    raise exception 'anon should not execute mark_presence_token_batch_exported';
+  end if;
 
-  begin
-    perform public.revoke_presence_token_batch('50000000-0000-0000-0000-000000000201');
-    raise exception 'anon executed revoke_presence_token_batch unexpectedly';
-  exception when insufficient_privilege then
-    null;
-  end;
+  if has_function_privilege('anon', 'public.revoke_presence_token_batch(uuid)', 'EXECUTE') then
+    raise exception 'anon should not execute revoke_presence_token_batch';
+  end if;
+
+  if not has_function_privilege('authenticated', 'public.generate_trainings(uuid, uuid, date, date, integer[], time without time zone, time without time zone, text, text, text)', 'EXECUTE') then
+    raise exception 'authenticated should execute generate_trainings';
+  end if;
+
+  if not has_function_privilege('authenticated', 'public.create_presence_token_batch(uuid, uuid, timestamp with time zone)', 'EXECUTE') then
+    raise exception 'authenticated should execute create_presence_token_batch';
+  end if;
+
+  if not has_function_privilege('authenticated', 'public.mark_presence_token_batch_exported(uuid)', 'EXECUTE') then
+    raise exception 'authenticated should execute mark_presence_token_batch_exported';
+  end if;
+
+  if not has_function_privilege('authenticated', 'public.revoke_presence_token_batch(uuid)', 'EXECUTE') then
+    raise exception 'authenticated should execute revoke_presence_token_batch';
+  end if;
+
+  if has_function_privilege('authenticated', 'public.confirm_presence_by_token(text, text, text)', 'EXECUTE') then
+    raise exception 'authenticated should not execute confirm_presence_by_token';
+  end if;
 end $$;
 
 -- Viewer has authenticated grant but must be denied by RPC internal role checks.

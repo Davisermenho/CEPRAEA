@@ -1,55 +1,97 @@
-# Dev notes (local only)
+# Este arquivo .gitignore é usado para especificar quais arquivos e pastas devem ser ignorados pelo sistema de controle de versão Git. Ele é especialmente útil para evitar que arquivos temporários, de configuração local, dependências e artefatos de build sejam versionados, mantendo o repositório limpo e focado apenas no código-fonte e arquivos essenciais do projeto.
+
+# Aqui estão listados os arquivos e pastas que devem ser ignorados:
+
+# PASTAS DE CONFIGURAÇÃO LOCAL:
+# Arquivos dentro dessa pasta podem conter informações sensíveis ou específicas do ambiente de desenvolvimento, e não devem ser compartilhados ou versionados.
 /.dev
+#---
 
-# Dependencies
+# PASTAS DE DEPENDÊNCIAS:
+# node_modules é a pasta onde as dependências do projeto são instaladas, e geralmente é grande e pode ser facilmente reconstruída a partir do package.json, por isso não deve ser versionada.
 node_modules/
+#---
 
-# Build output
-dist/
-dist-ssr/
+# PASTAS DE SAÍDA DE BUILDS:
+# dist-ssr é a pasta de saída para builds de server-side rendering. Esses arquivos são gerados a partir do código-fonte e não devem ser versionados, pois podem ser reconstruídos a partir do código-fonte.
+# dist é a pasta de saída para builds de produção. Esses arquivos são gerados a partir do código-fonte e não devem ser versionados, pois podem ser reconstruídos a partir do código-fonte.
+dist/ 
+dist-ssr/ 
+#---
 
-# Vite
+# PASTAS DE CACHE E ARTEFATOS DE DESENVOLVIMENTO:
+# .vite é a pasta de cache do Vite, que armazena arquivos temporários gerados durante o desenvolvimento. Esses arquivos são específicos do ambiente de desenvolvimento e não devem ser versionados
 .vite/
+#---
 
-# Playwright artifacts
+# PLAYWRIGHT VIA MCP
+# A pasta .playwright-mcp é usada para armazenar arquivos relacionados ao Playwright, como relatórios de teste e artefatos gerados durante a execução dos testes. Esses arquivos são específicos do ambiente de desenvolvimento e não devem ser versionados.
+# Contem o token do MCP, que é sensível e não deve ser compartilhado ou versionado.
 .playwright-mcp/
+#---
 
-# Environment
+# ARQUIVOS DAS VARIÁVEIS DE AMBIENTE:
+# Esses arquivos geralmente contêm informações sensíveis, como chaves de API, credenciais e configurações específicas do ambiente. Eles não devem ser versionados para evitar a exposição de informações confidenciais e para permitir que cada desenvolvedor tenha suas próprias configurações locais sem afetar os outros.
 .env
 .env.local
 .env.*.local
+.env.vercel.production
+#---
 
-# Logs
+# ARQUIVOS DE LOG E DEPURAÇÃO:
+# Esses arquivos são gerados durante a execução do projeto e contêm informações de depuração e logs de execução. Eles não devem ser versionados, pois são específicos do ambiente de desenvolvimento e podem conter informações sensíveis ou irrelevantes para outros desenvolvedores.
 *.log
 npm-debug.log*
+#---
 
-# Editor
+# ARQUIVOS DE CONFIGURAÇÃO DE EDITORES E IDEs:
+# Esses arquivos são específicos do ambiente de desenvolvimento e contêm configurações personalizadas para editores de código e IDEs. Eles não devem ser versionados, pois podem variar entre os desenvolvedores e não são relevantes para o projeto em si.
 .vscode/extensions.json
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+#---
 
-# OS
+# ARQUIVOS DE SISTEMA:
+# Esses arquivos são gerados pelo sistema operacional e não têm relevância para o projeto. Eles podem conter informações específicas do ambiente ou serem arquivos temporários, e não devem ser versionados.
+# Arquivo criado pelo macOS para armazenar informações de visualização de pastas. Ele é específico do sistema operacional e não tem relevância para o projeto. 
 .DS_Store
 Thumbs.db
+#---
 
+# PASTAS DE AGENTES:
+# Essas pastas podem conter arquivos relacionados a agentes de inteligência artificial, como Claude, Codex e Copilot. Esses arquivos podem ser específicos do ambiente de desenvolvimento ou conter informações sensíveis, e não devem ser versionados.
+.claude/
+.codex/
+.files/
+.copilot/
+#---
 
-# Pasta dos agentes
-.claude
-.codex
-.dev
-.files
-.copilot
-
-# Arquivos de planejamento 
-plan.md
-CEPRAEA.md
-
-# Documentação dos agentes
-AGENT.md
-# Artefatos gerados (testes/build — não versionar)
+# PASTAS DE TESTES AUTOMATIZADOS:
+# Essas pastas e arquivos são gerados durante a execução de testes automatizados, como os testes do Playwright. Eles podem conter relatórios de teste, arquivos de cache e outros artefatos relacionados aos testes, e não devem ser versionados, pois são específicos do ambiente de desenvolvimento e podem ser facilmente regenerados a partir do código-fonte.
+# A pasta playwright-report é usada para armazenar relatórios de teste gerados pelo Playwright. Esses arquivos são específicos do ambiente de desenvolvimento e não devem ser versionados, pois podem ser facilmente regenerados a partir do código-fonte.
+# O arquivo tests/report.html é um relatório de teste gerado durante a execução dos testes automatizados. Ele é específico do ambiente de desenvolvimento e não deve ser versionado, pois pode ser facilmente regenerado a partir do código-fonte.
+# A pasta tests/api/__pycache__/ é usada para armazenar arquivos de cache gerados durante a execução de testes automatizados relacionados à API. Esses arquivos são específicos do ambiente de desenvolvimento e não devem ser versionados, pois podem ser facilmente regenerados a partir do código-fonte.
 playwright-report/
 tests/report.html
+tests/api/__pycache__/
 tsconfig.tsbuildinfo
+supabase/.temp/
+supabase/.branches/
+test-results/
+#---
+
+# ARQUIVOS DE DOCUMENTAÇÃO DE AGENTES:
+# Esses arquivos podem conter documentação específica de agentes de inteligência artificial, como Claude, Codex e Copilot. Esses arquivos podem ser específicos do ambiente de desenvolvimento ou conter informações sensíveis, e não devem ser versionados.
+# Esses arquivos podem conter informações detalhadas sobre o funcionamento, configuração e uso dos agentes, e podem ser específicos do ambiente de desenvolvimento ou conter informações sensíveis. Por isso, eles não devem ser versionados para evitar a exposição de informações confidenciais e para permitir que cada desenvolvedor tenha suas próprias documentações locais sem afetar os outros.
+CLAUDE.md
+AGENT.md
+#---
+
+#ARQUIVOS DE CONFIGURAÇÃO DE DEPLOYMENT:
+# Esses arquivos podem conter informações de configuração específicas para o deployment do projeto, como configurações de ambiente, chaves de API e outras informações sensíveis. Eles não devem ser versionados para evitar a exposição de informações confidenciais e para permitir que cada desenvolvedor tenha suas próprias configurações locais sem afetar os outros.
+.vercel
+
+#---
