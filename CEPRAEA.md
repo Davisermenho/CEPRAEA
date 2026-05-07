@@ -108,6 +108,7 @@ CEPRAEA adota uma arquitetura **cliente-centric offline-first** com sincronizaç
 │ │ ┌──────────────────────────────────────────────────┐ │ │
 │ │ │           Pages (Lazy-loaded)                   │ │ │
 │ │ │ • Dashboard • Athletes • Trainings • Reports    │ │ │
+│ │ │ • Scout • Atleta (login, perfil, treinos)       │ │ │
 │ │ └────────────────────────┬─────────────────────────┘ │ │
 │ │                          ↓                            │ │
 │ │ ┌──────────────────────────────────────────────────┐ │ │
@@ -126,15 +127,16 @@ CEPRAEA adota uma arquitetura **cliente-centric offline-first** com sincronizaç
 │ └────────────────────────┬─────────────────────────┘ │ │
 └─────────────────────────│──────────────────────────────┘
                           │
-                          ↓ (Optional Sync)
-            ┌─────────────────────────────┐
-            │  Google Apps Script          │
-            │  (Sync Endpoint)             │
-            │                              │
-            │  • Validate Secret           │
-            │  • Store to Google Sheets    │
-            │  • Return Records            │
-            └──────────────────────────────┘
+              ┌───────────┴───────────┐
+              │                       │
+              ↓ (Auth + DB)           ↓ (Optional Sync)
+┌─────────────────────────┐  ┌──────────────────────────┐
+│  Supabase (PostgreSQL)   │  │  Google Apps Script       │
+│  • Auth (email+senha)    │  │  (Sync Endpoint legado)   │
+│  • RLS por equipe        │  │  • Validate Secret        │
+│  • athletes.user_id      │  │  • Store to Google Sheets │
+│  • get_athlete_team_id() │  │  • Return Records         │
+└──────────────────────────┘  └──────────────────────────┘
 ```
 
 ### 2.2 Componentes Principais
@@ -144,9 +146,11 @@ CEPRAEA adota uma arquitetura **cliente-centric offline-first** com sincronizaç
 | **Frontend (SPA)** | Interface de usuário, navegação, formulários | React 19, React Router 7, Tailwind CSS | Local |
 | **Global State** | Gerenciar estado global (atletas, treinos, presença, scout) | Zustand 5 | Memory + IndexedDB |
 | **Persistência Local** | Armazenamento durável offline | IndexedDB (idb v8) | Dispositivo |
-| **Autenticação** | Validação de acesso via PIN com hash | Web Crypto API SHA-256 | SessionStorage |
+| **Auth do Técnico** | Validação de acesso via PIN com hash SHA-256 | Web Crypto API | SessionStorage |
+| **Auth do Atleta** | Login email+senha via Supabase Auth, lazy-link por email | @supabase/supabase-js | Supabase JWT |
+| **Banco Remoto** | Atletas, presenças, treinos com RLS por equipe | Supabase PostgreSQL | Supabase Cloud |
 | **Lógica de Negócio** | Cálculos, validações, geração de dados | TypeScript | Determinístico |
-| **Sincronização** | Push/Pull com endpoint remoto | Fetch API | Async |
+| **Sincronização** | Push/Pull com endpoint remoto (técnico) | Fetch API | Async |
 | **PWA** | Instalação, offline, atualização automática | Workbox v7, vite-plugin-pwa (`autoUpdate`) | Auto |
 | **Integração WhatsApp** | Geração de links e mensagens | WhatsApp Web URLs | Web |
 | **Exportação** | CSV/Excel | XLSX v0.18 | Blob Download |
@@ -295,11 +299,19 @@ graph TB
 - Suporte nativo a dark mode
 - Alternativa: Material UI (heavier)
 
-#### Por que **Google Apps Script + Sheets**?
+#### Por que **Google Apps Script + Sheets** (sincronização legada)?
 - Endpoint gratuito (não requer servidor)
 - Dados centralizados em Sheets (acesso simples)
 - Sem autenticação complexa (secret + URL suficientes)
-- Alternativa: Firebase (requer cartão), Supabase (backend complexo)
+- Mantido para compatibilidade com fluxo de sync do técnico
+
+#### Por que **Supabase**?
+- PostgreSQL gerenciado com RLS nativo — isolamento por equipe sem lógica extra no cliente
+- Auth integrado (email+senha, JWT, magic link) — sem implementar servidor de auth
+- `@supabase/supabase-js` substituiu acesso direto ao IndexedDB para atletas
+- CLI (`supabase db push`) permite versionamento de migrations com CI/CD
+- Plano gratuito suficiente para o porte atual (1 equipe, ~30 atletas)
+- Alternativa: Firebase (vendor lock-in Google, NoSQL), PlanetScale (sem RLS nativo)
 
 #### Por que **PWA com Workbox**?
 - Instalação nativa em mobile
@@ -314,29 +326,39 @@ graph TB
 ### 3.1 Stack Tecnológico
 
 #### Frontend
-- **Framework**: React 19.1.0
-- **Build Tool**: Vite 6.3.5
-- **Linguagem**: TypeScript 5.8.3
-- **CSS**: Tailwind CSS 4.1.6 + Tailwind Merge 3.3.0
-- **Ícones**: Lucide React 0.511.0
-- **Roteamento**: React Router DOM 7.6.0
-- **Estado Global**: Zustand 5.0.4
-- **PWA**: vite-plugin-pwa 1.0.0 + Workbox 7.3.0
-- **Persistência**: IDB 8.0.3
+- **Framework**: React ^19.1.0
+- **Build Tool**: Vite ^6.3.5
+- **Linguagem**: TypeScript ^5.8.3
+- **CSS**: Tailwind CSS ^4.1.6 + Tailwind Merge ^3.3.0
+- **Ícones**: Lucide React ^0.511.0
+- **Roteamento**: React Router DOM ^7.6.0
+- **Estado Global**: Zustand ^5.0.4
+- **PWA**: vite-plugin-pwa ^1.0.0 + Workbox ^7.3.0
+- **Persistência**: IDB ^8.0.3
 
-#### Backend (Opcional)
-- **Sincronização**: Google Apps Script (JavaScript 1.0)
-- **Armazenamento**: Google Sheets (API v4)
+#### Backend
+- **Auth + Banco**: Supabase (PostgreSQL + RLS) — `@supabase/supabase-js ^2.87.1`
+- **Sincronização legada**: Google Apps Script (JavaScript 1.0)
+- **Armazenamento legado**: Google Sheets (API v4)
 
 #### Utilitários
-- **Formatação**: clsx 2.1.1 (classname merger)
-- **Exportação**: XLSX 0.18.5 (Excel/CSV)
+- **Formatação**: clsx ^2.1.1 (classname merger)
+- **Exportação**: XLSX ^0.18.5 (Excel/CSV)
 - **Criptografia**: Web Crypto API (nativa)
-- **HTTP**: Fetch API (nativa)
+- **HTTP**: Fetch API (nativa) + Supabase client
+
+#### Testes
+- **Unit/Integration**: Vitest ^4.1.5 + jsdom ^29.1.1
+- **Cobertura**: @vitest/coverage-v8 ^4.1.5
+- **E2E**: Playwright (playwright.config.ts)
+- **SQL**: psql + arquivos `.test.sql` (RLS, migrations)
 
 #### DevOps
 - **Hospedagem**: Vercel
+- **Banco remoto**: Supabase Cloud (`fcnyjmrknqaomamdzabt.supabase.co`)
+- **CLI banco**: Supabase CLI ^2.98.1
 - **VCS**: Git/GitHub
+- **CI**: GitHub Actions (supabase-foundation.yml)
 - **Container**: Não utiliza (edge function via Vercel)
 
 ### 3.2 Estrutura de Pastas e Organização do Código
@@ -518,22 +540,27 @@ Domínios:
 
 #### Externas (npm packages)
 ```
-react@19.1.0                    ← Framework principal
-react-dom@19.1.0               ← Renderização DOM
-react-router-dom@7.6.0         ← Roteamento SPA
-zustand@5.0.4                  ← Estado global
-idb@8.0.3                       ← IndexedDB wrapper
-tailwindcss@4.1.6              ← CSS framework
-tailwind-merge@3.3.0           ← Classe merger
-lucide-react@0.511.0           ← Ícones
-clsx@2.1.1                     ← className utility
-xlsx@0.18.5                    ← Excel/CSV export
-vite-plugin-pwa@1.0.0          ← PWA builder
-workbox-window@7.3.0           ← Service Worker
-typescript@5.8.3               ← Type checking
-vite@6.3.5                     ← Build tool
-@tailwindcss/vite@4.1.6        ← Tailwind plugin
-@vitejs/plugin-react@4.5.0     ← React HMR
+react@^19.1.0                    ← Framework principal
+react-dom@^19.1.0               ← Renderização DOM
+react-router-dom@^7.6.0         ← Roteamento SPA
+zustand@^5.0.4                  ← Estado global
+idb@^8.0.3                      ← IndexedDB wrapper
+@supabase/supabase-js@^2.87.1  ← Auth + banco remoto (Supabase)
+tailwindcss@^4.1.6              ← CSS framework
+tailwind-merge@^3.3.0           ← Classe merger
+lucide-react@^0.511.0           ← Ícones
+clsx@^2.1.1                     ← className utility
+xlsx@^0.18.5                    ← Excel/CSV export
+vite-plugin-pwa@^1.0.0          ← PWA builder
+workbox-window@^7.3.0           ← Service Worker
+typescript@^5.8.3               ← Type checking
+vite@^6.3.5                     ← Build tool
+@tailwindcss/vite@^4.1.6        ← Tailwind plugin
+@vitejs/plugin-react@^4.5.0     ← React HMR
+vitest@^4.1.5                   ← Testes unitários
+@vitest/coverage-v8@^4.1.5      ← Cobertura de testes
+jsdom@^29.1.1                   ← DOM simulado para testes
+@resvg/resvg-js@^2.6.2         ← Geração de ícones PWA
 ```
 
 #### Internas (módulos TypeScript)
@@ -562,7 +589,8 @@ src/features/scout/pages/*.tsx + components/*.tsx
 ```
 
 #### Dependências Assíncronas (Runtime)
-- **Google Apps Script** (optional): endpoint remoto para sync
+- **Supabase** (auth + banco): `fcnyjmrknqaomamdzabt.supabase.co` — requerido para atletas
+- **Google Apps Script** (optional): endpoint remoto para sync do técnico
 - **Google Fonts**: via Workbox cache
 - **WhatsApp Web**: links HTTPS para abrir chats
 
@@ -572,15 +600,23 @@ src/features/scout/pages/*.tsx + components/*.tsx
 
 ### 4.1 Arquitetura de Negócio
 
-CEPRAEA não possui backend tradicional. A lógica de negócio reside no **cliente (browser)** com persistência local (IndexedDB) e sincronização **opcional** com Google Apps Script.
+CEPRAEA adota uma arquitetura **híbrida**: lógica de negócio no cliente com persistência local (IndexedDB), auth e banco centralizado via Supabase para atletas, e sincronização opcional com Google Apps Script para o técnico.
 
 ```
-┌─ Local (Browser) ─┐    ┌─ Remote (Optional) ─┐
-│ IndexedDB         │←→  │ Google Apps Script   │
-│ • Lógica CRUD     │    │ • Validação Secret   │
-│ • Cálculos        │    │ • Persist to Sheets  │
-│ • Validações      │    │ • Return Records     │
-└───────────────────┘    └──────────────────────┘
+┌─ Local (Browser) ───┐    ┌─ Supabase (Cloud) ──────────┐
+│ IndexedDB           │    │ PostgreSQL + Auth            │
+│ • Lógica CRUD coach │    │ • athletes (email, user_id)  │
+│ • Cálculos          │←→  │ • RLS policies por equipe    │
+│ • Validações        │    │ • get_athlete_team_id() RPC  │
+└─────────────────────┘    └─────────────────────────────┘
+                                      ↑
+                              AtletaGuard (lazy-link)
+                                      │
+                            ┌─ Remote (Optional) ─┐
+                            │ Google Apps Script   │
+                            │ • Sync técnico       │
+                            │ • Persist to Sheets  │
+                            └──────────────────────┘
 ```
 
 ### 4.2 Serviços e Operações de Negócio
@@ -1104,6 +1140,10 @@ await pushConfirmation(config, {
 
 ### 6.1 Modelo Conceitual
 
+> O sistema possui dois níveis de persistência: **IndexedDB** (local, no dispositivo do técnico) e **Supabase PostgreSQL** (remoto, para auth + RLS de atletas).
+
+#### IndexedDB (local — coach)
+
 ```
 ┌─────────────┐
 │   Athlete   │
@@ -1111,6 +1151,7 @@ await pushConfirmation(config, {
 │ id (PK)     │
 │ nome        │
 │ telefone    │
+│ email       │ ← novo (migration 0006)
 │ categoria   │
 │ nível       │
 │ status      │
@@ -1154,14 +1195,44 @@ await pushConfirmation(config, {
             └─────────────────┘
 ```
 
+#### Supabase PostgreSQL (remoto — atletas)
+
+```
+┌──────────────────────────┐    ┌───────────────────┐
+│ athletes (Supabase)      │    │  auth.users       │
+├──────────────────────────┤    ├───────────────────┤
+│ id          uuid PK      │    │ id   uuid PK      │
+│ team_id     uuid FK      │    │ email text        │
+│ nome        text         │←→  │ encrypted_password│
+│ email       text         │    │ ...               │
+│ user_id     uuid NULL FK │    └───────────────────┘
+│ telefone    text         │
+│ categoria   text         │    7 RLS Policies:
+│ nivel       text         │    • athlete_select_own_record
+│ status      text         │    • athlete_select_by_email_for_linking
+│ created_at  timestamptz  │    • athlete_link_user_id
+│ updated_at  timestamptz  │    • athlete_select_team_athletes
+└──────────────────────────┘    • athlete_select_team_trainings
+                                • athlete_insert_own_attendance
+                                • athlete_update_own_attendance
+
+Índices:
+• athletes_user_id_key  — UNIQUE(user_id) NULLS NOT DISTINCT
+• athletes_team_email_key — UNIQUE(team_id, lower(email))
+
+RPC:
+• get_athlete_team_id() SECURITY DEFINER → uuid
+```
+
 ### 6.2 Entidades Principais
 
 | Entidade | Chave Primária | Índices | Relacionamento |
 |---|---|---|---|
-| **Athlete** | `id` (UUID) | - | 1:N com Attendance |
-| **Training** | `id` (UUID) | `data` (query por período) | 1:N com Attendance |
-| **AttendanceRecord** | `id` (composto: `treinoId::atletaId`) | `treinoId`, `atletaId` | N:1 com Athlete + Training |
-| **Settings** | `key` (string) | - | Key-value store |
+| **Athlete** (IndexedDB) | `id` (UUID) | - | 1:N com Attendance |
+| **Training** (IndexedDB) | `id` (UUID) | `data` (query por período) | 1:N com Attendance |
+| **AttendanceRecord** (IndexedDB) | `id` (composto: `treinoId::atletaId`) | `treinoId`, `atletaId` | N:1 com Athlete + Training |
+| **Settings** (IndexedDB) | `key` (string) | - | Key-value store |
+| **athletes** (Supabase) | `id` (UUID) | `user_id` UNIQUE, `(team_id, lower(email))` UNIQUE | N:1 com auth.users |
 
 ### 6.3 Schema IndexedDB
 
@@ -1301,56 +1372,87 @@ await tx.done
 
 ### 7.1 Autenticação
 
-#### Modelo de Autenticação
-- **Tipo**: PIN + Hash SHA-256 (não requer usuário/senha)
+O sistema possui **dois modelos de autenticação** separados por perfil:
+
+#### Autenticação do Técnico (coach)
+- **Tipo**: PIN + Hash SHA-256 (sem usuário/senha)
 - **Fluxo**:
   1. Primeiro acesso: Insere PIN 2x (criação)
-  2. Acesso: Insere PIN 1x (verificação)
+  2. Acesso seguinte: Insere PIN 1x (verificação)
 
-#### Implementação
 ```typescript
 // Hash
-const hash = await crypto.subtle.digest('SHA-256', 
+const hash = await crypto.subtle.digest('SHA-256',
   encoder.encode(pin + 'cepraea_salt_2025')
 )
-
-// Verificação
-const storedHash = await getSetting('pinHash')
-const matches = (hash === storedHash)
-
-// Sessão
-sessionStorage.setItem('cepraea_session', '1')  // Session-only (não persiste)
+// Sessão — session-only, limpo ao fechar aba
+sessionStorage.setItem('cepraea_session', '1')
 ```
 
-#### Segurança
-- ✓ SHA-256: 256-bit output, resistente a collision
-- ✓ Salt: Adicionado para evitar rainbow tables
-- ✓ Session Storage: Apenas em memoria (limpo ao fechar aba)
-- ⚠️ Limitação: PIN pode ser bruteforce se conhecer salt
+- ✓ SHA-256: 256-bit, resistente a collision
+- ✓ Salt: evita rainbow tables
+- ✓ SessionStorage: sem persistência entre sessões
+- ⚠️ PIN pode ser bruteforce se o salt for conhecido
+
+#### Autenticação do Atleta (migration 0006 — CEPR-0028/0029)
+- **Tipo**: Email + senha via Supabase Auth (JWT)
+- **Guard**: `AtletaGuard.tsx` — hook React com lazy-link automático
+- **Fluxo**:
+  1. `supabase.auth.signInWithPassword({ email, password })`
+  2. `AtletaGuard` busca atleta por `user_id` (fast path)
+  3. Se não encontrado → busca por `email` onde `user_id IS NULL` (first-login)
+  4. Se encontrado → `UPDATE athletes SET user_id = auth.user.id` (lazy-link)
+  5. Estados: `loading | found | not-found | unauthenticated`
+- **Reset de senha**: `/atleta/nova-senha` → `supabase.auth.updateUser`
+
+```typescript
+// AtletaGuard — fast path
+const { data: { user } } = await supabase.auth.getUser()
+const { data: athlete } = await supabase
+  .from('athletes')
+  .select('id, team_id')
+  .eq('user_id', user.id)
+  .single()
+```
+
+- ✓ JWT gerenciado pelo Supabase (sem tokens no código)
+- ✓ RLS no banco — atleta só acessa dados da própria equipe
+- ✓ Lazy-link: atletas criados antes da migration são vinculados no primeiro login
+- ✓ `VITE_SUPABASE_PUBLISHABLE_KEY` — chave anon pública (não secreta)
 
 ### 7.2 Autorização
 
-#### Modelo
-- **Sem roles**: Único grupo de usuários (técnicos)
-- **Sem permissões granulares**: Acesso tudo ou nada
-- **Aplicável no futuro**: Adicionar roles (admin, assistente, atleta)
+#### Técnico (sessão local)
+- **Modelo**: sem roles — acesso tudo ou nada via `AuthGuard`
+- **Controle**: `isAuthenticated()` verifica `sessionStorage`
 
-#### Controle de Acesso
 ```typescript
-// Guard verifica sessionStorage
 export function AuthGuard() {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />
-  }
+  if (!isAuthenticated()) return <Navigate to="/login" replace />
   return <Outlet />
 }
+```
 
-// Rotas públicas
-/login
-/confirmar/:treinoId/:atletaId  (sem autenticação necessária)
+#### Atleta (Supabase RLS)
+- **Modelo**: Row-Level Security no PostgreSQL por `team_id` e `user_id`
+- **Controle**: `AtletaGuard` + 7 políticas RLS na migration 0006
 
-// Rotas privadas
-/dashboard, /atletas, /treinos, /relatorios, etc.
+| Política | Permite |
+|---|---|
+| `athlete_select_own_record` | Atleta lê apenas seu próprio registro |
+| `athlete_select_by_email_for_linking` | Busca por email (lazy-link) |
+| `athlete_link_user_id` | UPDATE próprio `user_id` (apenas uma vez) |
+| `athlete_select_team_athletes` | Lê atletas da mesma equipe |
+| `athlete_select_team_trainings` | Lê treinos da equipe |
+| `athlete_insert_own_attendance` | INSERT de presença própria |
+| `athlete_update_own_attendance` | UPDATE de presença própria |
+
+#### Rotas por perfil
+```
+Públicas:    /login, /atleta/login, /atleta/nova-senha,
+             /confirmar/:treinoId/:atletaId
+Técnico:     /dashboard, /atletas, /treinos, /relatorios, ...
+Atleta:      /atleta/treinos, /atleta/treinos/:id, /atleta/perfil
 ```
 
 ### 7.3 Controle de Acesso
@@ -1456,21 +1558,25 @@ export function AuthGuard() {
 
 #### Desenvolvimento
 - **Hospedagem**: Local (localhost:5173 via Vite)
-- **Database**: IndexedDB local
-- **Sync**: Pode-se configurar Google Apps Script local
+- **Database local**: IndexedDB no navegador
+- **Database remoto**: Supabase local (`supabase start` → porta 54322)
+- **Sync legado**: Google Apps Script (configurável)
 - **Build**: `npm run dev`
+- **Env**: `.env.local` com `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_TEAM_ID`
 
 #### Homologação (Staging)
-- **Pendente de definição**
-- **Sugestão**: Branch `staging`, deploy em Vercel preview
+- **Sugestão**: Branch `staging`, deploy em Vercel preview + Supabase preview branch
 
 #### Produção
-- **Hospedagem**: Vercel (zero-config)
+- **Hospedagem**: Vercel (zero-config, auto-deploy de `main`)
 - **Domain**: cepraea.vercel.app ou customizado
-- **Database**: IndexedDB no dispositivo do usuário
-- **Sync**: Google Apps Script endpoint (URL remota)
+- **Database local**: IndexedDB no dispositivo do técnico
+- **Database remoto**: Supabase Cloud `fcnyjmrknqaomamdzabt.supabase.co`
+- **Auth**: Supabase Auth (email+senha para atletas)
+- **Sync legado**: Google Apps Script endpoint (URL remota)
 - **Build**: `npm run build`
 - **Cache**: Vercel Edge + Workbox SW
+- **Migrations**: aplicadas via `supabase db push` (6 migrations — 0001→0006)
 
 ### 8.2 Cloud e Servidor
 
@@ -1482,8 +1588,12 @@ export function AuthGuard() {
 - **Uptime SLA**: 99.9%
 
 #### Banco de Dados
-- **Tipo**: Não aplicável (cliente-centric)
-- **Backup**: Google Sheets (opcional)
+- **Local**: IndexedDB (cliente-centric, no dispositivo)
+- **Remoto**: Supabase PostgreSQL 15 (gerenciado)
+  - Região: `sa-east-1` (São Paulo)
+  - Plano: Free tier (suficiente para o porte atual)
+  - Backup: automático pelo Supabase (daily)
+- **Legado**: Google Sheets via Apps Script (sync opcional do técnico)
 
 #### Configuração DNS
 - **Vercel**: Automática ou custom
@@ -2088,11 +2198,11 @@ Se data(treino) ∈ HOLIDAYS
 - [ ] Métricas de performance (Core Web Vitals)
 - [ ] Dashboard de uso (Google Analytics)
 
-#### Sprint 4 (Backend)
-- [ ] Migrar para backend Node.js (Express/Fastify)
-- [ ] Banco de dados centralizado (PostgreSQL/Supabase)
-- [ ] API RESTful versioned
-- [ ] Autenticação JWT + refresh tokens
+#### Sprint 4 (Backend) — parcialmente concluído
+- [ ] Migrar para backend Node.js (Express/Fastify) — não necessário (Supabase cobre)
+- [x] Banco de dados centralizado (PostgreSQL via Supabase) — ✅ CEPR-0028
+- [ ] API RESTful versioned — coberta por Supabase PostgREST
+- [x] Autenticação JWT + refresh tokens — ✅ Supabase Auth (atletas) — CEPR-0029
 
 ### 12.2 Refatorações Futuras
 
@@ -2132,7 +2242,7 @@ Depois:
 ### 12.3 Evolução da Arquitetura
 
 ```
-Versão 1.x (Current):
+Versão 1.x:
 ┌─ Browser (PWA) ─────────────────┐
 │ React + Zustand + IndexedDB      │
 └──────┬──────────────────────────┘
@@ -2143,20 +2253,38 @@ Versão 1.x (Current):
 └──────────────────────────────────┘
 
 
-Versão 2.x (Com Backend):
+Versão 1.5 (Current — mai/2026):
+┌─ Browser (PWA) ─────────────────────┐
+│ React + Zustand + IndexedDB          │
+│ + @supabase/supabase-js              │
+└──────┬──────────────────────────────┘
+       │                  │ (auth + RLS)
+       │ (optional sync)  ↓
+       │         ┌─ Supabase ────────────┐
+       │         │ PostgreSQL + Auth      │
+       │         │ • athletes RLS         │
+       │         │ • 6 migrations         │
+       ↓         └────────────────────────┘
+┌─ Google Apps Script ─────────────┐
+│ Sync coach + Google Sheets        │
+└──────────────────────────────────┘
+
+
+Versão 2.x (Planejado):
 ┌─ Browser (PWA) ──────────────────┐
-│ React + Redux Toolkit + RTK Query│
+│ React + Zustand/RTK + Supabase   │
 └──────┬──────────────────────────┘
        │
-       ↓ HTTPS + JWT
-┌─ Backend (Node.js) ──────────────┐
-│ Express + PostgreSQL + Bull      │
-│ • Auth • API • WebSocket • Jobs  │
+       ↓ HTTPS + JWT (Supabase)
+┌─ Supabase (BaaS) ────────────────┐
+│ PostgreSQL + Auth + RLS + Realtime│
+│ • Multi-tenant (N equipes)        │
+│ • Edge Functions (lógica server)  │
 └──────┬──────────────────────────┘
        │
        ↓
 ┌─ Externos ──────────────────────┐
-│ WhatsApp • Google Sheets • etc.  │
+│ WhatsApp • Google Cal • etc.     │
 └─────────────────────────────────┘
 
 
@@ -2209,11 +2337,13 @@ Versão 3.x (Infraestrutura Avançada):
 | Versão | Data | Recursos Principais |
 |---|---|---|
 | **1.0** | ✅ Abril 2025 | MVP: Atletas, Treinos, Presença, Sync |
-| **1.1** | Junho 2025 | Testes, perf optimization, bug fixes |
-| **1.2** | Setembro 2025 | UX melhorias, docs, mobile optimization |
-| **2.0** | Q1 2026 | Backend, multi-user, roles, notificações |
-| **2.5** | Q3 2026 | Integrações (WhatsApp API, Google Cal) |
-| **3.0** | Q1 2027 | Microserviços, escalabilidade enterprise |
+| **1.1** | ✅ Dez 2025 | Testes Vitest + Playwright, E2E, perf |
+| **1.2** | ✅ Mar 2026 | Scout, ExportPage, Reports, WhatsApp |
+| **1.3** | ✅ Mai 2026 | Supabase Auth atleta, RLS, migrations 0001–0006 |
+| **1.5** | Jun 2026 | Migração completa atleta (remover athleteAuth.ts), multi-equipe |
+| **2.0** | Q3 2026 | Supabase multi-tenant, N equipes, Edge Functions |
+| **2.5** | Q1 2027 | Integrações (WhatsApp API, Google Cal), Realtime |
+| **3.0** | Q3 2027 | Microserviços, escalabilidade enterprise |
 
 ---
 

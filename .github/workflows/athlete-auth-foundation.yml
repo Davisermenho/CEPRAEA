@@ -1,17 +1,13 @@
-name: Supabase Foundation
+name: Athlete Auth Foundation
 
 on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
-      - feat/supabase-foundation
 
 jobs:
-  foundation:
-    if: github.head_ref != 'migration/athlete-auth-foundation'
+  athlete-auth:
+    if: github.head_ref == 'migration/athlete-auth-foundation'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,4 +22,4 @@ jobs:
         with:
           version: latest
       - run: supabase start
-      - run: npm run validate:supabase-foundation
+      - run: npm run validate:athlete-auth-foundation

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronLeft, CheckCircle2, MessageCircle, Copy, Send,
-  UserCheck, RefreshCw, Wifi, WifiOff, Shield, Link2, Ban,
+  UserCheck, Wifi, Shield, Link2, Ban,
 } from 'lucide-react'
 import { useTrainingStore } from '@/stores/trainingStore'
 import { useAthleteStore } from '@/stores/athleteStore'
@@ -10,8 +10,7 @@ import { useAttendanceStore } from '@/stores/attendanceStore'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
-import { formatDateLong, formatPhone, formatTime } from '@/lib/utils'
-import { getSetting } from '@/db'
+import { formatDateLong, formatPhone } from '@/lib/utils'
 import {
   gerarAnuncioTreino,
   gerarPedidoConfirmacaoGrupo,
@@ -20,7 +19,6 @@ import {
   abrirWhatsApp,
   copiarTexto,
 } from '@/lib/whatsapp'
-import { pullConfirmations, pushConfirmation, loadSyncConfig } from '@/lib/sync'
 import { isSupabasePresenceTokensEnabled } from '@/features/presence-tokens/presenceTokenFeatureFlag'
 import { assertSupabaseTeamId } from '@/features/presence-tokens/presenceTokenConfig'
 import { validatePresenceTokenCoachAccess } from '@/features/presence-tokens/presenceTokenAccess'
@@ -31,7 +29,7 @@ import {
   revokePresenceTokenBatch,
 } from '@/features/presence-tokens/presenceTokenApi'
 import type { PresenceTokenBatchLink } from '@/features/presence-tokens/presenceTokenTypes'
-import type { AppSettings, AttendanceStatus } from '@/types'
+import type { AttendanceStatus } from '@/types'
 import { cn } from '@/lib/utils'
 
 const STATUS_CONFIG: Record<AttendanceStatus, { label: string; color: string; bg: string }> = {
@@ -48,14 +46,10 @@ export default function TrainingDetailPage() {
   const updateStatus = useTrainingStore((s) => s.updateStatus)
   const athletes = useAthleteStore((s) => s.athletes)
   const { records, loadForTraining, upsert, getTrainingSummary } = useAttendanceStore()
-  const [settings, setSettings] = useState<Partial<AppSettings>>({})
   const [waModal, setWaModal] = useState<{ title: string; text: string } | null>(null)
   const [justifAtleta, setJustifAtleta] = useState<string | null>(null)
   const [justifText, setJustifText] = useState('')
   const [copied, setCopied] = useState(false)
-  const [syncing, setSyncing] = useState(false)
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'ok' | 'error'>('idle')
-  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null)
   const [presenceBatchLoading, setPresenceBatchLoading] = useState(false)
   const [presenceBatchLinks, setPresenceBatchLinks] = useState<PresenceTokenBatchLink[]>([])
   const [presenceBatchId, setPresenceBatchId] = useState<string | null>(null)
@@ -64,12 +58,6 @@ export default function TrainingDetailPage() {
 
   useEffect(() => {
     if (id) loadForTraining(id)
-    getSetting<AppSettings>('appSettings').then((s) => {
-      if (s) {
-        setSettings(s)
-        if (s.lastSyncAt) setLastSyncAt(s.lastSyncAt)
-      }
-    })
   }, [id, loadForTraining])
 
   if (!training) {
@@ -84,8 +72,7 @@ export default function TrainingDetailPage() {
   const athleteById = new Map(activeAthletes.map((a) => [a.id, a]))
   const trainingRecords = records.filter((r) => r.treinoId === training.id)
   const summary = getTrainingSummary(training.id, activeAthletes.length)
-  const trainingLocal = training.local || settings.localPadrao
-  const syncConfigured = !!(settings.syncEndpointUrl && settings.syncSecret)
+  const trainingLocal = training.local
   const supabasePresenceTokensEnabled = isSupabasePresenceTokensEnabled()
 
   const getStatus = (atletaId: string): AttendanceStatus => {
@@ -94,9 +81,9 @@ export default function TrainingDetailPage() {
   }
 
   const buildBatchText = (links: PresenceTokenBatchLink[]) => {
-    const appUrl = settings.appUrl ?? window.location.origin
+    const appUrl = window.location.origin
     const data = formatDateLong(training.data)
-    const header = `✅ Confirmação de presença — ${settings.nomeEquipe ?? 'CEPRAEA'}\nTreino: ${data} — ${training.horaInicio} às ${training.horaFim}\n`
+    const header = `✅ Confirmação de presença — ${'CEPRAEA'}\nTreino: ${data} — ${training.horaInicio} às ${training.horaFim}\n`
     const rows = links.map((link) => {
       const athlete = athleteById.get(link.athleteId)
       const name = athlete?.nome ?? link.athleteId
@@ -198,106 +185,16 @@ export default function TrainingDetailPage() {
     }
 
     await upsert(training.id, atletaId, next)
-
-    // Push manual ao endpoint remoto se configurado
-    if (syncConfigured && next !== 'pendente') {
-      const syncConfig = await loadSyncConfig()
-      const athlete = athletes.find((a) => a.id === atletaId)
-      if (syncConfig && athlete) {
-        pushConfirmation(syncConfig, {
-          treinoId: training.id,
-          atletaId,
-          nomeAtleta: athlete.nome,
-          status: next,
-          origem: 'manual',
-        }).catch(() => {/* push silencioso — local já está salvo */})
-      }
-    }
   }
 
   const handleJustifSave = async () => {
     if (!justifAtleta) return
     await upsert(training.id, justifAtleta, 'justificado', { justificativa: justifText })
-
-    if (syncConfigured) {
-      const syncConfig = await loadSyncConfig()
-      const athlete = athletes.find((a) => a.id === justifAtleta)
-      if (syncConfig && athlete) {
-        pushConfirmation(syncConfig, {
-          treinoId: training.id,
-          atletaId: justifAtleta,
-          nomeAtleta: athlete.nome,
-          status: 'justificado',
-          origem: 'manual',
-        }).catch(() => {})
-      }
-    }
-
     setJustifAtleta(null)
   }
 
   const handleMarkAll = async (status: AttendanceStatus) => {
     await Promise.all(activeAthletes.map((a) => upsert(training.id, a.id, status)))
-
-    if (syncConfigured && status !== 'pendente') {
-      const syncConfig = await loadSyncConfig()
-      if (syncConfig) {
-        Promise.all(
-          activeAthletes.map((a) =>
-            pushConfirmation(syncConfig, {
-              treinoId: training.id,
-              atletaId: a.id,
-              nomeAtleta: a.nome,
-              status,
-              origem: 'manual',
-            })
-          )
-        ).catch(() => {})
-      }
-    }
-  }
-
-  const handleSync = async () => {
-    if (!syncConfigured) return
-    setSyncing(true)
-    setSyncStatus('idle')
-
-    const syncConfig = await loadSyncConfig()
-    if (!syncConfig) { setSyncing(false); return }
-
-    const result = await pullConfirmations(syncConfig, { treinoId: training.id })
-
-    if (!result.ok || !result.records) {
-      setSyncStatus('error')
-      setSyncing(false)
-      return
-    }
-
-    // Merge: cada registro remoto atualiza o IDB local
-    // Regra: confirmação da atleta via link prevalece sobre "pendente" local
-    for (const remote of result.records) {
-      const local = trainingRecords.find((r) => r.atletaId === remote.atletaId)
-      const shouldOverride = !local || local.status === 'pendente' || remote.origem === 'link'
-      if (shouldOverride && (remote.status === 'presente' || remote.status === 'ausente')) {
-        await upsert(training.id, remote.atletaId, remote.status, {
-          confirmadoPelaAtleta: remote.origem === 'link',
-        })
-      }
-    }
-
-    const now = new Date().toISOString()
-    setLastSyncAt(now)
-
-    // Persiste o timestamp da última sync
-    const s = await getSetting<AppSettings>('appSettings')
-    if (s) {
-      const { setSetting } = await import('@/db')
-      await setSetting('appSettings', { ...s, lastSyncAt: now })
-    }
-
-    setSyncStatus('ok')
-    setSyncing(false)
-    setTimeout(() => setSyncStatus('idle'), 3000)
   }
 
   const handleCopy = async () => {
@@ -356,35 +253,6 @@ export default function TrainingDetailPage() {
           ))}
         </div>
 
-        {/* Sync bar */}
-        {syncConfigured && (
-          <div className="mx-4 mb-3 flex items-center gap-2 bg-cep-purple-850 rounded-xl border border-cep-purple-700 px-4 py-2.5">
-            <div className="flex-1 min-w-0">
-              {lastSyncAt ? (
-                <p className="text-xs text-cep-muted">
-                  Última sync: {formatTime(lastSyncAt)}
-                </p>
-              ) : (
-                <p className="text-xs text-cep-muted/60">Nunca sincronizado</p>
-              )}
-              {syncStatus === 'ok' && (
-                <p className="text-xs text-cep-lime-400 flex items-center gap-1 mt-0.5">
-                  <Wifi className="h-3 w-3" /> Sincronizado
-                </p>
-              )}
-              {syncStatus === 'error' && (
-                <p className="text-xs text-red-400 flex items-center gap-1 mt-0.5">
-                  <WifiOff className="h-3 w-3" /> Falha na sync
-                </p>
-              )}
-            </div>
-            <Button variant="secondary" size="sm" onClick={handleSync} loading={syncing}>
-              <RefreshCw className="h-4 w-4" />
-              Sincronizar
-            </Button>
-          </div>
-        )}
-
         {/* Quick actions */}
         <div className="px-4 mb-3 flex flex-wrap gap-2">
           <Button variant="secondary" size="sm" onClick={() => handleMarkAll('presente')}>
@@ -404,7 +272,7 @@ export default function TrainingDetailPage() {
           {[
             {
               label: 'Anúncio',
-              text: () => gerarAnuncioTreino(training, settings.nomeEquipe ?? 'CEPRAEA', trainingLocal),
+              text: () => gerarAnuncioTreino(training, 'CEPRAEA', trainingLocal),
             },
             {
               label: 'Confirmação',
@@ -475,7 +343,7 @@ export default function TrainingDetailPage() {
               {activeAthletes.map((athlete) => {
                 const status = getStatus(athlete.id)
                 const config = STATUS_CONFIG[status]
-                const appUrl = settings.appUrl ?? window.location.origin
+                const appUrl = window.location.origin
                 const confirmLink = gerarMensagemConfirmacao(training, athlete, appUrl)
                 const confirmed = trainingRecords.find((r) => r.atletaId === athlete.id)?.confirmadoPelaAtleta
 
@@ -539,7 +407,7 @@ export default function TrainingDetailPage() {
               <Button
                 fullWidth
                 className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => abrirWhatsApp(waModal.text, settings.telefoneTecnico)}
+                onClick={() => abrirWhatsApp(waModal.text, undefined)}
               >
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp

@@ -4,7 +4,10 @@ export type AthleteStatus = 'ativo' | 'inativo'
 
 export interface Athlete {
   id: string
+  teamId?: string
+  userId?: string
   nome: string
+  email: string
   telefone: string
   categoria?: string
   nivel?: string
@@ -79,7 +82,6 @@ export interface AppSettings {
   localPadrao: string
   semanasFuturas: number
   recurrenceSchedules?: RecurrenceSchedule[]
-  pinHash: string
   appUrl: string
   // Sincronização remota via Apps Script
   syncEndpointUrl?: string
@@ -87,7 +89,7 @@ export interface AppSettings {
   lastSyncAt?: string
 }
 
-export const DEFAULT_SETTINGS: Omit<AppSettings, 'pinHash'> = {
+export const DEFAULT_SETTINGS: AppSettings = {
   nomeEquipe: 'CEPRAEA',
   nomeTecnico: '',
   telefoneTecnico: '',

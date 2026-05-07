@@ -34,3 +34,22 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+
+# Pasta dos agentes
+.claude
+.codex
+.dev
+.files
+.copilot
+
+# Arquivos de planejamento 
+plan.md
+CEPRAEA.md
+
+# Documentação dos agentes
+AGENT.md
+# Artefatos gerados (testes/build — não versionar)
+playwright-report/
+tests/report.html
+tsconfig.tsbuildinfo
