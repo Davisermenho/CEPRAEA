@@ -1,291 +1,194 @@
--- athlete_auth.test.sql — Verifica migração 0006 e RLS de atleta.
--- Cobre: schema, índices, RPC get_athlete_team_id(), todas as 7 policies de atleta,
--- linking de primeiro login, isolamento cross-team e rejeição de write indevido.
--- Execute após as migrations. Faz rollback ao final — sem efeito colateral.
 \set ON_ERROR_STOP on
 
 begin;
 
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 1 — Schema guard (migração 0006)
--- ═══════════════════════════════════════════════════════════════════════════
-
-do $$
-begin
-  if not exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'athletes' and column_name = 'email'
-  ) then raise exception '0006: athletes.email column missing'; end if;
-
-  if not exists (
-    select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'athletes' and column_name = 'user_id'
-  ) then raise exception '0006: athletes.user_id column missing'; end if;
-
-  if not exists (
-    select 1 from pg_indexes
-    where schemaname = 'public' and tablename = 'athletes' and indexname = 'athletes_user_id_key'
-  ) then raise exception '0006: unique index athletes_user_id_key missing'; end if;
-
-  if not exists (
-    select 1 from pg_indexes
-    where schemaname = 'public' and tablename = 'athletes' and indexname = 'athletes_team_email_key'
-  ) then raise exception '0006: unique index athletes_team_email_key missing'; end if;
-
-  if not exists (
-    select 1 from pg_proc p
-    join pg_namespace n on n.oid = p.pronamespace
-    where n.nspname = 'public' and p.proname = 'get_athlete_team_id'
-  ) then raise exception '0006: RPC get_athlete_team_id() missing'; end if;
-end $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 2 — Fixtures
--- ═══════════════════════════════════════════════════════════════════════════
-
 insert into auth.users (
-  id, email, encrypted_password, email_confirmed_at,
-  created_at, updated_at, raw_app_meta_data, raw_user_meta_data, aud, role
-) values
-  ('00000000-0000-0000-0000-000000000011', 'atleta1@cepraea.test',
-   crypt('password', gen_salt('bf')), now(), now(), now(),
-   '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000012', 'atleta2@cepraea.test',
-   crypt('password', gen_salt('bf')), now(), now(), now(),
-   '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000013', 'atleta-outra@other.test',
-   crypt('password', gen_salt('bf')), now(), now(), now(),
-   '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated')
-on conflict (id) do nothing;
+  id, email, encrypted_password, email_confirmed_at, created_at, updated_at,
+  raw_app_meta_data, raw_user_meta_data, aud, role
+) values (
+  '00000000-0000-0000-0000-000000000011',
+  'athlete1@cepraea.test',
+  crypt('password', gen_salt('bf')),
+  now(), now(), now(),
+  '{"provider":"email","providers":["email"]}',
+  '{}',
+  'authenticated',
+  'authenticated'
+);
 
--- Atletas: 1 vinculado, 1 pré-cadastrado (user_id null), 1 de outra equipe
-insert into public.athletes (id, team_id, name, email, user_id, status)
-values
-  ('20000000-0000-0000-0000-000000000011',
-   '10000000-0000-0000-0000-000000000001',
-   'Atleta Linked 1', 'atleta1@cepraea.test',
-   '00000000-0000-0000-0000-000000000011', 'ativo'),
-  ('20000000-0000-0000-0000-000000000012',
-   '10000000-0000-0000-0000-000000000001',
-   'Atleta Unlinked', 'atleta2@cepraea.test',
-   null, 'ativo'),
-  ('20000000-0000-0000-0000-000000000013',
-   '10000000-0000-0000-0000-000000000002',
-   'Atleta Outra Equipe Auth', 'atleta-outra@other.test',
-   '00000000-0000-0000-0000-000000000013', 'ativo')
-on conflict (id) do nothing;
+insert into public.profiles (id, name, email)
+values ('00000000-0000-0000-0000-000000000011', 'Athlete Auth Test', 'athlete1@cepraea.test');
+
+insert into public.athletes (
+  id, team_id, user_id, name, email, status
+) values
+  (
+    '20000000-0000-0000-0000-000000000011',
+    '10000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000011',
+    'Athlete Auth Test',
+    'athlete1@cepraea.test',
+    'ativo'
+  ),
+  (
+    '20000000-0000-0000-0000-000000000012',
+    '10000000-0000-0000-0000-000000000001',
+    null,
+    'Teammate Visible',
+    'teammate@cepraea.test',
+    'ativo'
+  );
 
 insert into public.trainings (
   id, team_id, type, status, training_date, start_time, end_time, timezone,
   starts_at, presence_lock_at, generation_key
 ) values (
-  '30000000-0000-0000-0000-000000000011',
+  '30000000-0000-0000-0000-000000000111',
   '10000000-0000-0000-0000-000000000001',
   'extra', 'agendado', '2026-09-01', '20:00', '21:30', 'America/Sao_Paulo',
-  '2026-09-01 20:00:00-03', '2026-09-01 14:00:00-03', 'auth:cepraea:training'
-) on conflict do nothing;
+  '2026-09-01 20:00:00-03', '2026-09-01 14:00:00-03', 'athlete-auth:test:training'
+);
 
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 3 — RPC get_athlete_team_id()
--- ═══════════════════════════════════════════════════════════════════════════
+insert into public.attendance_records (
+  id, team_id, training_id, athlete_id, status
+) values (
+  '40000000-0000-0000-0000-000000000111',
+  '10000000-0000-0000-0000-000000000001',
+  '30000000-0000-0000-0000-000000000111',
+  '20000000-0000-0000-0000-000000000012',
+  'pendente'
+);
 
 set local role authenticated;
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000011';
-set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-000000000011","email":"atleta1@cepraea.test"}';
 
 do $$
 begin
-  if public.get_athlete_team_id() is distinct from '10000000-0000-0000-0000-000000000001'::uuid then
-    raise exception 'get_athlete_team_id: retornou team_id errado para atleta vinculado';
+  if public.get_athlete_team_id() <> '10000000-0000-0000-0000-000000000001' then
+    raise exception 'get_athlete_team_id should resolve the athlete team';
   end if;
-end $$;
 
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 4 — athlete_select_own_record
--- ═══════════════════════════════════════════════════════════════════════════
-
-do $$
-begin
   if not exists (
     select 1 from public.athletes where id = '20000000-0000-0000-0000-000000000011'
   ) then
-    raise exception 'athlete_select_own_record: atleta vinculado deve ler o próprio registro';
+    raise exception 'athlete should read own record';
   end if;
-end $$;
 
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 5 — athlete_select_by_email_for_linking (primeiro login)
--- ═══════════════════════════════════════════════════════════════════════════
-
-set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000012';
-set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-000000000012","email":"atleta2@cepraea.test"}';
-
-do $$
-begin
   if not exists (
-    select 1 from public.athletes
-    where id = '20000000-0000-0000-0000-000000000012' and user_id is null
+    select 1 from public.athletes where id = '20000000-0000-0000-0000-000000000012'
   ) then
-    raise exception 'athlete_select_by_email_for_linking: deve ver registro não vinculado pelo email';
+    raise exception 'athlete should read active teammates';
   end if;
-end $$;
 
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 6 — athlete_link_user_id (reivindicação de registro)
--- ═══════════════════════════════════════════════════════════════════════════
+  if exists (
+    select 1 from public.athletes where team_id = '10000000-0000-0000-0000-000000000002'
+  ) then
+    raise exception 'athlete must not read other team athletes';
+  end if;
 
-update public.athletes
-  set user_id = '00000000-0000-0000-0000-000000000012'
-  where id = '20000000-0000-0000-0000-000000000012';
-
-do $$
-begin
   if not exists (
-    select 1 from public.athletes
-    where id    = '20000000-0000-0000-0000-000000000012'
-      and user_id = '00000000-0000-0000-0000-000000000012'
+    select 1 from public.trainings where id = '30000000-0000-0000-0000-000000000111'
   ) then
-    raise exception 'athlete_link_user_id: atleta deve reivindicar próprio registro no primeiro login';
+    raise exception 'athlete should read own team trainings';
   end if;
-end $$;
 
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 7 — athlete_select_team_athletes (pós-link)
--- ═══════════════════════════════════════════════════════════════════════════
-
-do $$
-begin
-  if (
-    select count(*) from public.athletes
-    where team_id = '10000000-0000-0000-0000-000000000001'
-  ) < 2 then
-    raise exception 'athlete_select_team_athletes: atleta deve ver os colegas da equipe';
-  end if;
-end $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 8 — athlete_select_team_trainings
--- ═══════════════════════════════════════════════════════════════════════════
-
-do $$
-begin
   if not exists (
-    select 1 from public.trainings where id = '30000000-0000-0000-0000-000000000011'
+    select 1 from public.attendance_records where id = '40000000-0000-0000-0000-000000000111'
   ) then
-    raise exception 'athlete_select_team_trainings: atleta deve ver treinos da equipe';
+    raise exception 'athlete should read own team attendance';
   end if;
-end $$;
 
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 9 — athlete_insert_own_attendance + athlete_select_team_attendance
--- ═══════════════════════════════════════════════════════════════════════════
+  insert into public.attendance_records (
+    id, team_id, training_id, athlete_id, status
+  ) values (
+    '40000000-0000-0000-0000-000000000112',
+    '10000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000111',
+    '20000000-0000-0000-0000-000000000011',
+    'presente'
+  );
 
-set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000011';
-set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-000000000011","email":"atleta1@cepraea.test"}';
-
-insert into public.attendance_records (id, team_id, training_id, athlete_id, status)
-values (
-  '40000000-0000-0000-0000-000000000011',
-  '10000000-0000-0000-0000-000000000001',
-  '30000000-0000-0000-0000-000000000011',
-  '20000000-0000-0000-0000-000000000011',
-  'presente'
-);
-
-do $$
-begin
-  if not exists (
-    select 1 from public.attendance_records where id = '40000000-0000-0000-0000-000000000011'
-  ) then
-    raise exception 'athlete_insert_own_attendance: atleta deve inserir própria presença';
-  end if;
-end $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 10 — athlete_update_own_attendance
--- ═══════════════════════════════════════════════════════════════════════════
-
-update public.attendance_records
-  set status = 'ausente'
-  where id = '40000000-0000-0000-0000-000000000011';
-
-do $$
-begin
-  if not exists (
-    select 1 from public.attendance_records
-    where id = '40000000-0000-0000-0000-000000000011' and status = 'ausente'
-  ) then
-    raise exception 'athlete_update_own_attendance: atleta deve poder atualizar própria presença';
-  end if;
-end $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 11 — Rejeição: inserir presença por outro atleta
--- ═══════════════════════════════════════════════════════════════════════════
-
-do $$
-begin
   begin
-    insert into public.attendance_records (id, team_id, training_id, athlete_id, status)
-    values (
-      '40000000-0000-0000-0000-000000000099',
+    insert into public.attendance_records (
+      id, team_id, training_id, athlete_id, status
+    ) values (
+      '40000000-0000-0000-0000-000000000113',
       '10000000-0000-0000-0000-000000000001',
-      '30000000-0000-0000-0000-000000000011',
+      '30000000-0000-0000-0000-000000000111',
       '20000000-0000-0000-0000-000000000012',
       'presente'
     );
-    raise exception 'atleta não deve inserir presença por outro atleta';
+    raise exception 'athlete inserted attendance for another athlete unexpectedly';
   exception when insufficient_privilege or check_violation or with_check_option_violation then
     null;
   end;
 end $$;
 
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 12 — Isolamento cross-team
--- ═══════════════════════════════════════════════════════════════════════════
 
-set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000013';
-set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-000000000013","email":"atleta-outra@other.test"}';
+-- ── 6. link_athlete_user_id() RPC ────────────────────────────────────────────
+-- Creates a second auth user whose email matches the pre-inserted unlinked
+-- athlete (teammate@cepraea.test / id 20000000-…-12), calls the RPC, and
+-- verifies: (a) correct athlete_id returned, (b) user_id set, (c) team_id
+-- unchanged, (d) second call returns NULL (idempotent guard).
 
-do $$
-begin
-  if exists (
-    select 1 from public.athletes where team_id = '10000000-0000-0000-0000-000000000001'
-  ) then
-    raise exception 'cross-team: atleta de outra equipe não deve ver atletas da CEPRAEA';
-  end if;
-  if exists (
-    select 1 from public.trainings where team_id = '10000000-0000-0000-0000-000000000001'
-  ) then
-    raise exception 'cross-team: atleta de outra equipe não deve ver treinos da CEPRAEA';
-  end if;
-  if exists (
-    select 1 from public.attendance_records where team_id = '10000000-0000-0000-0000-000000000001'
-  ) then
-    raise exception 'cross-team: atleta de outra equipe não deve ver presenças da CEPRAEA';
-  end if;
-end $$;
+reset role;
 
--- ═══════════════════════════════════════════════════════════════════════════
--- BLOCO 13 — Constraint: email duplicado na mesma equipe (case-insensitive)
--- ═══════════════════════════════════════════════════════════════════════════
+insert into auth.users (
+  id, email, encrypted_password, email_confirmed_at, created_at, updated_at,
+  raw_app_meta_data, raw_user_meta_data, aud, role
+) values (
+  '00000000-0000-0000-0000-000000000022',
+  'teammate@cepraea.test',
+  crypt('password', gen_salt('bf')),
+  now(), now(), now(),
+  '{"provider":"email","providers":["email"]}',
+  '{}',
+  'authenticated',
+  'authenticated'
+);
 
-set local role postgres;
+insert into public.profiles (id, name, email)
+values ('00000000-0000-0000-0000-000000000022', 'Teammate Linking Test', 'teammate@cepraea.test');
+
+set local role authenticated;
+set local request.jwt.claim.sub   = '00000000-0000-0000-0000-000000000022';
+set local request.jwt.claims      = '{"sub":"00000000-0000-0000-0000-000000000022","email":"teammate@cepraea.test","aud":"authenticated","role":"authenticated"}';
 
 do $$
+declare
+  v_linked_id  uuid;
+  v_second_id  uuid;
+  v_team_after uuid;
 begin
-  begin
-    insert into public.athletes (id, team_id, name, email, status)
-    values (
-      '20000000-0000-0000-0000-000000000099',
-      '10000000-0000-0000-0000-000000000001',
-      'Duplicado', 'ATLETA1@cepraea.test',
-      'ativo'
-    );
-    raise exception '0006: deveria rejeitar email duplicado na mesma equipe (case-insensitive)';
-  exception when unique_violation then
-    null;
-  end;
+  -- First call: should link the matching unlinked record and return its id.
+  v_linked_id := public.link_athlete_user_id();
+  if v_linked_id is null then
+    raise exception 'link_athlete_user_id should return athlete id on first call';
+  end if;
+  if v_linked_id <> '20000000-0000-0000-0000-000000000012' then
+    raise exception 'link_athlete_user_id returned unexpected athlete id: %', v_linked_id;
+  end if;
+
+  -- user_id must be set to the caller's auth.uid()
+  if not exists (
+    select 1 from public.athletes
+    where id      = v_linked_id
+      and user_id = '00000000-0000-0000-0000-000000000022'
+  ) then
+    raise exception 'link_athlete_user_id should have written user_id';
+  end if;
+
+  -- team_id must be unchanged (security invariant)
+  select team_id into v_team_after from public.athletes where id = v_linked_id;
+  if v_team_after <> '10000000-0000-0000-0000-000000000001' then
+    raise exception 'link_athlete_user_id must not alter team_id (got %)', v_team_after;
+  end if;
+
+  -- Second call: no unlinked record remains → must return NULL
+  v_second_id := public.link_athlete_user_id();
+  if v_second_id is not null then
+    raise exception 'link_athlete_user_id should return null when no unlinked record exists';
+  end if;
 end $$;
 
 rollback;

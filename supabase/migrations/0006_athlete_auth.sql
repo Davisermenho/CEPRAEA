@@ -48,24 +48,41 @@ CREATE POLICY "athlete_select_own_record" ON public.athletes
   FOR SELECT
   USING (user_id = auth.uid());
 
--- Athlete reads a matching-email record with no user_id yet (first-login linking)
-CREATE POLICY "athlete_select_by_email_for_linking" ON public.athletes
-  FOR SELECT
-  USING (
-    user_id    IS NULL
-    AND lower(email) = lower(auth.jwt() ->> 'email')
-    AND deleted_at   IS NULL
-  );
+-- Athlete claims the unlinked record via SECURITY DEFINER RPC.
+-- An UPDATE policy is avoided: its WITH CHECK only restricts user_id in the
+-- post-update row, leaving team_id and other columns freely writable by the
+-- client in the same request. The RPC exclusively executes
+-- SET user_id = auth.uid() and nothing else.
+CREATE OR REPLACE FUNCTION public.link_athlete_user_id()
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_athlete_id uuid;
+BEGIN
+  SELECT id INTO v_athlete_id
+  FROM   public.athletes
+  WHERE  user_id    IS NULL
+    AND  lower(email) = lower(auth.jwt() ->> 'email')
+    AND  deleted_at   IS NULL
+  LIMIT 1;
 
--- Athlete claims the record by writing their user_id (one-time operation)
-CREATE POLICY "athlete_link_user_id" ON public.athletes
-  FOR UPDATE
-  USING (
-    user_id    IS NULL
-    AND lower(email) = lower(auth.jwt() ->> 'email')
-    AND deleted_at   IS NULL
-  )
-  WITH CHECK (user_id = auth.uid());
+  IF v_athlete_id IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  UPDATE public.athletes
+  SET    user_id = auth.uid()
+  WHERE  id      = v_athlete_id
+    AND  user_id IS NULL;   -- guard against concurrent claim
+
+  RETURN v_athlete_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.link_athlete_user_id() TO authenticated;
 
 -- Athlete lists all active teammates (to see who's coming to a training session)
 CREATE POLICY "athlete_select_team_athletes" ON public.athletes

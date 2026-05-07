@@ -35,21 +35,11 @@ export function AtletaGuard() {
         return
       }
 
-      // First-login path: claim the athlete record that matches this email.
-      // Explicit email filter here + RLS policy "athlete_select_by_email_for_linking"
-      // provide defense-in-depth: neither layer alone is the single gate.
-      const { data: byEmail } = await supabase
-        .from('athletes')
-        .select('id')
-        .eq('email', user.email)
-        .is('user_id', null)
-        .maybeSingle()
-
-      if (byEmail) {
-        await supabase
-          .from('athletes')
-          .update({ user_id: user.id })
-          .eq('id', byEmail.id)
+      // First-login path: claim the athlete record via SECURITY DEFINER RPC.
+      // The RPC exclusively sets user_id = auth.uid(), preventing a client from
+      // modifying team_id or other columns in the same request.
+      const { data: linkedId } = await supabase.rpc('link_athlete_user_id')
+      if (linkedId) {
         setCheck('found')
         return
       }

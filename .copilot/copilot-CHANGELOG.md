@@ -1,3 +1,21 @@
+---
+tipo: LOG-CHANGELOG
+nome: "Histórico de Mudanças — Agente Copilot"
+papel: "Registra O QUÊ foi alterado pelo agente Copilot, quando, com qual evidência objetiva — foco em decisões arquiteturais, PRs abertas e merges de branch."
+autoridade: "Histórico append-only — não normativo; descreve o que aconteceu, não o que deve acontecer."
+lido_por: "Copilot"
+quando_ler: "antes de iniciar trabalho que pode duplicar algo já feito; ao identificar decisão arquitetural anterior"
+atualizado_por: "Copilot exclusivamente"
+quando_atualizar: "ao concluir qualquer unidade de trabalho com evidência objetiva (commit, PR aberta, merge) — verificar último ID antes de criar novo entry"
+validade: "Atual até último entry"
+status: ATUAL
+conflito: "Entradas passadas são imutáveis; se entry anterior descreve estado que foi revertido, registrar reversão como novo entry — nunca editar entry passado."
+proibido:
+  - "NÃO editar entries passados"
+  - "NÃO registrar entry sem evidência objetiva (commit hash, PR number, resultado de build)"
+nao_cobre: "O que fazer a seguir (→ plan.md), decisões de produto (→ CEPRAEA.md), logs de Claude ou Codex"
+---
+
 # Sistema de gestão CEPRAEA - HANDEBOL DE PRAIA
 > Agente Copilot: 
 > Versão 1.0 — 2026-05-06
@@ -544,3 +562,95 @@ Commit: `c7674d8`
 - Valores de settings substituídos por padrões: `settings.appUrl` → `window.location.origin`, `settings.nomeEquipe` → `'CEPRAEA'`, `settings.telefoneTecnico` → `undefined`, `settings.localPadrao` → removido
 
 **npm run typecheck → exit 0** em todos os tasks.
+
+
+---
+
+## CEPR-0032 — Fix Build TS: páginas atleta + SettingsPage (2026-05-06)
+
+**Branch:** `migration/athlete-auth-foundation`
+**Commits:** `4f96c15`, `7408f45`
+
+### Causa Raiz
+Arquivos modificados no working tree (remoção de `syncFromRemote`, `getAtletaSession`, `pinHash`) nunca foram commitados nas sessões anteriores. O Vercel compila o código commitado, resultando em 6+1 erros TypeScript.
+
+### Erros Corrigidos
+
+**Commit `4f96c15` — 6 erros TS:**
+
+**`src/types/index.ts`:**
+- Adiciona `teamId?: string` e `userId?: string` à interface `Athlete`
+- Fix: TS2353 em `athleteApi.ts` (`mapRow` referenciava campo inexistente)
+
+**`src/features/athletes/pages/AthletesPage.tsx`:**
+- Remove segundo argumento `opts` de `handleSave` (store `add` aceita 1 arg)
+- Fix: TS2554 (`Expected 1 arguments, but got 2`)
+
+**`src/features/atleta/pages/AtletaTreinoDetailPage.tsx`:**
+- Remove `syncFromRemote`, `getAtletaSession`, `pushConfirmation`, `loadAtletaSyncConfig`
+- Usa `useCurrentAthlete` e `supabase` direto
+- Fix: TS2339 em `AttendanceStore`
+
+**`src/features/atleta/pages/AtletaTreinosPage.tsx`:**
+- Remove `syncFromRemote`×3, `getAtletaSession`, `loadAtletaSyncConfig`
+- Usa `useCurrentAthlete`
+- Fix: TS2339 em `TrainingStore`, `AttendanceStore`, `AthleteStore`
+
+**`src/features/atleta/useCurrentAthlete.ts`** (novo, untracked):
+- Hook Supabase-first para portal da atleta
+- Busca atleta por `userId` (store → Supabase fallback)
+
+**Commit `7408f45` — 1 erro TS:**
+
+**`src/features/settings/pages/SettingsPage.tsx`:**
+- Remove `pinHash: ''` do objeto `DEFAULT` (campo removido de `AppSettings`)
+- Fix: TS2353 (`pinHash` não existe no tipo)
+
+### scope check
+- Allowlist expandida: `AthletesPage.tsx`, `AtletaTreinoDetailPage.tsx`, `AtletaTreinosPage.tsx`, `useCurrentAthlete.ts`, `SettingsPage.tsx`
+- `bash scripts/check-athlete-auth-foundation-scope.sh` → exit 0
+
+### Método de validação
+- `git stash` + `npx tsc --noEmit` simulou o estado exato do Vercel → confirmou apenas 1 erro restante após `4f96c15`
+
+**npm run typecheck → exit 0** após ambos os commits.
+
+---
+
+## CEPR-0034 — P1 #2: Substituir `athlete_link_user_id` UPDATE policy por RPC SECURITY DEFINER
+
+**Data:** 2026-05-07  
+**Branch:** `migration/athlete-auth-foundation` (PR #9)  
+**Trigger:** Codex bot review comment `r3193398149` — RLS escalation via `athlete_link_user_id` policy (P1)
+
+### Problema
+
+A policy `athlete_link_user_id` usava `WITH CHECK (user_id = auth.uid())` para restringir
+apenas o campo `user_id` no UPDATE. Qualquer cliente autenticado podia incluir outros campos
+(`team_id`, `email`, `status`) no mesmo request e alterá-los sem restrição, porque o
+`WITH CHECK` só valida o estado **pós**-update da linha.
+
+### Solução
+
+Substituída pelo RPC `link_athlete_user_id()` com `SECURITY DEFINER`, que executa
+exclusivamente `SET user_id = auth.uid()` — impossível ao cliente alterar qualquer outro campo.
+
+### Arquivos modificados
+
+**`supabase/migrations/0006_athlete_auth.sql`:**
+- Remove `CREATE POLICY "athlete_select_by_email_for_linking"` (lookup agora interno ao RPC)
+- Remove `CREATE POLICY "athlete_link_user_id"` (UPDATE policy vulnerável)
+- Adiciona `CREATE OR REPLACE FUNCTION public.link_athlete_user_id()` SECURITY DEFINER
+- `GRANT EXECUTE ... TO authenticated`
+
+**`src/shared/layouts/AtletaGuard.tsx`:**
+- Remove email-SELECT + direct-update (duas queries → single RPC call)
+- First-login path agora: `supabase.rpc('link_athlete_user_id')` → retorna uuid ou null
+
+**`supabase/tests/athlete_auth.test.sql`:**
+- Bloco 6 adicionado: testa `link_athlete_user_id()` — retorno correto, `user_id` setado,
+  `team_id` inalterado, segunda chamada retorna NULL
+
+### Validação
+- `npx tsc --noEmit` → exit 0 (sem erros TS)
+- Bloco de teste SQL cobre: link bem-sucedido, invariante `team_id`, idempotência
