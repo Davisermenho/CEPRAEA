@@ -26,9 +26,11 @@ run "typecheck"              npm run typecheck
 run "unit tests"             npm test
 run "build"                  npm run build
 run "deps:check"             npm run deps:check
-run "audit"                  npm audit --audit-level=high
-run "check:runtime-legacy"   bash scripts/check-runtime-legacy.sh
+run "audit"                  npm audit
+run "db reset (deterministic)" supabase db reset
 run "test:supabase"          npm run test:supabase
+run "e2e tests"              npm run test:e2e
+run "check:runtime-legacy"   bash scripts/check-runtime-legacy.sh
 
 echo ""
 echo "========================================"

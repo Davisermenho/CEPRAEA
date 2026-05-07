@@ -17,9 +17,6 @@ const DEFAULT: AppSettings = {
     { dow: 0, horaInicio: '07:30', horaFim: '09:00' },
   ],
   appUrl: window.location.origin,
-  syncEndpointUrl: '',
-  syncSecret: '',
-  lastSyncAt: '',
 }
 
 const DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']

@@ -47,6 +47,12 @@ interface AttendanceStore {
     status: AttendanceStatus,
     opts?: { justificativa?: string; confirmadoPelaAtleta?: boolean }
   ) => Promise<void>
+  upsertOwn: (
+    treinoId: string,
+    atletaId: string,
+    status: AttendanceStatus,
+    opts?: { justificativa?: string }
+  ) => Promise<void>
   getForTraining: (treinoId: string) => AttendanceRecord[]
   getForAthlete: (atletaId: string) => AttendanceRecord[]
   getTrainingSummary: (treinoId: string, totalAtivos: number) => TrainingSummary
@@ -68,7 +74,7 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
       // attendance_records usa training_id → join com trainings para filtrar por team
       const { data, error } = await supabase
         .from('attendance_records')
-        .select('id, training_id, athlete_id, status, justification, confirmed_by_athlete, created_at, updated_at, trainings!inner(team_id)')
+        .select('id, training_id, athlete_id, status, justification, confirmed_by_athlete, created_at, updated_at, trainings!attendance_records_training_team_fk!inner(team_id)')
         .eq('trainings.team_id', teamId)
 
       if (error) throw new Error(error.message)
@@ -128,6 +134,29 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
       status,
       justificativa: opts.justificativa,
       confirmadoPelaAtleta: opts.confirmadoPelaAtleta ?? false,
+      registradoEm: new Date().toISOString(),
+    }
+    set((s) => {
+      const without = s.records.filter((r) => r.id !== record.id)
+      return { records: [...without, record] }
+    })
+  },
+
+  upsertOwn: async (treinoId, atletaId, status, opts = {}) => {
+    const { error } = await supabase.rpc('upsert_own_attendance', {
+      input_training_id: treinoId,
+      input_status: status,
+      input_justification: opts.justificativa ?? null,
+    })
+    if (error) throw new Error(error.message)
+
+    const record: AttendanceRecord = {
+      id: `${treinoId}::${atletaId}`,
+      treinoId,
+      atletaId,
+      status,
+      justificativa: opts.justificativa,
+      confirmadoPelaAtleta: true,
       registradoEm: new Date().toISOString(),
     }
     set((s) => {

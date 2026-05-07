@@ -11,7 +11,7 @@ on:
 
 jobs:
   foundation:
-    if: github.head_ref != 'migration/athlete-auth-foundation'
+    if: github.event_name == 'push' || github.head_ref == 'feat/supabase-foundation'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

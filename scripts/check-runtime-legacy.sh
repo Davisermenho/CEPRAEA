@@ -4,36 +4,73 @@
 set -euo pipefail
 
 FAIL=0
+SEARCH_ROOT="src"
+
+# Sanity check: garantir que grep funciona e que a detecção não é um falso negativo silencioso
+if ! echo "from '@/lib/sync'" | grep -qE "from ['\"].*lib/sync['\"]" 2>/dev/null; then
+  echo "ERROR: self-test do grep falhou — ferramenta de detecção quebrada" >&2
+  exit 2
+fi
 
 echo "=== Checagem de legado de runtime ==="
 
-check() {
+GREP_EXCL=(
+  --exclude-dir='__tests__'
+  --exclude='*.test.ts'
+  --exclude='*.test.tsx'
+  --exclude='*.spec.ts'
+  --exclude='*.spec.tsx'
+)
+
+# Padrão regex: retorna FAIL se encontrar matches
+check_regex() {
   local label="$1"
   local pattern="$2"
-  if grep -rn --include="*.ts" --include="*.tsx" "$pattern" src/ 2>/dev/null \
-      | grep -v '^\s*//' \
-      | grep -q .; then
+  local matches
+  matches="$(grep -rn --include='*.ts' --include='*.tsx' "${GREP_EXCL[@]}" -E "$pattern" "$SEARCH_ROOT" 2>/dev/null)" || true
+  if [ -n "$matches" ]; then
     echo "[FAIL] $label"
-    grep -rn --include="*.ts" --include="*.tsx" "$pattern" src/ 2>/dev/null \
-      | grep -v '^\s*//' | head -5
+    printf '%s\n' "$matches" | head -5
     FAIL=1
   else
     echo "[OK]   $label"
   fi
 }
 
-check "sync.ts importado em runtime"    "from ['\"].*lib/sync['\"]"
-check "getDB( em stores/features"       "getDB("
-check "db.put('athletes')"              "db\.put('athletes'"
-check "db.put('trainings')"             "db\.put('trainings'"
-check "db.put('attendance)"             "db\.put('attendance"
-check "db.getAll('athletes')"           "db\.getAll('athletes'"
-check "db.getAll('trainings')"          "db\.getAll('trainings'"
-check "db.getAll('attendance)"          "db\.getAll('attendance"
-check "pullConfirmations legado"        "pullConfirmations"
-check "loadSyncConfig legado"           "loadSyncConfig"
-check "resolveEndpointUrl legado"       "resolveEndpointUrl"
-check "athleteAuth.ts importado"        "from ['\"].*athleteAuth['\"]"
+# Padrão fixo (literal): retorna FAIL se encontrar matches
+# $3 opcional: diretório adicional a excluir (ex: "db")
+check_fixed() {
+  local label="$1"
+  local pattern="$2"
+  local extra_excl="${3:-}"
+  local matches
+  local excl_args=("${GREP_EXCL[@]}")
+  if [ -n "$extra_excl" ]; then
+    excl_args+=("--exclude-dir=$extra_excl")
+  fi
+  matches="$(grep -rn --include='*.ts' --include='*.tsx' "${excl_args[@]}" -F "$pattern" "$SEARCH_ROOT" 2>/dev/null)" || true
+  if [ -n "$matches" ]; then
+    echo "[FAIL] $label"
+    printf '%s\n' "$matches" | head -5
+    FAIL=1
+  else
+    echo "[OK]   $label"
+  fi
+}
+
+check_regex "sync.ts importado em runtime" "from ['\"].*lib/sync['\"]"
+check_fixed "getDB( em runtime"            "getDB("          "db"
+check_fixed "db.put('athletes')"           "db.put('athletes'" "db"
+check_fixed "db.put('trainings')"          "db.put('trainings'" "db"
+check_fixed "db.put('attendance)"          "db.put('attendance" "db"
+check_fixed "db.getAll('athletes')"        "db.getAll('athletes'" "db"
+check_fixed "db.getAll('trainings')"       "db.getAll('trainings'" "db"
+check_fixed "db.getAll('attendance)"       "db.getAll('attendance" "db"
+check_fixed "pullConfirmations legado"     "pullConfirmations"
+check_fixed "pushConfirmation legado"      "pushConfirmation"
+check_fixed "loadSyncConfig legado"        "loadSyncConfig"
+check_fixed "resolveEndpointUrl legado"    "resolveEndpointUrl"
+check_regex "athleteAuth.ts importado"     "from ['\"].*athleteAuth['\"]"
 
 echo ""
 if [ "$FAIL" -ne 0 ]; then

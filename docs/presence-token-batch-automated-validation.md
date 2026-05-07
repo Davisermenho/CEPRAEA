@@ -1,3 +1,22 @@
+---
+tipo: CHECKLIST-CI
+nome: "Validação Automatizada de Lotes de Presence Tokens — GitHub Actions"
+papel: "Especifica o workflow de CI e o script validate-presence-token-batch.mjs para validação remota automatizada de tokens Supabase antes de merge."
+autoridade: "Hierarquia 4/4 — referência para configuração de CI; perde para workflow e script reais se divergirem."
+lido_por: "Agente responsável por CI/CD"
+quando_ler: "ao configurar ou alterar o workflow de validação de tokens; ao depurar falha de CI"
+atualizado_por: "Agente executor"
+quando_atualizar: "workflow ou script mudam, ou novos secrets são necessários"
+validade: "2026-05-04"
+status: PARCIAL
+status_nota: "Verificar .github/workflows/ e scripts/validate-presence-token-batch.mjs antes de usar"
+conflito: "Código do script e workflow YAML prevalecem sobre esta spec se divergirem."
+proibido:
+  - "Agentes NÃO devem commitar secrets ou tokens reais"
+  - "NÃO devem executar o script fora de ambiente com Supabase configurado"
+nao_cobre: "Validação manual (→ docs/presence-token-batch-validation.md), outros fluxos de presença"
+---
+
 # Validação automatizada remota — lotes de Presence Tokens Supabase
 
 ## Objetivo

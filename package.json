@@ -18,7 +18,8 @@
     "test:athlete-auth": "bash scripts/run-athlete-auth-tests.sh",
     "validate:athlete-auth-foundation": "npm run check:athlete-auth-foundation-scope && supabase db reset && npm run test:athlete-auth && npm run build",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test --reporter=line",
+    "test:e2e": "bash scripts/run-e2e-local.sh",
+    "test:smoke": "playwright test --config=playwright.smoke.config.ts --reporter=line",
     "deps:check": "npm ls --all",
     "check:runtime-legacy": "bash scripts/check-runtime-legacy.sh",
     "validate:mvp:v1": "bash scripts/validate-mvp-v1.sh"
@@ -45,6 +46,7 @@
     "@types/react-dom": "^19.1.3",
     "@vitejs/plugin-react": "^4.5.0",
     "@vitest/coverage-v8": "^4.1.5",
+    "dotenv": "^17.4.2",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4.1.6",
     "typescript": "^5.8.3",

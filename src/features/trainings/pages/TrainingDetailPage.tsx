@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ChevronLeft, CheckCircle2, MessageCircle, Copy, Send,
+  ChevronLeft, CheckCircle2, MessageCircle, Copy,
   UserCheck, Wifi, Shield, Link2, Ban,
 } from 'lucide-react'
 import { useTrainingStore } from '@/stores/trainingStore'
@@ -15,7 +15,6 @@ import {
   gerarAnuncioTreino,
   gerarPedidoConfirmacaoGrupo,
   gerarResumoPresenca,
-  gerarMensagemConfirmacao,
   abrirWhatsApp,
   copiarTexto,
 } from '@/lib/whatsapp'
@@ -343,8 +342,6 @@ export default function TrainingDetailPage() {
               {activeAthletes.map((athlete) => {
                 const status = getStatus(athlete.id)
                 const config = STATUS_CONFIG[status]
-                const appUrl = window.location.origin
-                const confirmLink = gerarMensagemConfirmacao(training, athlete, appUrl)
                 const confirmed = trainingRecords.find((r) => r.atletaId === athlete.id)?.confirmadoPelaAtleta
 
                 return (
@@ -363,14 +360,6 @@ export default function TrainingDetailPage() {
                         )}
                       </div>
                     </div>
-
-                    <button
-                      onClick={() => abrirWhatsApp(confirmLink, athlete.telefone)}
-                      className="p-2 rounded-lg text-green-400 hover:bg-green-500/15 active:bg-green-500/25 transition-colors"
-                      title="Enviar link de confirmação"
-                    >
-                      <Send className="h-4 w-4" />
-                    </button>
 
                     <button
                       onClick={() => handleStatusToggle(athlete.id, status)}

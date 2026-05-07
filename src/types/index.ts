@@ -83,10 +83,6 @@ export interface AppSettings {
   semanasFuturas: number
   recurrenceSchedules?: RecurrenceSchedule[]
   appUrl: string
-  // Sincronização remota via Apps Script
-  syncEndpointUrl?: string
-  syncSecret?: string
-  lastSyncAt?: string
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -100,9 +96,6 @@ export const DEFAULT_SETTINGS: AppSettings = {
     { dow: 0, horaInicio: '07:30', horaFim: '09:00' },
   ],
   appUrl: typeof window !== 'undefined' ? window.location.origin : '',
-  syncEndpointUrl: '',
-  syncSecret: '',
-  lastSyncAt: '',
 }
 
 // ─── Relatórios ────────────────────────────────────────────────────────────────

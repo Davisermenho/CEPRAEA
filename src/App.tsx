@@ -9,16 +9,12 @@ import { SupabaseAuthProvider, useSupabaseAuth } from '@/features/auth/SupabaseA
 
 const LoginPage              = lazy(() => import('@/features/auth/pages/LoginPage'))
 const PublicConfirmPage      = lazy(() => import('@/features/confirm/pages/PublicConfirmPage'))
-const ScoutGamesPage         = lazy(() => import('@/features/scout/pages/ScoutGamesPage'))
-const ScoutLivePage          = lazy(() => import('@/features/scout/pages/ScoutLivePage'))
-const ScoutSummaryPage       = lazy(() => import('@/features/scout/pages/ScoutSummaryPage'))
 const DashboardPage          = lazy(() => import('@/features/dashboard/pages/DashboardPage'))
 const AthletesPage           = lazy(() => import('@/features/athletes/pages/AthletesPage'))
 const AthleteDetailPage      = lazy(() => import('@/features/athletes/pages/AthleteDetailPage'))
 const TrainingsPage          = lazy(() => import('@/features/trainings/pages/TrainingsPage'))
 const TrainingDetailPage     = lazy(() => import('@/features/trainings/pages/TrainingDetailPage'))
 const ReportsPage            = lazy(() => import('@/features/reports/pages/ReportsPage'))
-const ExportPage             = lazy(() => import('@/features/export/pages/ExportPage'))
 const SettingsPage           = lazy(() => import('@/features/settings/pages/SettingsPage'))
 const SupabaseSettingsPage   = lazy(() => import('@/features/settings/pages/SupabaseSettingsPage'))
 
@@ -49,7 +45,6 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/atleta/login" element={<AtletaLoginPage />} />
             <Route path="/atleta/nova-senha" element={<AtletaNovaSenhaPage />} />
-            <Route path="/confirmar/:treinoId/:atletaId" element={<PublicConfirmPage />} />
             <Route path="/confirmar-presenca" element={<PublicConfirmPage />} />
 
             <Route element={<AtletaGuard />}>
@@ -68,12 +63,8 @@ export default function App() {
                 <Route path="treinos" element={<TrainingsPage />} />
                 <Route path="treinos/:id" element={<TrainingDetailPage />} />
                 <Route path="relatorios" element={<ReportsPage />} />
-                <Route path="exportar" element={<ExportPage />} />
                 <Route path="configuracoes" element={<SettingsPage />} />
                 <Route path="configuracoes/supabase" element={<SupabaseSettingsPage />} />
-                <Route path="scout" element={<ScoutGamesPage />} />
-                <Route path="scout/:id/ao-vivo" element={<ScoutLivePage />} />
-                <Route path="scout/:id/resumo" element={<ScoutSummaryPage />} />
               </Route>
             </Route>
 

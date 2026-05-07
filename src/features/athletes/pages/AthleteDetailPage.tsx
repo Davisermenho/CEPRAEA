@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Edit2, Trash2, Phone, KeyRound } from 'lucide-react'
+import { ChevronLeft, Edit2, Trash2, Phone, Mail, Link2, Link2Off } from 'lucide-react'
 import { useAthleteStore } from '@/stores/athleteStore'
 import { useAttendanceStore } from '@/stores/attendanceStore'
 import { useTrainingStore } from '@/stores/trainingStore'
 import { AthleteForm } from '../components/AthleteForm'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { Badge } from '@/shared/components/Badge'
-import { Modal } from '@/shared/components/Modal'
 import { Button } from '@/shared/components/Button'
 import { formatDateCompact, formatPhone, formatPercent } from '@/lib/utils'
-import { loadSyncConfig, setPinRemote } from '@/lib/sync'
+import { supabase } from '@/lib/supabase'
 import type { Athlete, AttendanceStatus } from '@/types'
 
 const STATUS_LABELS: Record<AttendanceStatus, string> = {
@@ -38,11 +37,8 @@ export default function AthleteDetailPage() {
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [resetPinOpen, setResetPinOpen] = useState(false)
-  const [newPin, setNewPin] = useState('')
   const [resetLoading, setResetLoading] = useState(false)
-  const [resetError, setResetError] = useState('')
-  const [resetSuccess, setResetSuccess] = useState(false)
+  const [resetInfo, setResetInfo] = useState('')
 
   if (!athlete) {
     return (
@@ -51,6 +47,8 @@ export default function AthleteDetailPage() {
       </div>
     )
   }
+
+  const isLinked = !!athlete.userId
 
   const freq = getAthleteFrequency(athlete.id)
   const records = getForAthlete(athlete.id)
@@ -65,25 +63,14 @@ export default function AthleteDetailPage() {
     await update(athlete.id, data)
   }
 
-  const handleResetPin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (newPin.length !== 4) { setResetError('PIN deve ter 4 dígitos.'); return }
+  const handleSendResetLink = async () => {
+    if (!athlete.email) return
     setResetLoading(true)
-    setResetError('')
-    const config = await loadSyncConfig()
-    if (!config) {
-      setResetError('Sincronização não configurada.')
-      setResetLoading(false)
-      return
-    }
-    const ok = await setPinRemote(config, athlete.id, newPin)
-    if (ok) {
-      setResetSuccess(true)
-      setNewPin('')
-      setTimeout(() => { setResetPinOpen(false); setResetSuccess(false) }, 1500)
-    } else {
-      setResetError('Erro ao redefinir PIN. Verifique a conexão.')
-    }
+    setResetInfo('')
+    const { error } = await supabase.auth.resetPasswordForEmail(athlete.email, {
+      redirectTo: `${window.location.origin}/atleta/nova-senha`,
+    })
+    setResetInfo(error ? 'Não foi possível enviar o email agora.' : 'Link de redefinição enviado para a atleta.')
     setResetLoading(false)
   }
 
@@ -126,6 +113,21 @@ export default function AthleteDetailPage() {
                 <Phone className="h-3.5 w-3.5" />
                 <span>{formatPhone(athlete.telefone)}</span>
               </div>
+              <div className="flex items-center gap-1 text-sm text-cep-muted mt-0.5">
+                <Mail className="h-3.5 w-3.5" />
+                <span>{athlete.email}</span>
+              </div>
+              <div className="mt-1">
+                {isLinked ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-cep-lime-400/15 px-2 py-0.5 text-xs font-semibold text-cep-lime-400">
+                    <Link2 className="h-3 w-3" /> Vinculada
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-cep-gold-400/20 px-2 py-0.5 text-xs font-semibold text-cep-gold-400">
+                    <Link2Off className="h-3 w-3" /> Não vinculada
+                  </span>
+                )}
+              </div>
             </div>
             <Badge variant={athlete.status === 'ativo' ? 'lime' : 'gray'}>
               {athlete.status === 'ativo' ? 'Ativa' : 'Inativa'}
@@ -142,14 +144,26 @@ export default function AthleteDetailPage() {
           {athlete.observacoes && (
             <p className="text-sm text-cep-muted bg-cep-purple-800 rounded-xl p-3">{athlete.observacoes}</p>
           )}
-
-          <button
-            onClick={() => { setNewPin(''); setResetError(''); setResetSuccess(false); setResetPinOpen(true) }}
-            className="flex items-center gap-2 text-xs text-cep-muted hover:text-cep-lime-400 transition-colors"
-          >
-            <KeyRound className="h-3.5 w-3.5" />
-            Redefinir PIN de acesso
-          </button>
+          {isLinked ? (
+            <>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleSendResetLink}
+                loading={resetLoading}
+                disabled={!athlete.email}
+              >
+                <Mail className="h-4 w-4" />
+                Enviar link de redefinição de senha
+              </Button>
+              {resetInfo && <p className="text-sm text-cep-lime-400">{resetInfo}</p>}
+            </>
+          ) : (
+            <p className="text-sm text-cep-muted bg-cep-purple-800 rounded-xl p-3">
+              A atleta ainda não criou conta. Ela deve acessar o app atleta e fazer o primeiro acesso com o email:{' '}
+              <span className="text-cep-white font-semibold">{athlete.email}</span>
+            </p>
+          )}
         </div>
 
         {/* Frequency stats */}
@@ -213,32 +227,6 @@ export default function AthleteDetailPage() {
         confirmLabel="Excluir"
         loading={deleting}
       />
-
-      <Modal open={resetPinOpen} onClose={() => setResetPinOpen(false)} title="Redefinir PIN">
-        <form onSubmit={handleResetPin} className="p-4 space-y-4">
-          <p className="text-sm text-cep-muted">
-            Define um novo PIN de 4 dígitos para <span className="text-cep-white font-semibold">{athlete.nome}</span>.
-          </p>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Novo PIN *</label>
-            <input
-              type="password"
-              inputMode="numeric"
-              value={newPin}
-              onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
-              placeholder="4 dígitos"
-              className="w-full h-11 rounded-xl border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoFocus
-            />
-          </div>
-          {resetError && <p className="text-sm text-red-600">{resetError}</p>}
-          {resetSuccess && <p className="text-sm text-green-600">PIN redefinido com sucesso!</p>}
-          <div className="flex gap-2 pt-1">
-            <Button type="button" variant="secondary" fullWidth onClick={() => setResetPinOpen(false)}>Cancelar</Button>
-            <Button type="submit" fullWidth loading={resetLoading}>Salvar</Button>
-          </div>
-        </form>
-      </Modal>
     </div>
   )
 }

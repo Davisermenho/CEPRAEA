@@ -6,7 +6,6 @@ import { Modal } from '@/shared/components/Modal'
 import { useTrainingStore } from '@/stores/trainingStore'
 import { useAthleteStore } from '@/stores/athleteStore'
 import { useAttendanceStore } from '@/stores/attendanceStore'
-import { supabase } from '@/lib/supabase'
 import { formatDateLong, todayISO, cn } from '@/lib/utils'
 import type { AttendanceStatus } from '@/types'
 import { useCurrentAthlete } from '@/features/atleta/useCurrentAthlete'
@@ -17,7 +16,7 @@ export default function AtletaTreinoDetailPage() {
   const training = useTrainingStore((s) => s.getById(id ?? ''))
   const athletes = useAthleteStore((s) => s.athletes)
   const records = useAttendanceStore((s) => s.records)
-  const upsert = useAttendanceStore((s) => s.upsert)
+  const upsertOwn = useAttendanceStore((s) => s.upsertOwn)
 
   const [saving, setSaving] = useState(false)
   const [showJustify, setShowJustify] = useState(false)
@@ -71,29 +70,12 @@ export default function AtletaTreinoDetailPage() {
     if (!training) return
     setSaving(true)
     setFeedback(null)
-    await upsert(training.id, me.id, status, {
-      confirmadoPelaAtleta: true,
-      justificativa,
-    })
-
-    if (me.teamId) {
-      const { error } = await supabase.from('attendance_records').upsert({
-        team_id: me.teamId,
-        training_id: training.id,
-        athlete_id: me.id,
-        status,
-        justification: justificativa ?? null,
-        confirmed_by_athlete: true,
-        registered_at: new Date().toISOString(),
-      }, {
-        onConflict: 'training_id,athlete_id',
-      })
-
-      setFeedback(error ? 'Resposta salva neste dispositivo.' : 'Sua resposta foi registrada.')
-    } else {
-      setFeedback('Resposta salva neste dispositivo.')
+    try {
+      await upsertOwn(training.id, me.id, status, { justificativa })
+      setFeedback('Sua resposta foi registrada.')
+    } catch {
+      setFeedback('Não foi possível registrar sua resposta.')
     }
-
     setSaving(false)
     setShowJustify(false)
     setJustifyText('')

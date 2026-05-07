@@ -219,4 +219,48 @@ begin
   end if;
 end $$;
 
+-- ── Teste 8: convergência — atleta e coach escrevem na mesma linha ────────────
+-- Atleta grava 'presente'; coach regrava 'ausente'; deve existir exactamente 1 linha.
+
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000071'; -- atleta
+
+do $$
+declare
+  v_count int;
+begin
+  perform public.upsert_own_attendance(
+    '30000000-0000-0000-0000-000000000701'::uuid,
+    'presente',
+    null
+  );
+
+  set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000001'; -- coach
+  perform public.upsert_coach_attendance(
+    '10000000-0000-0000-0000-000000000001'::uuid,
+    '30000000-0000-0000-0000-000000000701'::uuid,
+    '20000000-0000-0000-0000-000000000071'::uuid,
+    'ausente',
+    null,
+    false
+  );
+
+  select count(*) into v_count
+  from public.attendance_records
+  where training_id = '30000000-0000-0000-0000-000000000701'
+    and athlete_id = '20000000-0000-0000-0000-000000000071';
+
+  if v_count <> 1 then
+    raise exception 'convergência falhou: esperado 1 linha, encontrado %', v_count;
+  end if;
+
+  if not exists (
+    select 1 from public.attendance_records
+    where training_id = '30000000-0000-0000-0000-000000000701'
+      and athlete_id = '20000000-0000-0000-0000-000000000071'
+      and status = 'ausente'
+  ) then
+    raise exception 'convergência falhou: status deve ser ausente após escrita do coach';
+  end if;
+end $$;
+
 rollback;

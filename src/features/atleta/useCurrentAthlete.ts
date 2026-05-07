@@ -47,17 +47,10 @@ export function useCurrentAthlete(): CurrentAthleteResult {
   const [athlete, setAthlete] = useState<Athlete | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const normalizedEmail = useMemo(() => user?.email?.trim().toLowerCase() ?? '', [user?.email])
-
   const storeMatch = useMemo(() => {
     if (!user) return null
-
-    const byUserId = athletes.find((candidate) => candidate.userId === user.id)
-    if (byUserId) return byUserId
-
-    if (!normalizedEmail) return null
-    return athletes.find((candidate) => candidate.email.trim().toLowerCase() === normalizedEmail) ?? null
-  }, [athletes, normalizedEmail, user])
+    return athletes.find((candidate) => candidate.userId === user.id) ?? null
+  }, [athletes, user])
 
   useEffect(() => {
     if (authLoading) return
