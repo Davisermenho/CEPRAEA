@@ -16,7 +16,6 @@ const DEFAULT: AppSettings = {
     { dow: 4, horaInicio: '20:00', horaFim: '21:30' },
     { dow: 0, horaInicio: '07:30', horaFim: '09:00' },
   ],
-  pinHash: '',
   appUrl: window.location.origin,
   syncEndpointUrl: '',
   syncSecret: '',

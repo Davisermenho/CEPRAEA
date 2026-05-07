@@ -34,6 +34,7 @@ is_allowed() {
     src/features/atleta/useCurrentAthlete.ts) return 0 ;;
     src/features/atleta/pages/AtletaNovaSenhaPage.tsx) return 0 ;;
     src/lib/export.ts) return 0 ;;
+    src/features/settings/pages/SettingsPage.tsx) return 0 ;;
     src/lib/supabase.ts) return 0 ;;
     src/lib/sync.ts) return 0 ;;
     src/shared/layouts/AtletaGuard.tsx) return 0 ;;
