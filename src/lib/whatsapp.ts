@@ -23,22 +23,6 @@ Confirme sua presença respondendo com ✅ ou ❌.
 Até lá! 💪`
 }
 
-/** Gera mensagem para enviar individualmente à atleta com link de confirmação */
-export function gerarMensagemConfirmacao(
-  training: Training,
-  athlete: Athlete,
-  appUrl: string,
-): string {
-  const link = `${appUrl}/confirmar/${training.id}/${athlete.id}`
-  const data = formatDateCompact(training.data)
-  return `Olá, ${athlete.nome.split(' ')[0]}! 👋
-
-Confirmando sua presença no treino de ${bold(data)} às ${bold(training.horaInicio)}?
-
-Acesse o link para confirmar:
-${link}`
-}
-
 /** Gera pedido de confirmação coletivo listando todas as atletas */
 export function gerarPedidoConfirmacaoGrupo(
   training: Training,
