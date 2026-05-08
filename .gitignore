@@ -64,7 +64,6 @@ Thumbs.db
 # PASTAS DE AGENTES:
 # Essas pastas podem conter arquivos relacionados a agentes de inteligência artificial, como Claude, Codex e Copilot. Esses arquivos podem ser específicos do ambiente de desenvolvimento ou conter informações sensíveis, e não devem ser versionados.
 .claude/
-.codex/
 .files/
 .copilot/
 #---
