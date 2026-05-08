@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-08 - 02:42 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-08 - 03:14 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,8 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-08 | 03:14 | CEPR-0046 | Migração `0010_scout_security_policies_and_grants.sql` criada com RLS/grants do scout novo e validada por estágio; contrato técnico ajustado para codebook global read-only | `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; cat supabase/migrations/0009_scout_codebook_foundation.sql; cat supabase/migrations/0010_scout_security_policies_and_grants.sql; sed \"4d;\\$d\" supabase/tests/scout_security_grants.test.sql; sed \"4d;\\$d\" supabase/tests/scout_security_rls.test.sql; echo \"rollback;\"; } | psql ...'` → passou · `docs/scout/scout-contrato-tecnico-supabase.md` atualizado na seção de segurança |
+| 2026-05-08 | 03:01 | CEPR-0045 | Migração `0009_scout_codebook_foundation.sql` criada com codebook mínimo do slice 1, mapeamento condicional por seletor e teste SQL validado junto com `0008` | `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; cat supabase/migrations/0009_scout_codebook_foundation.sql; sed \"4d;\\$d\" supabase/tests/scout_contract_foundation.test.sql; sed \"4d;\\$d\" supabase/tests/scout_codebook_foundation.test.sql; echo \"rollback;\"; } | psql ...'` → migrações + testes executados sem erro |
 | 2026-05-08 | 02:42 | CEPR-0044 | Teste SQL da foundation do scout criado e validado junto com a migração `0008` em transação única | `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; sed \"4d;\\$d\" supabase/tests/scout_contract_foundation.test.sql; echo \"rollback;\"; } | psql ...'` → migração + teste executados sem erro |
 | 2026-05-08 | 02:33 | CEPR-0043 | Migração `0008_scout_contract_foundation.sql` criada para abrir a fundação relacional do scout normalizado e validada em transação no Postgres local | `psql ... BEGIN; \\i supabase/migrations/0008_scout_contract_foundation.sql; ROLLBACK;` → todas as `CREATE/ALTER` executadas com sucesso · `supabase status` confirmou DB local em `127.0.0.1:54322` |
 | 2026-05-08 | 02:15 | CEPR-0042 | Etapa B do scout aberta com contrato técnico Supabase-first, definindo normalização, legado `payload jsonb`, codebook central e vertical slice inicial | `find docs/scout -maxdepth 1 -type f | sort` inclui `scout-contrato-tecnico-supabase.md` · `rg -n \"scout_events.payload|scout_plays|scout_play_participations|scout_code_values\" docs/scout/scout-contrato-tecnico-supabase.md` · leitura de `supabase/migrations/0001_initial_schema.sql`, `0002_rls_policies.sql` e tipos legados do scout em `src/types/index.ts` |
@@ -1278,3 +1280,27 @@ Implementar UX guiada do scout com sistemas por fase, campos contextuais e bloco
 - **Evidências:** `docs/scout/scout-reconciliacao-manuscout-xlsx.md`, leitura dirigida do workbook, checagem textual do arquivo produzido
 
 ---
+
+## [v0.2.10] — 2026-05-08 — Scout Etapa B: RPCs seguras do slice 1
+
+---
+
+### [CEPR-0041] — 2026-05-08 — 10:40 — Implementação e validação de `0011_scout_rpc_write_read.sql`
+
+#### Changed
+
+- Criada `supabase/migrations/0011_scout_rpc_write_read.sql` com a primeira interface segura de escrita/leitura do scout novo.
+- Adicionado helper interno `public.scout_field_value_allowed(...)` para resolver codebook por `contract_name`, `field_name` e seletor condicional.
+- Corrigida a semântica do helper para respeitar `allow_nao_aplica` e `allow_nao_observado`, além de priorizar mapeamento específico antes do wildcard.
+- Implementadas as RPCs:
+  - `public.upsert_scout_play_bundle(uuid, uuid, jsonb, jsonb)`
+  - `public.get_scout_play_bundle(uuid, uuid)`
+- Criados os testes:
+  - `supabase/tests/scout_rpc_grants.test.sql`
+  - `supabase/tests/scout_rpc_write_read.test.sql`
+- Atualizado `docs/scout/scout-contrato-tecnico-supabase.md` com o contrato operacional de `0011`.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** LOCAL
+- **Evidências:** validação em quatro passes transacionais de `0008`, `0009`, `0010` e `0011` contra o Postgres local em `127.0.0.1:54322`, incluindo grants, RLS, write/read RPC e rollback final sem persistência

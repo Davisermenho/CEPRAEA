@@ -474,14 +474,17 @@ Decisão:
 - `id uuid primary key`
 - `field_name text not null`
 - `contract_name text not null`
+- `selector_key text not null default '*'`
+- `selector_value text not null default '*'`
 - `list_key text not null`
 - `allow_nao_aplica boolean not null default false`
 - `allow_nao_observado boolean not null default true`
-- `unique(contract_name, field_name)`
+- `unique(contract_name, field_name, selector_key, selector_value)`
 
 Papel:
 
 - permitir validação central por campo;
+- permitir listas condicionais para o mesmo campo, como `action_code` em `scout_play_participations` conforme `participant_scope`;
 - evitar explosão de enums;
 - permitir geração futura de tipos, selects e validadores.
 
@@ -508,7 +511,10 @@ Aplica-se a:
 - `scout_feedback_items`
 - `athlete_scout_profiles`
 - `scout_catalog_teams`
-- codebooks do scout
+
+Exceção:
+
+- os codebooks do scout não têm `team_id`, então a leitura deles deve ser global para `authenticated`, e não filtrada por time.
 
 ## 6.2 Escrita
 
@@ -516,6 +522,11 @@ Regra padrão:
 
 - `owner` e `coach` escrevem contratos-base;
 - contratos derivados editoriais podem continuar restritos a `owner`/`coach`.
+
+Para codebooks:
+
+- `authenticated` lê;
+- ninguém escreve por policy no slice atual.
 
 ## 6.3 Observação importante
 
@@ -595,9 +606,51 @@ Sequência sugerida:
 
 1. `0008_scout_contract_foundation.sql`
 2. `0009_scout_codebook_foundation.sql`
-3. `0010_scout_rls_and_indexes.sql`
+3. `0010_scout_security_policies_and_grants.sql`
 4. `0011_scout_rpc_write_read.sql`
 5. `0012_scout_derived_contracts.sql`
+
+## 9.1 RPCs do slice 1
+
+O primeiro slice de runtime do scout não deve abrir acesso bruto às tabelas novas.
+
+Decisão:
+
+- escrita via `public.upsert_scout_play_bundle(uuid, uuid, jsonb, jsonb)`;
+- leitura via `public.get_scout_play_bundle(uuid, uuid)`;
+- validação de codebook via helper interno `public.scout_field_value_allowed(...)`, sem grant para cliente.
+
+### `upsert_scout_play_bundle`
+
+Contrato:
+
+- recebe `team_id`, `scout_game_id`, um objeto `play` e uma lista `participations`;
+- exige `auth.uid()` com papel `owner` ou `coach` no `team_id`;
+- aceita `insert` e `update` no mesmo endpoint por presença opcional de `play.id`;
+- substitui o conjunto de participações da jogada no update;
+- grava `audit_logs` ao final da operação.
+
+Validações mínimas do slice 1:
+
+- campos obrigatórios de `scout_plays`;
+- listas de `phase_of_ball`, `offensive_system`, `offensive_configuration`, `defensive_system`, `factual_result` e `main_cause`;
+- lista condicional de `action_code` em `scout_play_participations` conforme `participant_scope`;
+- semântica de `NAO_APLICA` e `NAO_OBSERVADO` respeitando `allow_nao_aplica` e `allow_nao_observado` do mapeamento.
+
+### `get_scout_play_bundle`
+
+Contrato:
+
+- recebe `team_id` e `scout_play_id`;
+- exige `auth.uid()` membro do time;
+- retorna um `jsonb` com:
+  - `play`
+  - `participations`
+
+Objetivo:
+
+- expor um bundle estável para o frontend do slice 1;
+- evitar acoplamento inicial a múltiplas queries cliente-side.
 
 ## 10. Tipos TypeScript
 

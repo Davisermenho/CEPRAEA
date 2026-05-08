@@ -19,10 +19,171 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br> 
-*Última atualização*: 2026-05-08 - 02:42 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-08 - 03:14 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+# Execution Log: CEPR-0046
+
+## 🎯 Objetivo
+
+Implementar `0010` com RLS/policies e grants do scout novo, cobrindo tanto os contratos multi-tenant com `team_id` quanto o codebook global read-only do slice atual.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `supabase/migrations/0010_scout_security_policies_and_grants.sql`, `supabase/tests/scout_security_grants.test.sql`, `supabase/tests/scout_security_rls.test.sql`, `docs/scout/scout-contrato-tecnico-supabase.md`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** próximas migrations do scout, integração PostgREST do scout, runtime do slice 1 e documentação de segurança
+- **Partes do sistema que podem quebrar:** nenhuma no runtime atual; o risco tratado era deixar o scout novo sem política explícita ou com política errada para o codebook
+- **Testes que cobrem o risco:** grants test dedicado, RLS test dedicado e validação por estágio das migrations do scout
+- **Comandos de validação:** 
+  - `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; sed \"4d;\\$d\" supabase/tests/scout_contract_foundation.test.sql; echo \"rollback;\"; } | psql ...'`
+  - `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; cat supabase/migrations/0009_scout_codebook_foundation.sql; sed \"4d;\\$d\" supabase/tests/scout_contract_foundation.test.sql; sed \"4d;\\$d\" supabase/tests/scout_codebook_foundation.test.sql; echo \"rollback;\"; } | psql ...'`
+  - `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; cat supabase/migrations/0009_scout_codebook_foundation.sql; cat supabase/migrations/0010_scout_security_policies_and_grants.sql; sed \"4d;\\$d\" supabase/tests/scout_security_grants.test.sql; sed \"4d;\\$d\" supabase/tests/scout_security_rls.test.sql; echo \"rollback;\"; } | psql ...'`
+- **Arquivos proibidos nesta tarefa:** `src/**`, `supabase/migrations/0011*`, `plan.md`, `CEPRAEA.md`
+
+O escopo permaneceu em banco, segurança e contrato técnico.
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Definição da política de segurança real
+
+- **Arquivos:** `supabase/migrations/0010_scout_security_policies_and_grants.sql`
+- **Resultado:** os contratos com `team_id` foram configurados com `member read / owner+coach write`, enquanto o codebook foi configurado como `authenticated read-only`.
+
+### Passo 2 — Grants explícitos
+
+- **Arquivos:** `supabase/migrations/0010_scout_security_policies_and_grants.sql`
+- **Resultado:** `anon` e `public` ficaram sem acesso às novas tabelas do scout; `authenticated` recebeu CRUD apenas nas tabelas multi-tenant e SELECT apenas nas tabelas do codebook.
+
+### Passo 3 — Testes de grants e RLS
+
+- **Arquivos:** `supabase/tests/scout_security_grants.test.sql`, `supabase/tests/scout_security_rls.test.sql`
+- **Resultado:** os testes cobrem:
+  - grants esperados por role;
+  - leitura por membro de time;
+  - escrita por owner/coach;
+  - negação para viewer em escrita;
+  - negação para usuário sem time nos contratos multi-tenant;
+  - leitura global do codebook por `authenticated`.
+
+### Passo 4 — Ajuste do contrato técnico
+
+- **Arquivos:** `docs/scout/scout-contrato-tecnico-supabase.md`
+- **Resultado:** a seção de segurança foi corrigida para refletir o comportamento real do codebook sem `team_id`.
+
+### Passo 5 — Validação por estágio
+
+- **Arquivos:** migrations `0008`–`0010` e testes do scout
+- **Resultado:** a validação foi feita por estágio, porque os testes de `0008/0009` verificam corretamente o estado fail-closed antes da existência de policies e não devem ser reaplicados após `0010`.
+
+---
+
+## ✅ Validação Final
+
+- `0008` continua válida isoladamente
+- `0008 + 0009` continuam válidas isoladamente
+- `0008 + 0009 + 0010` com os testes de grants/RLS do scout passam sem erro
+- o contrato técnico está alinhado ao comportamento real das policies
+
+---
+
+# Execution Log: CEPR-0045
+
+## 🎯 Objetivo
+
+Implementar a fundação do codebook do scout em `0009`, corrigindo a limitação do mapeamento campo -> lista para suportar cenários condicionais do slice 1, como `action_code` por `participant_scope`.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `supabase/migrations/0009_scout_codebook_foundation.sql`, `supabase/tests/scout_codebook_foundation.test.sql`, `docs/scout/scout-contrato-tecnico-supabase.md`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** futura migration `0010`, validadores do scout, geração de tipos e formulários do slice 1
+- **Partes do sistema que podem quebrar:** nenhuma em runtime atual; o risco tratado era abrir um codebook incapaz de representar listas condicionais no mesmo campo
+- **Testes que cobrem o risco:** execução conjunta de `0008`, `0009`, teste da foundation e teste do codebook em uma única transação com rollback
+- **Comandos de validação:** `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; cat supabase/migrations/0009_scout_codebook_foundation.sql; sed \"4d;\\$d\" supabase/tests/scout_contract_foundation.test.sql; sed \"4d;\\$d\" supabase/tests/scout_codebook_foundation.test.sql; echo \"rollback;\"; } | psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1'`
+- **Arquivos proibidos nesta tarefa:** `src/**`, `supabase/migrations/0010*`, `plan.md`, `CEPRAEA.md`
+
+O escopo permaneceu na base de banco e contrato técnico do scout.
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Refinamento do contrato do codebook
+
+- **Arquivos:** `docs/scout/scout-contrato-tecnico-supabase.md`
+- **Resultado:** o contrato técnico foi ajustado para usar `selector_key` e `selector_value` em `scout_field_codebook_map`, substituindo a versão simplificada que não comportava listas condicionais para o mesmo campo.
+
+### Passo 2 — Implementação da migration `0009`
+
+- **Arquivos:** `supabase/migrations/0009_scout_codebook_foundation.sql`
+- **Resultado:** a migration passou a criar:
+  - `scout_code_lists`
+  - `scout_code_values`
+  - `scout_field_codebook_map`
+
+Também passou a semear o codebook mínimo do slice 1:
+
+- `LISTA_FASES`
+- `LISTA_SISTEMA_OFENSIVO`
+- `LISTA_CONFIGURACAO_OFENSIVA`
+- `LISTA_SISTEMA_DEFENSIVO`
+- `LISTA_ACAO_OFENSIVA`
+- `LISTA_ACAO_DEFENSIVA`
+- `LISTA_RESULTADO_FACTUAL`
+- `LISTA_CAUSA_PRINCIPAL`
+- `LISTA_PRIORIDADE_TREINO`
+
+### Passo 3 — Implementação do teste do codebook
+
+- **Arquivos:** `supabase/tests/scout_codebook_foundation.test.sql`
+- **Resultado:** o teste cobre:
+  - existência das tabelas do codebook;
+  - RLS habilitado e ainda sem policies;
+  - contagens esperadas do seed mínimo;
+  - flags `NAO_APLICA` / `NAO_OBSERVADO`;
+  - mapeamento condicional ofensivo/defensivo de `action_code`;
+  - `unique` e FK do mapa de codebook.
+
+### Passo 4 — Correção do caso de teste de FK
+
+- **Arquivos:** `supabase/tests/scout_codebook_foundation.test.sql`
+- **Resultado:** um primeiro teste de `list_key` inválido batia antes na constraint de unicidade; o caso foi corrigido para forçar a violação certa de FK.
+
+### Passo 5 — Validação integrada
+
+- **Arquivos:** `supabase/migrations/0008_scout_contract_foundation.sql`, `supabase/migrations/0009_scout_codebook_foundation.sql`, `supabase/tests/scout_contract_foundation.test.sql`, `supabase/tests/scout_codebook_foundation.test.sql`
+- **Resultado:** toda a foundation atual do scout executou junta e terminou com `ROLLBACK` limpo.
+
+---
+
+## ✅ Validação Final
+
+- `0008` continua válida
+- `0009` executa sem erro
+- o teste da foundation estrutural passa
+- o teste do codebook passa
+- a validação foi feita sem persistir alterações no banco local
+
+---
 
 # Execution Log: CEPR-0044
 
@@ -2332,3 +2493,67 @@ Solicitação do usuário para corrigir `plan.md` após a validação da auditor
 ---
 
 *Próxima entrada: CEPR-0027*
+
+## [CEPR-0041] — 2026-05-08 10:40 America/Sao_Paulo
+
+### Contexto
+
+Solicitação do usuário para prosseguir com `0011_scout_rpc_write_read.sql`, abrindo a primeira interface segura de escrita/leitura do slice 1 do scout sobre `scout_plays` e `scout_play_participations`.
+
+### Arquivos alvo
+
+- `supabase/migrations/0011_scout_rpc_write_read.sql`
+- `supabase/tests/scout_rpc_grants.test.sql`
+- `supabase/tests/scout_rpc_write_read.test.sql`
+- `docs/scout/scout-contrato-tecnico-supabase.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Riscos considerados
+
+- aceitar códigos `NAO_APLICA` / `NAO_OBSERVADO` fora das permissões do mapeamento de codebook;
+- expor helper interno de validação a clientes autenticados;
+- misturar grant de EXECUTE com autorização de negócio por papel de equipe;
+- poluir o banco local durante a validação de migrações;
+- introduzir runtime novo sem bundle de leitura estável para o slice 1.
+
+### Ações executadas
+
+1. Revisei a implementação em andamento de `0011_scout_rpc_write_read.sql` contra `0008`, `0009`, `0010` e os RPCs existentes do projeto.
+2. Corrigi `public.scout_field_value_allowed(...)` para:
+   - priorizar mapeamento específico antes do wildcard;
+   - aplicar `allow_nao_aplica`;
+   - aplicar `allow_nao_observado`.
+3. Mantive o helper sem `GRANT EXECUTE` para clientes e deixei só as RPCs públicas do slice 1 com grant para `authenticated`.
+4. Criei `supabase/tests/scout_rpc_grants.test.sql` para validar:
+   - grants de EXECUTE;
+   - ausência de grant no helper interno;
+   - negação por papel/time para `viewer`, `user_no_team`, `other-team owner` e coach com `scout_game_id` de outro time.
+5. Criei `supabase/tests/scout_rpc_write_read.test.sql` para validar:
+   - helper condicional por `participant_scope`;
+   - enforcement de `allow_nao_aplica` / `allow_nao_observado`;
+   - insert e update de bundle por `upsert_scout_play_bundle`;
+   - leitura agregada por `get_scout_play_bundle`;
+   - substituição de participações no update;
+   - gravação em `audit_logs`;
+   - rejeição de `action_code` ofensivo em contexto defensivo.
+6. Durante a primeira tentativa de validação, detectei que `0008` havia sido aplicada fora de transação no banco local por erro operacional do processo de teste. Medi o impacto, confirmei que as tabelas novas estavam vazias e removi somente esse escopo para restaurar o estado anterior.
+7. Revalidei tudo com quatro passes transacionais, sanitizando `BEGIN/ROLLBACK` dos testes para manter rollback único por sessão:
+   - `0008 + scout_contract_foundation`
+   - `0008 + 0009 + scout_contract_foundation + scout_codebook_foundation`
+   - `0008 + 0009 + 0010 + scout_security_grants + scout_security_rls`
+   - `0008 + 0009 + 0010 + 0011 + scout_rpc_grants + scout_rpc_write_read`
+8. Confirmei que após o rollback final não restou nenhuma tabela nova de scout no banco local.
+9. Atualizei `docs/scout/scout-contrato-tecnico-supabase.md` para registrar a estratégia e o contrato operacional das RPCs de `0011`.
+
+### Verificação final
+
+- `0011_scout_rpc_write_read.sql` válida e coerente com `0008–0010`
+- grants e RLS preservados
+- helper interno protegido sem grant para cliente
+- write/read do slice 1 funcionando com validação condicional de codebook
+- banco local limpo ao final da validação
+
+### Saída
+
+- foundation de RPC do scout pronta para commit no escopo de `0011`
