@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-08 - 01:58 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-08 - 02:42 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,9 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-08 | 02:42 | CEPR-0044 | Teste SQL da foundation do scout criado e validado junto com a migração `0008` em transação única | `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; sed \"4d;\\$d\" supabase/tests/scout_contract_foundation.test.sql; echo \"rollback;\"; } | psql ...'` → migração + teste executados sem erro |
+| 2026-05-08 | 02:33 | CEPR-0043 | Migração `0008_scout_contract_foundation.sql` criada para abrir a fundação relacional do scout normalizado e validada em transação no Postgres local | `psql ... BEGIN; \\i supabase/migrations/0008_scout_contract_foundation.sql; ROLLBACK;` → todas as `CREATE/ALTER` executadas com sucesso · `supabase status` confirmou DB local em `127.0.0.1:54322` |
+| 2026-05-08 | 02:15 | CEPR-0042 | Etapa B do scout aberta com contrato técnico Supabase-first, definindo normalização, legado `payload jsonb`, codebook central e vertical slice inicial | `find docs/scout -maxdepth 1 -type f | sort` inclui `scout-contrato-tecnico-supabase.md` · `rg -n \"scout_events.payload|scout_plays|scout_play_participations|scout_code_values\" docs/scout/scout-contrato-tecnico-supabase.md` · leitura de `supabase/migrations/0001_initial_schema.sql`, `0002_rls_policies.sql` e tipos legados do scout em `src/types/index.ts` |
 | 2026-05-08 | 01:58 | CEPR-0041 | `.codex/` passou a ser versionável no repositório e os logs do Codex foram preparados para o primeiro commit dedicado | `git diff -- .gitignore` mostra remoção de `.codex/` do ignore · `find .codex -maxdepth 1 -type f` mostra `codex-CHANGELOG.md` e `codex-EXECUTION_LOG.md` · `git status --short .codex .gitignore` confirma escopo do commit |
 | 2026-05-08 | 01:34 | CEPR-0040 | Revisão corretiva da Etapa A do scout: matriz de rastreabilidade alinhada a campos canônicos do workbook e contagens normalizadas entre os documentos | `python3` revalidou `TABELA_MESTRE=466`, `LISTAS=57`, `DICIONARIO_CODIGOS=942` e contratos por aba · `rg -n "ACAO_PRINCIPAL|POSICAO_DEFENSIVA|TECNICA_GOLEIRA" docs/scout/scout-rastreabilidade.md` → sem ocorrências inválidas · `git diff -- docs/scout/scout-rastreabilidade.md docs/scout/scout-reconciliacao-manuscout-xlsx.md docs/scout/scout-campos.md` |
 | 2026-05-08 | 00:36 | CEPR-0039 | Matriz de rastreabilidade do scout criada, fechando a ponte entre conceito, campo, lista, validação e derivado | `rg -n "^## " docs/scout/scout-rastreabilidade.md` → 18 seções · `wc -l docs/scout/scout-rastreabilidade.md` → `208` · revalidação de duplicidades de campo na `TABELA_MESTRE` via `python3` |

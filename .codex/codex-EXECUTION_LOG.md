@@ -19,10 +19,205 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br> 
-*Última atualização*: 2026-05-08 - 01:58 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-08 - 02:42 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+# Execution Log: CEPR-0044
+
+## 🎯 Objetivo
+
+Criar o teste SQL da foundation do scout e validá-lo junto com a migração `0008`, antes de avançar para `0009` ou para tipos/runtime.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `supabase/tests/scout_contract_foundation.test.sql`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** futuro encadeamento de testes SQL do scout, pipeline local de validação de migrações, próxima migration `0009`
+- **Partes do sistema que podem quebrar:** nenhuma em runtime; o teste cobre a base estrutural do banco
+- **Testes que cobrem o risco:** execução transacional conjunta da migração `0008` com o corpo do novo teste
+- **Comandos de validação:** `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; sed \"4d;\\$d\" supabase/tests/scout_contract_foundation.test.sql; echo \"rollback;\"; } | psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1'`
+- **Arquivos proibidos nesta tarefa:** `src/**`, `supabase/migrations/0009*`, `plan.md`, `CEPRAEA.md`
+
+O escopo permaneceu restrito ao banco e à validação da foundation.
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Modelagem do teste estrutural
+
+- **Arquivos:** `supabase/tests/scout_contract_foundation.test.sql`
+- **Resultado:** o teste passou a cobrir:
+  - existência das novas tabelas;
+  - RLS habilitado e sem policies ainda;
+  - presença das constraints críticas;
+  - unicidade de `play_code`;
+  - unicidade de slot por jogada/escopo/lado;
+  - `identity_check` de participações;
+  - integridade cruzada por `team_id` em jogadas, participações e perfil tático.
+
+### Passo 2 — Simplificação da checagem de catálogo
+
+- **Arquivos:** `supabase/tests/scout_contract_foundation.test.sql`
+- **Resultado:** removi uma abordagem mais frágil com `foreach`/`record` e deixei as verificações do catálogo explícitas, reduzindo risco de sintaxe obscura em PL/pgSQL.
+
+### Passo 3 — Validação real com a migração `0008`
+
+- **Arquivos:** `supabase/migrations/0008_scout_contract_foundation.sql`, `supabase/tests/scout_contract_foundation.test.sql`
+- **Resultado:** migração e teste foram executados juntos dentro de uma única transação e terminaram com `ROLLBACK` limpo, provando que a foundation está sintaticamente e estruturalmente consistente.
+
+---
+
+## ✅ Validação Final
+
+- a migração `0008` executa sem erro
+- o teste novo executa sem erro sobre a foundation recém-criada
+- a validação foi feita sem persistir mudanças no banco local
+
+---
+
+# Execution Log: CEPR-0043
+
+## 🎯 Objetivo
+
+Implementar a migração `0008_scout_contract_foundation.sql` como primeiro passo físico da Etapa B do scout, criando os contratos-base normalizados sem reativar o runtime legado.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `supabase/migrations/0008_scout_contract_foundation.sql`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** próximas migrations `0009+`, testes SQL do scout, tipos TypeScript futuros e runtime do scout slice 1
+- **Partes do sistema que podem quebrar:** nenhuma no runtime atual, porque a migração apenas adiciona novas tabelas/índices/triggers e não altera o fluxo hoje ativo
+- **Testes que cobrem o risco:** validação transacional da migração em Postgres local, inspeção de FKs compostas por `team_id` e alinhamento com as tabelas existentes `teams`, `athletes` e `scout_games`
+- **Comandos de validação:** `supabase status`, `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1 <<'SQL' ... \\i supabase/migrations/0008_scout_contract_foundation.sql ... ROLLBACK`
+- **Arquivos proibidos nesta tarefa:** `src/**`, `supabase/tests/**` por enquanto, `plan.md`, `CEPRAEA.md`
+
+O escopo permaneceu na fundação física do banco.
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Alinhamento com o schema atual
+
+- **Arquivos:** `supabase/migrations/0001_initial_schema.sql`, `0005_harden_team_integrity_and_rpc_security.sql`
+- **Resultado:** confirmei o padrão estrutural do projeto: isolamento por `team_id`, uso de FKs compostas e legado do scout em `scout_games` + `scout_events`.
+
+### Passo 2 — Implementação da fundação do scout normalizado
+
+- **Arquivos:** `supabase/migrations/0008_scout_contract_foundation.sql`
+- **Resultado:** a migração criou:
+  - `scout_plays`
+  - `scout_play_participations`
+  - `scout_mental_events`
+  - `scout_play_validations`
+  - `athlete_scout_profiles`
+  - `scout_catalog_teams`
+
+Também foram definidos:
+
+- FKs compostas com `team_id`
+- `unique` de integridade para `play_code` por jogo
+- índices básicos
+- triggers de `updated_at`
+- `RLS enable` em modo fail-closed para as novas tabelas
+
+### Passo 3 — Validação real da migração
+
+- **Arquivos:** `supabase/migrations/0008_scout_contract_foundation.sql`
+- **Resultado:** a migração foi executada com sucesso em transação sobre o banco local Supabase e revertida com `ROLLBACK`, validando sintaxe, FKs, índices, triggers e `ALTER TABLE`.
+
+---
+
+## ✅ Validação Final
+
+- `supabase status` confirmou Postgres local disponível em `127.0.0.1:54322`
+- `psql` executou a migração inteira sem erro
+- o rollback garantiu validação sem alterar permanentemente o banco local
+
+---
+
+# Execution Log: CEPR-0042
+
+## 🎯 Objetivo
+
+Abrir formalmente a Etapa B do scout com um contrato técnico Supabase-first que traduza a Etapa A em decisões estruturais de banco, RLS, codebook, migração do legado e sequenciamento de implementação.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `docs/scout/scout-contrato-tecnico-supabase.md`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** futuras migrações do scout, testes de RLS, novos tipos TypeScript, stores e UI do scout
+- **Partes do sistema que podem quebrar:** nenhuma em runtime atual; o trabalho abre a camada de planejamento técnico e reduz risco de implementação errada sobre o modelo legado
+- **Testes que cobrem o risco:** releitura do schema Supabase atual, das policies atuais do scout, da Etapa A textual e dos tipos legados em `src/types/index.ts`
+- **Comandos de validação:** `rg --files docs/scout supabase src/features/scout src/stores src/types`, `sed -n` em `supabase/migrations/0001_initial_schema.sql`, `0002_rls_policies.sql`, `docs/scout/scout-ssot.md`, `docs/scout/scout-validacoes.md`, `docs/scout/scout-rastreabilidade.md`, `src/types/index.ts`
+- **Arquivos proibidos nesta tarefa:** `supabase/migrations/**` (sem mudança ainda), `src/**` de runtime, `plan.md`, `CEPRAEA.md`
+
+O escopo permaneceu documental e arquitetural.
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Releitura da base atual do produto
+
+- **Arquivos:** `supabase/migrations/0001_initial_schema.sql`, `supabase/migrations/0002_rls_policies.sql`, `src/types/index.ts`, `src/features/scout/**`
+- **Resultado:** confirmei que já existe scout legado em `scout_games` + `scout_events(payload jsonb)`, com RLS básica, mas sem contrato normalizado para o scout v1.
+
+### Passo 2 — Reancoragem da Etapa B na Etapa A
+
+- **Arquivos:** `docs/scout/scout-ssot.md`, `docs/scout/scout-validacoes.md`, `docs/scout/scout-rastreabilidade.md`
+- **Resultado:** o contrato técnico foi desenhado a partir dos contratos lógicos e não a partir do frontend antigo nem do layout bruto do workbook.
+
+### Passo 3 — Definição do contrato técnico Supabase-first
+
+- **Arquivos:** `docs/scout/scout-contrato-tecnico-supabase.md`
+- **Resultado:** ficaram definidas as decisões centrais:
+  - manter `scout_games`;
+  - congelar `scout_events.payload` como legado;
+  - criar `scout_plays`, `scout_play_participations`, `scout_mental_events`, `scout_play_validations`, `scout_report_items`, `scout_feedback_items`, `athlete_scout_profiles` e `scout_catalog_teams`;
+  - não espelhar o workbook coluna por coluna;
+  - não usar `ENUM` massivo para as `124` listas;
+  - adotar codebook central;
+  - começar por um vertical slice mínimo de jogada + participação.
+
+### Passo 4 — Registro da abertura formal da Etapa B
+
+- **Arquivos:** `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Resultado:** a nova fase do scout foi registrada como unidade de trabalho própria.
+
+---
+
+## ✅ Validação Final
+
+- o documento novo está alinhado ao schema Supabase existente do projeto
+- a estratégia de legado para `scout_events.payload` ficou explícita
+- o primeiro slice técnico do scout ficou delimitado e menor que o workbook completo
+
+---
 
 # Execution Log: CEPR-0041
 
