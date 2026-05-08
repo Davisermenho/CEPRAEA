@@ -98,6 +98,79 @@ O escopo permaneceu em banco, segurança e contrato técnico.
 
 ---
 
+# Execution Log: CEPR-0047
+
+## 🎯 Objetivo
+
+Produzir um manual operacional do scout atual da rota `/scout`, em formato usável por pessoas, explicando o fluxo do slice 1 e cada campo/menu da tela com orientação objetiva de preenchimento.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `docs/scout/scout-manual-operacional-slice1.md`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** onboarding operacional do scout, treinamento de uso interno, futura documentação de produto do scout
+- **Partes do sistema que podem quebrar:** nenhuma em runtime; o risco tratado era documentação humana descolada da UX real da rota `/scout`
+- **Testes que cobrem o risco:** não aplicável; validação foi por leitura direta da implementação real da tela
+- **Comandos de validação:** 
+  - `sed -n '1,320p' src/features/scout/pages/ScoutWorkspacePage.tsx`
+  - `sed -n '321,720p' src/features/scout/pages/ScoutWorkspacePage.tsx`
+  - `sed -n '721,1100p' src/features/scout/pages/ScoutWorkspacePage.tsx`
+  - leitura dos contratos em `src/types/index.ts`
+- **Arquivos proibidos nesta tarefa:** `src/**`, `supabase/**`, `plan.md`, `CEPRAEA.md`
+
+O escopo permaneceu totalmente documental.
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Revalidação da tela real
+
+- **Arquivos:** `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** a rota `/scout` foi relida integralmente para mapear exatamente:
+  - blocos da tela;
+  - fluxo de criação de jogo;
+  - fluxo de criação/edição de jogada;
+  - dropdowns reais expostos;
+  - defaults atuais.
+
+### Passo 2 — Tradução operacional do slice 1
+
+- **Arquivos:** `docs/scout/scout-manual-operacional-slice1.md`
+- **Resultado:** o manual foi escrito no nível de uso, não no nível de schema, cobrindo:
+  - quando usar o scout atual;
+  - quando não usar;
+  - ordem operacional correta;
+  - campo por campo da jogada;
+  - campo por campo da participação;
+  - erros operacionais comuns.
+
+### Passo 3 — Exemplo concreto de jogada
+
+- **Arquivos:** `docs/scout/scout-manual-operacional-slice1.md`
+- **Resultado:** o manual passou a incluir um exemplo completo de:
+  - contexto do jogo;
+  - jogada preenchida;
+  - três participações;
+  - leitura prática do que cada linha representa.
+
+---
+
+## ✅ Validação Final
+
+- o manual está alinhado ao frontend real já disponível em `/scout`
+- o manual não promete recursos que ainda não existem na tela
+- o manual separa claramente o scout atual do scout completo do `MANUSCOUT`
+
+---
+
 # Execution Log: CEPR-0045
 
 ## 🎯 Objetivo
