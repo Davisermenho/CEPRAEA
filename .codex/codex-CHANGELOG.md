@@ -1324,3 +1324,29 @@ Implementar UX guiada do scout com sistemas por fase, campos contextuais e bloco
 
 - **Status:** LOCAL
 - **Evidências:** `npm run typecheck` verde após criação de `src/features/scout/scoutApi.ts` e dos contratos normalizados do scout
+
+---
+
+### [CEPR-0043] — 2026-05-08 — 11:25 — Vertical slice mínimo do frontend do scout
+
+#### Changed
+
+- Criada `src/features/scout/pages/ScoutWorkspacePage.tsx` como primeira tela real do scout novo.
+- Integrada a rota `/scout` em `src/App.tsx`.
+- Integrada a navegação principal em `src/shared/layouts/AppLayout.tsx`.
+- Expandido `src/features/scout/scoutApi.ts` com suporte a:
+  - `fetchScoutGames`
+  - `createScoutGame`
+  - `fetchScoutPlaysForGame`
+- Expandido `src/types/index.ts` com contratos de `ScoutGameRecord`, `ScoutGameWriteInput` e `ScoutPlayListItem`.
+- O frontend mínimo já permite:
+  - criar `scout_game`;
+  - selecionar jogo;
+  - listar jogadas do jogo;
+  - criar/editar bundle de `scout_play` + participações;
+  - salvar e recarregar pelo contrato novo.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** LOCAL
+- **Evidências:** `npm run typecheck` e `npm run build` verdes; chunk dedicado `ScoutWorkspacePage-*.js` gerado no build

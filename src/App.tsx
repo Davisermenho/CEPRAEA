@@ -15,6 +15,7 @@ const AthleteDetailPage      = lazy(() => import('@/features/athletes/pages/Athl
 const TrainingsPage          = lazy(() => import('@/features/trainings/pages/TrainingsPage'))
 const TrainingDetailPage     = lazy(() => import('@/features/trainings/pages/TrainingDetailPage'))
 const ReportsPage            = lazy(() => import('@/features/reports/pages/ReportsPage'))
+const ScoutWorkspacePage     = lazy(() => import('@/features/scout/pages/ScoutWorkspacePage'))
 const SettingsPage           = lazy(() => import('@/features/settings/pages/SettingsPage'))
 const SupabaseSettingsPage   = lazy(() => import('@/features/settings/pages/SupabaseSettingsPage'))
 
@@ -62,6 +63,7 @@ export default function App() {
                 <Route path="atletas/:id" element={<AthleteDetailPage />} />
                 <Route path="treinos" element={<TrainingsPage />} />
                 <Route path="treinos/:id" element={<TrainingDetailPage />} />
+                <Route path="scout" element={<ScoutWorkspacePage />} />
                 <Route path="relatorios" element={<ReportsPage />} />
                 <Route path="configuracoes" element={<SettingsPage />} />
                 <Route path="configuracoes/supabase" element={<SupabaseSettingsPage />} />

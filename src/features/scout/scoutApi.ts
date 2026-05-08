@@ -5,9 +5,12 @@ import type {
   ScoutCodeListKey,
   ScoutCodeValue,
   ScoutFieldCodebookMap,
+  ScoutGameRecord,
+  ScoutGameWriteInput,
   ScoutPlay,
   ScoutPlayBundle,
   ScoutPlayBundleUpsertInput,
+  ScoutPlayListItem,
   ScoutPlayParticipation,
   ScoutPlayParticipationWriteInput,
   ScoutPlayWriteInput,
@@ -113,6 +116,19 @@ type RawScoutPlayBundle = {
   participations: RawScoutPlayParticipationRow[]
 }
 
+type RawScoutGameRow = {
+  id: string
+  team_id: string
+  game_date: string | null
+  analyzed_team: string | null
+  opponent: string | null
+  location: string | null
+  notes: string | null
+  status: string
+  created_at: string
+  updated_at: string
+}
+
 function assertSupabaseReady() {
   if (!isSupabaseConfigured()) {
     throw new Error('Supabase não configurado para o scout.')
@@ -197,6 +213,21 @@ function mapScoutBundle(bundle: RawScoutPlayBundle): ScoutPlayBundle {
   return {
     play: mapScoutPlay(bundle.play),
     participations: (bundle.participations ?? []).map(mapScoutPlayParticipation),
+  }
+}
+
+function mapScoutGame(row: RawScoutGameRow): ScoutGameRecord {
+  return {
+    id: row.id,
+    teamId: row.team_id,
+    gameDate: toOptional(row.game_date),
+    analyzedTeam: toOptional(row.analyzed_team),
+    opponent: toOptional(row.opponent),
+    location: toOptional(row.location),
+    notes: toOptional(row.notes),
+    status: row.status as ScoutGameRecord['status'],
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   }
 }
 
@@ -314,6 +345,49 @@ export async function fetchScoutCodebook(listKeys?: ScoutCodeListKey[]): Promise
   }))
 }
 
+export async function fetchScoutGames(teamId?: string): Promise<ScoutGameRecord[]> {
+  assertSupabaseReady()
+
+  const resolvedTeamId = resolveTeamId(teamId)
+  const { data, error } = await supabase
+    .from('scout_games')
+    .select('id, team_id, game_date, analyzed_team, opponent, location, notes, status, created_at, updated_at')
+    .eq('team_id', resolvedTeamId)
+    .order('game_date', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw new Error(error.message || 'Falha ao carregar jogos do scout.')
+  }
+
+  return ((data ?? []) as RawScoutGameRow[]).map(mapScoutGame)
+}
+
+export async function createScoutGame(input: ScoutGameWriteInput, teamId?: string): Promise<ScoutGameRecord> {
+  assertSupabaseReady()
+
+  const resolvedTeamId = resolveTeamId(teamId)
+  const { data, error } = await supabase
+    .from('scout_games')
+    .insert({
+      team_id: resolvedTeamId,
+      game_date: input.gameDate ?? null,
+      analyzed_team: input.analyzedTeam ?? null,
+      opponent: input.opponent ?? null,
+      location: input.location ?? null,
+      notes: input.notes ?? null,
+      status: input.status ?? 'em_andamento',
+    })
+    .select('id, team_id, game_date, analyzed_team, opponent, location, notes, status, created_at, updated_at')
+    .single<RawScoutGameRow>()
+
+  if (error) {
+    throw new Error(error.message || 'Falha ao criar jogo do scout.')
+  }
+
+  return mapScoutGame(data)
+}
+
 export async function fetchScoutFieldCodebookMap(contractName?: string): Promise<ScoutFieldCodebookMap[]> {
   assertSupabaseReady()
 
@@ -360,6 +434,49 @@ export async function getScoutPlayBundle(scoutPlayId: string, teamId?: string): 
   }
 
   return mapScoutBundle(data as RawScoutPlayBundle)
+}
+
+export async function fetchScoutPlaysForGame(scoutGameId: string, teamId?: string): Promise<ScoutPlayListItem[]> {
+  assertSupabaseReady()
+
+  const resolvedTeamId = resolveTeamId(teamId)
+  const { data, error } = await supabase
+    .from('scout_plays')
+    .select('id, team_id, scout_game_id, play_code, session_date, period, game_clock, phase_of_ball, factual_result, updated_at')
+    .eq('team_id', resolvedTeamId)
+    .eq('scout_game_id', scoutGameId)
+    .is('deleted_at', null)
+    .order('session_date', { ascending: false })
+    .order('period')
+    .order('game_clock')
+
+  if (error) {
+    throw new Error(error.message || 'Falha ao carregar jogadas do scout.')
+  }
+
+  return ((data ?? []) as Array<{
+    id: string
+    team_id: string
+    scout_game_id: string
+    play_code: string
+    session_date: string
+    period: string
+    game_clock: string
+    phase_of_ball: string
+    factual_result: string
+    updated_at: string
+  }>).map((row) => ({
+    id: row.id,
+    teamId: row.team_id,
+    scoutGameId: row.scout_game_id,
+    playCode: row.play_code,
+    sessionDate: row.session_date,
+    period: row.period,
+    gameClock: row.game_clock,
+    phaseOfBall: row.phase_of_ball as ScoutPlayListItem['phaseOfBall'],
+    factualResult: row.factual_result,
+    updatedAt: row.updated_at,
+  }))
 }
 
 export async function upsertScoutPlayBundle(input: ScoutPlayBundleUpsertInput): Promise<ScoutPlayBundle> {

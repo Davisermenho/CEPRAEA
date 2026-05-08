@@ -129,6 +129,7 @@ export type ScoutPhaseCode = 'AT_POS' | 'DEF_POS' | 'TRANS_OF' | 'TRANS_DEF'
 export type ScoutTeamSide = 'ANALYZED' | 'OPPONENT'
 export type ScoutParticipantScope = 'ATQ' | 'DEF'
 export type ScoutValidationStatus = 'PENDENTE' | 'REVISADO' | 'CORRIGIDO' | 'VALIDADO' | 'DUVIDA'
+export type ScoutGameStatusCode = 'em_andamento' | 'finalizado'
 
 export type ScoutCodeListKey =
   | 'LISTA_FASES'
@@ -173,6 +174,28 @@ export interface ScoutFieldCodebookMap {
   allowNaoAplica: boolean
   allowNaoObservado: boolean
   active: boolean
+}
+
+export interface ScoutGameRecord {
+  id: string
+  teamId: string
+  gameDate?: string
+  analyzedTeam?: string
+  opponent?: string
+  location?: string
+  notes?: string
+  status: ScoutGameStatusCode
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ScoutGameWriteInput {
+  gameDate?: string
+  analyzedTeam?: string
+  opponent?: string
+  location?: string
+  notes?: string
+  status?: ScoutGameStatusCode
 }
 
 export interface ScoutPlay {
@@ -240,6 +263,19 @@ export interface ScoutPlayParticipation {
 export interface ScoutPlayBundle {
   play: ScoutPlay
   participations: ScoutPlayParticipation[]
+}
+
+export interface ScoutPlayListItem {
+  id: string
+  teamId: string
+  scoutGameId: string
+  playCode: string
+  sessionDate: string
+  period: string
+  gameClock: string
+  phaseOfBall: ScoutPhaseCode
+  factualResult: string
+  updatedAt: string
 }
 
 export interface ScoutPlayWriteInput {

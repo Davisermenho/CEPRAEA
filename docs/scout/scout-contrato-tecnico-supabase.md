@@ -670,6 +670,7 @@ Estado atual desta etapa:
 
 - contratos normalizados do slice 1 já foram introduzidos em [src/types/index.ts](/home/davis/cepraea-pwa/src/types/index.ts:122);
 - o client Supabase do scout novo já existe em [src/features/scout/scoutApi.ts](/home/davis/cepraea-pwa/src/features/scout/scoutApi.ts:1);
+- o frontend mínimo do slice 1 já está exposto em [src/features/scout/pages/ScoutWorkspacePage.tsx](/home/davis/cepraea-pwa/src/features/scout/pages/ScoutWorkspacePage.tsx:1) e conectado à navegação principal;
 - `ScoutEvent` e o runtime IndexedDB permanecem apenas como legado, sem receber novos acoplamentos.
 
 ## 11. O que o sistema realmente precisa agora

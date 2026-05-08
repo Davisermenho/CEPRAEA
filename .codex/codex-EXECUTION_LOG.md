@@ -2610,3 +2610,68 @@ Após o commit do bloco `0009–0011`, solicitação implícita do usuário para
 ### Saída
 
 - camada tipos/runtime do scout slice 1 aberta e pronta para commit separado
+
+## [CEPR-0043] — 2026-05-08 11:25 America/Sao_Paulo
+
+### Contexto
+
+Solicitação do usuário para seguir direto no vertical slice mínimo do frontend do scout após a foundation SQL e a camada de tipos/runtime do slice 1.
+
+### Arquivos alvo
+
+- `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- `src/features/scout/scoutApi.ts`
+- `src/types/index.ts`
+- `src/App.tsx`
+- `src/shared/layouts/AppLayout.tsx`
+- `docs/scout/scout-contrato-tecnico-supabase.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Riscos considerados
+
+- reativar o scout legado por rota ou store errados;
+- exigir `scout_game_id` manual sem fluxo mínimo de criação;
+- construir UI acoplada a `ScoutEvent` ou IndexedDB;
+- criar tela sem codebook suficiente para salvar dados válidos;
+- quebrar o build principal com rota lazy ou imports novos.
+
+### Ações executadas
+
+1. Revalidei o contrato de `public.scout_games` e suas policies já existentes para garantir que o vertical slice pudesse usar a tabela base sem nova migração.
+2. Inspecionei `src/App.tsx`, `src/shared/layouts/AppLayout.tsx`, `src/types/index.ts`, `src/features/scout/` e os módulos Supabase-first existentes para escolher o menor ponto de integração.
+3. Expandi `src/types/index.ts` com:
+   - `ScoutGameStatusCode`
+   - `ScoutGameRecord`
+   - `ScoutGameWriteInput`
+   - `ScoutPlayListItem`
+4. Expandi `src/features/scout/scoutApi.ts` com:
+   - `fetchScoutGames`
+   - `createScoutGame`
+   - `fetchScoutPlaysForGame`
+5. Criei `src/features/scout/pages/ScoutWorkspacePage.tsx` com um vertical slice mínimo que:
+   - cria `scout_game`;
+   - lista jogos do time;
+   - lista jogadas do jogo selecionado;
+   - carrega bundle salvo por `getScoutPlayBundle`;
+   - salva bundle por `upsertScoutPlayBundle`;
+   - usa codebook real para fase, sistemas, ações, causa e prioridade;
+   - usa atletas carregadas globalmente para vincular participações do lado analisado.
+6. Integrei a página nova:
+   - rota `/scout` em `src/App.tsx`;
+   - item `Scout` na navegação de `src/shared/layouts/AppLayout.tsx`.
+7. Atualizei `docs/scout/scout-contrato-tecnico-supabase.md` para registrar que o frontend mínimo do slice 1 já existe.
+8. Rodei validação local:
+   - `npm run typecheck`
+   - `npm run build`
+
+### Verificação final
+
+- `typecheck` passou
+- `build` passou
+- `ScoutWorkspacePage` foi chunkada separadamente pelo Vite
+- o scout novo está acessível por rota própria sem tocar no runtime legado
+
+### Saída
+
+- vertical slice mínimo do frontend do scout pronto e isolado no contrato novo
