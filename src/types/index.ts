@@ -121,6 +121,188 @@ export interface TrainingSummary {
 
 // ─── Scout ─────────────────────────────────────────────────────────────────────
 
+// Scout v2 / slice 1 — contratos normalizados Supabase-first.
+
+export type ScoutSessionType = 'JOGO' | 'TREINO' | 'AMISTOSO' | 'SIMULADO'
+export type ScoutSource = 'AO_VIVO' | 'VIDEO' | 'MISTA'
+export type ScoutPhaseCode = 'AT_POS' | 'DEF_POS' | 'TRANS_OF' | 'TRANS_DEF'
+export type ScoutTeamSide = 'ANALYZED' | 'OPPONENT'
+export type ScoutParticipantScope = 'ATQ' | 'DEF'
+export type ScoutValidationStatus = 'PENDENTE' | 'REVISADO' | 'CORRIGIDO' | 'VALIDADO' | 'DUVIDA'
+
+export type ScoutCodeListKey =
+  | 'LISTA_FASES'
+  | 'LISTA_SISTEMA_OFENSIVO'
+  | 'LISTA_CONFIGURACAO_OFENSIVA'
+  | 'LISTA_SISTEMA_DEFENSIVO'
+  | 'LISTA_ACAO_OFENSIVA'
+  | 'LISTA_ACAO_DEFENSIVA'
+  | 'LISTA_RESULTADO_FACTUAL'
+  | 'LISTA_CAUSA_PRINCIPAL'
+  | 'LISTA_PRIORIDADE_TREINO'
+
+export interface ScoutCodeValue {
+  id: string
+  listId: string
+  code: string
+  label: string
+  sortOrder: number
+  isNaoAplica: boolean
+  isNaoObservado: boolean
+  notes?: string
+  active: boolean
+}
+
+export interface ScoutCodeList {
+  id: string
+  listKey: ScoutCodeListKey | string
+  label: string
+  contractScope?: string
+  active: boolean
+  sourceVersion: string
+  values: ScoutCodeValue[]
+}
+
+export interface ScoutFieldCodebookMap {
+  id: string
+  contractName: string
+  fieldName: string
+  selectorKey: string
+  selectorValue: string
+  listKey: ScoutCodeListKey | string
+  allowNaoAplica: boolean
+  allowNaoObservado: boolean
+  active: boolean
+}
+
+export interface ScoutPlay {
+  id: string
+  teamId: string
+  scoutGameId: string
+  playCode: string
+  sessionDate: string
+  sessionType: ScoutSessionType
+  opponentName?: string
+  period: string
+  gameClock: string
+  source: ScoutSource
+  phaseOfBall: ScoutPhaseCode
+  attackingTeamSide: ScoutTeamSide
+  defendingTeamSide: ScoutTeamSide
+  analyzedTeamPhase?: string
+  offensiveSystem?: string
+  offensiveConfiguration?: string
+  specialOffensiveRole?: string
+  temporaryPivotOccupation?: string
+  temporaryPivotAthleteId?: string
+  temporaryPivotResult?: string
+  defensiveSystem?: string
+  expectedDefensiveAction?: string
+  defensiveConnection?: string
+  defensiveAdjustment?: string
+  mainOffensiveThreat?: string
+  defensiveAdjustmentResult?: string
+  finishType?: string
+  shotDestination?: string
+  shotRegion?: string
+  factualResult: string
+  playPoints?: string
+  playScoreReason?: string
+  mainCause?: string
+  videoRef?: string
+  freeNotes?: string
+  validationStatus: ScoutValidationStatus
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ScoutPlayParticipation {
+  id: string
+  teamId: string
+  scoutGameId: string
+  scoutPlayId: string
+  participantScope: ScoutParticipantScope
+  participantSide: ScoutTeamSide
+  slotOrder: number
+  athleteId?: string
+  externalAthleteLabel?: string
+  phaseOfAthlete?: ScoutPhaseCode
+  participationRole: string
+  positionCode?: string
+  specialFunctionCode?: string
+  actionCode?: string
+  individualResult?: string
+  mainCause?: string
+  trainingPriority?: string
+  createdAt: string
+}
+
+export interface ScoutPlayBundle {
+  play: ScoutPlay
+  participations: ScoutPlayParticipation[]
+}
+
+export interface ScoutPlayWriteInput {
+  id?: string
+  playCode: string
+  sessionDate: string
+  sessionType: ScoutSessionType
+  opponentName?: string
+  period: string
+  gameClock: string
+  source: ScoutSource
+  phaseOfBall: ScoutPhaseCode
+  attackingTeamSide: ScoutTeamSide
+  defendingTeamSide: ScoutTeamSide
+  analyzedTeamPhase?: string
+  offensiveSystem?: string
+  offensiveConfiguration?: string
+  specialOffensiveRole?: string
+  temporaryPivotOccupation?: string
+  temporaryPivotAthleteId?: string
+  temporaryPivotResult?: string
+  defensiveSystem?: string
+  expectedDefensiveAction?: string
+  defensiveConnection?: string
+  defensiveAdjustment?: string
+  mainOffensiveThreat?: string
+  defensiveAdjustmentResult?: string
+  finishType?: string
+  shotDestination?: string
+  shotRegion?: string
+  factualResult: string
+  playPoints?: string
+  playScoreReason?: string
+  mainCause?: string
+  videoRef?: string
+  freeNotes?: string
+}
+
+export interface ScoutPlayParticipationWriteInput {
+  participantScope: ScoutParticipantScope
+  participantSide: ScoutTeamSide
+  slotOrder: number
+  athleteId?: string
+  externalAthleteLabel?: string
+  phaseOfAthlete?: ScoutPhaseCode
+  participationRole: string
+  positionCode?: string
+  specialFunctionCode?: string
+  actionCode?: string
+  individualResult?: string
+  mainCause?: string
+  trainingPriority?: string
+}
+
+export interface ScoutPlayBundleUpsertInput {
+  scoutGameId: string
+  teamId?: string
+  play: ScoutPlayWriteInput
+  participations?: ScoutPlayParticipationWriteInput[]
+}
+
+// Scout legado — manter até a troca completa do runtime/UI.
+
 export interface ScoutAthleteBlock {
   atleta?: string
   numero?: string

@@ -2557,3 +2557,56 @@ Solicitação do usuário para prosseguir com `0011_scout_rpc_write_read.sql`, a
 ### Saída
 
 - foundation de RPC do scout pronta para commit no escopo de `0011`
+
+## [CEPR-0042] — 2026-05-08 11:05 America/Sao_Paulo
+
+### Contexto
+
+Após o commit do bloco `0009–0011`, solicitação implícita do usuário para abrir a camada seguinte do slice 1 em tipos/runtime do scout, sem reativar UI nem store legados.
+
+### Arquivos alvo
+
+- `src/types/index.ts`
+- `src/features/scout/scoutApi.ts`
+- `docs/scout/scout-contrato-tecnico-supabase.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Riscos considerados
+
+- reacoplar o novo scout ao modelo `ScoutEvent`;
+- misturar payload camelCase do frontend com snake_case do RPC sem fronteira clara;
+- reativar runtime IndexedDB legado por acidente;
+- criar contratos incompletos que não cobrissem codebook e bundle do slice 1.
+
+### Ações executadas
+
+1. Inspecionei o estado atual de `src/types/index.ts`, `src/db/index.ts`, `src/lib/supabase.ts` e os módulos Supabase-first existentes (`athleteApi`, `trainingApi`, `presenceTokenApi`).
+2. Confirmei que o menor passo coerente seria criar:
+   - contratos normalizados do scout novo;
+   - um client runtime Supabase para `0011`;
+   - sem tocar em tela, store ou IndexedDB.
+3. Adicionei em `src/types/index.ts`:
+   - enums/aliases do slice 1 (`ScoutSessionType`, `ScoutSource`, `ScoutPhaseCode`, `ScoutTeamSide`, `ScoutParticipantScope`, `ScoutValidationStatus`);
+   - contratos de codebook (`ScoutCodeList`, `ScoutCodeValue`, `ScoutFieldCodebookMap`);
+   - contratos normalizados de jogada/participação (`ScoutPlay`, `ScoutPlayParticipation`, `ScoutPlayBundle`);
+   - contratos de escrita (`ScoutPlayWriteInput`, `ScoutPlayParticipationWriteInput`, `ScoutPlayBundleUpsertInput`);
+   - separação explícita entre scout novo e scout legado.
+4. Criei `src/features/scout/scoutApi.ts` com:
+   - `fetchScoutCodebook`;
+   - `fetchScoutFieldCodebookMap`;
+   - `getScoutPlayBundle`;
+   - `upsertScoutPlayBundle`;
+   - mapeamento seguro entre snake_case do banco e camelCase do app.
+5. Atualizei `docs/scout/scout-contrato-tecnico-supabase.md` para registrar que os contratos TypeScript e o client runtime do slice 1 já existem.
+6. Rodei `npm run typecheck` para validar a camada nova de runtime/tipos.
+
+### Verificação final
+
+- `npm run typecheck` passou com exit `0`
+- runtime novo do scout compila sem alterar UI atual
+- runtime legado continua intacto e isolado
+
+### Saída
+
+- camada tipos/runtime do scout slice 1 aberta e pronta para commit separado

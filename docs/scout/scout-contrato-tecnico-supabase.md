@@ -666,6 +666,12 @@ Decisão:
 - a Etapa B deve gerar novos contratos TypeScript alinhados ao banco;
 - a UI nova deve consumir contratos normalizados, não `ScoutEvent` antigo.
 
+Estado atual desta etapa:
+
+- contratos normalizados do slice 1 já foram introduzidos em [src/types/index.ts](/home/davis/cepraea-pwa/src/types/index.ts:122);
+- o client Supabase do scout novo já existe em [src/features/scout/scoutApi.ts](/home/davis/cepraea-pwa/src/features/scout/scoutApi.ts:1);
+- `ScoutEvent` e o runtime IndexedDB permanecem apenas como legado, sem receber novos acoplamentos.
+
 ## 11. O que o sistema realmente precisa agora
 
 Depois da Etapa A, o próximo passo lógico **não** é:

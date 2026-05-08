@@ -1304,3 +1304,23 @@ Implementar UX guiada do scout com sistemas por fase, campos contextuais e bloco
 
 - **Status:** LOCAL
 - **Evidências:** validação em quatro passes transacionais de `0008`, `0009`, `0010` e `0011` contra o Postgres local em `127.0.0.1:54322`, incluindo grants, RLS, write/read RPC e rollback final sem persistência
+
+---
+
+### [CEPR-0042] — 2026-05-08 — 11:05 — Abertura da camada tipos/runtime do scout slice 1
+
+#### Changed
+
+- Introduzidos contratos TypeScript normalizados do scout slice 1 em `src/types/index.ts`.
+- Mantidos os tipos legados (`ScoutGame`, `ScoutEvent`) sem remoção, mas explicitamente separados do modelo novo.
+- Criado `src/features/scout/scoutApi.ts` com:
+  - leitura de codebook (`fetchScoutCodebook`);
+  - leitura de mapeamentos (`fetchScoutFieldCodebookMap`);
+  - leitura agregada de bundle (`getScoutPlayBundle`);
+  - escrita segura de bundle (`upsertScoutPlayBundle`).
+- Atualizado `docs/scout/scout-contrato-tecnico-supabase.md` para registrar que o runtime novo já existe e que o runtime legado não deve receber novos acoplamentos.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** LOCAL
+- **Evidências:** `npm run typecheck` verde após criação de `src/features/scout/scoutApi.ts` e dos contratos normalizados do scout
