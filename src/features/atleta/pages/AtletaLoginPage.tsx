@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Phone, KeyRound } from 'lucide-react'
-import { Button } from '@/shared/components/Button'
-import { CepraeaLogomarca } from '@/shared/components/CepraeaLogomarca'
+import { KeyRound, Phone } from 'lucide-react'
+import { AuthLoginScreen } from '@/features/auth/components/AuthLoginScreen'
 import { isAtletaAuthenticated, loginAtleta } from '@/lib/athleteAuth'
 
 function formatPhoneInput(raw: string): string {
@@ -46,70 +45,70 @@ export default function AtletaLoginPage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center bg-cep-purple-950 px-6 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none" aria-hidden>
-        <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-cep-purple-850 opacity-50" />
-        <div className="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-cep-purple-900 opacity-60" />
-      </div>
-
-      <div className="w-full max-w-sm relative z-10">
-        <div className="flex flex-col items-center mb-8">
-          <CepraeaLogomarca className="h-10 w-auto text-cep-lime-400 mb-3" />
-          <p className="text-cep-muted text-sm mt-2">Acesso da atleta</p>
+    <AuthLoginScreen
+      kicker="ACESSO DA ATLETA"
+      helper="Use seu telefone e PIN para acessar seus treinos e confirmações."
+      firstAccess={(
+        <section className="auth-first-access-card">
+          <h2 className="auth-first-access-title">Primeiro acesso?</h2>
+          <p className="auth-first-access-text">
+            Peça ao treinador para cadastrar seu telefone e gerar seu PIN de acesso.
+          </p>
+          <button type="button" className="auth-first-access-button">
+            Falar com o treinador
+          </button>
+        </section>
+      )}
+    >
+      <form onSubmit={handleSubmit} className="auth-login-form">
+        <div className="auth-login-field">
+          <label htmlFor="athlete-phone" className="auth-login-label">Telefone</label>
+          <div className="auth-login-input-wrap">
+            <Phone className="auth-login-field-icon" aria-hidden />
+            <input
+              id="athlete-phone"
+              type="tel"
+              inputMode="numeric"
+              value={telefone}
+              onChange={(e) => setTelefone(formatPhoneInput(e.target.value))}
+              placeholder="(21) 99999-9999"
+              className="auth-login-input auth-login-input-with-icon"
+              autoFocus
+            />
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-cep-muted mb-1.5 tracking-wide uppercase">
-              Telefone
-            </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-cep-muted" />
-              <input
-                type="tel"
-                inputMode="numeric"
-                value={telefone}
-                onChange={(e) => setTelefone(formatPhoneInput(e.target.value))}
-                placeholder="(21) 99999-9999"
-                className="w-full h-12 rounded-xl bg-cep-purple-850 border border-cep-purple-700 text-cep-white placeholder-cep-muted/40 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent"
-                autoFocus
-              />
-            </div>
+        <div className="auth-login-field">
+          <label htmlFor="athlete-pin" className="auth-login-label">PIN</label>
+          <div className="auth-login-input-wrap">
+            <KeyRound className="auth-login-field-icon" aria-hidden />
+            <input
+              id="athlete-pin"
+              type="password"
+              inputMode="numeric"
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="••••"
+              maxLength={6}
+              className="auth-login-input auth-login-input-with-icon"
+            />
           </div>
+        </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-cep-muted mb-1.5 tracking-wide uppercase">
-              PIN
-            </label>
-            <div className="relative">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-cep-muted" />
-              <input
-                type="password"
-                inputMode="numeric"
-                value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="••••"
-                maxLength={6}
-                className="w-full h-12 rounded-xl bg-cep-purple-850 border border-cep-purple-700 text-cep-white placeholder-cep-muted/40 pl-11 pr-4 text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-cep-lime-400 focus:border-transparent"
-              />
-            </div>
+        {error && (
+          <div className="auth-login-status auth-login-status-error">
+            {error}
           </div>
+        )}
 
-          {error && (
-            <div className="rounded-xl bg-red-500/20 border border-red-500/40 px-4 py-2.5">
-              <p className="text-red-400 text-sm text-center">{error}</p>
-            </div>
-          )}
+        <button type="submit" className="auth-login-primary" disabled={loading}>
+          {loading ? 'Entrando...' : 'Entrar →'}
+        </button>
 
-          <Button type="submit" fullWidth size="lg" loading={loading} className="mt-2">
-            Entrar
-          </Button>
-
-          <p className="text-center text-xs text-cep-muted/70 pt-2">
-            Esqueceu o PIN? Peça ao treinador para resetar.
-          </p>
-        </form>
-      </div>
-    </div>
+        <p className="auth-login-hint">
+          Esqueceu o PIN? Peça ao treinador para resetar.
+        </p>
+      </form>
+    </AuthLoginScreen>
   )
 }
