@@ -27,23 +27,23 @@
   width: 100%;
   max-width: 390px;
   min-height: 100svh;
-  padding: 96px 24px 40px;
+  padding: 64px 28px max(40px, calc(env(safe-area-inset-bottom) + 40px));
   display: flex;
   flex-direction: column;
 }
 
 .auth-login-logo {
-  width: 270px;
-  max-width: 78%;
+  width: 224px;
+  max-width: 72%;
   height: auto;
-  margin: 0 auto 96px;
+  margin: 0 auto 72px;
   display: block;
   color: var(--auth-lime-accent);
 }
 
 .auth-login-title {
   margin: 0 0 10px;
-  font-size: 40px;
+  font-size: 36px;
   line-height: 1;
   font-weight: 800;
   color: var(--auth-text);
@@ -61,20 +61,20 @@
 }
 
 .auth-login-helper {
-  margin: 0 0 48px;
-  font-size: 16px;
+  margin: 0 0 40px;
+  font-size: 15px;
   line-height: 1.55;
   color: var(--auth-muted);
 }
 
 .auth-login-form { display: flex; flex-direction: column; }
-.auth-login-field { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+.auth-login-field { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
 .auth-login-label { font-size: 11px; line-height: 1; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(161, 139, 169, 0.60); }
 .auth-login-input-wrap { position: relative; }
 
 .auth-login-input {
   width: 100%;
-  min-height: 56px;
+  min-height: 52px;
   border-radius: 16px;
   border: 1px solid var(--auth-input-border);
   background: var(--auth-input-bg);
@@ -108,7 +108,7 @@
 
 .auth-login-primary {
   width: 100%;
-  min-height: 56px;
+  min-height: 52px;
   border-radius: 16px;
   border: 0;
   background: var(--auth-primary);
@@ -133,18 +133,21 @@
 .auth-login-status-error { color: #ffb4b4; border: 1px solid rgba(248, 113, 113, 0.40); background: rgba(239, 68, 68, 0.16); }
 .auth-login-status-info { color: var(--auth-lime-accent); border: 1px solid rgba(126, 255, 0, 0.22); background: rgba(126, 255, 0, 0.08); }
 
-.auth-first-access-card { margin-top: 96px; width: 100%; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.03); padding: 24px; }
+.auth-first-access-card { margin-top: 72px; width: 100%; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.03); padding: 24px; }
 .auth-first-access-title { margin: 0 0 12px; font-size: 20px; line-height: 1.2; font-weight: 800; color: var(--auth-text); }
 .auth-first-access-text { margin: 0 0 24px; font-size: 15px; line-height: 1.45; color: var(--auth-muted); }
 .auth-first-access-button { width: 100%; min-height: 50px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.12); background: transparent; color: var(--auth-text); font-size: 14px; font-weight: 800; cursor: pointer; }
 
-.auth-login-footer { margin-top: 84px; text-align: center; color: rgba(161, 139, 169, 0.70); font-size: 10px; font-weight: 700; letter-spacing: 0.35em; text-transform: uppercase; }
+.auth-login-footer { margin-top: 72px; text-align: center; color: rgba(161, 139, 169, 0.70); font-size: 10px; font-weight: 700; letter-spacing: 0.35em; text-transform: uppercase; }
 .auth-login-small-action { margin-top: 18px; display: flex; justify-content: center; }
 .auth-login-small-action button { border: 0; background: transparent; color: var(--auth-muted); font-size: 13px; cursor: pointer; }
 
 @media (max-height: 760px) {
-  .auth-login-container { padding-top: 48px; padding-bottom: 28px; }
-  .auth-login-logo { margin-bottom: 56px; }
-  .auth-first-access-card { margin-top: 56px; }
-  .auth-login-footer { margin-top: 56px; }
+  .auth-login-container { padding-top: 40px; padding-bottom: max(28px, calc(env(safe-area-inset-bottom) + 28px)); }
+  .auth-login-logo { width: 188px; margin-bottom: 48px; }
+  .auth-login-title { font-size: 34px; }
+  .auth-login-helper { margin-bottom: 32px; }
+  .auth-login-field { margin-bottom: 22px; }
+  .auth-first-access-card { margin-top: 48px; }
+  .auth-login-footer { margin-top: 48px; }
 }
