@@ -8,13 +8,13 @@ test.describe('AtletaLoginPage', () => {
   test('exibe campos de email e senha no modo login', async ({ page }) => {
     await expect(page.locator('#atleta-email')).toBeVisible()
     await expect(page.locator('#atleta-password')).toBeVisible()
-    await expect(page.getByRole('button', { name: /^entrar$/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /primeiro acesso\? criar conta/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^entrar\s*→?$/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /criar conta/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /esqueci minha senha/i })).toBeVisible()
   })
 
   test('modo primeiro acesso troca o CTA para criar conta', async ({ page }) => {
-    await page.getByRole('button', { name: /primeiro acesso\? criar conta/i }).click()
+    await page.getByRole('button', { name: /criar conta/i }).click()
     await expect(page.getByText(/primeiro acesso/i)).toBeVisible()
     await expect(page.getByRole('button', { name: /^criar conta$/i })).toBeVisible()
     await expect(page.getByText(/mínimo 6 caracteres/i)).toBeVisible()
