@@ -35,6 +35,11 @@ export default function AtletaLoginPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     reset()
+    if (!configured) {
+      setError('Sistema não configurado. Avise o treinador.')
+      return
+    }
+
     const normalizedEmail = email.trim().toLowerCase()
     if (!normalizedEmail || !normalizedEmail.includes('@')) {
       setError('Informe um email válido.')
