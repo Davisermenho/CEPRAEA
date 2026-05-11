@@ -1,48 +1,63 @@
 import { Link } from 'react-router-dom'
-import { Users, UserCog } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { CepraeaLogomarca } from '@/shared/components/CepraeaLogomarca'
 
 export default function WelcomePage() {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-cep-purple-950 px-6 py-10">
-      <div className="w-full max-w-sm space-y-8">
-        <div className="text-center">
-          <CepraeaLogomarca className="mx-auto h-12 w-auto text-cep-lime-400" />
-          <p className="mt-3 text-sm text-cep-muted">Gestão de Treinos</p>
-        </div>
+    <div className="min-h-svh w-full overflow-y-auto bg-[#14001F] text-white">
+      <main className="mx-auto flex min-h-svh w-full max-w-[390px] flex-col px-[26px] pb-[max(36px,calc(env(safe-area-inset-bottom)+36px))] pt-[52px]">
+        <section className="pt-5 text-center">
+          <CepraeaLogomarca className="mx-auto mb-7 h-auto w-[270px] max-w-[78%] text-[#7EFF00]" />
 
-        <div className="space-y-3">
+          <h1 className="mb-3 text-[29px] font-normal leading-tight tracking-[-0.04em] text-white">
+            Bem-vindo ao CEPRAEA
+          </h1>
+          <p className="mx-auto mb-6 max-w-[280px] text-[15px] leading-snug text-[#A18BA9]">
+            Sua plataforma completa para gestão e acompanhamento de treinos.
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-4" aria-label="Tipos de acesso">
           <Link
             to="/atleta/login"
-            className="flex w-full items-center gap-4 rounded-2xl border-2 border-cep-lime-400/40 bg-cep-purple-900 p-5 transition hover:border-cep-lime-400 hover:bg-cep-purple-850"
+            aria-label="Sou atleta: acessar treinos e informar presenças"
+            className="group flex min-h-[56px] items-center justify-between rounded-xl border border-white/70 bg-white/[0.035] px-6 py-3.5 shadow-[0_0_28px_rgba(192,44,255,0.28)] transition hover:border-white/85 hover:bg-white/[0.05] focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#C02CFF]/40"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cep-lime-400/20">
-              <Users className="h-6 w-6 text-cep-lime-400" />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-semibold text-cep-white">Sou atleta</p>
-              <p className="text-xs text-cep-muted">Ver treinos e confirmar presença</p>
-            </div>
+            <span className="text-left">
+              <span className="block text-base font-extrabold leading-tight text-white">Sou atleta</span>
+              <span className="mt-1 block text-[12px] leading-tight text-[#C02CFF]">
+                Acessar treinos e informar presenças.
+              </span>
+            </span>
+            <ChevronRight className="h-5 w-5 shrink-0 text-[#7EFF00] transition group-hover:translate-x-0.5" aria-hidden />
           </Link>
 
           <Link
             to="/login"
-            className="flex w-full items-center gap-4 rounded-2xl border-2 border-cep-purple-800 bg-cep-purple-900 p-5 transition hover:border-cep-gold-400 hover:bg-cep-purple-850"
+            aria-label="Sou treinador: gerenciar atletas e treinos"
+            className="group flex min-h-[56px] items-center justify-between rounded-xl border border-white/70 bg-white/[0.035] px-6 py-3.5 shadow-[0_0_28px_rgba(192,44,255,0.28)] transition hover:border-white/85 hover:bg-white/[0.05] focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#C02CFF]/40"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cep-gold-400/20">
-              <UserCog className="h-6 w-6 text-cep-gold-400" />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-semibold text-cep-white">Sou treinador</p>
-              <p className="text-xs text-cep-muted">Gerenciar atletas e treinos</p>
-            </div>
+            <span className="text-left">
+              <span className="block text-base font-extrabold leading-tight text-white">Sou treinador</span>
+              <span className="mt-1 block text-[12px] leading-tight text-[#C02CFF]">
+                Gerenciar atletas e treinos
+              </span>
+            </span>
+            <ChevronRight className="h-5 w-5 shrink-0 text-[#7EFF00] transition group-hover:translate-x-0.5" aria-hidden />
           </Link>
-        </div>
+        </section>
 
-        <p className="text-center text-xs text-cep-muted/60">
-          CEPRAEA · Rio de Janeiro
-        </p>
-      </div>
+        <footer className="mt-9 text-center">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.35em] text-[#7EFF00]">
+            CEPRAEA • RIO DE JANEIRO
+          </p>
+          <div className="mt-3 flex justify-center gap-1.5" aria-hidden>
+            <span className="h-1.5 w-1.5 rounded-full bg-[#52D900]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#52D900]/30" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#52D900]/30" />
+          </div>
+        </footer>
+      </main>
     </div>
   )
 }
