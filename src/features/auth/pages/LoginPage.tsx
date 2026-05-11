@@ -25,11 +25,16 @@ export default function LoginPage() {
       setError('Informe email e senha.')
       return
     }
+    if (!configured) {
+      setError('Supabase não está configurado neste ambiente.')
+      return
+    }
+
     setSubmitting(true)
     setError('')
     const result = await signInWithPassword(normalizedEmail, password)
     if (!result.ok) {
-      setError('Não foi possível entrar. Verifique os dados informados.')
+      setError(result.error ?? 'Não foi possível entrar. Verifique os dados informados.')
       setSubmitting(false)
       return
     }
