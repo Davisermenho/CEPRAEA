@@ -35,15 +35,15 @@ export default function WelcomePage() {
           <Link
             to="/login"
             aria-label="Sou treinador: gerenciar atletas e treinos"
-            className="group flex min-h-[56px] items-center justify-between rounded-xl border border-white/35 bg-white/[0.012] px-6 py-3.5 opacity-65 transition hover:border-white/70 hover:bg-white/[0.04] hover:opacity-100 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#C02CFF]/35"
+            className="group flex min-h-[56px] items-center justify-between rounded-xl border border-white/70 bg-white/[0.035] px-6 py-3.5 shadow-[0_0_28px_rgba(192,44,255,0.28)] transition hover:border-white/85 hover:bg-white/[0.05] focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#C02CFF]/40"
           >
             <span className="text-left">
-              <span className="block text-base font-medium leading-tight text-white">Sou treinador</span>
-              <span className="mt-1 block text-[12px] leading-tight text-[#C02CFF]/75">
+              <span className="block text-base font-extrabold leading-tight text-white">Sou treinador</span>
+              <span className="mt-1 block text-[12px] leading-tight text-[#C02CFF]">
                 Gerenciar atletas e treinos
               </span>
             </span>
-            <ChevronRight className="h-5 w-5 shrink-0 text-white/55 transition group-hover:translate-x-0.5 group-hover:text-[#7EFF00]" aria-hidden />
+            <ChevronRight className="h-5 w-5 shrink-0 text-[#7EFF00] transition group-hover:translate-x-0.5" aria-hidden />
           </Link>
         </section>
 
