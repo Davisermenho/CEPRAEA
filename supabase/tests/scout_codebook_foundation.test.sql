@@ -36,6 +36,34 @@ begin
   ) then
     raise exception 'unexpected RLS flags for public.scout_field_codebook_map';
   end if;
+
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'scout_code_values'
+      and column_name = 'description'
+  ) then
+    raise exception 'missing scout_code_values.description';
+  end if;
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'scout_code_values'
+      and column_name = 'when_to_use'
+  ) then
+    raise exception 'missing scout_code_values.when_to_use';
+  end if;
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'scout_code_values'
+      and column_name = 'when_not_to_use'
+  ) then
+    raise exception 'missing scout_code_values.when_not_to_use';
+  end if;
 end $$;
 
 do $$
@@ -48,14 +76,14 @@ begin
   select count(*) into value_count from public.scout_code_values where active = true;
   select count(*) into map_count from public.scout_field_codebook_map where active = true;
 
-  if list_count <> 9 then
-    raise exception 'expected 9 active code lists, got %', list_count;
+  if list_count <> 17 then
+    raise exception 'expected 17 active code lists, got %', list_count;
   end if;
-  if value_count <> 147 then
-    raise exception 'expected 147 active code values, got %', value_count;
+  if value_count <> 246 then
+    raise exception 'expected 246 active code values, got %', value_count;
   end if;
-  if map_count <> 11 then
-    raise exception 'expected 11 active field mappings, got %', map_count;
+  if map_count <> 25 then
+    raise exception 'expected 25 active field mappings, got %', map_count;
   end if;
 end $$;
 
@@ -87,6 +115,30 @@ begin
   end if;
   if not exists (select 1 from public.scout_code_lists where list_key = 'LISTA_PRIORIDADE_TREINO') then
     raise exception 'missing LISTA_PRIORIDADE_TREINO';
+  end if;
+  if not exists (select 1 from public.scout_code_lists where list_key = 'LISTA_FASE_EQUIPE') then
+    raise exception 'missing LISTA_FASE_EQUIPE';
+  end if;
+  if not exists (select 1 from public.scout_code_lists where list_key = 'LISTA_TIPO_FINALIZACAO') then
+    raise exception 'missing LISTA_TIPO_FINALIZACAO';
+  end if;
+  if not exists (select 1 from public.scout_code_lists where list_key = 'LISTA_STATUS_VALIDACAO') then
+    raise exception 'missing LISTA_STATUS_VALIDACAO';
+  end if;
+  if not exists (select 1 from public.scout_code_lists where list_key = 'LISTA_MOTIVO_PONTUACAO') then
+    raise exception 'missing LISTA_MOTIVO_PONTUACAO';
+  end if;
+  if not exists (select 1 from public.scout_code_lists where list_key = 'LISTA_ACAO_PRINCIPAL_AT_POS') then
+    raise exception 'missing LISTA_ACAO_PRINCIPAL_AT_POS';
+  end if;
+  if not exists (select 1 from public.scout_code_lists where list_key = 'LISTA_ACAO_PRINCIPAL_DEF_POS') then
+    raise exception 'missing LISTA_ACAO_PRINCIPAL_DEF_POS';
+  end if;
+  if not exists (select 1 from public.scout_code_lists where list_key = 'LISTA_ACAO_PRINCIPAL_TRANS_OF') then
+    raise exception 'missing LISTA_ACAO_PRINCIPAL_TRANS_OF';
+  end if;
+  if not exists (select 1 from public.scout_code_lists where list_key = 'LISTA_ACAO_PRINCIPAL_TRANS_DEF') then
+    raise exception 'missing LISTA_ACAO_PRINCIPAL_TRANS_DEF';
   end if;
 end $$;
 
@@ -135,7 +187,7 @@ begin
   from public.scout_code_values v
   join public.scout_code_lists l on l.id = v.list_id
   where l.list_key = 'LISTA_RESULTADO_FACTUAL';
-  if actual <> 8 then raise exception 'LISTA_RESULTADO_FACTUAL should have 8 values, got %', actual; end if;
+  if actual <> 18 then raise exception 'LISTA_RESULTADO_FACTUAL should have 18 values, got %', actual; end if;
 
   select count(*) into actual
   from public.scout_code_values v
@@ -148,6 +200,80 @@ begin
   join public.scout_code_lists l on l.id = v.list_id
   where l.list_key = 'LISTA_PRIORIDADE_TREINO';
   if actual <> 57 then raise exception 'LISTA_PRIORIDADE_TREINO should have 57 values, got %', actual; end if;
+
+  select count(*) into actual
+  from public.scout_code_values v
+  join public.scout_code_lists l on l.id = v.list_id
+  where l.list_key = 'LISTA_FASE_EQUIPE';
+  if actual <> 6 then raise exception 'LISTA_FASE_EQUIPE should have 6 values, got %', actual; end if;
+
+  select count(*) into actual
+  from public.scout_code_values v
+  join public.scout_code_lists l on l.id = v.list_id
+  where l.list_key = 'LISTA_TIPO_FINALIZACAO';
+  if actual <> 8 then raise exception 'LISTA_TIPO_FINALIZACAO should have 8 values, got %', actual; end if;
+
+  select count(*) into actual
+  from public.scout_code_values v
+  join public.scout_code_lists l on l.id = v.list_id
+  where l.list_key = 'LISTA_STATUS_VALIDACAO';
+  if actual <> 5 then raise exception 'LISTA_STATUS_VALIDACAO should have 5 values, got %', actual; end if;
+
+  select count(*) into actual
+  from public.scout_code_values v
+  join public.scout_code_lists l on l.id = v.list_id
+  where l.list_key = 'LISTA_MOTIVO_PONTUACAO';
+  if actual <> 10 then raise exception 'LISTA_MOTIVO_PONTUACAO should have 10 values, got %', actual; end if;
+
+  select count(*) into actual
+  from public.scout_code_values v
+  join public.scout_code_lists l on l.id = v.list_id
+  where l.list_key = 'LISTA_ACAO_PRINCIPAL_AT_POS';
+  if actual <> 14 then raise exception 'LISTA_ACAO_PRINCIPAL_AT_POS should have 14 values, got %', actual; end if;
+
+  select count(*) into actual
+  from public.scout_code_values v
+  join public.scout_code_lists l on l.id = v.list_id
+  where l.list_key = 'LISTA_ACAO_PRINCIPAL_DEF_POS';
+  if actual <> 17 then raise exception 'LISTA_ACAO_PRINCIPAL_DEF_POS should have 17 values, got %', actual; end if;
+
+  select count(*) into actual
+  from public.scout_code_values v
+  join public.scout_code_lists l on l.id = v.list_id
+  where l.list_key = 'LISTA_ACAO_PRINCIPAL_TRANS_OF';
+  if actual <> 14 then raise exception 'LISTA_ACAO_PRINCIPAL_TRANS_OF should have 14 values, got %', actual; end if;
+
+  select count(*) into actual
+  from public.scout_code_values v
+  join public.scout_code_lists l on l.id = v.list_id
+  where l.list_key = 'LISTA_ACAO_PRINCIPAL_TRANS_DEF';
+  if actual <> 15 then raise exception 'LISTA_ACAO_PRINCIPAL_TRANS_DEF should have 15 values, got %', actual; end if;
+end $$;
+
+-- [0028] Resultados de passe devem existir em LISTA_RESULTADO_FACTUAL.
+do $$
+begin
+  if not exists (
+    select 1
+    from public.scout_code_values v
+    join public.scout_code_lists l on l.id = v.list_id
+    where l.list_key = 'LISTA_RESULTADO_FACTUAL'
+      and v.code = 'ERRO_PASSE'
+      and v.active = true
+  ) then
+    raise exception 'LISTA_RESULTADO_FACTUAL missing ERRO_PASSE';
+  end if;
+
+  if not exists (
+    select 1
+    from public.scout_code_values v
+    join public.scout_code_lists l on l.id = v.list_id
+    where l.list_key = 'LISTA_RESULTADO_FACTUAL'
+      and v.code = 'PASSE_INTERCEPTADO'
+      and v.active = true
+  ) then
+    raise exception 'LISTA_RESULTADO_FACTUAL missing PASSE_INTERCEPTADO';
+  end if;
 end $$;
 
 -- Semantic flags around NAO_APLICA / NAO_OBSERVADO must survive the seed.
@@ -216,6 +342,58 @@ begin
   ) then
     raise exception 'missing defensive action_code mapping';
   end if;
+
+  if not exists (
+    select 1
+    from public.scout_field_codebook_map
+    where contract_name = 'scout_live_entries'
+      and field_name = 'fase_equipe_analisada_code'
+      and list_key = 'LISTA_FASE_EQUIPE'
+  ) then
+    raise exception 'missing scout_live_entries fase_equipe_analisada_code mapping';
+  end if;
+
+  if not exists (
+    select 1
+    from public.scout_field_codebook_map
+    where contract_name = 'scout_live_entries'
+      and field_name = 'tipo_finalizacao_code'
+      and list_key = 'LISTA_TIPO_FINALIZACAO'
+  ) then
+    raise exception 'missing scout_live_entries tipo_finalizacao_code mapping';
+  end if;
+
+  if not exists (
+    select 1
+    from public.scout_field_codebook_map
+    where contract_name = 'scout_live_entries'
+      and field_name = 'status_validacao_code'
+      and list_key = 'LISTA_STATUS_VALIDACAO'
+  ) then
+    raise exception 'missing scout_live_entries status_validacao_code mapping';
+  end if;
+
+  if not exists (
+    select 1
+    from public.scout_field_codebook_map
+    where contract_name = 'scout_live_entries'
+      and field_name = 'motivo_pontuacao_code'
+      and list_key = 'LISTA_MOTIVO_PONTUACAO'
+  ) then
+    raise exception 'missing scout_live_entries motivo_pontuacao_code mapping';
+  end if;
+
+  if not exists (
+    select 1
+    from public.scout_field_codebook_map
+    where contract_name = 'scout_live_entries'
+      and field_name = 'acao_principal_suggestion_code'
+      and selector_key = 'fase_da_bola_code'
+      and selector_value = 'AT_POS'
+      and list_key = 'LISTA_ACAO_PRINCIPAL_AT_POS'
+  ) then
+    raise exception 'missing AT_POS acao_principal_suggestion_code mapping';
+  end if;
 end $$;
 
 -- Duplicate selector mapping must fail.
@@ -264,18 +442,43 @@ begin
   end;
 end $$;
 
--- 0009 should still be fail-closed before RLS/policies of the next migration.
+-- The current chain should expose authenticated read-only access to codebook tables.
 do $$
 begin
-  if exists (
+  if not exists (
     select 1
     from pg_policy p
     join pg_class c on c.oid = p.polrelid
     join pg_namespace n on n.oid = c.relnamespace
     where n.nspname = 'public'
-      and c.relname in ('scout_code_lists', 'scout_code_values', 'scout_field_codebook_map')
+      and c.relname = 'scout_code_lists'
+      and p.polname = 'scout_code_lists_select_authenticated'
   ) then
-    raise exception '0009 should not create codebook policies yet';
+    raise exception 'missing scout_code_lists_select_authenticated';
+  end if;
+
+  if not exists (
+    select 1
+    from pg_policy p
+    join pg_class c on c.oid = p.polrelid
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'scout_code_values'
+      and p.polname = 'scout_code_values_select_authenticated'
+  ) then
+    raise exception 'missing scout_code_values_select_authenticated';
+  end if;
+
+  if not exists (
+    select 1
+    from pg_policy p
+    join pg_class c on c.oid = p.polrelid
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'scout_field_codebook_map'
+      and p.polname = 'scout_field_codebook_map_select_authenticated'
+  ) then
+    raise exception 'missing scout_field_codebook_map_select_authenticated';
   end if;
 end $$;
 
