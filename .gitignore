@@ -92,5 +92,7 @@ AGENT.md
 #ARQUIVOS DE CONFIGURAÇÃO DE DEPLOYMENT:
 # Esses arquivos podem conter informações de configuração específicas para o deployment do projeto, como configurações de ambiente, chaves de API e outras informações sensíveis. Eles não devem ser versionados para evitar a exposição de informações confidenciais e para permitir que cada desenvolvedor tenha suas próprias configurações locais sem afetar os outros.
 .vercel
-
 #---
+
+# Local/offline reference files
+/googledrive/
