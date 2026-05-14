@@ -7,7 +7,7 @@ lido_por: "Codex"
 quando_ler: "antes de iniciar trabalho que pode duplicar algo já feito; ao identificar a versão onde algo mudou"
 atualizado_por: "Codex exclusivamente"
 quando_atualizar: "ao concluir qualquer unidade de trabalho com evidência objetiva (commit, build, teste) — verificar último ID antes de criar novo entry"
-sempre_atualizar: "Atualizar sempre a *Última atualização*: data e hora no formato ISO, seguido do nome da versão do Copilot que fez a última modificação."
+sempre_atualizar: "Atualizar sempre a *Última atualização*: data e hora no formato ISO, seguido do nome da versão do agente que fez a última modificação."
 validade: "Atual até último entry"
 status: ATUAL
 conflito: "Entradas passadas são imutáveis; se entry anterior descreve estado que foi revertido, registrar reversão como novo entry — nunca editar entry passado."
@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-08 - 03:14 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-08 - 23:49 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,12 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-08 | 23:49 | CEPR-0053 | Protocolo operacional do `PILOTO-01` da `COLETA_AO_VIVO` criado em `docs/scout`, consolidando objetivo, escopo, métricas, conferência de banco e critérios de decisão antes de ampliar o scout | `docs/scout/scout-piloto-01-coleta-ao-vivo.md` criado · `find docs/scout -maxdepth 1 -type f | sort` inclui o novo protocolo |
+| 2026-05-08 | 23:27 | CEPR-0052 | UX-02 da rota `/scout` implementado: submit fixo em viewport, opcionais recolhíveis, fase da equipe por default ajustável, chips para fase/resultado/pontos e fluxo pós-submit mais rápido, com validação operacional mantida em `scout_live_entries` | `npm run typecheck` e `npm run build` passaram · Playwright criou `24` entradas `UX02-*`/`UX02B-*` sem erro sem criar `scout_plays` ou `scout_play_participations` · medição estrutural caiu para `4–6` campos editáveis por cenário principal e `submitTop=717–783` em viewport `900px` |
+| 2026-05-08 | 23:12 | CEPR-0051 | Medição de atrito operacional da tela `/scout` concluída: o gargalo atual é densidade fixa de formulário e scroll, não persistência; a `COLETA_AO_VIVO` expõe `11–14` campos editáveis e mantém o submit abaixo da dobra em todas as fases | Playwright mediu `formHeight=3081`, `submitTop≈1383–1403` com viewport `900px` · contagem estrutural mostrou `11–12` campos em transições/perdas e até `14` em `AT_POS + GOL` · agregação da cadência por fase mostrou `AT_POS avgMs=1409` vs `TRANS_DEF avgMs=1200` |
+| 2026-05-08 | 23:05 | CEPR-0050 | Teste de cadência operacional da rota `/scout` executado com 12 entradas seguidas na `COLETA_AO_VIVO`, validando tempo por envio, persistência exclusiva em `scout_live_entries` e preservação da fronteira semântica com `scout_plays` e `scout_play_participations` | Script Playwright gerou `12` envios sem erro, `avgMs=1273`, `maxMs=1514`, `minMs=1185` · `psql ... select count(*) from public.scout_live_entries where id_jogada like 'CADENCE-%';` → `12` · `psql ... select count(*) from public.scout_plays;` → `0` · `psql ... select count(*) from public.scout_play_participations;` → `0` |
+| 2026-05-08 | 12:11 | CEPR-0049 | `docs/scout/REFAZERSCOUT.md` foi ajustado para voltar a cumprir o papel de documento de execução: referências aos 6 `.md` de apoio restauradas e decisão de implementação com `scout_live_entries` recolocada como diretriz operacional | `find docs/scout -maxdepth 1 -type f | sort` confirma existência dos 6 `.md` · `rg -n 'Artefatos documentais de apoio|Decisão de execução deste documento|scout_live_entries' docs/scout/REFAZERSCOUT.md` |
+| 2026-05-08 | 12:06 | CEPR-0048 | `docs/scout/REFAZERSCOUT.md` foi revalidado contra o manual consolidado e a `Tabela_Mestre`, corrigindo precedência de SSOT, lista oficial de `TIPO_FINALIZACAO` em `COLETA_AO_VIVO` e separando fatos confirmados de hipótese arquitetural | `python3` extraiu `COLETA_AO_VIVO` da `TABELA_MESTRE` com `18` campos e listas oficiais · `rg -n 'Campos mínimos oficiais|STATUS_VALIDACAO inicial|FASE_DA_BOLA aceita apenas' .files/Codificação_e_Validação_do_Scout.md` · `rg -n 'play_points|training_priority|action_code|athlete_id' supabase/migrations/0008_scout_contract_foundation.sql src/types/index.ts` |
 | 2026-05-08 | 03:14 | CEPR-0046 | Migração `0010_scout_security_policies_and_grants.sql` criada com RLS/grants do scout novo e validada por estágio; contrato técnico ajustado para codebook global read-only | `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; cat supabase/migrations/0009_scout_codebook_foundation.sql; cat supabase/migrations/0010_scout_security_policies_and_grants.sql; sed \"4d;\\$d\" supabase/tests/scout_security_grants.test.sql; sed \"4d;\\$d\" supabase/tests/scout_security_rls.test.sql; echo \"rollback;\"; } | psql ...'` → passou · `docs/scout/scout-contrato-tecnico-supabase.md` atualizado na seção de segurança |
 | 2026-05-08 | 11:42 | CEPR-0047 | Manual operacional do scout atual criado para a rota `/scout`, cobrindo fluxo real do slice 1, campo por campo, com “quando usar”, “quando não usar” e exemplo de jogada | `docs/scout/scout-manual-operacional-slice1.md` criado · baseado na leitura de `src/features/scout/pages/ScoutWorkspacePage.tsx` e dos contratos atuais do scout |
 | 2026-05-08 | 03:01 | CEPR-0045 | Migração `0009_scout_codebook_foundation.sql` criada com codebook mínimo do slice 1, mapeamento condicional por seletor e teste SQL validado junto com `0008` | `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; cat supabase/migrations/0009_scout_codebook_foundation.sql; sed \"4d;\\$d\" supabase/tests/scout_contract_foundation.test.sql; sed \"4d;\\$d\" supabase/tests/scout_codebook_foundation.test.sql; echo \"rollback;\"; } | psql ...'` → migrações + testes executados sem erro |
@@ -46,6 +52,213 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 | 2026-05-06 | 05:36 | CEPR-0033 | `CEPRAEA.md` enriquecido com dor real do treinador, proposta de valor e metas mensuráveis do MVP | `rg -n "Dor operacional real do treinador|Metas iniciais de adoção do MVP|Metas iniciais de ganho operacional" CEPRAEA.md` → blocos presentes · `wc -l CEPRAEA.md` → `880` |
 | 2026-05-06 | 05:31 | CEPR-0032 | `CEPRAEA.md` reescrito como PRD oficial completo do produto | `wc -l CEPRAEA.md` → `763` · `rg -n "^## " CEPRAEA.md` → 22 seções principais · `sed -n '1,220p' CEPRAEA.md` valida objetivo, hierarquia e estado atual |
 | 2026-05-06 | 04:26 | CEPR-0031 | `plan.md` reescrito no formato determinístico oficial do MVP v1.0 | `wc -l plan.md` → `1106` · `sed -n '1,260p' plan.md` mostra regras globais e `T00` · `sed -n '521,840p' plan.md` mostra `T05`–`T08` · `sed -n '841,1160p' plan.md` mostra `T09`–`T10` e checklist final |
+
+---
+
+### [CEPR-0053] — 2026-05-08 — Protocolo do PILOTO-01 da `COLETA_AO_VIVO`
+
+#### ✨ Resumo
+
+Foi criado um protocolo curto e executável para o primeiro piloto humano controlado da rota `/scout`, sem abrir escopo para `COLETA_SCOUT` ou `PARTICIPACOES`.
+
+#### 🚀 Added
+
+- `docs/scout/scout-piloto-01-coleta-ao-vivo.md`
+
+#### 🛠️ Changed
+
+- o repositório agora tem um roteiro explícito para:
+  - conduzir o piloto humano;
+  - medir tempo, dúvida, fadiga e uso de `ACAO_PRINCIPAL` custom;
+  - conferir o banco ao final;
+  - decidir entre:
+    - aprovado para treinador;
+    - UX-03;
+    - revisão do vocabulário.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO.
+- **Evidências objetivas:**
+  - `docs/scout/scout-piloto-01-coleta-ao-vivo.md`
+  - `find docs/scout -maxdepth 1 -type f | sort`
+
+---
+
+### [CEPR-0052] — 2026-05-08 — UX-02 da `COLETA_AO_VIVO`
+
+#### ✨ Resumo
+
+Foi implementado o primeiro refinamento operacional da rota `/scout`, reduzindo carga de captura rápida sem alterar a fronteira semântica já validada da `COLETA_AO_VIVO`.
+
+#### 🚀 Added
+
+- barra de ação sticky com:
+  - resumo curto da entrada atual;
+  - botão `Registrar entrada`;
+  - botão `Limpar`;
+- bloco recolhível `Detalhes opcionais / revisar depois`;
+- ajuste manual recolhível para `FASE_EQUIPE_ANALISADA`;
+- chips rápidos para:
+  - `FASE_DA_BOLA`;
+  - `RESULTADO_FACTUAL`;
+  - `PONTOS_JOGADA` quando há `GOL`.
+
+#### 🛠️ Changed
+
+- a tela deixou de expor campos opcionais no fluxo principal;
+- os placeholders explicativos de sistemas e finalização foram removidos do caminho principal;
+- `Equipe analisada` saiu do grid principal e virou contexto de jogo;
+- o pós-submit passou a:
+  - manter defaults úteis por fase;
+  - limpar variáveis da sequência;
+  - devolver foco para `Tempo do jogo`.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO.
+- **Evidências objetivas:**
+  - `npm run typecheck`
+  - `npm run build`
+  - Playwright criou `24` entradas `UX02-*` / `UX02B-*` sem erro;
+  - `psql ... select count(*) from public.scout_live_entries where id_jogada like 'UX02-%' or id_jogada like 'UX02B-%';` → `24`
+  - `psql ... select count(*) from public.scout_plays;` → `0`
+  - `psql ... select count(*) from public.scout_play_participations;` → `0`
+  - medição estrutural pós-refactor mostrou `4–6` campos editáveis por cenário principal e `submitTop=717–783` em viewport `900px`.
+
+---
+
+### [CEPR-0051] — 2026-05-08 — Medição de atrito operacional da `COLETA_AO_VIVO`
+
+#### ✨ Resumo
+
+Foi medida a densidade operacional da tela `/scout` para identificar onde a coleta ao vivo atrasa, confunde ou exige campo demais em séries longas.
+
+#### 🚀 Added
+
+- evidência estrutural por fase da `COLETA_AO_VIVO`:
+  - `AT_POS`: `12` campos editáveis base e `14` quando há `GOL`;
+  - `DEF_POS`: `12` campos editáveis base e `13` quando há finalização defendida;
+  - `TRANS_OF` e `TRANS_DEF`: `11` campos editáveis base.
+
+#### 🛠️ Changed
+
+- ficou confirmado que o principal atrito atual é de UX operacional, não de persistência:
+  - o formulário mantém altura fixa de `3081px` mesmo nas fases mais simples;
+  - o botão `Registrar entrada` fica abaixo da dobra (`submitTop≈1383–1403` em viewport de `900px`);
+  - `AT_POS` é a fase mais lenta (`avgMs=1409`) por concentrar mais campos condicionais (`sistema`, `tipo_finalizacao`, `pontos`).
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO.
+- **Evidências objetivas:**
+  - script Playwright de medição estrutural por fase na rota `/scout`;
+  - script Playwright de contagem por combinação `fase + resultado`;
+  - agregação dos tempos do teste de cadência por fase.
+
+---
+
+### [CEPR-0050] — 2026-05-08 — Teste de cadência operacional da `COLETA_AO_VIVO`
+
+#### ✨ Resumo
+
+Foi executado um teste de cadência operacional com `12` entradas seguidas na rota `/scout`, cobrindo as quatro fases (`AT_POS`, `DEF_POS`, `TRANS_OF`, `TRANS_DEF`) para medir tempo por envio e verificar se a tela continua operando apenas como captura rápida em `scout_live_entries`.
+
+#### 🚀 Added
+
+- evidência operacional real de uso contínuo da `COLETA_AO_VIVO` com:
+  - `12` submissões válidas seguidas;
+  - alternância entre as quatro fases oficiais;
+  - sugestão oficial e valor custom de `ACAO_PRINCIPAL`.
+
+#### 🛠️ Changed
+
+- o estado do scout agora possui validação objetiva de cadência:
+  - média de `1273 ms` por envio;
+  - máximo de `1514 ms`;
+  - mínimo de `1185 ms`;
+  - `0` erros durante a sequência.
+- também ficou confirmado no banco que o slice não vazou para camadas analíticas:
+  - `12` linhas novas em `scout_live_entries` com prefixo `CADENCE-`;
+  - `0` linhas em `scout_plays`;
+  - `0` linhas em `scout_play_participations`.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO.
+- **Evidências objetivas:**
+  - script Playwright com login real, criação de jogo dedicado e `12` envios seguidos na rota `/scout`;
+  - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -At -F $'\\t' -c "select count(*) from public.scout_live_entries where id_jogada like 'CADENCE-%';"` → `12`
+  - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -At -F $'\\t' -c "select count(*) from public.scout_plays;"` → `0`
+  - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -At -F $'\\t' -c "select count(*) from public.scout_play_participations;"` → `0`
+
+---
+
+### [CEPR-0049] — 2026-05-08 — Restauração do papel executável do REFAZERSCOUT
+
+#### ✨ Resumo
+
+`docs/scout/REFAZERSCOUT.md` foi ajustado após revisão para voltar a funcionar como documento de execução do refactor, sem perder a validação contra SSOT.
+
+#### 🚀 Added
+
+- lista explícita dos 6 artefatos documentais de apoio:
+  - `scout-ssot.md`
+  - `scout-campos.md`
+  - `scout-listas.md`
+  - `scout-dicionario-codigos.md`
+  - `scout-validacoes.md`
+  - `scout-rastreabilidade.md`
+- seção `Decisão de execução deste documento`.
+
+#### 🛠️ Changed
+
+- a decisão de implementação voltou a ficar explícita:
+  - seguir com camada própria de persistência para `COLETA_AO_VIVO`;
+  - usar `scout_live_entries` como nome de trabalho recomendado;
+  - preservar `scout_plays` e `scout_play_participations` como fundação analítica.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO.
+- **Evidências objetivas:**
+  - `find docs/scout -maxdepth 1 -type f | sort`
+  - `rg -n 'Artefatos documentais de apoio|Decisão de execução deste documento|scout_live_entries' docs/scout/REFAZERSCOUT.md`
+
+---
+
+### [CEPR-0048] — 2026-05-08 — Validação corretiva do REFAZERSCOUT
+
+#### ✨ Resumo
+
+Foi reescrito `docs/scout/REFAZERSCOUT.md` para ficar estritamente alinhado ao manual consolidado `Codificação_e_Validação_do_Scout.md`, à `Tabela_Mestre` e ao estado real do backend/runtime atual do scout.
+
+#### 🚀 Added
+
+- validação explícita da precedência `manual > TABELA_MESTRE`;
+- lista oficial confirmada dos `18` campos de `COLETA_AO_VIVO`;
+- separação clara entre fatos validados e decisão arquitetural ainda em aberto.
+
+#### 🛠️ Changed
+
+- a base do documento deixou de citar `.files/MANUSCOUT.md` como SSOT principal;
+- `TIPO_FINALIZACAO` de `COLETA_AO_VIVO` foi corrigido para a lista realmente derivada da `TABELA_MESTRE`;
+- a recomendação de `scout_live_entries` foi rebaixada de conclusão implícita para hipótese arquitetural não fechada;
+- o texto passou a registrar os gaps reais já confirmados no schema atual:
+  - ausência de campo de primeira classe para `ATLETA_PRINCIPAL`;
+  - ausência de campo de primeira classe para `ACAO_PRINCIPAL`;
+  - ausência de campo de primeira classe para `PRIORIDADE_TREINO`;
+  - `play_points` ainda como `text`;
+  - codebook ainda parcial.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO.
+- **Evidências objetivas:**
+  - extração da `TABELA_MESTRE` via `python3` com `LIVE_COUNT 18` para `COLETA_AO_VIVO`;
+  - `rg -n 'Campos mínimos oficiais de `COLETA_AO_VIVO`|STATUS_VALIDACAO inicial|FASE_DA_BOLA aceita apenas' .files/Codificação_e_Validação_do_Scout.md`;
+  - `rg -n 'play_points|training_priority|action_code|athlete_id' supabase/migrations/0008_scout_contract_foundation.sql src/types/index.ts`;
+  - leitura final de `docs/scout/REFAZERSCOUT.md`.
 
 ---
 
@@ -1351,3 +1564,209 @@ Implementar UX guiada do scout com sistemas por fase, campos contextuais e bloco
 
 - **Status:** LOCAL
 - **Evidências:** `npm run typecheck` e `npm run build` verdes; chunk dedicado `ScoutWorkspacePage-*.js` gerado no build
+
+---
+
+### [CEPR-0044] — 2026-05-08 — 16:20 — Fundação de persistência da COLETA_AO_VIVO
+
+#### Changed
+
+- Criada a migration [0012_scout_live_entries_foundation.sql](/home/davis/cepraea-pwa/supabase/migrations/0012_scout_live_entries_foundation.sql:1) com a tabela `public.scout_live_entries` para persistir a camada própria de `COLETA_AO_VIVO`.
+- Criada a migration [0013_scout_live_entries_security.sql](/home/davis/cepraea-pwa/supabase/migrations/0013_scout_live_entries_security.sql:1) com grants e policies RLS da nova tabela.
+- Criados os testes:
+  - [scout_live_entries_foundation.test.sql](/home/davis/cepraea-pwa/supabase/tests/scout_live_entries_foundation.test.sql:1)
+  - [scout_live_entries_security.test.sql](/home/davis/cepraea-pwa/supabase/tests/scout_live_entries_security.test.sql:1)
+- Expandido [src/types/index.ts](/home/davis/cepraea-pwa/src/types/index.ts:116) com:
+  - `ScoutAnalyzedTeamPhaseCode`
+  - `ScoutFinishTypeCode`
+  - `ScoutFactualResultCode`
+  - `ScoutLiveEntry`
+  - `ScoutLiveEntryWriteInput`
+- Expandido [src/features/scout/scoutApi.ts](/home/davis/cepraea-pwa/src/features/scout/scoutApi.ts:1) com operações mínimas da `COLETA_AO_VIVO`:
+  - `fetchScoutLiveEntriesForGame`
+  - `getScoutLiveEntry`
+  - `createScoutLiveEntry`
+  - `updateScoutLiveEntry`
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** LOCAL
+- **Evidências:** `npm run typecheck` verde; migrations `0012/0013` e testes SQL do escopo executados com sucesso no banco local
+
+---
+
+### [CEPR-0045] — 2026-05-08 — 18:05 — Codebook mínimo e RPC create-only da COLETA_AO_VIVO
+
+#### Changed
+
+- Criada a migration [0014_scout_live_entries_codebook.sql](/home/davis/cepraea-pwa/supabase/migrations/0014_scout_live_entries_codebook.sql:1) para estender o codebook com:
+  - `LISTA_FASE_EQUIPE`
+  - `LISTA_TIPO_FINALIZACAO`
+  - `LISTA_STATUS_VALIDACAO`
+  - `LISTA_ACAO_PRINCIPAL_AT_POS`
+  - `LISTA_ACAO_PRINCIPAL_DEF_POS`
+  - `LISTA_ACAO_PRINCIPAL_TRANS_OF`
+  - `LISTA_ACAO_PRINCIPAL_TRANS_DEF`
+- Expandida `public.scout_code_values` com metadados semânticos de sugestão:
+  - `description`
+  - `when_to_use`
+  - `when_not_to_use`
+- Criada a migration [0015_scout_live_entries_rpc.sql](/home/davis/cepraea-pwa/supabase/migrations/0015_scout_live_entries_rpc.sql:1) com a RPC `public.create_scout_live_entry(jsonb)`.
+- A RPC nova:
+  - valida campos obrigatórios e condicionais por fase;
+  - valida `codebook`, `scout_game`, `team_id` e `atleta_principal_id`;
+  - força `status_validacao_code = 'PENDENTE'` na criação;
+  - aceita `ACAO_PRINCIPAL` sugerida ou custom curta/controlada;
+  - não cria `scout_plays`;
+  - não cria `scout_play_participations`;
+  - grava `audit_log`.
+- Criados os testes:
+  - [scout_live_entries_rpc_grants.test.sql](/home/davis/cepraea-pwa/supabase/tests/scout_live_entries_rpc_grants.test.sql:1)
+  - [scout_live_entries_rpc_create.test.sql](/home/davis/cepraea-pwa/supabase/tests/scout_live_entries_rpc_create.test.sql:1)
+- Atualizado [scout_codebook_foundation.test.sql](/home/davis/cepraea-pwa/supabase/tests/scout_codebook_foundation.test.sql:1) para refletir a expansão do codebook.
+- Atualizado [src/features/scout/scoutApi.ts](/home/davis/cepraea-pwa/src/features/scout/scoutApi.ts:1):
+  - `createScoutLiveEntry` agora usa a RPC `create_scout_live_entry`;
+  - `fetchScoutCodebook` passa a expor metadados semânticos adicionais das sugestões.
+- Atualizado [src/types/index.ts](/home/davis/cepraea-pwa/src/types/index.ts:116) com as novas chaves de listas e os campos extras do codebook.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** LOCAL
+- **Evidências:** `npm run typecheck` verde; `0012`–`0015` aplicadas no banco local; testes SQL de codebook, foundation, security e RPC da `COLETA_AO_VIVO` executados com sucesso em `127.0.0.1:54322`
+
+---
+
+### [CEPR-0046] — 2026-05-08 — 18:40 — Tela da COLETA_AO_VIVO sobre a RPC create-only
+
+#### Changed
+
+- Reescrita [src/features/scout/pages/ScoutWorkspacePage.tsx](/home/davis/cepraea-pwa/src/features/scout/pages/ScoutWorkspacePage.tsx:1) para abandonar o fluxo de bundle técnico (`scout_play + participations`) como referência principal da rota `/scout`.
+- A nova tela agora trabalha como captura rápida de `COLETA_AO_VIVO`:
+  - seleção/criação de `scout_game`;
+  - listagem das entradas já registradas do jogo;
+  - formulário condicional por `FASE_DA_BOLA`;
+  - envio via `createScoutLiveEntry`.
+- A UI passou a respeitar a fronteira aprovada:
+  - não cria `scout_plays`;
+  - não cria `scout_play_participations`;
+  - não promete análise detalhada;
+  - expõe `status` inicial como `PENDENTE`.
+- Implementado autocomplete assistido de `ACAO_PRINCIPAL` por fase, com suporte a valor custom curto/controlado.
+- Implementado tratamento inicial de erros do backend em linguagem operacional mais compreensível para a tela.
+- Expandido [src/types/index.ts](/home/davis/cepraea-pwa/src/types/index.ts:1) e [src/features/scout/scoutApi.ts](/home/davis/cepraea-pwa/src/features/scout/scoutApi.ts:1) para suportar os metadados adicionais do codebook (`description`, `when_to_use`, `when_not_to_use`) usados na coleta ao vivo.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** LOCAL
+- **Evidências:** `npm run typecheck` verde; `npm run build` verde; novo chunk `ScoutWorkspacePage-*.js` gerado pelo build do Vite
+
+---
+
+### [CEPR-0047] — 2026-05-08 — 21:25 — Smoke test operacional da rota `/scout`
+
+#### Changed
+
+- Validado o primeiro fluxo operacional real da tela `/scout` contra o Supabase local após `supabase db reset`.
+- Executado login como `coach@cepraea.test`.
+- Validado uso real da tela de `COLETA_AO_VIVO` com 4 entradas simuladas:
+  - `AT_POS`
+  - `DEF_POS`
+  - `TRANS_OF`
+  - `TRANS_DEF`
+- Confirmado o comportamento condicional da UI:
+  - `PONTOS_JOGADA` fica desabilitado quando não houve gol;
+  - `ACAO_PRINCIPAL` oficial salva com `suggestion_code`;
+  - `ACAO_PRINCIPAL` custom curta salva com `is_custom = true`.
+- Confirmado no banco:
+  - 4 linhas em `scout_live_entries` com prefixo `SMOKE-*`;
+  - 0 linhas criadas em `scout_plays`;
+  - 0 linhas criadas em `scout_play_participations`.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** LOCAL
+- **Evidências:** smoke test browser-driven em `http://127.0.0.1:5173/scout` + conferência SQL direta em `public.scout_live_entries`, `public.scout_plays` e `public.scout_play_participations`
+
+---
+
+### [CEPR-0054] — 2026-05-09 — 06:35 — RULES-03: pontuação guiada, eventos sem finalização e transição no scout
+
+#### Changed
+
+- Criada a migration [0016_scout_live_entries_handebol_rules.sql](/home/davis/cepraea-pwa/supabase/migrations/0016_scout_live_entries_handebol_rules.sql:1) para corrigir regras específicas do handebol de praia na `COLETA_AO_VIVO`.
+- A tabela `public.scout_live_entries` agora inclui `motivo_pontuacao_code`, usado para amarrar gols simples, giro, aérea, 6m, especialista, goleira e casos pendentes de validação.
+- A RPC `public.create_scout_live_entry(jsonb)` foi endurecida para:
+  - exigir `motivo_pontuacao_code` quando `resultado_factual_code = GOL`;
+  - bloquear `motivo_pontuacao_code` fora de gol;
+  - garantir coerência entre `motivo_pontuacao_code`, `tipo_finalizacao_code` e `pontos_jogada`;
+  - aceitar resultados factuais sem finalização, como `RECUPERACAO_POSSE`, `PASSIVO`, `ERRO_TROCA`, `TRANSICAO_NEUTRALIZADA`, `DEFESA_ESTABILIZADA`, `VANTAGEM_CRIADA` e `VANTAGEM_PERDIDA`;
+  - rejeitar `ACAO_PRINCIPAL` custom quando ela vira causa, resultado ou feedback disfarçado.
+- Expandido o codebook de `COLETA_AO_VIVO` com:
+  - `LISTA_MOTIVO_PONTUACAO`;
+  - novos valores de `LISTA_RESULTADO_FACTUAL` voltados a sequências sem arremesso e transições.
+- Atualizada a UI em [ScoutWorkspacePage.tsx](/home/davis/cepraea-pwa/src/features/scout/pages/ScoutWorkspacePage.tsx:1):
+  - `Motivo da pontuação` aparece apenas quando o resultado factual é `GOL`;
+  - `PONTOS_JOGADA` passa a ser guiado pelo motivo da pontuação;
+  - microcopy em `Atleta principal` esclarece que posição/função detalhada fica para a revisão;
+  - microcopy em `Tipo de finalização` esclarece que o campo descreve o arremesso, não a ação defensiva.
+- Atualizados [src/types/index.ts](/home/davis/cepraea-pwa/src/types/index.ts:130) e [src/features/scout/scoutApi.ts](/home/davis/cepraea-pwa/src/features/scout/scoutApi.ts:154) para suportar o novo campo e os novos códigos de resultado factual.
+- Expandido o teste de RPC em [scout_live_entries_rpc_create.test.sql](/home/davis/cepraea-pwa/supabase/tests/scout_live_entries_rpc_create.test.sql:1) para cobrir:
+  - gol com `motivo_pontuacao_code`;
+  - recuperação de posse sem `tipo_finalizacao_code`;
+  - incompatibilidade entre motivo, finalização e pontos;
+  - ação custom diagnóstica/feedback disfarçado.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** LOCAL
+- **Evidências:** `npm run typecheck` verde; `npm run build` verde; `supabase db reset --local --yes` com `0016` aplicada; testes SQL `scout_codebook_foundation`, `scout_live_entries_foundation`, `scout_live_entries_rpc_grants` e `scout_live_entries_rpc_create` verdes em `127.0.0.1:54322`
+
+---
+
+### [2026-05-14] — Contrato central da Matriz de Compatibilidade no repo
+
+#### Changed
+
+- Criado o espelho textual [docs/scout/matriz-compatibilidade-coleta-ao-vivo.md](/home/davis/cepraea-pwa/docs/scout/matriz-compatibilidade-coleta-ao-vivo.md:1) para versionar no repo a matriz canonica da `COLETA_AO_VIVO`.
+- Criado o contrato executavel [src/features/scout/domain/liveCollectionCompatibility.matrix.ts](/home/davis/cepraea-pwa/src/features/scout/domain/liveCollectionCompatibility.matrix.ts:1) com:
+  - categorias permitidas por fase;
+  - regras por `categoria -> acao basica -> classificacao -> resultado`;
+  - derivacao de `tipo_finalizacao`;
+  - regras de pontuacao por `motivo_pontuacao`;
+  - invariantes de persistencia da `COLETA_AO_VIVO`.
+- Criado o teste unitario [src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts](/home/davis/cepraea-pwa/src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts:1) cobrindo:
+  - filtros por fase;
+  - `AT_POS + PASSE`;
+  - `AT_POS + ARREMESSO`;
+  - `DEF_POS` por acao defensiva;
+  - transicao ofensiva com arremesso;
+  - invariantes de persistencia.
+- Atualizado [vitest.config.ts](/home/davis/cepraea-pwa/vitest.config.ts:1) para descobrir testes `src/**/*.test.ts` fora de `__tests__/`.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** LOCAL
+- **Evidências:** `npm run typecheck` verde; `npx vitest run src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts` com `10/10` testes passando
+
+---
+
+### [2026-05-14] — UI da COLETA_AO_VIVO consumindo a matriz central
+
+#### Changed
+
+- Refatorada [src/features/scout/pages/ScoutWorkspacePage.tsx](/home/davis/cepraea-pwa/src/features/scout/pages/ScoutWorkspacePage.tsx:1) para consumir o contrato central de [liveCollectionCompatibility.matrix.ts](/home/davis/cepraea-pwa/src/features/scout/domain/liveCollectionCompatibility.matrix.ts:1) em vez de manter arrays semânticos locais.
+- Expandido o contrato em [liveCollectionCompatibility.matrix.ts](/home/davis/cepraea-pwa/src/features/scout/domain/liveCollectionCompatibility.matrix.ts:1) com:
+  - `basicActionListKey` por categoria;
+  - derivação de `motivo_pontuacao` por classificação;
+  - helpers de `allowedResults`, `allowedFinishTypes`, `allowedScoringReasons` e `classificationListKey`.
+- Expandido o teste [liveCollectionCompatibility.matrix.test.ts](/home/davis/cepraea-pwa/src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts:1) para cobrir os novos helpers e o slice `NAO_OBSERVADO`.
+- A UI agora:
+  - filtra `categoria`, `acao basica`, `classificacao` e `resultado` a partir da matriz;
+  - deriva `tipo_finalizacao` e `motivo_pontuacao` via contrato;
+  - limpa estado dependente quando a combinacao muda;
+  - auto-seleciona o unico resultado permitido quando o slice fecha em uma opcao.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** LOCAL
+- **Evidências:** `npm run typecheck` verde; `npx vitest run src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts` com `11/11` testes passando

@@ -19,10 +19,464 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br> 
-*Última atualização*: 2026-05-08 - 03:14 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-08 - 23:49 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+# Execution Log: CEPR-0053
+
+## 🎯 Objetivo
+
+Transformar a decisão de governança do próximo passo do scout em um protocolo operacional curto e executável para o `PILOTO-01` da `COLETA_AO_VIVO`.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `docs/scout/scout-piloto-01-coleta-ao-vivo.md`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** preparação do piloto humano do scout, decisão de liberar ou não a rota `/scout` para uso controlado com treinador/analista
+- **Partes do sistema que podem quebrar:** nenhuma em runtime; o risco tratado era deixar a fase de piloto depender de interpretação informal
+- **Testes que cobrem o risco:** não aplicável; validação é documental e de governança
+- **Comandos de validação:**
+  - `find docs/scout -maxdepth 1 -type f | sort`
+  - leitura final de `docs/scout/scout-piloto-01-coleta-ao-vivo.md`
+- **Arquivos proibidos nesta tarefa:** `src/**`, `supabase/**`, `plan.md`, `CEPRAEA.md`
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Consolidação do objetivo do piloto
+
+- **Arquivos:** `docs/scout/scout-piloto-01-coleta-ao-vivo.md`
+- **Resultado:** o documento passou a registrar explicitamente que o piloto valida apenas `COLETA_AO_VIVO`, sem abrir `COLETA_SCOUT`, `PARTICIPACOES`, relatório ou dashboard.
+
+### Passo 2 — Definição do protocolo operacional
+
+- **Arquivos:** `docs/scout/scout-piloto-01-coleta-ao-vivo.md`
+- **Resultado:** o roteiro do piloto ficou congelado com:
+  - escopo mínimo de `20–40` entradas;
+  - regra de não consultar manual durante o uso;
+  - métricas de tempo, erro, dúvida, custom e fadiga;
+  - checklist de conferência no banco.
+
+### Passo 3 — Fechamento da saída decisória
+
+- **Arquivos:** `docs/scout/scout-piloto-01-coleta-ao-vivo.md`
+- **Resultado:** o documento passou a encerrar o piloto em três saídas possíveis:
+  - aprovado para teste com treinador;
+  - precisa `UX-03`;
+  - precisa revisar vocabulário de `ACAO_PRINCIPAL`.
+
+---
+
+## ✅ Validação Final
+
+- o próximo passo do scout agora está documentado como protocolo executável;
+- a governança de não expandir escopo antes do piloto ficou explícita;
+- o time já pode conduzir o `PILOTO-01` sem reinterpretar o estado validado do slice.
+
+# Execution Log: CEPR-0052
+
+## 🎯 Objetivo
+
+Implementar o UX-02 da rota `/scout` para reduzir carga operacional da `COLETA_AO_VIVO` sem mexer no contrato, na RPC ou na fronteira semântica já validada.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `src/features/scout/pages/ScoutWorkspacePage.tsx`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** UX operacional da coleta ao vivo, fluidez de captura rápida na rota `/scout`
+- **Partes do sistema que podem quebrar:** apenas a UI do scout; contrato Supabase/RPC não foi alterado
+- **Testes que cobrem o risco:** `typecheck`, `build`, criação real de entradas via Playwright e conferência no banco
+- **Comandos de validação:**
+  - `npm run typecheck`
+  - `npm run build`
+  - scripts Playwright de:
+    - inspeção de rótulos reais;
+    - cadência com `12` entradas;
+    - revalidação de cadência pós-refactor com `24` entradas `UX02-*` / `UX02B-*`;
+    - medição estrutural pós-refactor;
+  - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -At -F $'\t' -c "select count(*) from public.scout_live_entries where id_jogada like 'UX02-%' or id_jogada like 'UX02B-%';"`
+  - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -At -F $'\t' -c "select count(*) from public.scout_plays;"`
+  - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -At -F $'\t' -c "select count(*) from public.scout_play_participations;"`
+- **Arquivos proibidos nesta tarefa:** `supabase/**`, `plan.md`, `CEPRAEA.md`
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Refactor do layout principal
+
+- **Arquivos:** `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** o formulário foi reorganizado para captura rápida:
+  - `Equipe analisada` saiu do grid principal;
+  - `FASE_DA_BOLA` virou chips;
+  - `RESULTADO_FACTUAL` virou chips;
+  - `PONTOS_JOGADA` virou chips condicionais;
+  - `FASE_EQUIPE_ANALISADA` passou a usar default sugerido com ajuste manual recolhível.
+
+### Passo 2 — Redução de carga visual
+
+- **Arquivos:** `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** os campos opcionais foram recolhidos em `Detalhes opcionais / revisar depois`, preservando payload mas tirando competição visual do fluxo principal.
+
+### Passo 3 — Ação sempre acessível
+
+- **Arquivos:** `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** foi criada uma barra sticky com:
+  - resumo da entrada atual;
+  - `Registrar entrada`;
+  - `Limpar`.
+
+O submit deixou de depender de scroll.
+
+### Passo 4 — Pós-submit mais rápido
+
+- **Arquivos:** `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** a tela passou a preservar defaults úteis por fase e devolver foco para `Tempo do jogo` após limpar/salvar.
+
+### Passo 5 — Validação operacional
+
+- **Arquivos/contexto:** rota `/scout`, Postgres local
+- **Resultado:** o refactor foi validado com:
+  - `typecheck` e `build` limpos;
+  - `24` entradas reais criadas por Playwright em jogos de teste `UX02` / `UX02B`;
+  - `0` linhas em `scout_plays`;
+  - `0` linhas em `scout_play_participations`.
+
+### Passo 6 — Medição pós-refactor
+
+- **Arquivos/contexto:** mesma rota `/scout`
+- **Resultado:** a densidade do fluxo principal caiu para:
+  - `AT_POS + GOL`: `6` campos editáveis;
+  - `AT_POS + PERDA`: `5`;
+  - `DEF_POS + DEFENDIDO`: `6`;
+  - `TRANS_OF + PERDA`: `4`;
+  - `TRANS_DEF + PERDA`: `4`.
+
+O botão de submit ficou dentro da viewport:
+- `submitTop=717–783` em viewport `900px`.
+
+---
+
+## ✅ Validação Final
+
+- o UX-02 reduziu de forma concreta a carga operacional da `COLETA_AO_VIVO`;
+- o submit deixou de exigir scroll;
+- os opcionais saíram do caminho principal;
+- a fronteira semântica com `scout_plays` e `scout_play_participations` permaneceu intacta;
+- o próximo passo pode ser nova rodada curta de cadência humana para decidir se a tela já está boa para piloto controlado.
+
+# Execution Log: CEPR-0051
+
+## 🎯 Objetivo
+
+Medir onde a tela `/scout` atrasa, confunde ou exige campo demais durante a `COLETA_AO_VIVO`, separando gargalo de UX operacional de gargalo técnico de backend.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** priorização de refinamentos de UX da rota `/scout`, próxima etapa antes de abrir `COLETA_SCOUT` ou `PARTICIPACOES`
+- **Partes do sistema que podem quebrar:** nenhuma em runtime; o risco tratado era confundir lentidão de uso com lentidão de persistência
+- **Testes que cobrem o risco:** medição estrutural da tela no navegador + contagem de campos por combinação `fase/resultado` + agregação dos tempos do teste de cadência
+- **Comandos de validação:**
+  - script Playwright de medição estrutural por fase em viewport `1440x900`
+  - script Playwright de medição por combinação `AT_POS/DEF_POS/TRANS_OF` com `GOL`, `DEFENDIDO` e `PERDA`
+  - script Node de agregação dos tempos do teste `CADENCE-*` por fase
+- **Arquivos proibidos nesta tarefa:** `src/**`, `supabase/**`, `plan.md`, `CEPRAEA.md`
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Medição estrutural por fase
+
+- **Arquivos/contexto:** rota `/scout`
+- **Resultado:** foi confirmado que a tela mantém densidade alta em todas as fases:
+  - `AT_POS`: `12` campos editáveis visíveis;
+  - `DEF_POS`: `12` campos editáveis visíveis;
+  - `TRANS_OF`: `11` campos editáveis visíveis;
+  - `TRANS_DEF`: `11` campos editáveis visíveis.
+
+Mesmo nas fases mais simples, o formulário continua com altura de `3081px`.
+
+### Passo 2 — Medição por resultado factual
+
+- **Arquivos/contexto:** mesma tela, alternando `resultado_factual`
+- **Resultado:** o desfecho é o principal inflador de campos:
+  - `AT_POS + GOL` sobe para `14` campos editáveis;
+  - `DEF_POS + DEFENDIDO` sobe para `13`;
+  - `TRANS_OF + GOL` sobe para `13`;
+  - cenários com `PERDA` ficam entre `11` e `12`.
+
+### Passo 3 — Verificação da dobra e do scroll
+
+- **Arquivos/contexto:** layout da `SectionCard` de entrada
+- **Resultado:** o botão `Registrar entrada` permanece abaixo da dobra em todos os cenários medidos:
+  - `submitTop≈1383–1403` para viewport de `900px`.
+
+Isso confirma que mesmo entradas simples exigem scroll operacional.
+
+### Passo 4 — Cruzamento com a cadência real
+
+- **Arquivos/contexto:** resultados `CADENCE-*`
+- **Resultado:** a fase com mais densidade também foi a mais lenta:
+  - `AT_POS avgMs=1409`
+  - `DEF_POS avgMs=1243`
+  - `TRANS_OF avgMs=1238`
+  - `TRANS_DEF avgMs=1200`
+
+O atraso observado está concentrado no volume de campos condicionais, não em erro de backend ou falha de persistência.
+
+---
+
+## ✅ Validação Final
+
+- o backend não é o gargalo do fluxo atual da `COLETA_AO_VIVO`;
+- o principal atrito da tela é densidade fixa de formulário, excesso de campos opcionais sempre expostos e necessidade de scroll até o submit;
+- `AT_POS` é o caso mais pesado e mais lento;
+- a próxima etapa correta é refinamento de UX operacional, não mudança arquitetural.
+
+# Execution Log: CEPR-0050
+
+## 🎯 Objetivo
+
+Executar um teste de cadência operacional da rota `/scout` com `12` entradas seguidas para verificar fluidez de uso contínuo, tempo por envio e preservação da fronteira semântica da `COLETA_AO_VIVO`.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** avaliação operacional da UX do scout, priorização de refinamentos de produto da rota `/scout`
+- **Partes do sistema que podem quebrar:** nenhuma em runtime; o risco tratado era a tela compilar mas não sustentar uso contínuo de coleta ao vivo
+- **Testes que cobrem o risco:** fluxo real em navegador com submissões repetidas + conferência direta no Postgres local
+- **Comandos de validação:**
+  - script Playwright com login real, criação de jogo dedicado e `12` envios consecutivos na rota `/scout`
+  - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -At -F $'\t' -c "select count(*) from public.scout_live_entries where id_jogada like 'CADENCE-%';"`
+  - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -At -F $'\t' -c "select count(*) from public.scout_plays;"`
+  - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -At -F $'\t' -c "select count(*) from public.scout_play_participations;"`
+  - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -At -F $'\t' -c "select id_jogada, fase_da_bola_code, resultado_factual_code, coalesce(pontos_jogada::text,'null'), status_validacao_code, acao_principal_text, coalesce(acao_principal_suggestion_code,'null'), coalesce(acao_principal_is_custom::text,'null') from public.scout_live_entries where id_jogada like 'CADENCE-%' order by id_jogada;"`
+- **Arquivos proibidos nesta tarefa:** `src/**`, `supabase/**`, `plan.md`, `CEPRAEA.md`
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Preparação do ambiente e baseline
+
+- **Arquivos/contexto:** Supabase local, frontend `/scout`
+- **Resultado:** o banco local foi resetado antes do teste para garantir baseline limpo, mantendo `scout_live_entries = 0`, `scout_plays = 0` e `scout_play_participations = 0`.
+
+### Passo 2 — Execução da cadência no navegador
+
+- **Arquivos/contexto:** rota `/scout`
+- **Resultado:** foi criado um jogo dedicado de teste e a UI recebeu `12` entradas seguidas, alternando:
+  - `AT_POS`
+  - `DEF_POS`
+  - `TRANS_OF`
+  - `TRANS_DEF`
+
+O fluxo completou sem erro, com estas métricas:
+- média por envio: `1273 ms`
+- máximo: `1514 ms`
+- mínimo: `1185 ms`
+- total dos `12` envios: `15271 ms`
+
+### Passo 3 — Verificação direta no banco
+
+- **Arquivos/contexto:** `public.scout_live_entries`, `public.scout_plays`, `public.scout_play_participations`
+- **Resultado:** o banco confirmou:
+  - `12` linhas novas em `scout_live_entries` com prefixo `CADENCE-`;
+  - `0` linhas em `scout_plays`;
+  - `0` linhas em `scout_play_participations`.
+
+### Passo 4 — Verificação semântica dos campos-chave
+
+- **Arquivos/contexto:** linhas `CADENCE-*` em `public.scout_live_entries`
+- **Resultado:** ficou confirmado que:
+  - entradas `AT_POS` salvaram `GIRO` como sugestão oficial com `is_custom = false`;
+  - entradas `DEF_POS` salvaram `BLOQ_GIRO` como sugestão oficial com `is_custom = false`;
+  - entradas `TRANS_OF` salvaram valores curtos custom (`QUEBRA_DEF_RAPIDA_*`) com `suggestion_code = null` e `is_custom = true`;
+  - entradas `TRANS_DEF` salvaram `NEUTRALIZA_DIRETA` como sugestão oficial com `is_custom = false`;
+  - todas nasceram com `status_validacao_code = PENDENTE`.
+
+---
+
+## ✅ Validação Final
+
+- a rota `/scout` sustentou `12` entradas consecutivas sem erro;
+- a média de aproximadamente `1.27s` por envio é compatível com captura rápida inicial;
+- a UI continuou respeitando a fronteira da `COLETA_AO_VIVO`, sem criar `scout_plays` ou `scout_play_participations`;
+- `ACAO_PRINCIPAL` permaneceu semanticamente correta tanto para sugestão oficial quanto para valor custom curto;
+- o próximo trabalho deixa de ser arquitetura e passa a ser refinamento de UX operacional para reduzir atrito em séries mais longas (`10–20+` sequências).
+
+# Execution Log: CEPR-0049
+
+## 🎯 Objetivo
+
+Corrigir o `REFAZERSCOUT.md` para restaurar o seu papel de documento executável sem apagar a validação já feita contra os SSOTs.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `docs/scout/REFAZERSCOUT.md`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** planejamento de execução do refactor do scout
+- **Partes do sistema que podem quebrar:** nenhuma em runtime; o risco tratado era transformar um documento de execução em simples parecer de validação
+- **Testes que cobrem o risco:** não aplicável; validação por leitura documental e checagem dos arquivos existentes
+- **Comandos de validação:**
+  - `find docs/scout -maxdepth 1 -type f | sort`
+  - `git status --short docs/scout`
+  - `rg -n 'scout-contrato-tecnico-supabase|scout-ssot|scout-campos|scout-listas|scout-dicionario-codigos|scout-validacoes|scout-rastreabilidade|REFAZERSCOUT' docs/scout -S`
+  - `rg -n 'Artefatos documentais de apoio|Decisão de execução deste documento|scout_live_entries' docs/scout/REFAZERSCOUT.md`
+- **Arquivos proibidos nesta tarefa:** `src/**`, `supabase/**`, `plan.md`, `CEPRAEA.md`
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Verificação dos arquivos apontados pelo usuário
+
+- **Arquivos:** `docs/scout/*.md`
+- **Resultado:** ficou confirmado que os `.md` de apoio não foram apagados do repositório; o problema era sua ausência no corpo atualizado do `REFAZERSCOUT.md`.
+
+### Passo 2 — Restauração das referências documentais
+
+- **Arquivos:** `docs/scout/REFAZERSCOUT.md`
+- **Resultado:** os 6 artefatos documentais de apoio voltaram a constar explicitamente na base do documento.
+
+### Passo 3 — Restauração da decisão operacional
+
+- **Arquivos:** `docs/scout/REFAZERSCOUT.md`
+- **Resultado:** a decisão de seguir com camada própria de persistência para `COLETA_AO_VIVO`, usando `scout_live_entries` como nome de trabalho, voltou a ficar registrada como diretriz de execução, não como SSOT semântica.
+
+---
+
+## ✅ Validação Final
+
+- os 6 `.md` de apoio continuam existentes no repositório;
+- `REFAZERSCOUT.md` voltou a referenciá-los explicitamente;
+- a decisão arquitetural adotada pelo documento voltou a ficar clara para execução;
+- a distinção entre SSOT semântica e decisão técnica de implementação foi preservada.
+
+# Execution Log: CEPR-0048
+
+## 🎯 Objetivo
+
+Verificar `docs/scout/REFAZERSCOUT.md` contra os SSOTs atuais do scout e corrigir o documento para separar fatos confirmados de hipótese arquitetural.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-08
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `docs/scout/REFAZERSCOUT.md`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** decisões futuras de refatoração do scout, expansão do codebook, modelagem de `COLETA_AO_VIVO`
+- **Partes do sistema que podem quebrar:** nenhuma em runtime; o risco tratado era documentação derivada empurrando decisão arquitetural como se fosse regra da SSOT
+- **Testes que cobrem o risco:** não aplicável; a validação foi documental e estrutural contra SSOT + schema/runtime
+- **Comandos de validação:**
+  - `sed -n '1,260p' AGENT.md`
+  - `sed -n '1,260p' CEPRAEA.md`
+  - `gh pr list --state merged --limit 3 --json number,title,mergedAt,baseRefName,headRefName,url`
+  - `sed -n '1,260p' .files/Codificação_e_Validação_do_Scout.md`
+  - extração via `python3` da `TABELA_MESTRE` filtrando `COLETA_AO_VIVO`
+  - `rg -n 'play_points|training_priority|action_code|athlete_id' supabase/migrations/0008_scout_contract_foundation.sql src/types/index.ts`
+  - `sed -n '1,260p' docs/scout/REFAZERSCOUT.md`
+- **Arquivos proibidos nesta tarefa:** `src/**`, `supabase/**`, `plan.md`, `CEPRAEA.md`
+
+O escopo permaneceu documental, com leitura do código apenas para validação.
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Leitura das diretivas operacionais
+
+- **Arquivos:** `AGENT.md`, `CEPRAEA.md`
+- **Resultado:** a revisão seguiu a obrigatoriedade de ler a governança do repositório e checar o contexto recente.
+
+### Passo 2 — Verificação do contexto recente no GitHub
+
+- **Arquivos/contexto:** PRs `#10`, `#9` e `#8`
+- **Resultado:** foi confirmado o contexto recente de evolução do MVP e do scout antes de mexer na documentação.
+
+### Passo 3 — Revalidação dos SSOTs do scout
+
+- **Arquivos:** `.files/Codificação_e_Validação_do_Scout.md`, `.files/analise/Tabela_Mestre_dos_Campos.xlsx`
+- **Resultado:** ficou confirmado que:
+  - o manual consolidado é a SSOT semântica;
+  - a `TABELA_MESTRE` é derivada;
+  - `COLETA_AO_VIVO` possui `18` campos oficiais;
+  - `STATUS_VALIDACAO` inicial deve ser `PENDENTE`;
+  - `FASE_DA_BOLA` aceita só `AT_POS`, `DEF_POS`, `TRANS_OF`, `TRANS_DEF`.
+
+### Passo 4 — Checagem do backend/runtime real
+
+- **Arquivos:** `supabase/migrations/0008_scout_contract_foundation.sql`, `supabase/migrations/0009_scout_codebook_foundation.sql`, `supabase/migrations/0011_scout_rpc_write_read.sql`, `src/types/index.ts`, `src/features/scout/scoutApi.ts`, `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** foram confirmados os gaps reais entre a `COLETA_AO_VIVO` oficial e o modelo atual:
+  - `ATLETA_PRINCIPAL`, `ACAO_PRINCIPAL` e `PRIORIDADE_TREINO` sem coluna própria em `scout_plays`;
+  - `play_points` ainda como `text`;
+  - codebook atual ainda parcial;
+  - UI atual ainda expõe linguagem técnica do modelo interno.
+
+### Passo 5 — Reescrita validada do documento
+
+- **Arquivos:** `docs/scout/REFAZERSCOUT.md`
+- **Resultado:** o documento foi reduzido para uma versão validada, com:
+  - correção da base SSOT;
+  - correção da lista de `TIPO_FINALIZACAO` de `COLETA_AO_VIVO`;
+  - reaproveitamento do que já estava correto;
+  - rebaixamento de `scout_live_entries` para hipótese arquitetural em aberto.
+
+---
+
+## ✅ Validação Final
+
+- `docs/scout/REFAZERSCOUT.md` agora respeita a precedência `manual > TABELA_MESTRE`;
+- o documento não trata mais recomendação arquitetural como verdade já validada;
+- os campos e listas citados para `COLETA_AO_VIVO` batem com os SSOTs atuais;
+- a conclusão final preserva o que já está comprovado no backend e marca como aberto apenas o que realmente segue em decisão.
 
 # Execution Log: CEPR-0046
 
@@ -2748,3 +3202,475 @@ Solicitação do usuário para seguir direto no vertical slice mínimo do fronte
 ### Saída
 
 - vertical slice mínimo do frontend do scout pronto e isolado no contrato novo
+
+---
+
+Solicitação do usuário para iniciar a implementação correta do scout a partir dos SSOTs aprovados:
+
+- `.files/Codificação_e_Validação_do_Scout.md`
+- `.files/analise/Tabela_Mestre_dos_Campos.xlsx`
+- `AGENT.md`
+
+### Protocolo seguido
+
+1. Li `AGENT.md`.
+2. Li `CEPRAEA.md`.
+3. Verifiquei os 3 PRs mais recentes:
+   - `#10`
+   - `#9`
+   - `#8`
+4. Mantive a implementação nova restrita ao domínio do scout, sem tocar em UI neste passo.
+
+### Decisão de implementação aplicada
+
+- Iniciar pela fundação de persistência da `COLETA_AO_VIVO`, sem tentar reaproveitar artificialmente `scout_play_participations` como camada de captura rápida.
+- Materializar isso em uma nova tabela `public.scout_live_entries`.
+
+### Arquivos alvo
+
+- `supabase/migrations/0012_scout_live_entries_foundation.sql`
+- `supabase/migrations/0013_scout_live_entries_security.sql`
+- `supabase/tests/scout_live_entries_foundation.test.sql`
+- `supabase/tests/scout_live_entries_security.test.sql`
+- `src/types/index.ts`
+- `src/features/scout/scoutApi.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ações executadas
+
+1. Modelei `public.scout_live_entries` com os campos centrais da `COLETA_AO_VIVO`, incluindo:
+   - `id_jogada`
+   - `tempo_jogo`
+   - `fase_da_bola_code`
+   - `equipe_analisada_id`
+   - `fase_equipe_analisada_code`
+   - `atleta_principal_id`
+   - `acao_principal_text`
+   - `tipo_finalizacao_code`
+   - `resultado_factual_code`
+   - `pontos_jogada`
+   - `causa_provavel_code`
+   - `prioridade_treino_code`
+   - `status_validacao_code`
+   - `derived_scout_play_id`
+2. Adicionei FKs compostas por `team_id` quando necessárias e os índices básicos de lookup.
+3. Habilitei `RLS` na tabela e criei policies `member read / owner+coach write`.
+4. Criei testes SQL para:
+   - existência da tabela e constraints principais;
+   - integridade multi-tenant;
+   - grants;
+   - leitura/escrita via RLS.
+5. Expandi os contratos TypeScript do scout com a nova entidade `ScoutLiveEntry`.
+6. Expandi `scoutApi.ts` com CRUD mínimo da `COLETA_AO_VIVO`.
+
+### Validação executada
+
+- `npm run typecheck` passou.
+- Rodei `0012` + `0013` em banco local.
+- Rodei `scout_live_entries_foundation.test.sql` com sucesso.
+- Rodei `scout_live_entries_security.test.sql` com sucesso.
+
+### Observação de validação
+
+- O primeiro modo de execução dos testes falhou apenas porque cada arquivo `.test.sql` já gerencia sua própria transação, e eu tinha aninhado isso numa transação externa. Corrigi a forma de execução e revalidei o escopo com sucesso.
+
+### Saída
+
+- Fundação de persistência da `COLETA_AO_VIVO` iniciada corretamente, com banco, segurança, testes e runtime mínimo já no repositório.
+
+---
+
+Solicitação do usuário para continuar a implementação pela etapa 3 do refactor do scout:
+
+- RPC/API da `COLETA_AO_VIVO`
+- seguindo o corte semântico aprovado em `docs/scout/REFAZERSCOUT.md`
+- sem abrir UI ainda
+
+### Decisão aplicada
+
+- Tratar a etapa 3 como duas entregas acopladas:
+  1. codebook mínimo completo da `COLETA_AO_VIVO`;
+  2. RPC `create_scout_live_entry` com validação rígida e sem derivação automática.
+
+### Arquivos alvo
+
+- `supabase/migrations/0014_scout_live_entries_codebook.sql`
+- `supabase/migrations/0015_scout_live_entries_rpc.sql`
+- `supabase/tests/scout_codebook_foundation.test.sql`
+- `supabase/tests/scout_live_entries_rpc_grants.test.sql`
+- `supabase/tests/scout_live_entries_rpc_create.test.sql`
+- `src/types/index.ts`
+- `src/features/scout/scoutApi.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ações executadas
+
+1. Estendi `public.scout_code_values` com metadados semânticos adicionais:
+   - `description`
+   - `when_to_use`
+   - `when_not_to_use`
+2. Semeei as listas mínimas faltantes da `COLETA_AO_VIVO`:
+   - `LISTA_FASE_EQUIPE`
+   - `LISTA_TIPO_FINALIZACAO`
+   - `LISTA_STATUS_VALIDACAO`
+   - `LISTA_ACAO_PRINCIPAL_AT_POS`
+   - `LISTA_ACAO_PRINCIPAL_DEF_POS`
+   - `LISTA_ACAO_PRINCIPAL_TRANS_OF`
+   - `LISTA_ACAO_PRINCIPAL_TRANS_DEF`
+3. Mapeei os novos campos de `scout_live_entries` em `public.scout_field_codebook_map`, incluindo o selector por `fase_da_bola_code` para `acao_principal_suggestion_code`.
+4. Criei a RPC `public.create_scout_live_entry(jsonb)` com:
+   - autenticação obrigatória;
+   - permissão restrita a `owner/coach`;
+   - resolução do `team_id` a partir do `scout_game_id`;
+   - validação rígida de `codebook`;
+   - validação condicional de sistemas, finalização e pontos;
+   - validação de atleta ativa e do mesmo time;
+   - normalização de `acao_principal_text` para sugestão oficial;
+   - aceite de valor custom curto/controlado para `ACAO_PRINCIPAL`;
+   - `status_validacao_code` forçado para `PENDENTE`;
+   - registro em `audit_logs`.
+5. Atualizei o client Supabase do scout:
+   - `createScoutLiveEntry` deixou de fazer `insert` direto e passou a chamar a RPC;
+   - `fetchScoutCodebook` passou a expor os novos metadados semânticos do codebook.
+6. Atualizei o teste antigo do codebook para a nova contagem e para as novas mappings/policies.
+7. Criei testes de grants e de criação da RPC cobrindo cenários positivos e negativos.
+
+### Validação executada
+
+- `npm run typecheck`
+- aplicação local de:
+  - `0012_scout_live_entries_foundation.sql`
+  - `0013_scout_live_entries_security.sql`
+  - `0014_scout_live_entries_codebook.sql`
+  - `0015_scout_live_entries_rpc.sql`
+- testes SQL:
+  - `scout_codebook_foundation.test.sql`
+  - `scout_live_entries_foundation.test.sql`
+  - `scout_live_entries_security.test.sql`
+  - `scout_live_entries_rpc_grants.test.sql`
+  - `scout_live_entries_rpc_create.test.sql`
+
+### Ajustes de execução
+
+- Corrigi a idempotência de `0012` adicionando `drop trigger if exists` antes de recriar o trigger `scout_live_entries_set_updated_at`.
+- Corrigi a ordem interna da RPC para aceitar `acao_principal_suggestion_code` como forma válida de satisfazer a obrigatoriedade de `ACAO_PRINCIPAL`, antes da checagem final de ação observável.
+- Evitei rodar migrations e testes SQL em paralelo na mesma rodada, porque isso gerava falso negativo no teste do codebook antes do schema novo terminar de aplicar.
+
+### Saída
+
+- etapa 3 do scout fechada no backend:
+  - codebook mínimo da `COLETA_AO_VIVO` pronto;
+  - RPC create-only pronta;
+  - client usando a nova fronteira;
+  - testes positivos e negativos cobrindo a criação rápida sem derivação automática.
+
+---
+
+Solicitação do usuário para avançar ao próximo slice autorizado:
+
+- implementar a tela `COLETA_AO_VIVO`
+- sobre `create_scout_live_entry(jsonb)`
+- sem expandir ainda para `COLETA_SCOUT`, `PARTICIPACOES` ou análise detalhada
+
+### Decisão aplicada
+
+- Reaproveitar a rota `/scout`, mas substituir a lógica de “workspace técnico” por uma tela real de captura rápida.
+- Manter o contrato novo do backend como única fronteira de escrita.
+
+### Arquivos alvo
+
+- `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- `src/features/scout/scoutApi.ts`
+- `src/types/index.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ações executadas
+
+1. Reescrevi `ScoutWorkspacePage.tsx` para trabalhar com:
+   - `fetchScoutGames`
+   - `createScoutGame`
+   - `fetchScoutLiveEntriesForGame`
+   - `createScoutLiveEntry`
+2. Estruturei a tela em três frentes:
+   - seleção/criação de jogo;
+   - listagem das entradas ao vivo do jogo;
+   - formulário de nova entrada rápida.
+3. Removi da UX principal os conceitos herdados da workspace técnica anterior:
+   - bundle de `scout_play`
+   - participações detalhadas
+   - edição de jogada normalizada
+4. Passei a exibir condicionalmente os campos conforme a fase/resultado:
+   - `SISTEMA_OFENSIVO` em `AT_POS`
+   - `SISTEMA_DEFENSIVO` em `DEF_POS`
+   - `TIPO_FINALIZACAO` quando houve finalização
+   - `PONTOS_JOGADA` quando houve gol
+5. Implementei `ACAO_PRINCIPAL` com input assistido por fase:
+   - usa sugestões do codebook;
+   - aceita valor custom curto/controlado;
+   - normaliza valor custom para formato de banco sem tornar isso enum rígido.
+6. Adicionei tradução inicial de erros do backend para mensagens operacionais da tela.
+7. Ajustei `src/types/index.ts` e `src/features/scout/scoutApi.ts` para expor os metadados semânticos novos do codebook.
+
+### Validação executada
+
+- `npm run typecheck`
+- `npm run build`
+
+### Observações de implementação
+
+- A tela mostra explicitamente que a entrada nasce como `PENDENTE`.
+- A tela não cria `scout_plays`.
+- A tela não cria `scout_play_participations`.
+- A tela ainda não implementa edição/correção da entrada ao vivo; este slice é create-first.
+- Não houve verificação visual em navegador automatizado neste passo.
+
+### Saída
+
+- primeiro frontend funcional da `COLETA_AO_VIVO` pronto sobre a RPC validada, sem contaminar a captura rápida com análise detalhada.
+
+---
+
+Solicitação do usuário para validar operacionalmente a rota `/scout` antes de seguir para novas camadas do scout.
+
+### Estratégia aplicada
+
+1. Reativar o Supabase local com Docker disponível.
+2. Executar `supabase db reset` para garantir schema + seed coerentes.
+3. Fazer smoke test browser-driven com login real.
+4. Conferir no banco se a coleta rápida permaneceu isolada de `scout_plays` e `scout_play_participations`.
+
+### Ações executadas
+
+1. Revalidei o ambiente local:
+   - `supabase start`
+   - `supabase db reset`
+2. Confirmei a baseline do banco antes do fluxo:
+   - `scout_live_entries = 0`
+   - `scout_plays = 0`
+   - `scout_play_participations = 0`
+3. Testei o login real em `/login` com:
+   - `coach@cepraea.test`
+   - `password`
+4. Testei a rota `/scout` em navegador automatizado com:
+   - jogo já criado/ativo do smoke test;
+   - 4 entradas reais:
+     - `SMOKE-ATPOS-001`
+     - `SMOKE-DEFPOS-001`
+     - `SMOKE-TRANSOF-001`
+     - `SMOKE-TRANSDEF-001`
+5. Durante o smoke test, encontrei um detalhe positivo de UX:
+   - `PONTOS_JOGADA` fica desabilitado quando o resultado não é `GOL`;
+   - o primeiro script de automação falhou justamente por tentar preencher esse campo em `DEF_POS`, o que confirmou a regra condicional da UI.
+6. Reexecutei o smoke test respeitando essa condição e concluí o fluxo.
+7. Conferi o banco após o fluxo:
+   - `public.scout_live_entries` contém 4 linhas `SMOKE-*`
+   - `public.scout_plays` continua com `0`
+   - `public.scout_play_participations` continua com `0`
+8. Conferi também os campos salvos:
+   - `SMOKE-ATPOS-001` com `GIRO`, `suggestion_code = GIRO`, `is_custom = false`
+   - `SMOKE-DEFPOS-001` com `BLOQ_GIRO`, `suggestion_code = BLOQ_GIRO`, `is_custom = false`
+   - `SMOKE-TRANSOF-001` com `QUEBRA_DEF_RAPIDA`, `suggestion_code = null`, `is_custom = true`
+   - `SMOKE-TRANSDEF-001` com `NEUTRALIZA_DIRETA`, `suggestion_code = NEUTRALIZA_DIRETA`, `is_custom = false`
+
+### Saída
+
+- a rota `/scout` passou no primeiro smoke test operacional do slice `COLETA_AO_VIVO`;
+- a captura rápida está funcional e semanticamente isolada da análise detalhada.
+
+---
+
+Solicitação do usuário para ajustar o scout às regras reais do handebol de praia antes do piloto humano, com foco em:
+
+- pontuação de 1 e 2 pontos;
+- sequências sem finalização;
+- transições e trocas laterais;
+- controle melhor de `ACAO_PRINCIPAL` custom.
+
+### Estratégia aplicada
+
+1. Ler os gaps funcionais enviados pelo usuário à luz dos SSOTs já validados.
+2. Corrigir o contrato da `COLETA_AO_VIVO` sem quebrar a fronteira com `scout_plays` e `PARTICIPACOES`.
+3. Implementar as novas regras primeiro no banco/RPC, depois propagar para types, client e UI.
+4. Validar tudo com `typecheck`, `build`, reset do Supabase local e testes SQL direcionados.
+
+### Ações executadas
+
+1. Adicionei `motivo_pontuacao_code` ao contrato de `scout_live_entries`.
+2. Ampliei `LISTA_RESULTADO_FACTUAL` para cobrir sequências sem arremesso e saídas de transição:
+   - `RECUPERACAO_POSSE`
+   - `FALTA_ATAQUE`
+   - `PASSIVO`
+   - `ERRO_TROCA`
+   - `TRANSICAO_NEUTRALIZADA`
+   - `DEFESA_ESTABILIZADA`
+   - `VANTAGEM_CRIADA`
+   - `VANTAGEM_PERDIDA`
+3. Criei `LISTA_MOTIVO_PONTUACAO` com motivos mínimos para diferenciar gols de 1 e 2 pontos.
+4. Reescrevi a RPC `create_scout_live_entry(jsonb)` para:
+   - exigir `motivo_pontuacao_code` em `GOL`;
+   - validar coerência entre motivo, finalização e pontuação;
+   - manter `TIPO_FINALIZACAO` só quando houve finalização;
+   - endurecer `ACAO_PRINCIPAL` custom contra resultado/causa/feedback disfarçado.
+5. Atualizei `src/types/index.ts` e `src/features/scout/scoutApi.ts` com:
+   - novos códigos de resultado factual;
+   - novo tipo `ScoutScoringReasonCode`;
+   - novo campo `motivoPontuacaoCode`.
+6. Ajustei a UI de `/scout` para:
+   - exibir `Motivo da pontuação` apenas quando `RESULTADO_FACTUAL = GOL`;
+   - guiar `PONTOS_JOGADA` pelo motivo;
+   - adicionar microcopy em `ATLETA_PRINCIPAL` e `TIPO_FINALIZACAO`.
+7. Atualizei os testes SQL do codebook e da RPC para cobrir as novas regras.
+8. Rodei:
+   - `npm run typecheck`
+   - `npm run build`
+   - `supabase db reset --local --yes`
+   - `psql ... scout_codebook_foundation.test.sql`
+   - `psql ... scout_live_entries_foundation.test.sql`
+   - `psql ... scout_live_entries_rpc_grants.test.sql`
+   - `psql ... scout_live_entries_rpc_create.test.sql`
+
+### Observações de implementação
+
+- A fronteira de captura rápida foi preservada:
+  - não cria `scout_plays`;
+  - não cria `scout_play_participations`;
+  - continua nascendo com `STATUS_VALIDACAO = PENDENTE`.
+- `MOTIVO_PONTUACAO` foi escolhido em vez de posição/função detalhada da atleta, porque resolve a regra de pontuação sem inflar a coleta ao vivo.
+- O preview visual automatizado do build foi tentado, mas o `agent-browser` CLI não está disponível neste ambiente; a validação forte deste slice ficou ancorada em build + testes SQL + coerência do runtime.
+
+### Saída
+
+- `COLETA_AO_VIVO` agora respeita melhor as regras específicas do handebol de praia nas situações críticas levantadas pelo usuário:
+  - gol simples de atleta comum vs especialista/goleira;
+  - recuperação de posse sem arremesso;
+  - transição neutralizada/estabilizada sem exigir sistema estabilizado;
+  - ação custom curta sem contaminar causa, resultado ou feedback.
+
+---
+
+## [2026-05-14] — Implementação do trio da matriz canonica no repo
+
+### Contexto
+
+Solicitacao do usuario para materializar no repositório o trio minimo da matriz canonica de compatibilidade da `COLETA_AO_VIVO`:
+
+- `docs/scout/matriz-compatibilidade-coleta-ao-vivo.md`
+- `src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+
+### Protocolo seguido
+
+1. Li `AGENT.md`.
+2. Li `CEPRAEA.md`.
+3. Revalidei o contexto recente do scout pelos ultimos commits relevantes do branch:
+   - `cecf554` — frontend workspace do scout
+   - `0ba645f` — runtime contracts do scout
+   - `a718359` — codebook, security e RPC foundation
+4. Reli as fontes do contrato:
+   - manual consolidado em `.files/analise/Codificação_e_Validação_do_Scout.md`
+   - workbook `Tabela_Mestre_dos_Campos.xlsx`
+   - Notion `Matriz Canônica de Compatibilidade — COLETA_AO_VIVO`
+   - implementação atual em `ScoutWorkspacePage.tsx`, migrations e E2E
+
+### Decisão de implementação
+
+- Criar a matriz primeiro como contrato central puro, sem religar a UI a esse arquivo nesta rodada.
+- Preservar o comportamento validado existente; evitar refactor funcional desnecessario no `ScoutWorkspacePage.tsx`.
+- Codificar no contrato apenas regras que já existem ou que estão explicitamente canonizadas no Notion/SSOT do slice atual.
+
+### Ações executadas
+
+1. Criei `docs/scout/matriz-compatibilidade-coleta-ao-vivo.md` como espelho textual do contrato editorial:
+   - papel do Notion vs repo;
+   - categorias por fase;
+   - regras por categoria/acao;
+   - derivacao de finalizacao;
+   - pontuacao;
+   - invariantes de persistencia;
+   - gate obrigatorio para agentes.
+2. Criei `src/features/scout/domain/liveCollectionCompatibility.matrix.ts` com:
+   - tipos locais do contrato (`category`, `basic action`, `classification`);
+   - `liveCollectionCompatibilityMatrix`;
+   - `LIVE_COLLECTION_PERSISTENCE_INVARIANTS`;
+   - `LIVE_COLLECTION_POINTS_BY_SCORING_REASON`;
+   - helpers de consulta (`getAllowedCategoriesForPhase`, `getAllowedBasicActions`, `getAllowedClassifications`, `getAllowedResults`, `deriveFinishTypeFromClassification`, `shouldShowFinishTypeField`, `shouldShowScoringFields`).
+3. Criei `src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts` com 10 testes cobrindo:
+   - filtro de categoria por fase;
+   - `AT_POS + PASSE`;
+   - `AT_POS + ARREMESSO`;
+   - `DEF_POS + BLOQUEIO`;
+   - `DEF_POS + INTERCEPTACAO/ROUBO`;
+   - `DEF_POS + COBERTURA`;
+   - `TRANS_OF + ARREMESSO`;
+   - regras de pontuacao;
+   - invariantes de persistencia;
+   - ausencia de overlap `allowedResults x forbiddenResults`.
+4. Ajustei `vitest.config.ts` para descobrir testes em `src/**/*.test.ts`.
+5. Corrigi um detalhe de tipagem no helper `SHOT_RESULTS` apos o primeiro `typecheck`.
+
+### Validação executada
+
+- `npm run typecheck`
+- `npx vitest run src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+
+### Resultado
+
+- `typecheck` passou sem erros.
+- O teste novo passou com `10/10`.
+- O trio solicitado agora existe no repo como camada editorial + executavel + teste unitario.
+
+### Observações de escopo
+
+- Nesta rodada, **nao** religuei `ScoutWorkspacePage.tsx` ao novo contrato central.
+- O arquivo novo funciona como fonte unificada para os proximos passos de refactor, sem alterar o runtime atual ja validado.
+
+## [2026-05-14] — UI ligada ao contrato central da matriz
+
+### Contexto lido
+
+- reli a implementacao atual em `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- reli o contrato novo em `src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- validei o que ainda estava hardcoded na UI:
+  - categorias por fase;
+  - acoes basicas por categoria;
+  - classificacoes de arremesso por fase;
+  - resultados por categoria/acao;
+  - derivacao de finalizacao e de motivo de pontuacao
+
+### Decisão de implementação
+
+- usar a matriz central como fonte unica para a cadeia `fase -> categoria -> acao basica -> classificacao -> resultado`
+- ampliar o contrato somente com metadados que a UI realmente precisava consumir
+- remover os fallbacks semanticos locais da tela e preservar apenas microcopy/UX
+
+### Ações executadas
+
+1. Expandi `liveCollectionCompatibility.matrix.ts` com:
+   - `basicActionListKey` por categoria;
+   - `derivedScoringReasonByClassification`;
+   - helpers `getBasicActionListKey`, `getClassificationListKey`, `getAllowedResultsForSelection`, `getAllowedFinishTypes`, `getAllowedScoringReasons`, `deriveScoringReasonFromClassification`.
+2. Refatorei `ScoutWorkspacePage.tsx` para:
+   - filtrar `categoriaAcaoOptions` por `getAllowedCategoriesForPhase`;
+   - filtrar `acaoBasicaOptions` e `classificacaoOptions` pela matriz;
+   - montar `allowedFactualResults` via `getAllowedResultsForSelection`;
+   - calcular `requiresFinishType` e `requiresScoringReason` via `shouldShowFinishTypeField` e `shouldShowScoringFields`;
+   - derivar `tipoFinalizacao` e `motivoPontuacao` a partir da classificacao quando o contrato manda;
+   - limpar automaticamente estado dependente invalido.
+3. Ajustei a ponte `pontosJogada`:
+   - a matriz permanece numerica (`1 | 2`);
+   - a UI converte para chips `'1' | '2'` sem reintroduzir tabela paralela.
+4. Expandi `liveCollectionCompatibility.matrix.test.ts` para `11` testes cobrindo os novos helpers e `NAO_OBSERVADO`.
+
+### Validação executada
+
+- `npm run typecheck`
+- `npx vitest run src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+
+### Resultado
+
+- `typecheck` passou sem erros.
+- o teste da matriz passou com `11/11`.
+- a UI da `COLETA_AO_VIVO` agora consome o contrato central do repo em vez de manter listas semanticas duplicadas no componente.
