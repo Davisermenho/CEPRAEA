@@ -112,11 +112,16 @@ test('SMOKE-04: roster add/remove atleta em /scout/preparar/:gameId', async ({ p
   await page.waitForURL(/\/scout\/preparar\/[0-9a-f-]{36}/, { timeout: 10_000 })
   await page.waitForLoadState('networkidle', { timeout: 15_000 })
 
-  // Se não há atletas cadastradas, pular o toggle (empty state é esperado)
+  // Aguardar o fetch assíncrono de atletas concluir (loadingRoster → false)
+  await page.waitForFunction(
+    () => !document.querySelector('[class*="text-cep-muted"]')?.textContent?.includes('Carregando elenco'),
+    { timeout: 10_000 },
+  )
+
+  // Se não há atletas no DB, o empty state aparece — verificar e sair
   const noAthletesMsg = page.getByText('Nenhuma atleta cadastrada')
-  const hasNoAthletes = await noAthletesMsg.isVisible().catch(() => false)
+  const hasNoAthletes = await noAthletesMsg.isVisible({ timeout: 500 }).catch(() => false)
   if (hasNoAthletes) {
-    // Confirmado: empty state de roster está correto
     await expect(noAthletesMsg).toBeVisible()
     return
   }

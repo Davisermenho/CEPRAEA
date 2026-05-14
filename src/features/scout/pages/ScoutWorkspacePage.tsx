@@ -3,10 +3,11 @@ import { BarChart2, CheckCircle2, ChevronDown, ChevronUp, ClipboardList, LayoutD
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/shared/components/Button'
 import { EmptyState } from '@/shared/components/EmptyState'
-import { useAthleteStore } from '@/stores/athleteStore'
 import {
   createScoutLiveEntry,
+  fetchScoutAthletes,
   fetchScoutCodebook,
+  fetchScoutGameAthletes,
   fetchScoutGames,
   fetchScoutLiveEntriesForGame,
 } from '@/features/scout/scoutApi'
@@ -29,11 +30,13 @@ import {
   type LiveCollectionClassificationCode,
 } from '@/features/scout/domain/liveCollectionCompatibility.matrix'
 import type {
+  AthleteWithScoutProfile,
   ScoutAnalyzedTeamPhaseCode,
   ScoutCodeList,
   ScoutCodeValue,
   ScoutFactualResultCode,
   ScoutFinishTypeCode,
+  ScoutGameAthlete,
   ScoutGameRecord,
   ScoutLiveEntry,
   ScoutLiveEntryWriteInput,
@@ -318,9 +321,9 @@ function TextAreaField({
 }
 
 export default function ScoutWorkspacePage() {
-  const athletes = useAthleteStore((state) => state.athletes)
-  const activeAthletes = useMemo(() => athletes.filter((athlete) => athlete.status === 'ativo'), [athletes])
   const tempoInputRef = useRef<HTMLInputElement | null>(null)
+  const [rosterGameAthletes, setRosterGameAthletes] = useState<ScoutGameAthlete[]>([])
+  const [allActiveAthletes, setAllActiveAthletes] = useState<AthleteWithScoutProfile[]>([])
 
   const navigate = useNavigate()
   const { gameId } = useParams<{ gameId: string }>()
@@ -401,10 +404,15 @@ export default function ScoutWorkspacePage() {
     () => new Map(teamPhaseOptions.map((item) => [item.code, item.label])),
     [teamPhaseOptions],
   )
-  const athleteOptions = useMemo(
-    () => activeAthletes.map((athlete) => ({ code: athlete.id, label: athlete.nome })),
-    [activeAthletes],
-  )
+  // If the game has a confirmed roster, restrict the select to those athletes.
+  // If no roster is confirmed, fall back to all active scout athletes.
+  const athleteOptions = useMemo(() => {
+    const rosterIds = new Set(rosterGameAthletes.map((r) => r.athleteId))
+    const athletes = rosterIds.size > 0
+      ? allActiveAthletes.filter((a) => rosterIds.has(a.id))
+      : allActiveAthletes
+    return athletes.map((a) => ({ code: a.id, label: a.name }))
+  }, [rosterGameAthletes, allActiveAthletes])
 
   const requiresOffensiveSystem = draft.faseDaBolaCode === 'AT_POS'
   const requiresDefensiveSystem = draft.faseDaBolaCode === 'DEF_POS'
@@ -657,9 +665,11 @@ export default function ScoutWorkspacePage() {
   useEffect(() => {
     let active = true
 
-    async function loadEntries() {
+    async function loadGameData() {
       if (!selectedGameId) {
         setLiveEntries([])
+        setRosterGameAthletes([])
+        setAllActiveAthletes([])
         return
       }
 
@@ -667,9 +677,15 @@ export default function ScoutWorkspacePage() {
       setError('')
 
       try {
-        const rows = await fetchScoutLiveEntriesForGame(selectedGameId)
+        const [rows, rosterRows, activeAthletes] = await Promise.all([
+          fetchScoutLiveEntriesForGame(selectedGameId),
+          fetchScoutGameAthletes(selectedGameId),
+          fetchScoutAthletes({ status: 'ativo' }),
+        ])
         if (!active) return
         setLiveEntries(rows)
+        setRosterGameAthletes(rosterRows)
+        setAllActiveAthletes(activeAthletes)
       } catch (err) {
         if (!active) return
         setError(err instanceof Error ? err.message : 'Falha ao carregar as entradas ao vivo.')
@@ -678,7 +694,7 @@ export default function ScoutWorkspacePage() {
       }
     }
 
-    void loadEntries()
+    void loadGameData()
     return () => {
       active = false
     }

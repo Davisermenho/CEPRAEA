@@ -41,7 +41,8 @@ export default function ScoutPrepareSessionPage() {
   const [game, setGame] = useState<ScoutGameRecord | null>(null)
   const [athletes, setAthletes] = useState<AthleteWithScoutProfile[]>([])
   const [roster, setRoster] = useState<ScoutGameAthlete[]>([])
-  const [loadingRoster, setLoadingRoster] = useState(false)
+  // Start as true when gameId exists to avoid empty-state flash before fetchScoutAthletes resolves
+  const [loadingRoster, setLoadingRoster] = useState(!!gameId)
   const [rosterError, setRosterError] = useState('')
   const [pendingAthleteId, setPendingAthleteId] = useState<string | null>(null)
 
