@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, CheckSquare, AlertTriangle, Square, Video } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
-import { useAthleteStore } from '@/stores/athleteStore'
 import {
   addAthleteToGame,
   createScoutGame,
+  fetchScoutAthletes,
   fetchScoutGameAthletes,
   fetchScoutGames,
   removeAthleteFromGame,
 } from '@/features/scout/scoutApi'
-import type { ScoutGameAthlete, ScoutGameRecord, ScoutSessionType } from '@/types'
+import type { AthleteWithScoutProfile, ScoutGameAthlete, ScoutGameRecord, ScoutSessionType } from '@/types'
 
 const SESSION_TYPES: { value: ScoutSessionType; label: string }[] = [
   { value: 'JOGO', label: 'Jogo' },
@@ -39,20 +39,22 @@ export default function ScoutPrepareSessionPage() {
 
   // ── Elenco (só após gameId existir)
   const [game, setGame] = useState<ScoutGameRecord | null>(null)
+  const [athletes, setAthletes] = useState<AthleteWithScoutProfile[]>([])
   const [roster, setRoster] = useState<ScoutGameAthlete[]>([])
   const [loadingRoster, setLoadingRoster] = useState(false)
   const [rosterError, setRosterError] = useState('')
   const [pendingAthleteId, setPendingAthleteId] = useState<string | null>(null)
 
-  const allAthletes = useAthleteStore((s) => s.athletes)
-  const athletes = allAthletes.filter((a) => a.status === 'ativo')
-
-  // ── Carregar sessão e elenco existentes quando há gameId
+  // ── Carregar sessão, elenco e atletas ativas quando há gameId
   useEffect(() => {
     if (!gameId) return
     setLoadingRoster(true)
-    Promise.all([fetchScoutGames(), fetchScoutGameAthletes(gameId)])
-      .then(([games, existingRoster]) => {
+    Promise.all([
+      fetchScoutGames(),
+      fetchScoutGameAthletes(gameId),
+      fetchScoutAthletes({ status: 'ativo' }),
+    ])
+      .then(([games, existingRoster, activeAthletes]) => {
         const found = games.find((g) => g.id === gameId)
         if (found) {
           setGame(found)
@@ -63,6 +65,7 @@ export default function ScoutPrepareSessionPage() {
           setNotes(found.notes ?? '')
         }
         setRoster(existingRoster)
+        setAthletes(activeAthletes)
       })
       .catch((err: unknown) => setRosterError((err as Error).message))
       .finally(() => setLoadingRoster(false))
@@ -307,7 +310,7 @@ export default function ScoutPrepareSessionPage() {
                           <Square className="h-4 w-4 text-cep-muted shrink-0" />
                         )}
                         <span className={`text-sm font-medium ${inRoster ? 'text-cep-white' : 'text-cep-muted'}`}>
-                          {athlete.nome}
+                          {athlete.name}
                         </span>
                         {pending && (
                           <span className="ml-auto text-xs text-cep-muted">…</span>
