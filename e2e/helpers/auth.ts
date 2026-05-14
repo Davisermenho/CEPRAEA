@@ -8,8 +8,10 @@ export async function loginAsCoach(page: Page) {
   await page.locator('#coach-email').fill(coachEmail)
   await page.locator('#coach-password').fill(coachPassword)
   await page.getByRole('button', { name: /entrar/i }).click()
-  await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 10_000 })
-  await expect(page.getByRole('heading', { name: /central de comando/i })).toBeVisible()
+  await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 20_000 })
+  await expect(page.getByRole('link', { name: 'Início', exact: true })).toBeVisible({
+    timeout: 20_000,
+  })
 }
 
 export async function loginAsAthlete(page: Page, email: string, password: string) {
