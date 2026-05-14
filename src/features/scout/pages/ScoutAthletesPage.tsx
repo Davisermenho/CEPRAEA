@@ -27,9 +27,9 @@ function buildMap(lists: { id: string; listKey: string; values: ScoutCodeValue[]
   return { idMap, valueMap }
 }
 
-const INPUT_CLS = 'w-full text-sm border rounded px-2 py-1.5'
-const LABEL_CLS = 'block text-xs font-medium text-neutral-600 mb-1'
-const SELECT_CLS = 'w-full text-sm border rounded px-2 py-1.5 bg-white'
+const INPUT_CLS = 'w-full rounded-lg border border-cep-purple-700 bg-cep-purple-950/60 px-3 py-2 text-sm text-cep-white placeholder-cep-muted focus:outline-none focus:border-cep-purple-400'
+const LABEL_CLS = 'block text-xs font-medium uppercase tracking-[0.18em] text-cep-muted mb-1.5'
+const SELECT_CLS = 'w-full rounded-lg border border-cep-purple-700 bg-cep-purple-950/60 px-3 py-2 text-sm text-cep-white focus:outline-none focus:border-cep-purple-400'
 
 const EMPTY_FORM: AthleteWithScoutProfileWriteInput = {
   name: '',
@@ -131,28 +131,40 @@ export default function ScoutAthletesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="bg-white border-b px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/scout')}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <UserCheck className="h-5 w-5 text-blue-600" />
-        <h1 className="font-semibold text-gray-900">Cadastro de Atletas</h1>
-        <div className="ml-auto">
-          <Button size="sm" onClick={() => { setShowForm(true); setFormError(null) }}>
-            <Plus className="h-4 w-4 mr-1" />
-            Nova Atleta
-          </Button>
-        </div>
-      </div>
+    <div className="min-h-full bg-[radial-gradient(circle_at_top_left,_rgba(184,255,84,0.08),_transparent_28%),linear-gradient(180deg,_rgba(34,16,61,0.98),_rgba(14,7,28,1))] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl space-y-6">
 
-      <div className="flex-1 p-4 max-w-4xl mx-auto w-full space-y-4">
+        {/* Voltar */}
+        <button
+          onClick={() => navigate('/scout')}
+          className="inline-flex items-center gap-1.5 text-xs text-cep-muted hover:text-cep-white transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Central do Scout
+        </button>
+
+        {/* Header */}
+        <header className="rounded-[2rem] border border-cep-purple-800 bg-cep-purple-900/80 p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-cep-purple-700 bg-cep-purple-950/70 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-cep-lime-300">
+                <UserCheck className="h-3.5 w-3.5" />
+                Cadastro
+              </span>
+              <h1 className="text-2xl font-semibold text-cep-white">Atletas</h1>
+            </div>
+            <Button size="sm" onClick={() => { setShowForm(true); setFormError(null) }}>
+              <Plus className="h-4 w-4 mr-1" />
+              Nova Atleta
+            </Button>
+          </div>
+        </header>
 
         {/* Busca */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-cep-muted" />
           <input
-            className={`${INPUT_CLS} pl-9`}
+            className="w-full rounded-lg border border-cep-purple-700 bg-cep-purple-950/60 pl-9 pr-3 py-2 text-sm text-cep-white placeholder-cep-muted focus:outline-none focus:border-cep-purple-400"
             placeholder="Buscar por nome..."
             value={search}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
@@ -161,13 +173,15 @@ export default function ScoutAthletesPage() {
 
         {/* Formulário */}
         {showForm && (
-          <div className="bg-white border rounded-lg p-4 space-y-4">
-            <h2 className="font-semibold text-gray-800">Nova Atleta</h2>
-            {formError && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">{formError}</p>}
+          <div className="rounded-2xl border border-cep-purple-800 bg-cep-purple-950/40 p-5 space-y-4">
+            <h2 className="text-sm font-semibold text-cep-white">Nova Atleta</h2>
+            {formError && (
+              <p className="text-xs text-red-400 bg-red-950/30 border border-red-800 rounded-lg px-3 py-2">{formError}</p>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
 
               <fieldset className="space-y-3">
-                <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Dados Básicos</legend>
+                <legend className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Dados Básicos</legend>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className={LABEL_CLS}>Nome *</label>
@@ -207,14 +221,15 @@ export default function ScoutAthletesPage() {
                 </div>
                 <div>
                   <label className={LABEL_CLS}>Observações</label>
-                  <textarea className="w-full text-sm border rounded px-2 py-1.5 min-h-[60px]"
+                  <textarea
+                    className="w-full rounded-lg border border-cep-purple-700 bg-cep-purple-950/60 px-3 py-2 text-sm text-cep-white placeholder-cep-muted focus:outline-none focus:border-cep-purple-400 resize-none min-h-[60px]"
                     value={form.notes ?? ''}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setField('notes', e.target.value)} />
                 </div>
               </fieldset>
 
               <fieldset className="space-y-3">
-                <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Perfil Tático Scout</legend>
+                <legend className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Perfil Tático Scout</legend>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className={LABEL_CLS}>Mão Dominante</label>
@@ -259,7 +274,7 @@ export default function ScoutAthletesPage() {
                 </div>
                 <div className="flex flex-wrap gap-4 pt-1">
                   {([['isGoalkeeper', 'Goleira'], ['isSpecialist', 'Especialista'], ['isPlaymaker', 'Armadora']] as const).map(([key, lbl]) => (
-                    <label key={key} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <label key={key} className="flex items-center gap-2 text-sm cursor-pointer text-cep-muted hover:text-cep-white transition-colors">
                       <input type="checkbox" checked={!!form[key]}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setField(key, e.target.checked)}
                         className="rounded" />
@@ -270,8 +285,13 @@ export default function ScoutAthletesPage() {
               </fieldset>
 
               <div className="flex gap-2 justify-end pt-2">
-                <Button type="button" variant="secondary" size="sm"
-                  onClick={() => { setShowForm(false); setForm(EMPTY_FORM) }}>Cancelar</Button>
+                <button
+                  type="button"
+                  onClick={() => { setShowForm(false); setForm(EMPTY_FORM) }}
+                  className="rounded-xl border border-cep-purple-700 bg-cep-purple-950/60 px-4 py-2 text-sm font-medium text-cep-muted hover:text-cep-white hover:border-cep-purple-500 transition-colors"
+                >
+                  Cancelar
+                </button>
                 <Button type="submit" size="sm" disabled={submitting}>
                   {submitting ? 'Salvando...' : 'Cadastrar'}
                 </Button>
@@ -282,26 +302,30 @@ export default function ScoutAthletesPage() {
 
         {/* Lista */}
         {loading ? (
-          <p className="text-sm text-gray-500 text-center py-8">Carregando...</p>
+          <p className="text-sm text-cep-muted text-center py-8">Carregando...</p>
         ) : error ? (
-          <p className="text-sm text-red-600 text-center py-8">{error}</p>
+          <p className="text-sm text-red-400 text-center py-8">{error}</p>
         ) : athletes.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-8">Nenhuma atleta cadastrada.</p>
+          <div className="rounded-2xl border border-cep-purple-800 bg-cep-purple-950/40 px-4 py-12 text-center">
+            <UserCheck className="h-8 w-8 text-cep-muted mx-auto mb-3" />
+            <p className="text-sm text-cep-muted">Nenhuma atleta cadastrada.</p>
+            <p className="text-xs text-cep-muted mt-1">Use "Nova Atleta" para começar.</p>
+          </div>
         ) : (
           <div className="space-y-2">
             {athletes.map((a) => (
-              <div key={a.id} className="bg-white border rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2">
+              <div key={a.id} className="rounded-xl border border-cep-purple-800 bg-cep-purple-950/40 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{a.name}</p>
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="font-medium text-cep-white truncate">{a.name}</p>
+                  <p className="text-xs text-cep-muted truncate">
                     {[a.mainFunction, a.dominantHand, a.category].filter(Boolean).join(' · ')}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {a.isGoalkeeper && <span className="text-xs bg-blue-100 text-blue-700 rounded px-2 py-0.5">Goleira</span>}
-                  {a.isPlaymaker && <span className="text-xs bg-purple-100 text-purple-700 rounded px-2 py-0.5">Armadora</span>}
-                  {a.isSpecialist && <span className="text-xs bg-orange-100 text-orange-700 rounded px-2 py-0.5">Especialista</span>}
-                  <span className={`text-xs rounded px-2 py-0.5 ${a.status === 'ativo' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                  {a.isGoalkeeper && <span className="text-xs bg-cep-lime-400/15 text-cep-lime-300 rounded-full px-2 py-0.5">Goleira</span>}
+                  {a.isPlaymaker && <span className="text-xs bg-purple-400/15 text-purple-300 rounded-full px-2 py-0.5">Armadora</span>}
+                  {a.isSpecialist && <span className="text-xs bg-yellow-400/15 text-yellow-300 rounded-full px-2 py-0.5">Especialista</span>}
+                  <span className={`text-xs rounded-full px-2 py-0.5 ${a.status === 'ativo' ? 'bg-green-400/15 text-green-300' : 'bg-cep-purple-800/60 text-cep-muted'}`}>
                     {a.status}
                   </span>
                 </div>

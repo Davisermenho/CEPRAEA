@@ -15,15 +15,18 @@ import type {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-const INPUT_CLS = 'w-full text-sm border rounded px-2 py-1.5'
-const LABEL_CLS = 'block text-xs font-medium text-neutral-600 mb-1'
-const SELECT_CLS = 'w-full text-sm border rounded px-2 py-1.5 bg-white'
+const INPUT_CLS =
+  'w-full rounded-lg border border-cep-purple-700 bg-cep-purple-950/60 px-3 py-2 text-sm text-cep-white placeholder-cep-muted focus:outline-none focus:border-cep-purple-400'
+const LABEL_CLS =
+  'block text-xs font-medium uppercase tracking-[0.18em] text-cep-muted mb-1.5'
+const SELECT_CLS =
+  'w-full rounded-lg border border-cep-purple-700 bg-cep-purple-950/60 px-3 py-2 text-sm text-cep-white focus:outline-none focus:border-cep-purple-400'
 
 const TEAM_TYPE_COLORS: Record<string, string> = {
-  PROPRIA: 'bg-blue-100 text-blue-700',
-  ADVERSARIA: 'bg-red-100 text-red-700',
-  TREINO: 'bg-yellow-100 text-yellow-700',
-  OUTRA: 'bg-gray-100 text-gray-600',
+  PROPRIA: 'bg-cep-lime-400/15 text-cep-lime-300',
+  ADVERSARIA: 'bg-red-400/15 text-red-300',
+  TREINO: 'bg-yellow-400/15 text-yellow-300',
+  OUTRA: 'bg-cep-purple-800/60 text-cep-muted',
 }
 
 const EMPTY_FORM: ScoutCatalogTeamWriteInput = {
@@ -98,95 +101,162 @@ export default function ScoutTeamsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="bg-white border-b px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/scout')}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <Shield className="h-5 w-5 text-indigo-600" />
-        <h1 className="font-semibold text-gray-900">Cadastro de Equipes</h1>
-        <div className="ml-auto">
-          <Button size="sm" onClick={() => { setShowForm(true); setFormError(null) }}>
-            <Plus className="h-4 w-4 mr-1" />
-            Nova Equipe
-          </Button>
-        </div>
-      </div>
+    <div className="min-h-full bg-[radial-gradient(circle_at_top_left,_rgba(184,255,84,0.08),_transparent_28%),linear-gradient(180deg,_rgba(34,16,61,0.98),_rgba(14,7,28,1))] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-2xl space-y-6">
 
-      <div className="flex-1 p-4 max-w-3xl mx-auto w-full space-y-4">
+        {/* Voltar */}
+        <button
+          onClick={() => navigate('/scout')}
+          className="inline-flex items-center gap-1.5 text-xs text-cep-muted hover:text-cep-white transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Central do Scout
+        </button>
 
+        {/* Header */}
+        <header className="rounded-[2rem] border border-cep-purple-800 bg-cep-purple-900/80 p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-cep-purple-700 bg-cep-purple-950/70 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-cep-lime-300">
+                <Shield className="h-3.5 w-3.5" />
+                Equipes
+              </span>
+              <h1 className="text-2xl font-semibold text-cep-white">Cadastro de Equipes</h1>
+              <p className="text-sm text-cep-muted">Gerencie equipes próprias e adversárias para o Scout.</p>
+            </div>
+            <Button
+              onClick={() => { setShowForm(true); setFormError(null) }}
+              className="shrink-0"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Nova Equipe
+            </Button>
+          </div>
+        </header>
+
+        {/* Busca */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input className={`${INPUT_CLS} pl-9`} placeholder="Buscar por nome..."
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-cep-muted pointer-events-none" />
+          <input
+            className="w-full rounded-lg border border-cep-purple-700 bg-cep-purple-950/60 pl-9 pr-3 py-2 text-sm text-cep-white placeholder-cep-muted focus:outline-none focus:border-cep-purple-400"
+            placeholder="Buscar por nome…"
             value={search}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)} />
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+          />
         </div>
 
+        {/* Formulário nova equipe */}
         {showForm && (
-          <div className="bg-white border rounded-lg p-4 space-y-4">
-            <h2 className="font-semibold text-gray-800">Nova Equipe</h2>
-            {formError && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">{formError}</p>}
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <section className="rounded-2xl border border-cep-purple-800 bg-cep-purple-950/40 p-5 space-y-4">
+            <h2 className="text-xs font-medium uppercase tracking-widest text-cep-muted">
+              Nova Equipe
+            </h2>
+            {formError && (
+              <p className="text-xs text-red-400 rounded-lg border border-red-800/40 bg-red-950/20 px-3 py-2">
+                {formError}
+              </p>
+            )}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
                   <label className={LABEL_CLS}>Nome *</label>
-                  <input className={INPUT_CLS} value={form.name} required
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setField('name', e.target.value)} />
+                  <input
+                    className={INPUT_CLS}
+                    value={form.name}
+                    required
+                    placeholder="Nome da equipe"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setField('name', e.target.value)}
+                  />
                 </div>
                 <div>
                   <label className={LABEL_CLS}>Tipo de Equipe</label>
-                  <select className={SELECT_CLS} value={form.teamType ?? ''}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setField('teamType', e.target.value)}>
+                  <select
+                    className={SELECT_CLS}
+                    value={form.teamType ?? ''}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setField('teamType', e.target.value)}
+                  >
                     <option value="">— selecionar —</option>
-                    {opts('LISTA_TIPO_EQUIPE').map((o) => <option key={o.code} value={o.code}>{o.label}</option>)}
+                    {opts('LISTA_TIPO_EQUIPE').map((o) => (
+                      <option key={o.code} value={o.code}>{o.label}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
                   <label className={LABEL_CLS}>Categoria</label>
-                  <select className={SELECT_CLS} value={form.category ?? ''}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setField('category', e.target.value)}>
+                  <select
+                    className={SELECT_CLS}
+                    value={form.category ?? ''}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setField('category', e.target.value)}
+                  >
                     <option value="">— selecionar —</option>
-                    {opts('LISTA_CATEGORIA').map((o) => <option key={o.code} value={o.code}>{o.label}</option>)}
+                    {opts('LISTA_CATEGORIA').map((o) => (
+                      <option key={o.code} value={o.code}>{o.label}</option>
+                    ))}
                   </select>
                 </div>
               </div>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" checked={!!form.isInternal} className="rounded"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setField('isInternal', e.target.checked)} />
+              <label className="flex items-center gap-2.5 text-sm text-cep-muted cursor-pointer hover:text-cep-white transition-colors">
+                <input
+                  type="checkbox"
+                  checked={!!form.isInternal}
+                  className="rounded border-cep-purple-600 bg-cep-purple-950 accent-cep-lime-400"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setField('isInternal', e.target.checked)}
+                />
                 Equipe interna (própria)
               </label>
-              <div className="flex gap-2 justify-end pt-2">
-                <Button type="button" variant="secondary" size="sm"
-                  onClick={() => { setShowForm(false); setForm(EMPTY_FORM) }}>Cancelar</Button>
-                <Button type="submit" size="sm" disabled={submitting}>
-                  {submitting ? 'Salvando...' : 'Cadastrar'}
+              <div className="flex gap-3 pt-1">
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? 'Cadastrando…' : 'Cadastrar equipe →'}
                 </Button>
+                <button
+                  type="button"
+                  onClick={() => { setShowForm(false); setForm(EMPTY_FORM) }}
+                  className="rounded-xl border border-cep-purple-700 bg-cep-purple-950/60 px-4 py-2 text-sm font-medium text-cep-muted hover:text-cep-white hover:border-cep-purple-500 transition-colors"
+                >
+                  Cancelar
+                </button>
               </div>
             </form>
-          </div>
+          </section>
         )}
 
+        {/* Lista */}
         {loading ? (
-          <p className="text-sm text-gray-500 text-center py-8">Carregando...</p>
+          <p className="text-sm text-cep-muted text-center py-8">Carregando equipes…</p>
         ) : error ? (
-          <p className="text-sm text-red-600 text-center py-8">{error}</p>
+          <p className="text-sm text-red-400 text-center py-8">{error}</p>
         ) : teams.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-8">Nenhuma equipe cadastrada.</p>
+          <div className="rounded-2xl border border-cep-purple-800 bg-cep-purple-950/40 p-8 text-center space-y-2">
+            <Shield className="mx-auto h-8 w-8 text-cep-muted opacity-40" />
+            <p className="text-sm text-cep-muted">Nenhuma equipe cadastrada.</p>
+            <p className="text-xs text-cep-muted opacity-60">
+              Use "Nova Equipe" para adicionar equipes próprias ou adversárias.
+            </p>
+          </div>
         ) : (
           <div className="space-y-2">
             {teams.map((t) => (
-              <div key={t.id} className="bg-white border rounded-lg px-4 py-3 flex items-center gap-3">
+              <div
+                key={t.id}
+                className="rounded-xl border border-cep-purple-800 bg-cep-purple-950/40 px-4 py-3 flex items-center gap-3"
+              >
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{t.name}</p>
-                  {t.category && <p className="text-xs text-gray-500">{t.category}</p>}
+                  <p className="text-sm font-medium text-cep-white truncate">{t.name}</p>
+                  {t.category && (
+                    <p className="text-xs text-cep-muted mt-0.5">{t.category}</p>
+                  )}
                 </div>
-                <div className="flex flex-wrap gap-1 items-center">
+                <div className="flex flex-wrap gap-1.5 items-center shrink-0">
                   {t.teamType && (
-                    <span className={`text-xs rounded px-2 py-0.5 ${TEAM_TYPE_COLORS[t.teamType] ?? 'bg-gray-100 text-gray-600'}`}>
+                    <span className={`text-xs rounded-full px-2 py-0.5 font-medium ${TEAM_TYPE_COLORS[t.teamType] ?? 'bg-cep-purple-800/60 text-cep-muted'}`}>
                       {t.teamType}
                     </span>
                   )}
-                  {t.isInternal && <span className="text-xs bg-green-100 text-green-700 rounded px-2 py-0.5">Interna</span>}
+                  {t.isInternal && (
+                    <span className="text-xs rounded-full px-2 py-0.5 font-medium bg-cep-lime-400/15 text-cep-lime-300">
+                      Interna
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
