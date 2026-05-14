@@ -87,14 +87,14 @@ Convenção usada neste documento:
 - `RELATORIO`: `10` campos
 - `FEEDBACK`: `12` campos
 - `DASHBOARD`: `6` linhas-resumo de auditoria
-- `COLETA_AO_VIVO`: `18` registros catalogados na `TABELA_MESTRE`
+- `COLETA_AO_VIVO`: `19` registros catalogados na `TABELA_MESTRE`
 
 ## 4. Contratos lógicos obrigatórios
 
 | Contrato | Aba principal | Volume atual | Papel no domínio |
 |---|---:|---:|---|
 | `COLETA_SCOUT` | `COLETA_SCOUT` | 337 | Registro principal da jogada observada |
-| `COLETA_AO_VIVO` | `COLETA_AO_VIVO` | 18 | Captura compacta durante observação ao vivo |
+| `COLETA_AO_VIVO` | `COLETA_AO_VIVO` | 19 | Captura compacta durante observação ao vivo |
 | `PARTICIPACOES` | `PARTICIPACOES` | 17 | Decomposição da jogada por atleta |
 | `EVENTOS_MENTAIS` | `EVENTOS_MENTAIS` | 16 | Registro longitudinal da camada mental/comportamental |
 | `VALIDACAO` | `VALIDACAO` | 10 | Correção e revisão dos dados coletados |
@@ -345,7 +345,7 @@ Regra:
 
 `COLETA_AO_VIVO` existe como superfície compacta de registro em tempo real.
 
-Ela está representada na `TABELA_MESTRE` por `18` linhas próprias e não deve ser confundida com o contrato nuclear `COLETA_SCOUT`.
+Ela está representada na `TABELA_MESTRE` por `19` linhas próprias e não deve ser confundida com o contrato nuclear `COLETA_SCOUT`.
 
 Colunas atuais:
 
@@ -361,6 +361,7 @@ Colunas atuais:
 - `ACAO_PRINCIPAL`
 - `TIPO_FINALIZACAO`
 - `RESULTADO_FACTUAL`
+- `MOTIVO_PONTUACAO` *(obrigatório quando `RESULTADO_FACTUAL = GOL`; explica por que o gol vale 1 ou 2 pontos; não é causa do gol nem tipo de finalização; não se aplica quando `RESULTADO_FACTUAL ≠ GOL`)*
 - `PONTOS_JOGADA`
 - `CAUSA_PROVAVEL`
 - `PRIORIDADE_TREINO`

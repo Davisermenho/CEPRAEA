@@ -368,26 +368,37 @@ Famílias centrais:
 - `LISTA_DESTINO_ARREMESSO`
 - `LISTA_REGIAO_ARREMESSO`
 - `LISTA_RESULTADO_FACTUAL`
+- `LISTA_MOTIVO_PONTUACAO`
 - `LISTA_RESULTADO_ANALISE`
 - `LISTA_RESULTADO_INDIVIDUAL`
 - `LISTA_PONTOS`
 - `LISTA_CAUSA_PRINCIPAL`
 
+Definição canônica de `RESULTADO_FACTUAL`:
+
+> `RESULTADO_FACTUAL` é o **desfecho objetivo da sequência observada**.
+> Pode ser resultado de finalização, perda de posse, recuperação de posse, violação, passivo, erro de troca ou desfecho de transição.
+> **Não é causa provável, não é diagnóstico técnico e não é prioridade de treino.**
+> A presença de `RESULTADO_FACTUAL` não implica que houve arremesso.
+
 Padrão de uso:
 
 - separar claramente tipo, destino, região, resultado factual e leitura analítica;
-- usar `CAUSA_PRINCIPAL` como diagnóstico fechado, não narrativa livre.
+- usar `CAUSA_PRINCIPAL` como diagnóstico fechado, não narrativa livre;
+- quando `RESULTADO_FACTUAL = GOL`, preencher `MOTIVO_PONTUACAO` obrigatoriamente.
 
 Padrão de não uso:
 
 - não usar resultado factual como se fosse causa;
-- não usar ponto como diagnóstico técnico.
+- não usar ponto como diagnóstico técnico;
+- não usar `MOTIVO_PONTUACAO` quando `RESULTADO_FACTUAL ≠ GOL`.
 
 Erros comuns:
 
 - confundir lado da goleira com lado da atacante;
 - reduzir a leitura à consequência final;
-- substituir causa por opinião.
+- substituir causa por opinião;
+- usar `PERDA` como placeholder de "nenhum resultado selecionado" — `PERDA` é desfecho real.
 
 Códigos críticos:
 
@@ -395,11 +406,38 @@ Códigos críticos:
   usar: quando a tipologia da finalização é essa
   não usar: apenas porque a goleira participou do desfecho
 - `LISTA_RESULTADO_FACTUAL::GOL`
-  usar: como desfecho factual
+  usar: como desfecho factual de gol marcado
   não usar: como sinônimo de sucesso técnico automático
+- `LISTA_RESULTADO_FACTUAL::RECUPERACAO_POSSE`
+  usar: quando a defesa ou a transição termina com recuperação de posse sem arremesso
+  não usar: para arremesso bloqueado ou defendido (usar `BLOQUEADO`/`DEFENDIDO`)
+- `LISTA_RESULTADO_FACTUAL::FALTA_ATAQUE`
+  usar: quando a sequência termina com falta cometida pelo ataque
+  não usar: para perda de posse sem falta (usar `PERDA`)
+- `LISTA_RESULTADO_FACTUAL::PASSIVO`
+  usar: quando a sequência termina por decisão de passivo
+  não usar: para situação de pressão de passivo que não gerou perda (usar `PASSIVO_DECISAO` na ação)
+- `LISTA_RESULTADO_FACTUAL::ERRO_TROCA`
+  usar: quando a sequência termina em erro de troca ofensiva ou defensiva durante transição
+  não usar: para erro de passe em AT_POS estabilizado (usar `PERDA`)
+- `LISTA_RESULTADO_FACTUAL::TRANSICAO_NEUTRALIZADA`
+  usar: quando a transição ofensiva adversária é neutralizada sem gol, recuperação ou falta
+  não usar: fora do contexto de TRANS_DEF
+- `LISTA_RESULTADO_FACTUAL::DEFESA_ESTABILIZADA`
+  usar: quando a defesa estabiliza antes da finalização adversária
+  não usar: quando houve finalização (usar `BLOQUEADO`, `DEFENDIDO`, etc.)
+- `LISTA_RESULTADO_FACTUAL::VANTAGEM_CRIADA`
+  usar: quando a transição ofensiva gera superioridade que se converte em AT_POS
+  não usar: quando a vantagem não se materializou (usar `VANTAGEM_PERDIDA`)
+- `LISTA_RESULTADO_FACTUAL::VANTAGEM_PERDIDA`
+  usar: quando a transição ofensiva começa com vantagem e a perde antes de finalizar
+  não usar: para perda de posse por erro técnico (usar `PERDA` ou `ERRO_TROCA`)
+- `LISTA_MOTIVO_PONTUACAO::SIMPLES`
+  usar: quando o gol vale 1 ponto por arremesso comum sem característica especial
+  não usar: como fallback genérico para qualquer gol; verificar se a modalidade é GIRO, AEREA ou especialista
 - `LISTA_CAUSA_PRINCIPAL::TEC_OF`
   usar: quando a causa principal é técnica ofensiva
-  não usar: como rótulo genérico de “deu errado”
+  não usar: como rótulo genérico de "deu errado"
 
 ## 11. Bloco `OUT/punição`
 

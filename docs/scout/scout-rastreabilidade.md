@@ -128,7 +128,8 @@ Regra:
 |---|---|---|---|---|---|
 | Tipo de finalização | `COLETA_SCOUT` | `TIPO_FINALIZACAO` | `LISTA_TIPO_FINALIZACAO` | enum válido e contexto compatível | resultado, goleira, relatório |
 | Destino/região | `COLETA_SCOUT` | `DESTINO_ARREMESSO`, `REGIAO_ARREMESSO` | `LISTA_DESTINO_ARREMESSO`, `LISTA_REGIAO_ARREMESSO` | não confundir lado/altura | goleira, feedback técnico |
-| Resultado factual | `COLETA_SCOUT` | `RESULTADO_FACTUAL`, `PONTOS_JOGADA` | `LISTA_RESULTADO_FACTUAL`, `LISTA_PONTOS`, `LISTA_MOTIVO_PONTUACAO` | resultado factual não substitui diagnóstico | relatório, dashboard |
+| Resultado factual e pontuação | `COLETA_SCOUT`, `COLETA_AO_VIVO` | `RESULTADO_FACTUAL`, `PONTOS_JOGADA`, `MOTIVO_PONTUACAO` | `LISTA_RESULTADO_FACTUAL` (16 desfechos), `LISTA_PONTOS`, `LISTA_MOTIVO_PONTUACAO` | resultado factual é desfecho da sequência, não só de finalização; `MOTIVO_PONTUACAO` obrigatório quando `GOL` | relatório, dashboard |
+| Filtro Fase → Ação → Resultado | `COLETA_AO_VIVO` | `RESULTADO_FACTUAL`, `ACAO_PRINCIPAL`, `FASE_DA_BOLA` | `LISTA_ACAO_PRINCIPAL_AT_POS`, `LISTA_ACAO_PRINCIPAL_DEF_POS`, `LISTA_ACAO_PRINCIPAL_TRANS_OF`, `LISTA_ACAO_PRINCIPAL_TRANS_DEF`, `LISTA_RESULTADO_FACTUAL` | resultado filtrado por fase; ação custom aciona fallback por fase, não lista global; listas `LISTA_ACAO_PRINCIPAL_*` são sugestivas, não enum bloqueante | UX ao vivo, piloto |
 | Causa principal | `COLETA_SCOUT`, `PARTICIPACOES` | `CAUSA_PRINCIPAL` | `LISTA_CAUSA_PRINCIPAL` | não usar como opinião solta | `PRIORIDADE_TREINO`, feedback |
 
 ## 12. Rastreabilidade da goleira

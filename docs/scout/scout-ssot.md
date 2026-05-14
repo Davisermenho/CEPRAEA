@@ -7,9 +7,9 @@ lido_por: "Humano, Claude, Codex, Copilot"
 quando_ler: "antes de planejar implementação do scout; ao modelar schema, types, formulários ou relatórios; ao decidir significado de campo, código ou lista do scout."
 atualizado_por: "Agente executor + confirmação humana"
 quando_atualizar: "um conceito central do scout mudar; um gap semântico do workbook/manual for resolvido; nova família de campos passar a fazer parte da SSOT."
-validade: "2026-05-07"
-status: PARCIAL
-status_nota: "Documento semântico inicial da Etapa A. Não substitui ainda catálogo completo de campos, listas, dicionário e validações."
+validade: "2026-05-10"
+status: ATIVO
+status_nota: "ATIVO para COLETA_AO_VIVO (RULES-03, UX-04, CEPR-0046/0047 incorporados). Outros contratos (COLETA_SCOUT, PARTICIPACOES, relatório, dashboard) ainda parciais."
 conflito: "Se este documento divergir da planilha operacional em catálogo ou enumeração exata, revalidar o workbook; se divergir sobre semântica e o workbook não fechar a semântica, este documento prevalece até decisão explícita."
 proibido:
   - "Agentes NÃO devem implementar o scout usando apenas código residual ou memória de planilhas antigas."
@@ -346,6 +346,70 @@ Este documento deve ser seguido por:
 
 ## 14. Veredito atual
 
-**Veredito:** o domínio do scout já está suficientemente estruturado para consolidação textual, mas **ainda não está pronto para implementação direta**.
+A SSOT da `COLETA_AO_VIVO` está **ativa e sincronizada** com `RULES-03`, `UX-04`, `CEPR-0046` e `CEPR-0047`.
 
-O próximo passo lógico após este documento é expandir o catálogo textual e o dicionário, não abrir runtime de scout no app.
+Este status não declara o scout completo finalizado. `COLETA_SCOUT`, `PARTICIPACOES`, relatórios, dashboard e feedbacks completos continuam fora do escopo desta ativação documental.
+
+## 15. RULES-03/UX-04 — Decisões semânticas incorporadas (CEPR-0046/0047)
+
+### 15.1 `RESULTADO_FACTUAL` como desfecho da sequência
+
+`RESULTADO_FACTUAL` é o **desfecho objetivo da sequência observada**, não exclusivamente o resultado de um arremesso.
+
+Pode ser:
+- resultado de finalização: `GOL`, `DEFENDIDO`, `BLOQUEADO`, `FORA`, `TRAVE`
+- violação: `VIOLACAO`
+- perda de posse: `PERDA`, `ERRO_TROCA`, `FALTA_ATAQUE`, `PASSIVO`
+- recuperação de posse: `RECUPERACAO_POSSE`
+- desfecho de transição: `TRANSICAO_NEUTRALIZADA`, `DEFESA_ESTABILIZADA`, `VANTAGEM_CRIADA`, `VANTAGEM_PERDIDA`
+- não observado: `NAO_OBSERVADO`
+
+**Não é:** causa provável, diagnóstico técnico, prioridade de treino.
+**Não é:** exclusivo de fases com arremesso — `DEF_POS`, `TRANS_OF` e `TRANS_DEF` têm desfechos próprios.
+
+### 15.2 `MOTIVO_PONTUACAO` — campo condicional obrigatório
+
+`MOTIVO_PONTUACAO` é obrigatório quando `RESULTADO_FACTUAL = GOL`.
+
+Ele explica por que o gol vale 1 ou 2 pontos. **Não é causa do gol. Não é tipo de finalização genérico.**
+
+Exemplos:
+- `SIMPLES` → gol de 1 ponto por arremesso comum
+- `GIRO` → gol de 2 pontos por arremesso de giro
+- `AEREA` → gol de 2 pontos por aérea
+- `ESPECIALISTA` → gol por especialista (2 pontos)
+- `GOLEIRA` → gol da goleira (2 pontos)
+
+Não se aplica quando `RESULTADO_FACTUAL ≠ GOL`.
+
+### 15.3 Matriz Fase → Ação → Resultado (RULES-04/UX-04)
+
+A tela de coleta ao vivo filtra `RESULTADO_FACTUAL` pela combinação de `FASE_DA_BOLA` + `ACAO_PRINCIPAL`.
+
+Regras:
+- ação de finalização (`GIRO`, `AEREA`, `ARREM_SIMP`, etc.) → resultados de arremesso
+- ação sem finalização (`ERRO_PASSE`, `PERDA_OFENSIVA`, `PASSIVO_DECISAO`) → resultados ofensivos sem arremesso
+- ação defensiva com contenção (`BLOQ_GIRO`, `BLOQ_SIMPLES`) → resultados de arremesso
+- ações de transição → resultados de transição
+
+**Ação custom/desconhecida:** aciona fallback por fase — não retorna lista global.
+
+| Fase | Fallback para ação custom |
+|---|---|
+| `AT_POS` | `GOL`, `DEFENDIDO`, `BLOQUEADO`, `FORA`, `TRAVE`, `PERDA`, `VIOLACAO`, `PASSIVO`, `NAO_OBSERVADO` |
+| `DEF_POS` | `GOL`, `DEFENDIDO`, `BLOQUEADO`, `RECUPERACAO_POSSE`, `FALTA_ATAQUE`, `PERDA`, `VIOLACAO`, `NAO_OBSERVADO` |
+| `TRANS_OF` | `GOL`, `DEFENDIDO`, `BLOQUEADO`, `FORA`, `TRAVE`, `VANTAGEM_CRIADA`, `VANTAGEM_PERDIDA`, `PERDA`, `ERRO_TROCA`, `VIOLACAO`, `NAO_OBSERVADO` |
+| `TRANS_DEF` | `TRANSICAO_NEUTRALIZADA`, `DEFESA_ESTABILIZADA`, `RECUPERACAO_POSSE`, `GOL`, `DEFENDIDO`, `BLOQUEADO`, `PERDA`, `ERRO_TROCA`, `VIOLACAO`, `NAO_OBSERVADO` |
+
+### 15.4 `ACAO_PRINCIPAL` — campo semi-livre com sugestão por fase
+
+`ACAO_PRINCIPAL` é alimentado por quatro listas sugestivas (`LISTA_ACAO_PRINCIPAL_*`), uma por fase. Essas listas **não são enum bloqueante**. Valor custom curto e controlado é permitido.
+
+Consequência de valor custom:
+- o sistema não reconhece como código oficial;
+- o resultado factual cai no fallback por fase (não na lista global);
+- o código custom não é persistido no codebook automaticamente.
+
+### 15.5 Estado interno do formulário — `RESULTADO_FACTUAL = ''`
+
+O formulário de coleta ao vivo usa `''` (string vazia) como estado "nenhum resultado selecionado". `PERDA` não é placeholder. Submit com `RESULTADO_FACTUAL = ''` é bloqueado com mensagem "Selecione o desfecho da sequência."
