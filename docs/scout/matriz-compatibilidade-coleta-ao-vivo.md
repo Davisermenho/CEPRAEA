@@ -132,9 +132,9 @@ Ela nao cobre:
   - `AEREA`
   - `ARREM_SIMPLES`
 - Classificacoes proibidas em `AT_POS`:
-  - `FINALIZ_CONTRA`
-  - `FINALIZ_TRANS`
-  - `AEREA_TRANS`
+  - `FINALIZ_CONTRA` (label: Transição direta — válido apenas em TRANS_OF)
+  - `FINALIZ_TRANS` (label: Transição indireta — válido apenas em TRANS_OF)
+  - `AEREA_TRANS` (label: Aérea na transição — válido apenas em TRANS_OF)
   - `ESPECIALISTA`
   - `GOLEIRA`
   - `6M`
@@ -242,10 +242,10 @@ Ela nao cobre:
 
 - Categoria: `ARREMESSO`
 - Acao basica: `ARREMESSO`
-- Classificacoes permitidas:
-  - `FINALIZ_TRANS`
-  - `FINALIZ_CONTRA`
-  - `AEREA_TRANS`
+- Classificacoes permitidas (CEPR-0089: labels atualizados, códigos internos preservados):
+  - `FINALIZ_TRANS` — label: **Transição indireta** — finalização em bloco parcial (2x1, 3x2 ou 4x3)
+  - `FINALIZ_CONTRA` — label: **Transição direta** — atacante entra livre ou com vantagem clara, sem defesa estabilizada
+  - `AEREA_TRANS` — label: **Aérea na transição** — passe repositor direto para finalização em aérea
 - Resultados permitidos:
   - `GOL`
   - `DEFENDIDO`
@@ -258,6 +258,9 @@ Ela nao cobre:
   - `FINALIZ_TRANS -> SIMPLES`
   - `FINALIZ_CONTRA -> SIMPLES`
   - `AEREA_TRANS -> AEREA`
+- Derivacao de motivo de pontuacao (CEPR-0089):
+  - `AEREA_TRANS -> AEREA` (auto-derivado; motivo = Aérea, 2 pontos)
+  - `FINALIZ_CONTRA` e `FINALIZ_TRANS`: motivo não auto-derivado — requer seleção manual do chip (padrão: Simples)
 
 #### `TROCA_TRANSICAO`
 

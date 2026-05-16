@@ -140,7 +140,7 @@ function humanizeBackendError(message: string) {
   if (message.includes('INVALID_CODEBOOK_VALUE: categoria_acao_code')) return 'A categoria da ação informada não é válida.'
   if (message.includes('INVALID_CODEBOOK_VALUE: acao_basica_code')) return 'A ação básica informada não é válida para essa categoria.'
   if (message.includes('INVALID_CODEBOOK_VALUE: classificacao_acao_code')) return 'A classificação da ação informada não é válida para essa ação básica.'
-  if (message.includes('INVALID_CONTEXT: FINALIZ_CONTRA not allowed in AT_POS')) return 'Finalização em contra-ataque não é válida em ataque posicionado.'
+  if (message.includes('INVALID_CONTEXT: FINALIZ_CONTRA not allowed in AT_POS')) return 'Transição direta não é válida em ataque posicionado.'
   if (message.includes('INVALID_CONTEXT: classificacao_acao_code') && message.includes('AT_POS for ARREMESSO')) return 'Classificação de arremesso inválida para ataque posicionado.'
   if (message.includes('sistema_ofensivo_code required for AT_POS')) return 'Em ataque posicionado, o sistema ofensivo é obrigatório.'
   if (message.includes('sistema_defensivo_code required for DEF_POS')) return 'Em defesa posicionada, o sistema defensivo é obrigatório.'

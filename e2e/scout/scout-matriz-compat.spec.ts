@@ -6,8 +6,8 @@ import { execFileSync } from 'node:child_process'
  * CEPR-0085 — Matriz de compatibilidade (itens 1-9)
  *
  * Item 1: AT_POS + Sistema ofensivo nao mostra "Nao se aplica"
- * Item 2: AT_POS + Arremesso nao mostra Finalizacao em contra-ataque nem desativados
- * Item 3: TRANS_OF + Arremesso mostra Finalizacao em contra-ataque
+ * Item 2: AT_POS + Arremesso nao mostra 'Transição direta' nem desativados
+ * Item 3: TRANS_OF + Arremesso mostra 'Transição direta' e 'Transição indireta' (CEPR-0089)
  * Item 4: AT_POS + Passe nao mostra Passe longo
  * Item 5: tipo_fin nao aparece para ARREMESSO+ARREMESSO (nao duplica tecnica)
  * Item 6: Gol com motivo Especialista/Goleira/6m gera 2 pontos
@@ -65,7 +65,7 @@ test.describe('Scout — matriz de compatibilidade CEPR-0085', () => {
   })
 
   // ── Item 2 ───────────────────────────────────────────────────────────────
-  test('Item 2 — AT_POS + Arremesso: sem Finalizacao em contra-ataque nem desativados', async ({ page }) => {
+  test('Item 2 — AT_POS + Arremesso: sem Transicao direta nem desativados', async ({ page }) => {
     await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Arremesso', exact: true }).first().click()
@@ -73,7 +73,7 @@ test.describe('Scout — matriz de compatibilidade CEPR-0085', () => {
     await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
     await page.waitForTimeout(200)
     // Filtradas por fase (classificacaoOptionsFinal para AT_POS)
-    await expect(page.getByRole('button', { name: 'Finalização em contra-ataque', exact: true })).not.toBeVisible()
+    await expect(page.getByRole('button', { name: 'Transição direta', exact: true })).not.toBeVisible()
     // Desativadas pela migração 0027
     await expect(page.getByRole('button', { name: 'Especialista', exact: true })).not.toBeVisible()
     await expect(page.getByRole('button', { name: 'Goleira', exact: true })).not.toBeVisible()
@@ -85,15 +85,15 @@ test.describe('Scout — matriz de compatibilidade CEPR-0085', () => {
   })
 
   // ── Item 3 ───────────────────────────────────────────────────────────────
-  test('Item 3 — TRANS_OF + Arremesso: exibe Finalizacao em contra-ataque', async ({ page }) => {
+  test('Item 3 — TRANS_OF + Arremesso: exibe Transicao direta e Transicao indireta (CEPR-0089)', async ({ page }) => {
     await page.getByRole('button', { name: 'Transição ofensiva', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Arremesso', exact: true }).first().click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
     await page.waitForTimeout(200)
-    await expect(page.getByRole('button', { name: 'Finalização em contra-ataque', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Finalização em transição', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Transição direta', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Transição indireta', exact: true })).toBeVisible()
     // Classificacoes de AT_POS nao devem aparecer em TRANS_OF
     await expect(page.getByRole('button', { name: 'Arremesso simples', exact: true })).not.toBeVisible()
     await expect(page.getByRole('button', { name: 'Giro', exact: true })).not.toBeVisible()
