@@ -18,6 +18,6 @@ export async function loginAsAthlete(page: Page, email: string, password: string
   await page.goto('/atleta/login')
   await page.locator('#atleta-email').fill(email)
   await page.locator('#atleta-password').fill(password)
-  await page.getByRole('button', { name: /^entrar$/i }).click()
+  await page.getByRole('button', { name: /entrar/i }).click()
   await page.waitForURL((url) => url.pathname.startsWith('/atleta/treinos'), { timeout: 10_000 })
 }
