@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { LogOut, Mail, User } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
 import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
@@ -8,7 +7,6 @@ import { formatPhone } from '@/lib/utils'
 import { useCurrentAthlete } from '@/features/atleta/useCurrentAthlete'
 
 export default function AtletaPerfilPage() {
-  const navigate = useNavigate()
   const { signOut, user } = useSupabaseAuth()
   const { athlete: me, loading } = useCurrentAthlete()
   const [sendingReset, setSendingReset] = useState(false)
@@ -18,7 +16,7 @@ export default function AtletaPerfilPage() {
 
   const handleLogout = async () => {
     await signOut()
-    navigate('/welcome', { replace: true })
+    window.location.replace('/welcome')
   }
 
   const handleSendReset = async () => {

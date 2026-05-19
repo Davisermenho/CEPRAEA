@@ -3674,3 +3674,58 @@ Solicitacao do usuario para materializar no repositório o trio minimo da matriz
 - `typecheck` passou sem erros.
 - o teste da matriz passou com `11/11`.
 - a UI da `COLETA_AO_VIVO` agora consome o contrato central do repo em vez de manter listas semanticas duplicadas no componente.
+
+## [2026-05-14] — Marco de continuidade pós-CEPR-0086
+
+### Estado local confirmado
+
+- Working tree limpo após 6 commits organizados (branch `wip/post-merge-cleanup-2026-05-07`).
+- HEAD: `a8b1f2d chore: add general docs, gitignore cleanup, and audit notes`
+
+### Commits da sessão (mais recente para mais antigo)
+
+| Hash | Mensagem |
+|---|---|
+| `a8b1f2d` | chore: add general docs, gitignore cleanup, and audit notes |
+| `0625933` | feat(scout): add scout UI pages, api client, types and e2e infrastructure |
+| `6caaad4` | feat(scout): add migrations 0012-0029 and SQL test suite |
+| `165ecbb` | docs(scout): update ssot contracts and add pilot-01 doc |
+| `8042792` | chore: update codex/copilot governance logs |
+| `13556dd` | feat(scout): centralize live collection compatibility matrix |
+
+### Gates validados nesta sessão
+
+- `npm run build` → ok
+- `npm run typecheck` → 0 erros
+- `npx vitest run` → 25/25 (incluindo 12/12 da matriz)
+- `npx supabase db reset` → 29 migrations aplicadas do zero, sem erro
+- `bash scripts/run-supabase-tests.sh` → todas as suites SQL passando
+- `npx playwright test e2e/scout/ --project desktop` → 72/72
+
+### Invariantes em vigor
+
+- `COLETA_AO_VIVO` cria somente `scout_live_entries`.
+- `scout_plays = 0` e `scout_play_participations = 0` após qualquer entrada ao vivo.
+
+### Status do módulo Scout
+
+- Módulo Scout **ainda em desenvolvimento** — PR bloqueado por escopo incompleto.
+- Não abrir PR até ter unidade fechada de produto (ex: COLETA_AO_VIVO pronta para piloto controlado, ou MVP completo com preparar sessão + coleta + revisão + validação).
+
+### Regra de governança ativa (CEPR-0086)
+
+Nenhuma alteração em `COLETA_AO_VIVO` entra sem atualizar simultaneamente:
+1. Notion (CEPR correspondente);
+2. `docs/scout/matriz-compatibilidade-coleta-ao-vivo.md`;
+3. `src/features/scout/domain/liveCollectionCompatibility.matrix.ts`;
+4. `src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts` (incluindo testes negativos).
+
+### Próximo foco recomendado
+
+1. **PILOTO-01** — testar `COLETA_AO_VIVO` com 20–40 entradas reais/simuladas (ver `docs/scout/scout-piloto-01-coleta-ao-vivo.md`).
+2. Revisão por vídeo — validar coerência do fluxo separado (`ScoutVideoReviewPage`).
+3. Cadastro/preparação de sessão — atletas, elenco e times.
+4. Relatórios/feedbacks — verificar se dados coletados geram leitura útil.
+5. Hardening de governança — impedir alteração futura sem matriz + testes.
+
+**Regra:** próximo trabalho deve partir da matriz canônica. Não alterar `COLETA_AO_VIVO` sem a cadeia completa de evidências.

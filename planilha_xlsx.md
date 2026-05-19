@@ -1,9 +1,9 @@
 ---
 tipo: PLANO-OPERACIONAL
 nome: "Planilha Operacional CEPRAEA — Plano Completo"
-papel: "Define a solução de gestão documental e operacional para competições, convocações e documentos enquanto o PWA não cobre esses fluxos."
+papel: "Define a ponte operacional de agenda, treino, metas, scout, convocações e documentos enquanto o runtime do PWA ainda não cobre integralmente esses fluxos."
 autoridade: "Documento auxiliar — subordinado ao CEPRAEA.md e plan.md"
-atualizado_por: "GitHub Copilot — 10 de maio de 2026"
+atualizado_por: "Codex — 18 de maio de 2026"
 ---
 
 # PLANILHA OPERACIONAL CEPRAEA — Plano Completo
@@ -22,16 +22,21 @@ O ChatGPT sugeriu Google Sheets como solução permanente **sem saber que você 
 
 **O que falta no schema atual** (causa raiz do problema):
 
-| Tabela faltante | Por que é necessária |
+| Tabela / módulo faltante | Por que é necessária |
 |---|---|
-| `games` | Jogos de competição (não treinos, não scout) |
+| `training_plans` | Plano de treino do dia com objetivo, blocos, exercícios e observações |
+| `athlete_goals` | Metas individuais com origem `atleta`, `treinador` e `scout` |
+| `team_goals` | Metas da equipe com origem `treinador` e `scout` |
+| `games` | Jogos de competição e amistosos |
 | `competitions` | Campeonatos, torneios, ligas |
-| `convocations` | Relação nominal por jogo |
-| `athlete_details` | Responsável, documento, nº camisa, posição, uniforme |
+| `team_agenda_events` | Agenda oficial da equipe para treinos, jogos, viagens e competições |
+| `convocations` | Relação nominal por jogo/viagem com confirmação ativa da atleta |
+| `athlete_details` | Responsável, documento, nº camisa, posição ofensiva, função defensiva, uniforme |
+| `athlete_scout_views` | Leitura individual do scout pela atleta |
 | `sumulas` | Resultado e placar oficial por jogo |
 | `generated_documents` | Controle do que foi gerado e enviado |
 
-**Conclusão:** o problema não é falta de planilha. É que o PWA ainda não tem o módulo de *competições*. A planilha é a **ponte operacional** enquanto esse módulo não existe.
+**Conclusão:** o problema não é falta de planilha. É que o runtime atual do PWA ainda não cobre integralmente os módulos de operação esportiva definidos no PRD. A planilha é a **ponte operacional** para treino, metas, agenda, convocações, scout e documentos enquanto esses módulos não estão consolidados no app.
 
 ---
 
@@ -47,16 +52,16 @@ O ChatGPT sugeriu Google Sheets como solução permanente **sem saber que você 
 | Atleta duplicada por equipe | Schema Supabase já tem `team_id` + migração |
 | Sem geração de PDF no app | HTML `window.print()` no PWA (zero custo) |
 | Sem caminho de migração | IDs do Sheets exportáveis para Supabase |
-| Sem módulo de competições | Proposta de migration SQL completa abaixo |
+| Sem módulos operacionais completos no app | Proposta de ponte + extensão de schema abaixo |
 
 ### Arquitetura em 3 camadas (todas gratuitas)
 
 ```
 AGORA                    PRÓXIMAS SPRINTS           FUTURO
-─────────────────────    ──────────────────────     ─────────────────────
-Google Sheets            Supabase Schema            PWA: Módulo Competições
-(ponte operacional)  →   Extension            →     + Geração de documentos
-AppScript p/ docs        migrations 0017+           window.print() + CSS
+─────────────────────    ──────────────────────     ────────────────────────────────
+Google Sheets            Supabase Schema            PWA: Operação esportiva integrada
+(ponte operacional)  →   Extension            →     treino + metas + agenda +
+AppScript p/ docs        migrations 0017+           convocações + documentos + scout
 ```
 
 ---
@@ -68,7 +73,7 @@ AppScript p/ docs        migrations 0017+           window.print() + CSS
 Crie **um único arquivo** no Google Drive: `CEPRAEA — Base Operacional 2026`
 
 #### ABA 1: `EQUIPES`
-> Fonte de verdade das equipes. Cada linha = 1 equipe.
+> Fonte de verdade das equipes. Cada linha = 1 equipe. No contexto atual do CEPRAEA, a equipe principal é `Adulto Feminino` de `Handebol de Praia`, mas a aba pode comportar outras equipes se isso for decisão operacional futura.
 
 | Coluna | Tipo | Validação | Exemplo |
 |---|---|---|---|
@@ -118,13 +123,83 @@ Crie **um único arquivo** no Google Drive: `CEPRAEA — Base Operacional 2026`
 | `equipe_id` | texto | referência → `EQUIPES.equipe_id` |
 | `temporada` | número | `2026` |
 | `numero_camisa` | número | inteiro |
-| `posicao_funcao` | lista | Goleira / Ponta / Armadora / Pivô / Levantadora |
+| `posicao_ofensiva` | lista | Central / Lateral Esquerda / Lateral Direita / Pivô / Goleira |
+| `funcao_defensiva` | lista | Defensora Solta / Defensora Base / Defensora API |
 | `tamanho_uniforme` | lista | PP / P / M / G / GG / XGG |
 | `status_vinculo` | lista | Ativa / Suspensa / Desligada |
 
 ---
 
-#### ABA 4: `COMPETICOES`
+#### ABA 4: `PLANOS_TREINO_DIA`
+> Plano oficial do treino do dia publicado para a equipe.
+
+| Coluna | Tipo | Notas |
+|---|---|---|
+| `plano_id` | texto | `PLAN-001` |
+| `equipe_id` | texto | referência → `EQUIPES.equipe_id` |
+| `data_treino` | data | obrigatória |
+| `objetivo_principal` | texto | obrigatório |
+| `observacoes` | texto | observações técnicas e operacionais |
+| `publicado_por` | texto | treinador responsável |
+| `status_plano` | lista | Rascunho / Publicado / Encerrado |
+
+---
+
+#### ABA 5: `BLOCOS_TREINO`
+> Desdobra o plano do dia em blocos com objetivo específico e exercício principal.
+
+| Coluna | Tipo | Notas |
+|---|---|---|
+| `bloco_id` | texto | `BLOC-001` |
+| `plano_id` | texto | referência → `PLANOS_TREINO_DIA.plano_id` |
+| `ordem_bloco` | número | inteiro, sequência visual |
+| `objetivo_especifico` | texto | obrigatório |
+| `exercicio_principal` | texto | obrigatório |
+| `meta_relacionada` | texto | ids ou títulos resumidos das metas impactadas |
+| `observacoes_bloco` | texto | |
+
+---
+
+#### ABA 6: `METAS_INDIVIDUAIS`
+> Uma linha por meta individual. Suporta origens `atleta`, `treinador` e `scout`.
+
+| Coluna | Tipo | Notas |
+|---|---|---|
+| `meta_individual_id` | texto | `METAI-001` |
+| `equipe_id` | texto | referência → `EQUIPES.equipe_id` |
+| `atleta_id` | texto | referência → `ATLETAS.atleta_id` |
+| `origem_meta` | lista | Atleta / Treinador / Scout |
+| `contexto_meta` | lista | Treino / Jogo / Scout / Competição |
+| `titulo_meta` | texto | obrigatório |
+| `descricao_meta` | texto | |
+| `status_meta` | lista | Ativa / Em acompanhamento / Concluída / Cancelada |
+| `inicio_meta` | data | |
+| `prazo_meta` | data | |
+| `referencia_scout` | texto | opcional, quando origem = Scout |
+| `observacoes_meta` | texto | |
+
+---
+
+#### ABA 7: `METAS_EQUIPE`
+> Metas coletivas da equipe, criadas por treinador ou derivadas do scout.
+
+| Coluna | Tipo | Notas |
+|---|---|---|
+| `meta_equipe_id` | texto | `METAE-001` |
+| `equipe_id` | texto | referência → `EQUIPES.equipe_id` |
+| `origem_meta` | lista | Treinador / Scout |
+| `contexto_meta` | lista | Treino / Jogo / Scout / Competição |
+| `titulo_meta` | texto | obrigatório |
+| `descricao_meta` | texto | |
+| `status_meta` | lista | Ativa / Em acompanhamento / Concluída / Cancelada |
+| `inicio_meta` | data | |
+| `prazo_meta` | data | |
+| `referencia_scout` | texto | opcional |
+| `observacoes_meta` | texto | |
+
+---
+
+#### ABA 8: `COMPETICOES`
 > **Ausente no ChatGPT.** Campeonatos e torneios da temporada.
 
 | Coluna | Tipo | Notas |
@@ -141,15 +216,15 @@ Crie **um único arquivo** no Google Drive: `CEPRAEA — Base Operacional 2026`
 
 ---
 
-#### ABA 5: `JOGOS_EVENTOS`
-> Agenda oficial de jogos e eventos por equipe.
+#### ABA 9: `JOGOS_EVENTOS`
+> Agenda oficial da equipe para treinos, jogos, viagens, reuniões e competições.
 
 | Coluna | Tipo | Notas |
 |---|---|---|
 | `evento_id` | texto | `EVT-001` |
 | `equipe_id` | texto | referência → `EQUIPES` |
 | `competicao_id` | texto | referência → `COMPETICOES` (pode ser vazio) |
-| `tipo_evento` | lista | Jogo Oficial / Amistoso / Treino / Reunião / Viagem |
+| `tipo_evento` | lista | Jogo Oficial / Amistoso / Treino / Reunião / Viagem / Competição |
 | `adversario` | texto | nome do time adversário |
 | `data` | data | |
 | `horario_apresentacao` | hora | horário de chegada no local |
@@ -160,12 +235,12 @@ Crie **um único arquivo** no Google Drive: `CEPRAEA — Base Operacional 2026`
 | `transporte_necessario` | lista | Sim / Não / A confirmar |
 | `status_evento` | lista | Agendado / Confirmado / Cancelado / Realizado |
 
-> **Como usar:** você fala "jogo do Cadete sábado" — o sistema localiza por data+equipe. O `EVT-001` é referência interna, não precisa memorizar.
+> **Como usar:** você fala "jogo do Adulto Feminino sábado" ou "viagem da equipe para a competição" — o sistema localiza por data+equipe. O `EVT-001` é referência interna, não precisa memorizar.
 
 ---
 
-#### ABA 6: `CONVOCACOES`
-> Uma linha por atleta por jogo. Gera a relação nominal automaticamente.
+#### ABA 10: `CONVOCACOES`
+> Uma linha por atleta por jogo ou viagem. Gera relação nominal e registra confirmação ativa da atleta.
 
 | Coluna | Tipo | Notas |
 |---|---|---|
@@ -173,14 +248,16 @@ Crie **um único arquivo** no Google Drive: `CEPRAEA — Base Operacional 2026`
 | `evento_id` | texto | referência → `JOGOS_EVENTOS` |
 | `atleta_id` | texto | referência → `ATLETAS` |
 | `status_convocacao` | lista | Convocada / Dispensada / Lesionada / Suspeita |
-| `confirmou_presenca` | lista | Sim / Não / Pendente |
+| `resposta_atleta` | lista | Confirmada / Recusada / Pendente |
+| `respondido_em` | data e hora | vazio enquanto pendente |
 | `documento_ok` | lista | Sim / Não |
 | `autorizacao_responsavel_ok` | lista | Sim / Não / N/A (maior de idade) |
-| `observacao` | texto | |
+| `observacao_atleta` | texto | justificativa da resposta |
+| `observacao_comissao` | texto | uso da comissão técnica |
 
 ---
 
-#### ABA 7: `SUMULAS_RESULTADOS`
+#### ABA 11: `SUMULAS_RESULTADOS`
 > Registro do resultado oficial após cada jogo.
 
 | Coluna | Tipo | Notas |
@@ -201,13 +278,30 @@ Crie **um único arquivo** no Google Drive: `CEPRAEA — Base Operacional 2026`
 
 ---
 
-#### ABA 8: `DOCUMENTOS_MODELOS`
+#### ABA 12: `SCOUT_ATLETA_VISOES`
+> Estrutura operacional de leitura individual do scout para conferência e exportação antes da consolidação no app.
+
+| Coluna | Tipo | Notas |
+|---|---|---|
+| `visao_id` | texto | `SCV-001` |
+| `equipe_id` | texto | referência → `EQUIPES.equipe_id` |
+| `atleta_id` | texto | referência → `ATLETAS.atleta_id` |
+| `periodo_referencia` | texto | ex: `2026-Q2` |
+| `jogo_referencia` | texto | opcional |
+| `tipo_visao` | lista | Evento Bruto / Resumo por Jogo / Indicador Agregado / Histórico por Período |
+| `fonte_scout` | texto | id ou código de origem |
+| `conteudo_resumido` | texto | resumo legível para conferência operacional |
+| `atualizado_em` | data e hora | |
+
+---
+
+#### ABA 13: `DOCUMENTOS_MODELOS`
 > Controle dos templates oficiais no Google Drive.
 
 | Coluna | Tipo | Notas |
 |---|---|---|
 | `modelo_id` | texto | `MOD-001` |
-| `tipo_documento` | lista | Relação Nominal / Cronograma / Informativo / Solicitação Transporte / Solicitação Uniforme / Plano de Jogo / Plano de Treino / Relatório Pós-Jogo |
+| `tipo_documento` | lista | Relação Nominal / Cronograma / Informativo / Solicitação Transporte / Solicitação Uniforme / Plano de Jogo / Plano de Treino / Relatório Pós-Jogo / Relatório de Metas |
 | `equipe_id` | texto | vazio = modelo genérico |
 | `nome_arquivo` | texto | |
 | `link_template` | texto | URL do Google Docs |
@@ -216,7 +310,7 @@ Crie **um único arquivo** no Google Drive: `CEPRAEA — Base Operacional 2026`
 
 ---
 
-#### ABA 9: `DOCUMENTOS_GERADOS`
+#### ABA 14: `DOCUMENTOS_GERADOS`
 > Histórico de todos os documentos emitidos.
 
 | Coluna | Tipo | Notas |
@@ -236,7 +330,7 @@ Crie **um único arquivo** no Google Drive: `CEPRAEA — Base Operacional 2026`
 
 ---
 
-#### ABA 10: `VALIDACOES` (aba oculta — nunca editar direto)
+#### ABA 15: `VALIDACOES` (aba oculta — nunca editar direto)
 > Listas controladas usadas em todas as validações. Fonte das dropdowns.
 
 Coluna única por lista:
@@ -244,13 +338,21 @@ Coluna única por lista:
 - `status_atleta`: Ativa / Inativa / Suspensa / Desligada
 - `status_documento`: Entregue / Pendente / Vencido / Não informado
 - `status_convocacao`: Convocada / Dispensada / Lesionada / Suspeita
-- `tipo_evento`: Jogo Oficial / Amistoso / Treino / Reunião / Viagem
-- `tipo_documento`: Relação Nominal / Cronograma / Informativo / Solicitação Transporte / Solicitação Uniforme / Plano de Jogo / Plano de Treino / Relatório Pós-Jogo
-- `posicao_funcao`: Goleira / Ponta / Armadora / Pivô / Levantadora
+- `resposta_atleta`: Confirmada / Recusada / Pendente
+- `tipo_evento`: Jogo Oficial / Amistoso / Treino / Reunião / Viagem / Competição
+- `tipo_documento`: Relação Nominal / Cronograma / Informativo / Solicitação Transporte / Solicitação Uniforme / Plano de Jogo / Plano de Treino / Relatório Pós-Jogo / Relatório de Metas
+- `posicao_ofensiva`: Central / Lateral Esquerda / Lateral Direita / Pivô / Goleira
+- `funcao_defensiva`: Defensora Solta / Defensora Base / Defensora API
 - `tamanho_uniforme`: PP / P / M / G / GG / XGG
 - `resultado_jogo`: Vitória / Derrota / Empate
 - `status_modelo`: Ativo / Rascunho / Obsoleto
 - `status_pdf`: Rascunho / Enviado / Protocolado / Arquivado
+- `status_plano`: Rascunho / Publicado / Encerrado
+- `status_meta`: Ativa / Em acompanhamento / Concluída / Cancelada
+- `origem_meta_individual`: Atleta / Treinador / Scout
+- `origem_meta_equipe`: Treinador / Scout
+- `contexto_meta`: Treino / Jogo / Scout / Competição
+- `tipo_visao_scout`: Evento Bruto / Resumo por Jogo / Indicador Agregado / Histórico por Período
 - `naipe`: Feminino / Masculino / Misto
 - `categoria`: Adulto / Cadete / Infantil / Sub-16 / Sub-14
 - `modalidade`: Handebol de Praia / Handebol de Quadra
@@ -278,10 +380,15 @@ Coluna única por lista:
 | `EQ-` | Equipe | `EQ-001` |
 | `ATL-` | Atleta | `ATL-042` |
 | `VINC-` | Vínculo atleta-equipe | `VINC-001` |
+| `PLAN-` | Plano de treino do dia | `PLAN-001` |
+| `BLOC-` | Bloco de treino | `BLOC-001` |
+| `METAI-` | Meta individual | `METAI-014` |
+| `METAE-` | Meta da equipe | `METAE-003` |
 | `COMP-` | Competição | `COMP-003` |
 | `EVT-` | Jogo / Evento | `EVT-017` |
 | `CONV-` | Convocação (linha) | `CONV-089` |
 | `SUM-` | Súmula / Resultado | `SUM-004` |
+| `SCV-` | Visão operacional de scout | `SCV-010` |
 | `MOD-` | Modelo de documento | `MOD-008` |
 | `DOC-` | Documento gerado | `DOC-031` |
 
@@ -315,28 +422,44 @@ function gerarRelacaoNominal(eventoId) {
   const convocacoes = ss.getSheetByName('CONVOCACOES').getDataRange().getValues();
   const atletas = ss.getSheetByName('ATLETAS').getDataRange().getValues();
 
-  const evento = eventos.find(r => r[0] === eventoId);
+  const headersEventos = eventos[0];
+  const headersConv = convocacoes[0];
+  const headersAtletas = atletas[0];
+  const idxEventoId = headersEventos.indexOf('evento_id');
+  const idxAdversario = headersEventos.indexOf('adversario');
+  const idxData = headersEventos.indexOf('data');
+  const idxLocal = headersEventos.indexOf('local_nome');
+  const idxApresentacao = headersEventos.indexOf('horario_apresentacao');
+  const idxConvEvento = headersConv.indexOf('evento_id');
+  const idxConvAtleta = headersConv.indexOf('atleta_id');
+  const idxConvStatus = headersConv.indexOf('status_convocacao');
+  const idxAtletaId = headersAtletas.indexOf('atleta_id');
+  const idxNome = headersAtletas.indexOf('nome_completo');
+  const idxTelefone = headersAtletas.indexOf('telefone_atleta');
+  const idxDocStatus = headersAtletas.indexOf('status_documento');
+
+  const evento = eventos.slice(1).find(r => r[idxEventoId] === eventoId);
   if (!evento) { SpreadsheetApp.getUi().alert('Evento não encontrado.'); return; }
 
-  const convocadasIds = convocacoes
-    .filter(r => r[1] === eventoId && r[4] === 'Convocada')
-    .map(r => r[2]);
+  const convocadasIds = convocacoes.slice(1)
+    .filter(r => r[idxConvEvento] === eventoId && r[idxConvStatus] === 'Convocada')
+    .map(r => r[idxConvAtleta]);
 
-  const listaAtletas = atletas
-    .filter(r => convocadasIds.includes(r[0]))
-    .map(r => `${r[2]} | ${r[4]} | ${r[10]}`) // nome, telefone, status_doc
+  const listaAtletas = atletas.slice(1)
+    .filter(r => convocadasIds.includes(r[idxAtletaId]))
+    .map(r => `${r[idxNome]} | ${r[idxTelefone]} | ${r[idxDocStatus]}`)
     .join('\n');
 
   const modelo = DriveApp.getFilesByName('MODELO_RELACAO_NOMINAL.docx').next();
-  const copia = modelo.makeCopy(`Relação Nominal — ${evento[4]} — ${evento[5]}`);
+  const copia = modelo.makeCopy(`Relação Nominal — ${evento[idxAdversario]} — ${evento[idxData]}`);
   const doc = DocumentApp.openById(copia.getId());
   const corpo = doc.getBody();
 
-  corpo.replaceText('{{EQUIPE}}', evento[1]);
-  corpo.replaceText('{{ADVERSARIO}}', evento[4]);
-  corpo.replaceText('{{DATA}}', Utilities.formatDate(new Date(evento[5]), 'America/Sao_Paulo', 'dd/MM/yyyy'));
-  corpo.replaceText('{{LOCAL}}', evento[7]);
-  corpo.replaceText('{{HORARIO_APRESENTACAO}}', evento[6]);
+  corpo.replaceText('{{EQUIPE}}', String(evento[1]));
+  corpo.replaceText('{{ADVERSARIO}}', String(evento[idxAdversario] || ''));
+  corpo.replaceText('{{DATA}}', Utilities.formatDate(new Date(evento[idxData]), 'America/Sao_Paulo', 'dd/MM/yyyy'));
+  corpo.replaceText('{{LOCAL}}', String(evento[idxLocal] || ''));
+  corpo.replaceText('{{HORARIO_APRESENTACAO}}', String(evento[idxApresentacao] || ''));
   corpo.replaceText('{{ATLETAS}}', listaAtletas);
 
   doc.saveAndClose();
@@ -363,8 +486,16 @@ function menuGerarRelacaoNominal() {
 function verificarPendencias() {
   const ss = SpreadsheetApp.getActive();
   const convs = ss.getSheetByName('CONVOCACOES').getDataRange().getValues();
-  const pendentes = convs.filter(r => r[5] === 'Não' || r[6] === 'Não').length;
-  SpreadsheetApp.getUi().alert(`${pendentes} convocações com pendência de documento ou autorização.`);
+  const headers = convs[0];
+  const idxResposta = headers.indexOf('resposta_atleta');
+  const idxDocumento = headers.indexOf('documento_ok');
+  const idxAutorizacao = headers.indexOf('autorizacao_responsavel_ok');
+  const pendentes = convs.slice(1).filter(r =>
+    r[idxResposta] === 'Pendente' ||
+    r[idxDocumento] === 'Não' ||
+    r[idxAutorizacao] === 'Não'
+  ).length;
+  SpreadsheetApp.getUi().alert(`${pendentes} convocações com resposta pendente ou pendência documental.`);
 }
 ```
 
@@ -396,6 +527,8 @@ Crie uma pasta `CEPRAEA — Modelos Oficiais` no Google Drive e crie os seguinte
 | `MODELO_SOLICITACAO_TRANSPORTE.docx` | `{{EQUIPE}}`, `{{DESTINO}}`, `{{DATA}}`, `{{HORARIO_SAIDA}}`, `{{N_PESSOAS}}` |
 | `MODELO_SOLICITACAO_UNIFORME.docx` | `{{EQUIPE}}`, `{{TEMPORADA}}`, `{{LISTA_TAMANHOS}}` |
 | `MODELO_PLANO_JOGO.docx` | `{{EQUIPE}}`, `{{ADVERSARIO}}`, `{{DATA}}`, `{{SISTEMA}}`, `{{OBSERVACOES}}` |
+| `MODELO_PLANO_TREINO.docx` | `{{EQUIPE}}`, `{{DATA}}`, `{{OBJETIVO_PRINCIPAL}}`, `{{BLOCOS}}`, `{{OBSERVACOES}}` |
+| `MODELO_RELATORIO_METAS.docx` | `{{EQUIPE}}`, `{{ATLETA}}`, `{{TIPO_META}}`, `{{STATUS_META}}`, `{{OBSERVACOES}}` |
 | `MODELO_RELATORIO_POS_JOGO.docx` | `{{EQUIPE}}`, `{{ADVERSARIO}}`, `{{PLACAR}}`, `{{RESULTADO}}`, `{{DESTAQUES}}`, `{{OBSERVACOES}}` |
 
 ---
@@ -409,14 +542,21 @@ O schema existente cobre:
 - ✅ `athletes` — atletas (básico: name, phone, category, email)
 - ✅ `trainings` + `attendance_records` — treinos e presença
 - ✅ `scout_games` + `scout_events` — scout tático
+- ❌ `training_plans` — plano de treino do dia
+- ❌ `athlete_goals` — metas individuais
+- ❌ `team_goals` — metas da equipe
+- ❌ `team_agenda_events` — agenda consolidada da equipe
 - ❌ `athlete_details` — dados pessoais completos
 - ❌ `competitions` — campeonatos
 - ❌ `games` — jogos de competição
 - ❌ `convocations` — convocações por jogo
+- ❌ `athlete_scout_views` — leitura individual do scout
 - ❌ `sumulas` — resultados oficiais
 - ❌ `generated_documents` — controle de PDFs
 
-### 4.2 Migration SQL proposta (migration `0017_competitions_module.sql`)
+### 4.2 Migration SQL proposta (base `0017_competitions_module.sql`)
+
+> **Nota de fronteira:** a migration abaixo cobre principalmente o recorte competitivo-operacional. O PRD atual também exige tabelas para `training_plans`, `athlete_goals`, `team_goals` e projeções de leitura do scout pela atleta, que devem entrar na mesma onda de modelagem ou em migrations imediatamente subsequentes.
 
 ```sql
 -- ─── 0017: Módulo de Competições ─────────────────────────────────────────────
@@ -435,7 +575,8 @@ create table if not exists public.athlete_details (
   document_status text not null default 'pendente'
     check (document_status in ('entregue', 'pendente', 'vencido', 'nao_informado')),
   jersey_number  smallint,
-  position       text check (position in ('goleira', 'ponta', 'armadora', 'pivo', 'levantadora')),
+  offensive_position text check (offensive_position in ('central', 'lateral_esquerda', 'lateral_direita', 'pivo', 'goleira')),
+  defensive_role text check (defensive_role in ('defensora_solta', 'defensora_base', 'defensora_api')),
   uniform_size   text check (uniform_size in ('pp', 'p', 'm', 'g', 'gg', 'xgg')),
   created_at     timestamptz not null default now(),
   updated_at     timestamptz not null default now()
@@ -488,10 +629,13 @@ create table if not exists public.convocations (
   team_id                    uuid not null references public.teams(id) on delete cascade,
   status                     text not null default 'convocada'
     check (status in ('convocada', 'dispensada', 'lesionada', 'suspeita')),
-  confirmed_presence         boolean,
+  athlete_response           text not null default 'pendente'
+    check (athlete_response in ('confirmada', 'recusada', 'pendente')),
+  responded_at               timestamptz,
   document_ok                boolean,
   guardian_authorization_ok  boolean,
-  notes                      text,
+  athlete_notes              text,
+  staff_notes                text,
   created_at                 timestamptz not null default now(),
   unique(game_id, athlete_id)
 );
@@ -549,7 +693,7 @@ create index if not exists generated_documents_game_idx on public.generated_docu
 
 ## 5. Camada 3 — Geração de documentos no PWA (futuro, zero custo)
 
-Quando o módulo de competições estiver no PWA, gere PDFs com:
+Quando o módulo operacional ampliado estiver no PWA, gere PDFs com:
 
 ```typescript
 // src/features/games/utils/printDocument.ts
@@ -574,12 +718,13 @@ export function printRelacaoNominal(game: Game, athletes: Athlete[]) {
       <p>Data: ${game.game_date} | Local: ${game.location_name}</p>
       <p>Apresentação: ${game.presentation_time}</p>
       <table>
-        <tr><th>#</th><th>Nome</th><th>Posição</th><th>Documento</th></tr>
+        <tr><th>#</th><th>Nome</th><th>Posição Ofensiva</th><th>Função Defensiva</th><th>Documento</th></tr>
         ${athletes.map((a, i) => `
           <tr>
             <td>${i + 1}</td>
             <td>${a.name}</td>
-            <td>${a.position ?? '—'}</td>
+            <td>${a.offensive_position ?? '—'}</td>
+            <td>${a.defensive_role ?? '—'}</td>
             <td>${a.document_status}</td>
           </tr>
         `).join('')}
@@ -603,22 +748,24 @@ export function printRelacaoNominal(game: Game, athletes: Athlete[]) {
 
 ### Fase 1 — Agora (1–2 dias)
 - [ ] Criar Google Sheets `CEPRAEA — Base Operacional 2026`
-- [ ] Criar 10 abas conforme seção 3
+- [ ] Criar 15 abas conforme seção 3
 - [ ] Configurar validações e formatação condicional
-- [ ] Cadastrar: 3 equipes, todas as atletas ativas, próximos 3 jogos
+- [ ] Cadastrar: equipe principal, atletas ativas, próximos treinos, jogos, viagens e competições
+- [ ] Registrar metas individuais e metas da equipe em operação
 - [ ] Instalar AppScript com menu personalizado
-- [ ] Criar modelos no Google Drive (6 arquivos Google Docs)
+- [ ] Criar modelos no Google Drive (8 arquivos Google Docs)
 
 **Critério de aceite:**
 - Responde sem inferência: "Quem está convocada para o EVT-003?"
 - Gera relação nominal com 1 clique
+- Mostra resposta ativa da atleta em convocação
 - Campo `Pendente` aparece em amarelo
 
 ### Fase 2 — Próxima sprint do PWA
 - [ ] Criar migration `0017_competitions_module.sql`
 - [ ] Importar dados do Sheets via `exportarJsonSupabase()` → seed
-- [ ] Implementar tela de cadastro de jogos no PWA
-- [ ] Implementar tela de convocações
+- [ ] Implementar telas de plano de treino, metas, agenda e convocações
+- [ ] Implementar leitura do scout individual da atleta
 
 ### Fase 3 — Pós-MVP v1.0
 - [ ] Implementar geração de PDF no PWA (`printDocument.ts`)
@@ -635,7 +782,7 @@ export function printRelacaoNominal(game: Game, athletes: Athlete[]) {
 | Sem Make/Zapier | AppScript cobre toda automação sem custo |
 | Sem duplicar infraestrutura | Sheets alinhado ao schema Supabase existente |
 | Sem perder trabalho feito | Migration 0017 estende, não substitui |
-| Funciona hoje | Fase 1 independe do PWA |
+| Funciona hoje | Fase 1 independe do PWA e cobre o gap operacional atual |
 | Escalável | Fase 3 migra tudo para o PWA sem retrabalho de dados |
 | Gemini grátis | Google Sheets + Gemini (workspace gratuito) permite perguntas em linguagem natural sobre os dados das abas |
 
@@ -643,4 +790,4 @@ export function printRelacaoNominal(game: Game, athletes: Athlete[]) {
 
 ---
 
-*Gerado por GitHub Copilot — 10 de maio de 2026*
+*Atualizado por Codex — 18 de maio de 2026*

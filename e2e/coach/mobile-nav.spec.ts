@@ -19,10 +19,11 @@ test.describe('Coach — layout mobile', () => {
     await expect(page.locator('aside')).not.toBeVisible()
   })
 
-  test('bottom nav exibe os 5 itens de navegação', async ({ page }) => {
+  test('bottom nav exibe os 6 itens de navegação', async ({ page }) => {
     await expect(nav(page).getByRole('link', { name: 'Início' })).toBeVisible()
     await expect(nav(page).getByRole('link', { name: 'Atletas' })).toBeVisible()
     await expect(nav(page).getByRole('link', { name: 'Treinos' })).toBeVisible()
+    await expect(nav(page).getByRole('link', { name: 'Scout' })).toBeVisible()
     await expect(nav(page).getByRole('link', { name: 'Relatórios' })).toBeVisible()
     await expect(nav(page).getByRole('link', { name: 'Config' })).toBeVisible()
   })
@@ -33,6 +34,9 @@ test.describe('Coach — layout mobile', () => {
 
     await nav(page).getByRole('link', { name: 'Treinos' }).click()
     await expect(page).toHaveURL(/\/treinos$/, { timeout: 10_000 })
+
+    await nav(page).getByRole('link', { name: 'Scout' }).click()
+    await expect(page).toHaveURL(/\/scout$/, { timeout: 10_000 })
 
     await nav(page).getByRole('link', { name: 'Relatórios' }).click()
     await expect(page).toHaveURL(/\/relatorios$/, { timeout: 10_000 })

@@ -48,10 +48,10 @@ test.beforeAll(async () => {
     on conflict (id) do update set name = excluded.name, email = excluded.email;
 
     insert into public.athletes
-      (team_id, user_id, name, email, phone, category, level, status)
+      (team_id, user_id, name, email, phone, status)
     values
       ('${TEAM_ID}', '${userId}', '${esc(ATHLETE_NAME)}', '${esc(ATHLETE_EMAIL)}',
-       '21987654321', 'Sub-19', 'Intermediário', 'ativo');
+       '21987654321', 'ativo');
   `)
 
   athleteId = querySql(
@@ -98,15 +98,14 @@ test.describe('Perfil da atleta', () => {
     await ctx.close()
   })
 
-  test('exibe Categoria e Nível quando preenchidos', async ({ browser }) => {
+  test('não depende de Categoria e Nível para exibir o perfil da atleta', async ({ browser }) => {
     const ctx = await browser.newContext({ baseURL: BASE_URL })
     const page = await ctx.newPage()
     await loginAsAthlete(page, ATHLETE_EMAIL, ATHLETE_PASSWORD)
     await page.goto('/atleta/perfil')
-    await expect(page.getByText('Categoria')).toBeVisible({ timeout: 10_000 })
-    await expect(page.getByText('Sub-19')).toBeVisible()
-    await expect(page.getByText('Nível')).toBeVisible()
-    await expect(page.getByText('Intermediário')).toBeVisible()
+    await expect(page.getByText('Categoria')).not.toBeVisible()
+    await expect(page.getByText('Nível')).not.toBeVisible()
+    await expect(page.getByText('Ativa')).toBeVisible()
     await ctx.close()
   })
 

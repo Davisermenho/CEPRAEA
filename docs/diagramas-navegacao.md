@@ -1,5 +1,7 @@
 # Diagramas de Navegação — CEPRAEA PWA
 
+> **Nota de escopo:** estes diagramas refletem a navegação-alvo alinhada ao PRD oficial atual. Eles representam o contrato de produto esperado e podem estar à frente do runtime hoje implementado em partes do repositório.
+
 ## 1. Mapa geral do produto
 
 ```mermaid
@@ -24,9 +26,11 @@ flowchart TD
     C --> C1[/app/inicio]
     C --> C2[/app/atletas]
     C --> C3[/app/treinos]
-    C --> C4[/app/scout]
-    C --> C5[/app/relatorios]
-    C --> C6[/app/configuracoes]
+    C --> C4[/app/metas]
+    C --> C5[/app/agenda]
+    C --> C6[/app/scout]
+    C --> C7[/app/relatorios]
+    C --> C8[/app/configuracoes]
 
     DGuard -->|Atleta vinculada| D
     DGuard -->|Sem vínculo| D0[Tela de acesso bloqueado]
@@ -34,8 +38,11 @@ flowchart TD
 
     D --> D1[/atleta/inicio]
     D --> D2[/atleta/treinos]
-    D --> D3[/atleta/frequencia]
-    D --> D4[/atleta/perfil]
+    D --> D3[/atleta/metas]
+    D --> D4[/atleta/scout]
+    D --> D5[/atleta/agenda]
+    D --> D6[/atleta/convocacoes]
+    D --> D7[/atleta/perfil]
 
     E --> E1[/confirmar/:token]
     E1 --> E2{Token válido?}
@@ -45,13 +52,15 @@ flowchart TD
     E5 --> E6[Confirmação visual]
 
     C3 --> X[(Supabase)]
+    C4 --> X
+    C5 --> X
+    C6 --> X
     D2 --> X
+    D3 --> X
+    D4 --> X
+    D5 --> X
+    D6 --> X
     E5 --> X
-    X --> C1
-    X --> C3
-    X --> C5
-    X --> D1
-    X --> D2
 ```
 
 ---
@@ -65,20 +74,24 @@ flowchart TD
     B --> C[Início]
     B --> D[Atletas]
     B --> E[Treinos]
-    B --> F[Scout]
-    B --> G[Relatórios]
-    B --> H[Configurações]
+    B --> F[Metas]
+    B --> G[Agenda]
+    B --> H[Scout]
+    B --> I[Relatórios]
+    B --> J[Configurações]
 
     C --> C1[Central de Comando]
     C1 --> C2[Próximo treino]
-    C1 --> C3[Resumo de atletas]
-    C1 --> C4[Resumo de frequência]
-    C1 --> C5[Alertas operacionais]
+    C1 --> C3[Plano do dia]
+    C1 --> C4[Resumo de atletas]
+    C1 --> C5[Metas em atenção]
+    C1 --> C6[Agenda competitiva]
+    C1 --> C7[Alertas operacionais]
 
-    C2 --> C2A[Abrir detalhe do treino]
-    C5 --> C5A[Atletas sem vínculo]
-    C5 --> C5B[Treinos com conflito]
-    C5 --> C5C[Presenças pendentes]
+    C7 --> C7A[Atletas sem vínculo]
+    C7 --> C7B[Presenças pendentes]
+    C7 --> C7C[Convocações sem resposta]
+    C7 --> C7D[Metas sem atualização]
 
     D --> D1[Listagem de atletas]
     D1 --> D2[Buscar atleta]
@@ -90,7 +103,9 @@ flowchart TD
 
     D6 --> D6A[Dados principais]
     D6 --> D6B[Contato]
-    D6 --> D6C[Categoria e nível]
+    D6 --> D6C[Dados esportivos]
+    D6C --> D6C1[Posição ofensiva]
+    D6C --> D6C2[Função defensiva]
     D6 --> D6D[Status]
     D6 --> D6E[Observações]
     D6E --> D6F[Salvar atleta]
@@ -99,6 +114,8 @@ flowchart TD
     D7 --> D7B[Ativar ou inativar]
     D7 --> D7C[Ver presença da atleta]
     D7 --> D7D[Ver vínculo de conta]
+    D7 --> D7E[Ver metas da atleta]
+    D7 --> D7F[Ver scout da atleta]
 
     E --> E1[Listagem de treinos]
     E1 --> E2[Próximos]
@@ -107,13 +124,6 @@ flowchart TD
     E1 --> E5[Gerar recorrentes]
     E1 --> E6[Criar treino extra]
     E1 --> E7[Detalhe do treino]
-
-    E5 --> E5A[Definir período]
-    E5A --> E5B[Definir dias da semana]
-    E5B --> E5C[Definir horário]
-    E5C --> E5D[Definir local]
-    E5D --> E5E[Revisar feriados e conflitos]
-    E5E --> E5F[Confirmar geração]
 
     E6 --> E6A[Data]
     E6A --> E6B[Horário]
@@ -126,34 +136,57 @@ flowchart TD
     E7 --> E7C[Marcar presença manual]
     E7 --> E7D[Enviar ou copiar links de confirmação]
     E7 --> E7E[Editar treino]
-    E7 --> E7F[Cancelar treino]
+    E7 --> E7F[Plano do treino]
 
-    F --> F1[Listagem de jogos]
-    F1 --> F2[Novo jogo]
-    F1 --> F3[Detalhe do jogo]
+    E7F --> E7F1[Objetivo principal]
+    E7F --> E7F2[Blocos com objetivo específico]
+    E7F --> E7F3[Exercícios principais]
+    E7F --> E7F4[Observações]
 
-    F2 --> F2A[Times]
-    F2A --> F2B[Data e local]
-    F2B --> F2C[Salvar jogo]
+    F --> F1[Listagem de metas]
+    F1 --> F2[Metas individuais]
+    F1 --> F3[Metas da equipe]
+    F1 --> F4[Nova meta]
+    F1 --> F5[Detalhe da meta]
 
-    F3 --> F3A[Registrar eventos]
-    F3 --> F3B[Resumo do jogo]
-    F3 --> F3C[Encerrar jogo]
+    F4 --> F4A[Escolher escopo]
+    F4A --> F4B[Escolher origem]
+    F4B --> F4C[Definir contexto]
+    F4C --> F4D[Salvar meta]
 
-    G --> G1[Selecionar período]
-    G1 --> G2[Ordenar por nome]
-    G1 --> G3[Ordenar por frequência]
-    G1 --> G4[Frequência por atleta]
-    G1 --> G5[Resumo por treino]
-    G1 --> G6[Exportar CSV]
-    G1 --> G7[Exportar XLSX]
+    G --> G1[Agenda da equipe]
+    G1 --> G2[Calendário]
+    G1 --> G3[Jogos]
+    G1 --> G4[Viagens]
+    G1 --> G5[Competições]
+    G1 --> G6[Convocações]
+    G1 --> G7[Detalhe do evento]
 
-    H --> H1[Dados da equipe]
-    H --> H2[Dados do treinador]
-    H --> H3[Local padrão]
-    H --> H4[Treinos automáticos]
-    H --> H5[Backup e exportação]
-    H --> H6[Sair]
+    G6 --> G6A[Publicar listagem]
+    G6A --> G6B[Acompanhar confirmadas]
+    G6B --> G6C[Acompanhar recusas e pendências]
+
+    H --> H1[Central do Scout]
+    H1 --> H2[Preparar sessão]
+    H1 --> H3[Coleta ao vivo]
+    H1 --> H4[Revisão]
+    H1 --> H5[Resumo por jogo]
+    H1 --> H6[Leitura individual por atleta]
+
+    I --> I1[Selecionar período]
+    I1 --> I2[Frequência por atleta]
+    I1 --> I3[Resumo por treino]
+    I1 --> I4[Evolução de metas]
+    I1 --> I5[Resumo competitivo]
+    I1 --> I6[Exportar CSV]
+    I1 --> I7[Exportar XLSX]
+
+    J --> J1[Dados da equipe]
+    J --> J2[Dados do treinador]
+    J --> J3[Local padrão]
+    J --> J4[Treinos automáticos]
+    J --> J5[Backup e exportação]
+    J --> J6[Sair]
 ```
 
 ---
@@ -162,20 +195,23 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Portal da atleta] --> B[Bottom Navigation simplificada]
+    A[Portal da atleta] --> B[Bottom Navigation]
 
     B --> C[Início]
     B --> D[Meus treinos]
-    B --> E[Minha frequência]
-    B --> F[Perfil]
+    B --> E[Metas]
+    B --> F[Scout]
+    B --> G[Agenda]
+    B --> H[Convocações]
+    B --> I[Perfil]
 
     C --> C1[Próximo treino]
-    C1 --> C2[Data]
-    C1 --> C3[Horário]
-    C1 --> C4[Local]
-    C1 --> C5[Status da minha presença]
+    C1 --> C2[Plano do dia]
+    C1 --> C3[Status da minha presença]
+    C1 --> C4[Metas em destaque]
+    C1 --> C5[Próximo jogo ou viagem]
 
-    C5 --> C6{Ação da atleta}
+    C3 --> C6{Ação da atleta}
     C6 -->|Vou| C7[Confirmar presença]
     C6 -->|Não vou| C8[Informar ausência]
     C6 -->|Justificar| C9[Enviar justificativa]
@@ -184,10 +220,6 @@ flowchart TD
     C8 --> C10
     C9 --> C10
 
-    C10 --> C11[Exibir confirmação visual]
-    C11 --> C12[Atualizar status no portal]
-    C12 --> C13[Atualizar painel do treinador]
-
     D --> D1[Listagem dos meus treinos]
     D1 --> D2[Próximos]
     D1 --> D3[Passados]
@@ -195,19 +227,46 @@ flowchart TD
 
     D4 --> D4A[Informações do treino]
     D4 --> D4B[Meu status]
-    D4 --> D4C[Confirmar ou alterar resposta quando permitido]
+    D4 --> D4C[Plano do treino]
+    D4 --> D4D[Confirmar ou alterar resposta quando permitido]
 
-    E --> E1[Resumo da minha frequência]
-    E1 --> E2[Presenças]
-    E1 --> E3[Ausências]
-    E1 --> E4[Justificadas]
-    E1 --> E5[Histórico por período]
+    E --> E1[Metas individuais]
+    E1 --> E2[Metas criadas por mim]
+    E1 --> E3[Metas recebidas do treinador]
+    E1 --> E4[Metas recebidas do scout]
+    E1 --> E5[Metas da equipe]
+    E1 --> E6[Nova meta individual]
+    E1 --> E7[Detalhe da meta]
 
-    F --> F1[Meus dados]
-    F --> F2[Email vinculado]
-    F --> F3[Status no time]
-    F --> F4[Redefinir senha]
-    F --> F5[Sair]
+    F --> F1[Scout individual]
+    F1 --> F2[Eventos brutos]
+    F1 --> F3[Resumo por jogo]
+    F1 --> F4[Indicadores agregados]
+    F1 --> F5[Histórico por período]
+
+    G --> G1[Agenda da equipe]
+    G1 --> G2[Próximos treinos]
+    G1 --> G3[Jogos]
+    G1 --> G4[Viagens]
+    G1 --> G5[Competições]
+    G1 --> G6[Detalhe do evento]
+
+    H --> H1[Listagens publicadas]
+    H1 --> H2[Convocações abertas]
+    H1 --> H3[Convocações respondidas]
+    H1 --> H4[Detalhe da convocação]
+
+    H4 --> H4A[Confirmar participação]
+    H4 --> H4B[Recusar participação]
+    H4 --> H4C[Registrar observação]
+
+    I --> I1[Meus dados]
+    I --> I2[Email vinculado]
+    I --> I3[Status no time]
+    I --> I4[Posição ofensiva]
+    I --> I5[Função defensiva]
+    I --> I6[Redefinir senha]
+    I --> I7[Sair]
 ```
 
 ---
@@ -237,9 +296,11 @@ flowchart TD
     D5 --> D6[/app/inicio]
     D5 --> D7[/app/atletas]
     D5 --> D8[/app/treinos]
-    D5 --> D9[/app/scout]
-    D5 --> D10[/app/relatorios]
-    D5 --> D11[/app/configuracoes]
+    D5 --> D9[/app/metas]
+    D5 --> D10[/app/agenda]
+    D5 --> D11[/app/scout]
+    D5 --> D12[/app/relatorios]
+    D5 --> D13[/app/configuracoes]
 
     E --> E1{Existe sessão Supabase?}
     E1 -->|Não| E2[Redirecionar para /atleta/login]
@@ -249,8 +310,11 @@ flowchart TD
 
     E5 --> E6[/atleta/inicio]
     E5 --> E7[/atleta/treinos]
-    E5 --> E8[/atleta/frequencia]
-    E5 --> E9[/atleta/perfil]
+    E5 --> E8[/atleta/metas]
+    E5 --> E9[/atleta/scout]
+    E5 --> E10[/atleta/agenda]
+    E5 --> E11[/atleta/convocacoes]
+    E5 --> E12[/atleta/perfil]
 
     F --> F1[/confirmar/:token]
     F1 --> F2{Token existe?}
@@ -258,7 +322,6 @@ flowchart TD
     F2 -->|Sim| F4{Token expirado ou revogado?}
     F4 -->|Sim| F5[Link expirado ou indisponível]
     F4 -->|Não| F6[Exibir confirmação de presença]
-
     F6 --> F7[Salvar resposta]
     F7 --> F8[Exibir sucesso]
 ```

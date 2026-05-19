@@ -19,6 +19,8 @@ nao_cobre: "Estado atual do sistema, execuções posteriores a 2026-05-04"
 
 # Execução do checklist — lotes de Presence Tokens Supabase
 
+> **Status:** histórico. Este documento registra uma execução específica em `2026-05-04` e não deve ser usado como retrato do estado atual do sistema.
+
 Data: 2026-05-04
 
 ## Escopo
