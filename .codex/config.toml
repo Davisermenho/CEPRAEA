@@ -1,0 +1,21 @@
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+startup_timeout_sec = 20
+tool_timeout_sec = 60
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest"]
+startup_timeout_sec = 30
+tool_timeout_sec = 90
+
+[mcp_servers.supabase_local]
+url = "http://localhost:54321/mcp"
+startup_timeout_sec = 20
+tool_timeout_sec = 90
+
+[mcp_servers.vercel]
+url = "https://mcp.vercel.com"
+startup_timeout_sec = 20
+tool_timeout_sec = 90
