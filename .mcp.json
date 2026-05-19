@@ -1,20 +1,22 @@
 {
-  "servers": {
+  "mcpServers": {
     "context7": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "env": {}
     },
     "playwright": {
       "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
-        "@playwright/mcp@latest",
-        "--browser",
-        "chromium",
-        "--isolated"
-      ]
+        "@playwright/mcp@latest"
+      ],
+      "env": {}
     },
     "supabase-local": {
       "type": "http",
@@ -23,10 +25,6 @@
     "vercel": {
       "type": "http",
       "url": "https://mcp.vercel.com"
-    },
-    "notion": {
-      "type": "http",
-      "url": "https://mcp.notion.com/mcp"
     }
   }
 }
