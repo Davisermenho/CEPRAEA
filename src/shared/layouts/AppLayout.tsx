@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Users,
   Dumbbell,
+  Radar,
   BarChart2,
   Settings,
 } from 'lucide-react'
@@ -22,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/',             label: 'Início',    icon: LayoutDashboard },
   { to: '/atletas',      label: 'Atletas',   icon: Users },
   { to: '/treinos',      label: 'Treinos',   icon: Dumbbell },
+  { to: '/scout',        label: 'Scout',     icon: Radar },
   { to: '/relatorios',   label: 'Relatórios', icon: BarChart2 },
   { to: '/configuracoes', label: 'Config',   icon: Settings },
 ]

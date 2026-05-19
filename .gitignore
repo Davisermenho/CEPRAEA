@@ -64,7 +64,6 @@ Thumbs.db
 # PASTAS DE AGENTES:
 # Essas pastas podem conter arquivos relacionados a agentes de inteligência artificial, como Claude, Codex e Copilot. Esses arquivos podem ser específicos do ambiente de desenvolvimento ou conter informações sensíveis, e não devem ser versionados.
 .claude/
-.codex/
 .files/
 .copilot/
 #---
@@ -93,5 +92,12 @@ AGENT.md
 #ARQUIVOS DE CONFIGURAÇÃO DE DEPLOYMENT:
 # Esses arquivos podem conter informações de configuração específicas para o deployment do projeto, como configurações de ambiente, chaves de API e outras informações sensíveis. Eles não devem ser versionados para evitar a exposição de informações confidenciais e para permitir que cada desenvolvedor tenha suas próprias configurações locais sem afetar os outros.
 .vercel
-
 #---
+
+# Local/offline reference files
+/googledrive/
+
+# Raw Scout pilot/chat exports
+# Keep raw conversation dumps local; commit curated context and normalized extracts instead.
+/pilot-chat.json
+/docs/piloto01.json

@@ -6,10 +6,10 @@ autoridade: "Hierarquia 2/4 — vence decisões de agente sobre sequência e esc
 lido_por: "Claude, Codex, Copilot"
 quando_ler: "ao iniciar qualquer tarefa; ao atualizar status de tarefa; ao propor mudança de escopo ou sequência"
 atualizado_por: "Agente executor + confirmação humana"
-quando_atualizar: "status de tarefa muda com prova objetiva executada naquele momento (não retroativamente)"
-validade: "2026-05-06"
+quando_atualizar: "status de tarefa muda com prova objetiva executada naquele momento (não retroativamente); mudança de fronteira do plano exige decisão humana explícita"
+validade: "2026-05-18"
 status: PARCIAL
-status_nota: "As seções 6.2.1 e 6.2.2 são um snapshot auditado desta data; qualquer ação deve revalidar o código e os comandos objetivos no momento da execução"
+status_nota: "Plano congelado para o recorte técnico homologado em 2026-05-07. As seções 6.2.1 e 6.2.2 são snapshot auditado dessa data. O escopo ampliado posterior do PRD exige novo plano ou reabertura explícita deste contrato."
 conflito: "plan.md prevalece sobre interpretação livre de agente; código prevalece quando plan.md e código divergem sobre estado atual; ver auditplan.md para divergências conhecidas."
 proibido:
   - "Agentes NÃO devem marcar tarefa como DONE sem executar os comandos de prova no momento"
@@ -21,7 +21,7 @@ nao_cobre: "Intenção de produto (→ CEPRAEA.md), estado atual implementado (�
 
 ## 1. Objetivo obrigatório
 
-Este plano é o caminho oficial até o MVP v1.0 do CEPRAEA.
+Este plano é o caminho oficial até o MVP v1.0 do CEPRAEA **no recorte técnico homologado em 2026-05-07**.
 
 O MVP v1.0 só existe quando todas as condições abaixo forem verdadeiras ao mesmo tempo:
 
@@ -33,6 +33,37 @@ O MVP v1.0 só existe quando todas as condições abaixo forem verdadeiras ao me
 6. não existem dependências quebradas;
 7. não existe comportamento simulado no lugar do comportamento real;
 8. não existe tarefa marcada como concluída sem prova objetiva.
+
+### 1.1 Fronteira deste plano
+
+Este documento **não** comprova automaticamente a entrega do escopo ampliado de produto definido depois no PRD.
+
+Ele cobre o recorte técnico validado até o fechamento de `T00`–`T10`, centrado em:
+
+- autenticação de treinador e atleta;
+- atletas;
+- treinos;
+- presença;
+- confirmação pública por token;
+- relatórios;
+- exportação;
+- scout no recorte técnico então homologado;
+- remoção do runtime legado do caminho crítico.
+
+Este plano **não cobre por si só**, sem nova tarefa e nova prova objetiva:
+
+- plano de treino do dia;
+- metas individuais;
+- metas da equipe;
+- agenda da equipe;
+- jogos, viagens, convocações e competições;
+- scout visível à atleta como fluxo oficial de produto;
+- nova cobertura E2E correspondente a esses fluxos.
+
+Regra:
+
+- `T00`–`T10` concluídas significam apenas que o recorte acima foi homologado;
+- qualquer agente que queira tratar o escopo ampliado do PRD como parte do MVP deve abrir novo plano ou reabrir este documento com aprovação humana explícita.
 
 ## 2. Regras globais de execução
 
@@ -1283,6 +1314,8 @@ Confirmar que:
 ---
 
 ## 7. Checklist final de aceite do MVP v1.0
+
+> **Nota de escopo:** este checklist final valida apenas o recorte técnico congelado na seção `1.1`. Ele não deve ser usado para afirmar que módulos adicionados posteriormente ao PRD já estão entregues.
 
 O MVP v1.0 só existe quando todos os itens abaixo forem verdadeiros:
 

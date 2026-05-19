@@ -15,6 +15,16 @@ const AthleteDetailPage      = lazy(() => import('@/features/athletes/pages/Athl
 const TrainingsPage          = lazy(() => import('@/features/trainings/pages/TrainingsPage'))
 const TrainingDetailPage     = lazy(() => import('@/features/trainings/pages/TrainingDetailPage'))
 const ReportsPage            = lazy(() => import('@/features/reports/pages/ReportsPage'))
+const ScoutCentralPage        = lazy(() => import('@/features/scout/pages/ScoutCentralPage'))
+const ScoutPrepareSessionPage = lazy(() => import('@/features/scout/pages/ScoutPrepareSessionPage'))
+const ScoutWorkspacePage      = lazy(() => import('@/features/scout/pages/ScoutWorkspacePage'))
+const ScoutVideoReviewPage   = lazy(() => import('@/features/scout/pages/ScoutVideoReviewPage'))
+const ScoutValidationPage    = lazy(() => import('@/features/scout/pages/ScoutValidationPage'))
+const ScoutAthletesPage      = lazy(() => import('@/features/scout/pages/ScoutAthletesPage'))
+const ScoutTeamsPage         = lazy(() => import('@/features/scout/pages/ScoutTeamsPage'))
+const ScoutReportPage        = lazy(() => import('@/features/scout/pages/ScoutReportPage'))
+const ScoutFeedbackPage      = lazy(() => import('@/features/scout/pages/ScoutFeedbackPage'))
+const ScoutDashboardPage     = lazy(() => import('@/features/scout/pages/ScoutDashboardPage'))
 const SettingsPage           = lazy(() => import('@/features/settings/pages/SettingsPage'))
 const SupabaseSettingsPage   = lazy(() => import('@/features/settings/pages/SupabaseSettingsPage'))
 
@@ -62,6 +72,17 @@ export default function App() {
                 <Route path="atletas/:id" element={<AthleteDetailPage />} />
                 <Route path="treinos" element={<TrainingsPage />} />
                 <Route path="treinos/:id" element={<TrainingDetailPage />} />
+                <Route path="scout" element={<ScoutCentralPage />} />
+                <Route path="scout/preparar" element={<ScoutPrepareSessionPage />} />
+                <Route path="scout/preparar/:gameId" element={<ScoutPrepareSessionPage />} />
+                <Route path="scout/ao-vivo/:gameId" element={<ScoutWorkspacePage />} />
+                <Route path="scout/review/:gameId" element={<ScoutVideoReviewPage />} />
+                <Route path="scout/validate/:gameId" element={<ScoutValidationPage />} />
+                <Route path="scout/athletes" element={<ScoutAthletesPage />} />
+                <Route path="scout/teams" element={<ScoutTeamsPage />} />
+                <Route path="scout/report" element={<ScoutReportPage />} />
+                <Route path="scout/feedback" element={<ScoutFeedbackPage />} />
+                <Route path="scout/dashboard" element={<ScoutDashboardPage />} />
                 <Route path="relatorios" element={<ReportsPage />} />
                 <Route path="configuracoes" element={<SettingsPage />} />
                 <Route path="configuracoes/supabase" element={<SupabaseSettingsPage />} />
