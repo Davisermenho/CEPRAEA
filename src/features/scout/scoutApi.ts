@@ -184,12 +184,20 @@ type RawScoutLiveEntryRow = {
   categoria_acao_code: string | null
   acao_basica_code: string | null
   classificacao_acao_code: string | null
+  execucao_bloqueio_code: string | null
+  estrutura_transicao_code: string | null
+  contexto_decisao_code: string | null
+  contexto_arremesso_code: string | null
+  acao_preparatoria_code: string | null
   derived_scout_play_id: string | null
   created_by: string | null
   updated_by: string | null
   created_at: string
   updated_at: string
 }
+
+const SCOUT_LIVE_ENTRY_SELECT =
+  'id, team_id, scout_game_id, id_jogada, tempo_jogo, fase_da_bola_code, equipe_analisada_id, fase_equipe_analisada_code, sistema_ofensivo_code, sistema_defensivo_code, atleta_principal_id, acao_principal_text, acao_principal_suggestion_code, acao_principal_is_custom, tipo_finalizacao_code, resultado_factual_code, motivo_pontuacao_code, pontos_jogada, causa_provavel_code, prioridade_treino_code, video_ref, status_validacao_code, obs_geral, categoria_acao_code, acao_basica_code, classificacao_acao_code, execucao_bloqueio_code, estrutura_transicao_code, contexto_decisao_code, contexto_arremesso_code, acao_preparatoria_code, derived_scout_play_id, created_by, updated_by, created_at, updated_at'
 
 function assertSupabaseReady() {
   if (!isSupabaseConfigured()) {
@@ -324,6 +332,11 @@ function mapScoutLiveEntry(row: RawScoutLiveEntryRow): ScoutLiveEntry {
     categoriaAcaoCode: toOptional(row.categoria_acao_code),
     acaoBasicaCode: toOptional(row.acao_basica_code),
     classificacaoAcaoCode: toOptional(row.classificacao_acao_code),
+    execucaoBloqueioCode: toOptional(row.execucao_bloqueio_code),
+    estruturaTransicaoCode: toOptional(row.estrutura_transicao_code),
+    contextoDecisaoCode: toOptional(row.contexto_decisao_code),
+    contextoArremessoCode: toOptional(row.contexto_arremesso_code),
+    acaoPreparatoriaCode: toOptional(row.acao_preparatoria_code),
     derivedScoutPlayId: toOptional(row.derived_scout_play_id),
     createdBy: toOptional(row.created_by),
     updatedBy: toOptional(row.updated_by),
@@ -357,6 +370,8 @@ function serializeScoutLiveEntry(input: ScoutLiveEntryWriteInput, teamId: string
     status_validacao_code: input.statusValidacaoCode ?? 'PENDENTE',
     obs_geral: input.obsGeral ?? null,
     derived_scout_play_id: input.derivedScoutPlayId ?? null,
+    estrutura_transicao_code: input.estruturaTransicaoCode ?? null,
+    acao_preparatoria_code: input.acaoPreparatoriaCode ?? null,
   }
 }
 
@@ -386,6 +401,11 @@ function serializeScoutLiveEntryCreateInput(input: ScoutLiveEntryWriteInput): Re
     categoria_acao_code: input.categoriaAcaoCode ?? null,
     acao_basica_code: input.acaoBasicaCode ?? null,
     classificacao_acao_code: input.classificacaoAcaoCode ?? null,
+    execucao_bloqueio_code: input.execucaoBloqueioCode ?? null,
+    estrutura_transicao_code: input.estruturaTransicaoCode ?? null,
+    contexto_decisao_code: input.contextoDecisaoCode ?? null,
+    contexto_arremesso_code: input.contextoArremessoCode ?? null,
+    acao_preparatoria_code: input.acaoPreparatoriaCode ?? null,
   }
 }
 
@@ -641,9 +661,7 @@ export async function fetchScoutLiveEntriesForGame(scoutGameId: string, teamId?:
   const resolvedTeamId = resolveTeamId(teamId)
   const { data, error } = await supabase
     .from('scout_live_entries')
-    .select(
-      'id, team_id, scout_game_id, id_jogada, tempo_jogo, fase_da_bola_code, equipe_analisada_id, fase_equipe_analisada_code, sistema_ofensivo_code, sistema_defensivo_code, atleta_principal_id, acao_principal_text, acao_principal_suggestion_code, acao_principal_is_custom, tipo_finalizacao_code, resultado_factual_code, motivo_pontuacao_code, pontos_jogada, causa_provavel_code, prioridade_treino_code, video_ref, status_validacao_code, obs_geral, categoria_acao_code, acao_basica_code, classificacao_acao_code, derived_scout_play_id, created_by, updated_by, created_at, updated_at',
-    )
+    .select(SCOUT_LIVE_ENTRY_SELECT)
     .eq('team_id', resolvedTeamId)
     .eq('scout_game_id', scoutGameId)
     .is('deleted_at', null)
@@ -662,9 +680,7 @@ export async function getScoutLiveEntry(liveEntryId: string, teamId?: string): P
   const resolvedTeamId = resolveTeamId(teamId)
   const { data, error } = await supabase
     .from('scout_live_entries')
-    .select(
-      'id, team_id, scout_game_id, id_jogada, tempo_jogo, fase_da_bola_code, equipe_analisada_id, fase_equipe_analisada_code, sistema_ofensivo_code, sistema_defensivo_code, atleta_principal_id, acao_principal_text, acao_principal_suggestion_code, acao_principal_is_custom, tipo_finalizacao_code, resultado_factual_code, motivo_pontuacao_code, pontos_jogada, causa_provavel_code, prioridade_treino_code, video_ref, status_validacao_code, obs_geral, categoria_acao_code, acao_basica_code, classificacao_acao_code, derived_scout_play_id, created_by, updated_by, created_at, updated_at',
-    )
+    .select(SCOUT_LIVE_ENTRY_SELECT)
     .eq('team_id', resolvedTeamId)
     .eq('id', liveEntryId)
     .is('deleted_at', null)
@@ -728,6 +744,11 @@ export async function updateScoutLiveEntry(
   if (input.categoriaAcaoCode !== undefined) payload.categoria_acao_code = input.categoriaAcaoCode ?? null
   if (input.acaoBasicaCode !== undefined) payload.acao_basica_code = input.acaoBasicaCode ?? null
   if (input.classificacaoAcaoCode !== undefined) payload.classificacao_acao_code = input.classificacaoAcaoCode ?? null
+  if (input.execucaoBloqueioCode !== undefined) payload.execucao_bloqueio_code = input.execucaoBloqueioCode ?? null
+  if (input.estruturaTransicaoCode !== undefined) payload.estrutura_transicao_code = input.estruturaTransicaoCode ?? null
+  if (input.contextoDecisaoCode !== undefined) payload.contexto_decisao_code = input.contextoDecisaoCode ?? null
+  if (input.contextoArremessoCode !== undefined) payload.contexto_arremesso_code = input.contextoArremessoCode ?? null
+  if (input.acaoPreparatoriaCode !== undefined) payload.acao_preparatoria_code = input.acaoPreparatoriaCode ?? null
   if (input.derivedScoutPlayId !== undefined) payload.derived_scout_play_id = input.derivedScoutPlayId ?? null
 
   const { data, error } = await supabase
@@ -735,9 +756,7 @@ export async function updateScoutLiveEntry(
     .update(payload)
     .eq('team_id', resolvedTeamId)
     .eq('id', liveEntryId)
-    .select(
-      'id, team_id, scout_game_id, id_jogada, tempo_jogo, fase_da_bola_code, equipe_analisada_id, fase_equipe_analisada_code, sistema_ofensivo_code, sistema_defensivo_code, atleta_principal_id, acao_principal_text, acao_principal_suggestion_code, acao_principal_is_custom, tipo_finalizacao_code, resultado_factual_code, motivo_pontuacao_code, pontos_jogada, causa_provavel_code, prioridade_treino_code, video_ref, status_validacao_code, obs_geral, categoria_acao_code, acao_basica_code, classificacao_acao_code, derived_scout_play_id, created_by, updated_by, created_at, updated_at',
-    )
+    .select(SCOUT_LIVE_ENTRY_SELECT)
     .single<RawScoutLiveEntryRow>()
 
   if (error) {
@@ -745,6 +764,101 @@ export async function updateScoutLiveEntry(
   }
 
   return mapScoutLiveEntry(data)
+}
+
+export async function updatePendingScoutLiveEntry(
+  liveEntryId: string,
+  input: Partial<ScoutLiveEntryWriteInput>,
+  teamId?: string,
+): Promise<ScoutLiveEntry> {
+  assertSupabaseReady()
+
+  const current = await getScoutLiveEntry(liveEntryId, teamId)
+  if (current.statusValidacaoCode !== 'PENDENTE') {
+    throw new Error('Somente entradas PENDENTE podem ser editadas na coleta ao vivo.')
+  }
+
+  const resolvedTeamId = resolveTeamId(teamId)
+  const payload: Record<string, unknown> = {}
+
+  if (input.scoutGameId !== undefined) payload.scout_game_id = input.scoutGameId
+  if (input.idJogada !== undefined) payload.id_jogada = input.idJogada
+  if (input.tempoJogo !== undefined) payload.tempo_jogo = input.tempoJogo
+  if (input.faseDaBolaCode !== undefined) payload.fase_da_bola_code = input.faseDaBolaCode
+  if (input.equipeAnalisadaId !== undefined) payload.equipe_analisada_id = input.equipeAnalisadaId
+  if (input.faseEquipeAnalisadaCode !== undefined) payload.fase_equipe_analisada_code = input.faseEquipeAnalisadaCode
+  if (input.sistemaOfensivoCode !== undefined) payload.sistema_ofensivo_code = input.sistemaOfensivoCode ?? null
+  if (input.sistemaDefensivoCode !== undefined) payload.sistema_defensivo_code = input.sistemaDefensivoCode ?? null
+  if (input.atletaPrincipalId !== undefined) payload.atleta_principal_id = input.atletaPrincipalId ?? null
+  if (input.acaoPrincipalText !== undefined) payload.acao_principal_text = input.acaoPrincipalText ?? null
+  if (input.acaoPrincipalSuggestionCode !== undefined) payload.acao_principal_suggestion_code = input.acaoPrincipalSuggestionCode ?? null
+  if (input.acaoPrincipalIsCustom !== undefined) payload.acao_principal_is_custom = input.acaoPrincipalIsCustom
+  if (input.tipoFinalizacaoCode !== undefined) payload.tipo_finalizacao_code = input.tipoFinalizacaoCode ?? null
+  if (input.resultadoFactualCode !== undefined) payload.resultado_factual_code = input.resultadoFactualCode
+  if (input.motivoPontuacaoCode !== undefined) payload.motivo_pontuacao_code = input.motivoPontuacaoCode ?? null
+  if (input.pontosJogada !== undefined) payload.pontos_jogada = input.pontosJogada ?? null
+  if (input.causaProvavelCode !== undefined) payload.causa_provavel_code = input.causaProvavelCode ?? null
+  if (input.prioridadeTreinoCode !== undefined) payload.prioridade_treino_code = input.prioridadeTreinoCode ?? null
+  if (input.videoRef !== undefined) payload.video_ref = input.videoRef ?? null
+  if (input.statusValidacaoCode !== undefined) payload.status_validacao_code = input.statusValidacaoCode
+  if (input.obsGeral !== undefined) payload.obs_geral = input.obsGeral ?? null
+  if (input.categoriaAcaoCode !== undefined) payload.categoria_acao_code = input.categoriaAcaoCode ?? null
+  if (input.acaoBasicaCode !== undefined) payload.acao_basica_code = input.acaoBasicaCode ?? null
+  if (input.classificacaoAcaoCode !== undefined) payload.classificacao_acao_code = input.classificacaoAcaoCode ?? null
+  if (input.execucaoBloqueioCode !== undefined) payload.execucao_bloqueio_code = input.execucaoBloqueioCode ?? null
+  if (input.estruturaTransicaoCode !== undefined) payload.estrutura_transicao_code = input.estruturaTransicaoCode ?? null
+  if (input.contextoDecisaoCode !== undefined) payload.contexto_decisao_code = input.contextoDecisaoCode ?? null
+  if (input.contextoArremessoCode !== undefined) payload.contexto_arremesso_code = input.contextoArremessoCode ?? null
+  if (input.acaoPreparatoriaCode !== undefined) payload.acao_preparatoria_code = input.acaoPreparatoriaCode ?? null
+  if (input.derivedScoutPlayId !== undefined) payload.derived_scout_play_id = input.derivedScoutPlayId ?? null
+
+  const { data, error } = await supabase
+    .from('scout_live_entries')
+    .update(payload)
+    .eq('team_id', resolvedTeamId)
+    .eq('id', liveEntryId)
+    .eq('status_validacao_code', 'PENDENTE')
+    .is('deleted_at', null)
+    .select(SCOUT_LIVE_ENTRY_SELECT)
+    .single<RawScoutLiveEntryRow>()
+
+  if (error) {
+    throw new Error(error.message || 'Falha ao editar entrada pendente da coleta ao vivo.')
+  }
+
+  return mapScoutLiveEntry(data)
+}
+
+export async function discardPendingScoutLiveEntry(liveEntryId: string, teamId?: string): Promise<void> {
+  assertSupabaseReady()
+
+  const current = await getScoutLiveEntry(liveEntryId, teamId)
+  if (current.statusValidacaoCode !== 'PENDENTE') {
+    throw new Error('Somente entradas PENDENTE podem ser excluídas na coleta ao vivo.')
+  }
+  if (current.derivedScoutPlayId) {
+    throw new Error('Entradas já vinculadas a scout_play precisam seguir o fluxo de revisão.')
+  }
+
+  const resolvedTeamId = resolveTeamId(teamId)
+  const { data, error } = await supabase
+    .from('scout_live_entries')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('team_id', resolvedTeamId)
+    .eq('id', liveEntryId)
+    .eq('status_validacao_code', 'PENDENTE')
+    .is('derived_scout_play_id', null)
+    .is('deleted_at', null)
+    .select('id')
+    .maybeSingle()
+
+  if (error) {
+    throw new Error(error.message || 'Falha ao excluir entrada pendente da coleta ao vivo.')
+  }
+
+  if (!data) {
+    throw new Error('A entrada não pôde ser excluída porque deixou de estar pendente.')
+  }
 }
 
 export async function fetchScoutFieldCodebookMap(contractName?: string): Promise<ScoutFieldCodebookMap[]> {

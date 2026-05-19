@@ -38,7 +38,8 @@ test.describe('Scout visual — campos condicionais da coleta ao vivo', () => {
     await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
     await page.getByLabel('Sistema ofensivo').selectOption({ label: 'Ataque 4:0' })
     await page.getByRole('button', { name: 'Arremesso', exact: true }).first().click()
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
 
     await expect(page.getByText('Motivo da pontuação', { exact: true })).not.toBeVisible()
     await expect(page.getByText('Pontos da jogada', { exact: true })).not.toBeVisible()
@@ -59,11 +60,12 @@ test.describe('Scout visual — campos condicionais da coleta ao vivo', () => {
     await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
     await page.getByLabel('Sistema ofensivo').selectOption({ label: 'Ataque 4:0' })
     await page.getByRole('button', { name: 'Arremesso', exact: true }).first().click()
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
 
     await expect(page.getByText('Motivo da pontuação', { exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Simples', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Simples', exact: true }).last()).toBeVisible()
     await expect(page.getByRole('button', { name: 'Especialista', exact: true })).toBeVisible()
 
     await page.getByRole('button', { name: 'Defendido', exact: true }).click()
@@ -75,12 +77,13 @@ test.describe('Scout visual — campos condicionais da coleta ao vivo', () => {
     await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
     await page.getByLabel('Sistema ofensivo').selectOption({ label: 'Ataque 4:0' })
     await page.getByRole('button', { name: 'Arremesso', exact: true }).first().click()
+    await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
     await page.getByRole('button', { name: 'Giro', exact: true }).click()
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
 
     await expect(page.getByRole('button', { name: '1', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: '2', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Simples', exact: true })).not.toBeVisible()
+    await expect(page.getByText('Motivo da pontuação', { exact: true })).not.toBeVisible()
     await expect(page.getByRole('button', { name: 'Especialista', exact: true })).not.toBeVisible()
   })
 

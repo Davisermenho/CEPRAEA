@@ -16,6 +16,7 @@ export type LiveCollectionCategoryCode =
 export type LiveCollectionBasicActionCode =
   | 'PASSE'
   | 'ARREMESSO'
+  | 'FINALIZACAO_6M_FAV'
   | 'BLOQUEIO'
   | 'INTERCEPTACAO'
   | 'ROUBO'
@@ -27,6 +28,7 @@ export type LiveCollectionBasicActionCode =
   | 'TROCA_DEFENSIVA'
   | 'ESTABILIZACAO'
   | 'NAO_OBSERVADO'
+  | 'FINALIZACAO_6M_ADV'
 
 export type LiveCollectionClassificationCode =
   | 'PASSE_APOIADO'
@@ -43,9 +45,8 @@ export type LiveCollectionClassificationCode =
   | 'FINALIZ_TRANS'
   | 'FINALIZ_CONTRA'
   | 'AEREA_TRANS'
-  | 'BLOQ_GIRO'
-  | 'BLOQ_ARREM_SIMPLES'
-  | 'BLOQ_AEREA'
+  | '6M_ADV'
+  | 'NAO_OBSERVADO'
   | 'INTERCEPTACAO'
   | 'ROUBO_BOLA'
   | 'CORTE_LINHA_PASSE'
@@ -53,6 +54,10 @@ export type LiveCollectionClassificationCode =
   | 'TRANS_NEUTRALIZADA'
   | 'DEF_ESTABILIZADA_TR'
   | 'ERRO_TROCA_TRANS'
+  | 'COBERTURA_PIVO'
+  | 'FECHAMENTO_CENTRAL'
+  | 'TROCA_REFERENCIA'
+  | 'INTERCEPTACAO_MALSUCEDIDA'
 
 export type LiveCollectionConditionalField =
   | 'sistemaOfensivoCode'
@@ -86,7 +91,16 @@ export interface LiveCollectionActionRule {
   readonly derivedScoringReasonByClassification?: Readonly<
     Partial<Record<LiveCollectionClassificationCode, ScoutScoringReasonCode>>
   >
+  readonly allowedResultsByClassification?: Readonly<
+    Partial<Record<string, readonly ScoutFactualResultCode[]>>
+  >
   readonly forbiddenFields?: readonly LiveCollectionConditionalField[]
+  readonly execucaoBloqueioListKey?: ScoutCodeListKey
+  readonly derivedScoringReasonByFinishType?: Readonly<
+    Partial<Record<ScoutFinishTypeCode, ScoutScoringReasonCode>>
+  >
+  readonly contextoDecisaoListKey?: ScoutCodeListKey
+  readonly contextoArremessoListKey?: ScoutCodeListKey
   readonly notes?: string
 }
 
@@ -185,7 +199,7 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
       },
       ARREMESSO: {
         basicActionListKey: 'LISTA_ACAO_BASICA_ARREMESSO',
-        allowedBasicActions: ['ARREMESSO'],
+        allowedBasicActions: ['ARREMESSO', 'FINALIZACAO_6M_FAV'],
         actions: {
           ARREMESSO: {
             classificationListKey: 'LISTA_CLASSIF_ARREMESSO',
@@ -207,10 +221,12 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
               'FORA',
               'TRAVE',
               'VIOLACAO',
+              'PASSIVO',
               'NAO_OBSERVADO',
             ],
             forbiddenResults: ['ERRO_PASSE', 'PASSE_INTERCEPTADO', 'RECUPERACAO_POSSE'],
-            showFinishTypeField: 'never',
+            showFinishTypeField: 'when-shot-result',
+            allowedFinishTypes: ['SIMPLES', 'GIRO', 'AEREA'],
             derivedFinishTypeByClassification: {
               GIRO: 'GIRO',
               AEREA: 'AEREA',
@@ -231,6 +247,30 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
               GIRO: 'GIRO',
               AEREA: 'AEREA',
             },
+            derivedScoringReasonByFinishType: {
+              GIRO: 'GIRO',
+              AEREA: 'AEREA',
+            },
+          },
+          FINALIZACAO_6M_FAV: {
+            allowedClassifications: [],
+            allowedResults: [
+              'GOL',
+              'DEFENDIDO',
+              'FORA',
+              'TRAVE',
+              'VIOLACAO',
+              'NAO_OBSERVADO',
+            ],
+            forbiddenResults: ['BLOQUEADO', 'ERRO_PASSE', 'PASSE_INTERCEPTADO', 'RECUPERACAO_POSSE'],
+            showFinishTypeField: 'always',
+            allowedFinishTypes: ['6M'],
+            showScoringFields: 'when-offensive-goal',
+            allowedScoringReasons: ['6M'],
+            derivedScoringReasonByFinishType: {
+              '6M': '6M',
+            },
+            notes: 'Evento ofensivo observado: CEPRAEA cobra 6m. tipo_finalizacao_code auto-derivado para 6M.',
           },
         },
       },
@@ -251,32 +291,37 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
           'COBERTURA',
           'MARCACAO_PRESSAO',
           'RECOMPOSICAO',
+          'FINALIZACAO_6M_ADV',
         ],
         actions: {
           BLOQUEIO: {
+            // CEPR-0092: classificacaoAcaoCode = tipo da finalização adversária enfrentada.
+            // execucaoBloqueioCode (nova coluna) = qualidade de execução do bloqueio.
+            // LISTA_CLASSIF_BLOQUEIO mudou de significado operacional — nunca reintroduzir BLOQ_GIRO/BLOQ_AEREA/BLOQ_ARREM_SIMPLES/BLOQ_NAO_EXECUTADO.
             classificationListKey: 'LISTA_CLASSIF_BLOQUEIO',
-            allowedClassifications: ['BLOQ_GIRO', 'BLOQ_ARREM_SIMPLES', 'BLOQ_AEREA'],
+            allowedClassifications: ['GIRO', 'AEREA', 'ARREM_SIMPLES', '6M_ADV', 'NAO_OBSERVADO'],
             allowedResults: [
               'BLOQUEADO',
               'RECUPERACAO_POSSE',
               'FALTA_ATAQUE',
               'GOL',
               'VIOLACAO',
+              'TIRO_6M_CONCEDIDO',
               'NAO_OBSERVADO',
             ],
-            forbiddenResults: ['ERRO_PASSE', 'PASSE_INTERCEPTADO', 'PASSIVO'],
             showFinishTypeField: 'never',
             derivedFinishTypeByClassification: {
-              BLOQ_GIRO: 'GIRO',
-              BLOQ_ARREM_SIMPLES: 'SIMPLES',
-              BLOQ_AEREA: 'AEREA',
+              GIRO: 'GIRO',
+              ARREM_SIMPLES: 'SIMPLES',
+              AEREA: 'AEREA',
+              '6M_ADV': '6M',
             },
             showScoringFields: 'never',
-            notes: 'Finalizacao adversaria e derivada da classificacao.',
+            execucaoBloqueioListKey: 'LISTA_EXECUCAO_BLOQUEIO',
           },
           INTERCEPTACAO: {
             classificationListKey: 'LISTA_CLASSIF_INTERC_ROUBO',
-            allowedClassifications: ['INTERCEPTACAO', 'CORTE_LINHA_PASSE'],
+            allowedClassifications: ['INTERCEPTACAO', 'CORTE_LINHA_PASSE', 'INTERCEPTACAO_MALSUCEDIDA'],
             allowedResults: [
               'RECUPERACAO_POSSE',
               'FALTA_ATAQUE',
@@ -284,6 +329,9 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
               'VIOLACAO',
               'NAO_OBSERVADO',
             ],
+            allowedResultsByClassification: {
+              INTERCEPTACAO_MALSUCEDIDA: ['GOL', 'DEFENDIDO', 'NAO_OBSERVADO'],
+            },
             forbiddenResults: ['GOL', 'DEFENDIDO', 'BLOQUEADO', 'FORA', 'TRAVE'],
             showFinishTypeField: 'never',
             showScoringFields: 'never',
@@ -303,13 +351,15 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
             showScoringFields: 'never',
           },
           COBERTURA: {
-            allowedClassifications: [],
+            classificationListKey: 'LISTA_CLASSIF_COBERTURA',
+            allowedClassifications: ['COBERTURA_PIVO', 'FECHAMENTO_CENTRAL'],
             allowedResults: [
               'RECUPERACAO_POSSE',
               'FALTA_ATAQUE',
               'DEFESA_ESTABILIZADA',
               'GOL',
               'VIOLACAO',
+              'TIRO_6M_CONCEDIDO',
               'NAO_OBSERVADO',
             ],
             showFinishTypeField: 'when-shot-result-and-not-derived',
@@ -317,13 +367,15 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
             showScoringFields: 'never',
           },
           MARCACAO_PRESSAO: {
-            allowedClassifications: [],
+            classificationListKey: 'LISTA_CLASSIF_MARCACAO_PRESSAO',
+            allowedClassifications: ['TROCA_REFERENCIA'],
             allowedResults: [
               'RECUPERACAO_POSSE',
               'FALTA_ATAQUE',
               'DEFESA_ESTABILIZADA',
               'GOL',
               'VIOLACAO',
+              'TIRO_6M_CONCEDIDO',
               'NAO_OBSERVADO',
             ],
             showFinishTypeField: 'when-shot-result-and-not-derived',
@@ -338,11 +390,20 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
               'DEFESA_ESTABILIZADA',
               'GOL',
               'VIOLACAO',
+              'TIRO_6M_CONCEDIDO',
               'NAO_OBSERVADO',
             ],
             showFinishTypeField: 'when-shot-result-and-not-derived',
             allowedFinishTypes: ['SIMPLES', 'GIRO', 'AEREA', 'NAO_OBSERVADO'],
             showScoringFields: 'never',
+          },
+          FINALIZACAO_6M_ADV: {
+            allowedClassifications: [],
+            allowedResults: ['GOL', 'DEFENDIDO', 'FORA', 'TRAVE', 'VIOLACAO', 'NAO_OBSERVADO'],
+            showFinishTypeField: 'always',
+            allowedFinishTypes: ['6M'],
+            showScoringFields: 'never',
+            notes: 'Evento defensivo observado: adversaria cobra 6m. tipo_finalizacao_code auto-derivado para 6M.',
           },
         },
       },
@@ -387,8 +448,12 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
         allowedBasicActions: ['ARREMESSO'],
         actions: {
           ARREMESSO: {
-            classificationListKey: 'LISTA_CLASSIF_ARREMESSO',
-            allowedClassifications: ['FINALIZ_TRANS', 'FINALIZ_CONTRA', 'AEREA_TRANS'],
+            // Estrutura da transição: campo separado estruturaTransicaoCode.
+            // Classificações legadas (FINALIZ_TRANS, FINALIZ_CONTRA, AEREA_TRANS) podem
+            // existir em dados antigos mas não são oferecidas em novos registros.
+            // CEPR-0095: contextoDecisaoCode + contextoArremessoCode (opcionais, só TRANS_OF+ARREMESSO).
+            allowedClassifications: [],
+            forbiddenClassifications: ['AEREA_TRANS', 'FINALIZ_TRANS', 'FINALIZ_CONTRA'],
             allowedResults: [
               'GOL',
               'DEFENDIDO',
@@ -396,14 +461,11 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
               'FORA',
               'TRAVE',
               'VIOLACAO',
+              'PASSIVO',
               'NAO_OBSERVADO',
             ],
-            showFinishTypeField: 'never',
-            derivedFinishTypeByClassification: {
-              FINALIZ_TRANS: 'SIMPLES',
-              FINALIZ_CONTRA: 'SIMPLES',
-              AEREA_TRANS: 'AEREA',
-            },
+            showFinishTypeField: 'when-shot-result',
+            allowedFinishTypes: ['SIMPLES', 'GIRO', 'AEREA', 'NAO_OBSERVADO'],
             showScoringFields: 'when-offensive-goal',
             allowedScoringReasons: [
               'SIMPLES',
@@ -415,9 +477,13 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
               'GOL_CONTRA',
               'NAO_OBSERVADO',
             ],
-            derivedScoringReasonByClassification: {
-              AEREA_TRANS: 'AEREA',
+            derivedScoringReasonByFinishType: {
+              GIRO: 'GIRO',
+              AEREA: 'AEREA',
+              NAO_OBSERVADO: 'NAO_OBSERVADO',
             },
+            contextoDecisaoListKey: 'LISTA_CONTEXTO_DECISAO',
+            contextoArremessoListKey: 'LISTA_CONTEXTO_ARREMESSO',
           },
         },
       },
@@ -476,8 +542,9 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
         ],
         actions: {
           BLOQUEIO: {
+            // CEPR-0092 partial: codes alinhados com DEF_POS. execucaoBloqueioListKey será adicionado no CEPR-0093.
             classificationListKey: 'LISTA_CLASSIF_BLOQUEIO',
-            allowedClassifications: ['BLOQ_GIRO', 'BLOQ_ARREM_SIMPLES', 'BLOQ_AEREA'],
+            allowedClassifications: ['GIRO', 'AEREA', 'ARREM_SIMPLES', '6M_ADV', 'NAO_OBSERVADO'],
             allowedResults: [
               'TRANSICAO_NEUTRALIZADA',
               'DEFESA_ESTABILIZADA',
@@ -492,9 +559,10 @@ export const liveCollectionCompatibilityMatrix: Readonly<Record<ScoutPhaseCode, 
             ],
             showFinishTypeField: 'never',
             derivedFinishTypeByClassification: {
-              BLOQ_GIRO: 'GIRO',
-              BLOQ_ARREM_SIMPLES: 'SIMPLES',
-              BLOQ_AEREA: 'AEREA',
+              GIRO: 'GIRO',
+              ARREM_SIMPLES: 'SIMPLES',
+              AEREA: 'AEREA',
+              '6M_ADV': '6M',
             },
             showScoringFields: 'never',
           },
@@ -694,11 +762,17 @@ export function getAllowedResultsForSelection(
   phase: ScoutPhaseCode,
   category?: LiveCollectionCategoryCode | '',
   action?: LiveCollectionBasicActionCode | '',
+  classification?: string | '',
 ) {
   if (!category) return []
   if (category === 'NAO_OBSERVADO') return ['NAO_OBSERVADO'] as const
   if (!action) return []
-  return getAllowedResults(phase, category, action)
+  const rule = getActionCompatibility(phase, category, action)
+  if (!rule) return []
+  if (classification && rule.allowedResultsByClassification?.[classification]) {
+    return rule.allowedResultsByClassification[classification]
+  }
+  return rule.allowedResults
 }
 
 export function deriveFinishTypeFromClassification(
@@ -769,6 +843,17 @@ export function shouldShowFinishTypeField(
   }
 }
 
+export function shouldSubmitDerivedFinishType(
+  phase: ScoutPhaseCode,
+  category: LiveCollectionCategoryCode,
+  action: LiveCollectionBasicActionCode,
+  result?: ScoutFactualResultCode,
+) {
+  const rule = getActionCompatibility(phase, category, action)
+  if (!rule?.derivedFinishTypeByClassification) return false
+  return result ? SHOT_RESULTS.includes(result) : false
+}
+
 export function shouldShowScoringFields(
   phase: ScoutPhaseCode,
   category: LiveCollectionCategoryCode,
@@ -780,4 +865,80 @@ export function shouldShowScoringFields(
 
   if (rule.showScoringFields !== 'when-offensive-goal') return false
   return phase !== 'DEF_POS' && phase !== 'TRANS_DEF' && result === 'GOL'
+}
+
+export function shouldShowTransicaoStructure(
+  phase: ScoutPhaseCode,
+  category?: LiveCollectionCategoryCode | '',
+  action?: LiveCollectionBasicActionCode | '',
+) {
+  return phase === 'TRANS_OF' && category === 'ARREMESSO' && action === 'ARREMESSO'
+}
+
+export function shouldShowAcaoPreparatoria(
+  phase: ScoutPhaseCode,
+  category?: LiveCollectionCategoryCode | '',
+  action?: LiveCollectionBasicActionCode | '',
+) {
+  return phase === 'AT_POS' && category === 'ARREMESSO' && action === 'ARREMESSO'
+}
+
+export function getExecucaoBloqueioListKey(
+  phase: ScoutPhaseCode,
+  category: LiveCollectionCategoryCode,
+  action: LiveCollectionBasicActionCode,
+): ScoutCodeListKey | undefined {
+  return getActionCompatibility(phase, category, action)?.execucaoBloqueioListKey
+}
+
+export function shouldShowExecucaoBloqueio(
+  phase: ScoutPhaseCode,
+  category?: LiveCollectionCategoryCode | '',
+  action?: LiveCollectionBasicActionCode | '',
+): boolean {
+  if (!category || !action) return false
+  return !!getActionCompatibility(phase, category as LiveCollectionCategoryCode, action as LiveCollectionBasicActionCode)?.execucaoBloqueioListKey
+}
+
+export function deriveScoringReasonFromFinishType(
+  phase: ScoutPhaseCode,
+  category: LiveCollectionCategoryCode,
+  action: LiveCollectionBasicActionCode,
+  finishType: ScoutFinishTypeCode,
+): ScoutScoringReasonCode | undefined {
+  return getActionCompatibility(phase, category, action)?.derivedScoringReasonByFinishType?.[finishType]
+}
+
+export function getContextoDecisaoListKey(
+  phase: ScoutPhaseCode,
+  category: LiveCollectionCategoryCode,
+  action: LiveCollectionBasicActionCode,
+): ScoutCodeListKey | undefined {
+  return getActionCompatibility(phase, category, action)?.contextoDecisaoListKey
+}
+
+export function getContextoArremessoListKey(
+  phase: ScoutPhaseCode,
+  category: LiveCollectionCategoryCode,
+  action: LiveCollectionBasicActionCode,
+): ScoutCodeListKey | undefined {
+  return getActionCompatibility(phase, category, action)?.contextoArremessoListKey
+}
+
+export function shouldShowContextoDecisao(
+  phase: ScoutPhaseCode,
+  category?: LiveCollectionCategoryCode | '',
+  action?: LiveCollectionBasicActionCode | '',
+): boolean {
+  if (!category || !action) return false
+  return !!getActionCompatibility(phase, category as LiveCollectionCategoryCode, action as LiveCollectionBasicActionCode)?.contextoDecisaoListKey
+}
+
+export function shouldShowContextoArremesso(
+  phase: ScoutPhaseCode,
+  category?: LiveCollectionCategoryCode | '',
+  action?: LiveCollectionBasicActionCode | '',
+): boolean {
+  if (!category || !action) return false
+  return !!getActionCompatibility(phase, category as LiveCollectionCategoryCode, action as LiveCollectionBasicActionCode)?.contextoArremessoListKey
 }

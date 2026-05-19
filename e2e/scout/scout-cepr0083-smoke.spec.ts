@@ -8,6 +8,10 @@ import { loginAsCoach } from '../helpers/auth'
 const TODAY = new Date().toISOString().split('T')[0]
 const TOMORROW = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
+async function fillTempo(page: import('@playwright/test').Page, tempo = '03:21') {
+  await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill(tempo)
+}
+
 async function selectNaoObservadoSlice(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Não observado', exact: true }).click()
   await page.waitForTimeout(200)
@@ -179,6 +183,7 @@ test('SMOKE-05: workspace carrega jogo pela URL e registra live entry', async ({
   // (único padrão que não exige acao_principal_text nem sistema defensivo/ofensivo)
   await page.getByRole('button', { name: 'Transição defensiva', exact: true }).click()
   await selectNaoObservadoSlice(page)
+  await fillTempo(page, '03:21')
   await page.getByRole('button', { name: 'Registrar entrada' }).click()
   await expectEntryCreated(page)
 
@@ -283,6 +288,7 @@ test('SMOKE-08: video review — live entry existente continua funcionando', asy
   await page.waitForLoadState('networkidle', { timeout: 20_000 })
   await page.getByRole('button', { name: 'Transição defensiva', exact: true }).click()
   await selectNaoObservadoSlice(page)
+  await fillTempo(page, '04:21')
   await page.getByRole('button', { name: 'Registrar entrada' }).click()
   await expectEntryCreated(page)
 
@@ -338,6 +344,7 @@ test('SMOKE-09: Central mostra status atualizado após criar sessão e entrada',
   await page.waitForLoadState('networkidle', { timeout: 20_000 })
   await page.getByRole('button', { name: 'Transição defensiva', exact: true }).click()
   await selectNaoObservadoSlice(page)
+  await fillTempo(page, '05:21')
   await page.getByRole('button', { name: 'Registrar entrada' }).click()
   await expectEntryCreated(page)
 

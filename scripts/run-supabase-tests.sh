@@ -25,3 +25,4 @@ psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/scout_integration_flow.test.
 psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/scout_ssot_audit.test.sql
 psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/scout_dod_verification.test.sql
 psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/scout_game_athletes.test.sql
+psql "$DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/scout_rpc_finish_type_alignment_0032.test.sql

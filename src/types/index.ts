@@ -150,6 +150,7 @@ export type ScoutFactualResultCode =
   | 'VANTAGEM_PERDIDA'
   | 'ERRO_PASSE'
   | 'PASSE_INTERCEPTADO'
+  | 'TIRO_6M_CONCEDIDO'
   | 'NAO_OBSERVADO'
 export type ScoutScoringReasonCode =
   | 'SIMPLES'
@@ -227,6 +228,13 @@ export type ScoutCodeListKey =
   | 'LISTA_CLASSIF_BLOQUEIO'
   | 'LISTA_CLASSIF_INTERC_ROUBO'
   | 'LISTA_CLASSIF_TROCA_TRANSICAO'
+  | 'LISTA_CLASSIF_COBERTURA'
+  | 'LISTA_CLASSIF_MARCACAO_PRESSAO'
+  | 'LISTA_ESTRUTURA_TRANSICAO'
+  | 'LISTA_ACAO_PREPARATORIA'
+  | 'LISTA_EXECUCAO_BLOQUEIO'
+  | 'LISTA_CONTEXTO_DECISAO'
+  | 'LISTA_CONTEXTO_ARREMESSO'
 
 export interface ScoutCodeValue {
   id: string
@@ -400,6 +408,11 @@ export interface ScoutLiveEntry {
   categoriaAcaoCode?: string
   acaoBasicaCode?: string
   classificacaoAcaoCode?: string
+  execucaoBloqueioCode?: string
+  estruturaTransicaoCode?: string
+  contextoDecisaoCode?: string
+  contextoArremessoCode?: string
+  acaoPreparatoriaCode?: string
   derivedScoutPlayId?: string
   createdBy?: string
   updatedBy?: string
@@ -432,6 +445,11 @@ export interface ScoutLiveEntryWriteInput {
   categoriaAcaoCode?: string
   acaoBasicaCode?: string
   classificacaoAcaoCode?: string
+  execucaoBloqueioCode?: string
+  estruturaTransicaoCode?: string
+  contextoDecisaoCode?: string
+  contextoArremessoCode?: string
+  acaoPreparatoriaCode?: string
   derivedScoutPlayId?: string
 }
 

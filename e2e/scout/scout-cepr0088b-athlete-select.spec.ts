@@ -18,6 +18,10 @@ import { loginAsCoach } from '../helpers/auth'
 const TODAY = new Date().toISOString().split('T')[0]
 const UNIQUE = Date.now()
 
+async function fillTempo(page: import('@playwright/test').Page, tempo = '03:21') {
+  await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill(tempo)
+}
+
 test('CEPR0088B: atleta do roster aparece no select Atleta principal e entrada é salva', async ({ page }) => {
   test.setTimeout(90_000)
   await loginAsCoach(page)
@@ -93,6 +97,7 @@ test('CEPR0088B: atleta do roster aparece no select Atleta principal e entrada �
     }
   })
 
+  await fillTempo(page, '03:21')
   await page.getByRole('button', { name: 'Registrar entrada' }).click()
 
   // ─── 7. Confirmar que a entrada foi criada ────────────────────────────────

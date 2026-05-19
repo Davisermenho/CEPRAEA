@@ -17,6 +17,10 @@ async function expectEntryCreated(page: import('@playwright/test').Page) {
   await expect(page.getByText(/Entrada criada como/i)).toBeVisible({ timeout: 15_000 })
 }
 
+async function fillTempo(page: import('@playwright/test').Page, tempo = '03:21') {
+  await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill(tempo)
+}
+
 async function selectNaoObservadoSlice(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Não observado', exact: true }).click()
   await page.waitForTimeout(200)
@@ -112,6 +116,7 @@ test.describe('CEPR0085-01: PASSE', () => {
     await page.getByRole('button', { name: 'Passe', exact: true }).click()
     await page.waitForTimeout(300)
     await page.getByRole('button', { name: 'Perda', exact: true }).click()
+    await fillTempo(page, '03:21')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
 
     await expect(page.locator('article').last()).toBeVisible({ timeout: 15_000 })
@@ -146,8 +151,8 @@ test.describe('CEPR0085-02: AT_POS GOL + GIRO + 1pt', () => {
     await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
     await page.getByLabel('Sistema ofensivo').selectOption({ label: 'Ataque 4:0' })
 
-    // Arremesso auto-seleciona acao_basica
     await page.getByRole('button', { name: 'Arremesso', exact: true }).first().click()
+    await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
     await page.waitForTimeout(300)
 
     // Selecionar Giro como classificacao
@@ -169,6 +174,7 @@ test.describe('CEPR0085-02: AT_POS GOL + GIRO + 1pt', () => {
     // Selecionar 1 ponto explicitamente
     await page.getByRole('button', { name: '1', exact: true }).click()
 
+    await fillTempo(page, '04:32')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await expectEntryCreated(page)
     expect(rpcErrors, `RPC errors: ${rpcErrors.join(', ')}`).toHaveLength(0)
@@ -203,8 +209,8 @@ test.describe('CEPR0085-03: DEF_POS semântica', () => {
     await page.getByRole('button', { name: 'Bloqueio', exact: true }).click()
     await page.waitForTimeout(300)
 
-    // Classificacao (qualquer uma de LISTA_CLASSIF_BLOQUEIO)
-    await page.getByRole('button', { name: 'Bloqueio de giro', exact: true }).click()
+    // Classificacao (tipo da finalizacao adversaria enfrentada)
+    await page.getByRole('button', { name: 'Giro', exact: true }).click()
     await page.waitForTimeout(300)
 
     // Resultado "Gol sofrido" (GOL renomeado em contexto defensivo)
@@ -235,10 +241,11 @@ test.describe('CEPR0085-03: DEF_POS semântica', () => {
     await page.waitForTimeout(300)
     await page.getByRole('button', { name: 'Bloqueio', exact: true }).click()
     await page.waitForTimeout(300)
-    await page.getByRole('button', { name: 'Bloqueio de arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
     await page.waitForTimeout(300)
     await page.getByRole('button', { name: 'Gol sofrido', exact: true }).click()
 
+    await fillTempo(page, '05:12')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await expectEntryCreated(page)
     expect(rpcErrors, `RPC errors: ${rpcErrors.join(', ')}`).toHaveLength(0)
@@ -263,6 +270,7 @@ test.describe('CEPR0085-04: Invariantes de persistência', () => {
     // Registrar uma entrada TRANS_DEF (mínima)
     await page.getByRole('button', { name: 'Transição defensiva', exact: true }).click()
     await selectNaoObservadoSlice(page)
+    await fillTempo(page, '06:05')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await expectEntryCreated(page)
 
@@ -272,6 +280,7 @@ test.describe('CEPR0085-04: Invariantes de persistência', () => {
     await page.getByRole('button', { name: 'Passe', exact: true }).click()
     await page.waitForTimeout(300)
     await page.getByRole('button', { name: 'Perda', exact: true }).click()
+    await fillTempo(page, '06:55')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await expectEntryCreated(page)
 

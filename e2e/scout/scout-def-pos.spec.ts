@@ -4,10 +4,12 @@ import { execFileSync } from 'node:child_process'
 
 /**
  * CEPR-0085 DEF_POS — Ajuste semântico de ação defensiva posicionada
+ * CEPR-0092 DEF_POS + BLOQUEIO — Separar Finalização Adversária da Execução do Bloqueio
  *
  * Regras testadas:
- *   BLOQUEIO: tipo_finalizacao derivado de classificação (BLOQ_GIRO→GIRO, BLOQ_AEREA→AEREA).
- *   BLOQUEIO: não exibe campo visual "Finalização adversária enfrentada".
+ *   BLOQUEIO (0092): exibe "Finalização adversária enfrentada" (chips) + "Execução do bloqueio" (chips).
+ *   BLOQUEIO (0092): tipo_finalizacao derivado da classificação (GIRO→GIRO, AEREA→AEREA).
+ *   BLOQUEIO (0092): ARREM_SIMPLES + ATRASADO + 6m concedido → tipo_finalizacao_code = NULL.
  *   INTERCEPTACAO/ROUBO: sem Gol sofrido nos resultados; sem campo de finalização.
  *   COBERTURA/MARCACAO_PRESSAO/RECOMPOSICAO: campo de finalização só quando resultado envolve arremesso adversário.
  *   Em DEF_POS, opções de finalização filtradas: apenas SIMPLES/GIRO/AEREA/NAO_OBSERVADO.
@@ -18,6 +20,10 @@ const DB_URL = process.env['E2E_SUPABASE_DB_URL'] ?? 'postgresql://postgres:post
 
 function queryScalar(sql: string): string {
   return execFileSync('psql', [DB_URL, '-t', '-c', sql], { encoding: 'utf-8' }).trim()
+}
+
+async function fillTempo(page: import('@playwright/test').Page, tempo = '03:21') {
+  await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill(tempo)
 }
 
 /** Navega para Defesa posicionada e seleciona ACAO_DEFENSIVA.
@@ -32,7 +38,7 @@ async function goToDefPosAcaoDefensiva(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Bloqueio', exact: true }).waitFor({ state: 'visible', timeout: 5000 })
 }
 
-test.describe('Scout — DEF_POS semântico CEPR-0085', () => {
+test.describe('Scout — DEF_POS semântico CEPR-0085 / CEPR-0092', () => {
   let gameId: string
 
   test.beforeAll(async ({ browser }) => {
@@ -57,64 +63,146 @@ test.describe('Scout — DEF_POS semântico CEPR-0085', () => {
   })
 
   // ── Teste 1 ───────────────────────────────────────────────────────────────
-  test('1 — DEF_POS + Bloqueio de giro: não exibe campo visual de finalização', async ({ page }) => {
+  test('1 — CEPR-0092: BLOQUEIO exibe chips "Finalização adversária enfrentada" e "Execução do bloqueio"', async ({ page }) => {
     await goToDefPosAcaoDefensiva(page)
     await page.getByRole('button', { name: 'Bloqueio', exact: true }).click()
     await page.waitForTimeout(200)
-    // Selecionar classificação Bloqueio de giro
-    await page.getByRole('button', { name: 'Bloqueio de giro', exact: true }).click()
-    await page.waitForTimeout(200)
-    // Selecionar resultado Bloqueado
-    await page.getByRole('button', { name: 'Bloqueado', exact: true }).click()
-    await page.waitForTimeout(200)
-    // Campo "Finalização adversária enfrentada" NÃO deve estar visível (derivado de classificação)
+    // A seção "Finalização adversária enfrentada" deve aparecer (chips de classificação)
+    await expect(page.getByText('Finalização adversária enfrentada', { exact: true })).toBeVisible()
+    // A seção "Execução do bloqueio" deve aparecer
+    await expect(page.getByText('Execução do bloqueio', { exact: true })).toBeVisible()
+    // Os chips de classificação devem estar visíveis
+    await expect(page.getByRole('button', { name: 'Giro', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Aérea', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Arremesso simples', exact: true })).toBeVisible()
+    // Os chips de execução devem estar visíveis
+    await expect(page.getByRole('button', { name: 'Executado', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Não executado', exact: true })).toBeVisible()
+    // SELECT de "Finalização adversária" (usado por COBERTURA/MARCACAO_PRESSAO) NÃO deve estar visível
     await expect(page.getByLabel('Finalização adversária enfrentada')).not.toBeVisible()
   })
 
   // ── Teste 2 ───────────────────────────────────────────────────────────────
-  test('2 — DEF_POS + Bloqueio de giro + Bloqueado: persiste tipo_finalizacao_code = GIRO', async ({ page }) => {
+  test('2 — CEPR-0092: BLOQUEIO + Giro + Executado + Bloqueado → tipo_finalizacao=GIRO, execucao=EXECUTADO', async ({ page }) => {
     await goToDefPosAcaoDefensiva(page)
     await page.getByRole('button', { name: 'Bloqueio', exact: true }).click()
     await page.waitForTimeout(200)
-    await page.getByRole('button', { name: 'Bloqueio de giro', exact: true }).click()
+    await page.getByRole('button', { name: 'Giro', exact: true }).click()
+    await page.waitForTimeout(200)
+    await page.getByRole('button', { name: 'Executado', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Bloqueado', exact: true }).click()
     await page.waitForTimeout(200)
+    await fillTempo(page, '03:21')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await expect(page.locator('article').last()).toBeVisible({ timeout: 15_000 })
 
-    const tipoFin = queryScalar(
-      `SELECT tipo_finalizacao_code FROM public.scout_live_entries
-       WHERE scout_game_id = '${gameId}'
-         AND classificacao_acao_code = 'BLOQ_GIRO'
-       ORDER BY created_at DESC, id DESC LIMIT 1`
-    )
-    expect(tipoFin).toBe('GIRO')
+    await expect
+      .poll(
+        () =>
+          queryScalar(
+            `SELECT tipo_finalizacao_code FROM public.scout_live_entries
+             WHERE scout_game_id = '${gameId}'
+               AND classificacao_acao_code = 'GIRO'
+               AND execucao_bloqueio_code = 'EXECUTADO'
+             ORDER BY created_at DESC, id DESC LIMIT 1`
+          ),
+        { timeout: 15_000 }
+      )
+      .toBe('GIRO')
   })
 
   // ── Teste 3 ───────────────────────────────────────────────────────────────
-  test('3 — DEF_POS + Bloqueio de aérea + Bloqueado: persiste tipo_finalizacao_code = AEREA', async ({ page }) => {
+  test('3 — CEPR-0092: BLOQUEIO + Aérea + Não executado + Gol → tipo_finalizacao=AEREA', async ({ page }) => {
     await goToDefPosAcaoDefensiva(page)
     await page.getByRole('button', { name: 'Bloqueio', exact: true }).click()
     await page.waitForTimeout(200)
-    await page.getByRole('button', { name: 'Bloqueio de aérea', exact: true }).click()
+    await page.getByRole('button', { name: 'Aérea', exact: true }).click()
     await page.waitForTimeout(200)
-    await page.getByRole('button', { name: 'Bloqueado', exact: true }).click()
+    await page.getByRole('button', { name: 'Não executado', exact: true }).click()
     await page.waitForTimeout(200)
+    await page.getByRole('button', { name: 'Gol sofrido', exact: true }).click()
+    await page.waitForTimeout(200)
+    await fillTempo(page, '04:21')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await expect(page.locator('article').last()).toBeVisible({ timeout: 15_000 })
 
-    const tipoFin = queryScalar(
-      `SELECT tipo_finalizacao_code FROM public.scout_live_entries
-       WHERE scout_game_id = '${gameId}'
-         AND classificacao_acao_code = 'BLOQ_AEREA'
-       ORDER BY created_at DESC, id DESC LIMIT 1`
-    )
-    expect(tipoFin).toBe('AEREA')
+    await expect
+      .poll(
+        () =>
+          queryScalar(
+            `SELECT tipo_finalizacao_code FROM public.scout_live_entries
+             WHERE scout_game_id = '${gameId}'
+               AND classificacao_acao_code = 'AEREA'
+               AND execucao_bloqueio_code = 'NAO_EXECUTADO'
+             ORDER BY created_at DESC, id DESC LIMIT 1`
+          ),
+        { timeout: 15_000 }
+      )
+      .toBe('AEREA')
   })
 
-  // ── Teste 4 ───────────────────────────────────────────────────────────────
-  test('4 — DEF_POS + Interceptação: resultado "Gol sofrido" não aparece', async ({ page }) => {
+  // ── Teste 4 (novo) ────────────────────────────────────────────────────────
+  test('4 — CEPR-0092: BLOQUEIO + Arremesso simples + Atrasado + 6m concedido → tipo_finalizacao=NULL', async ({ page }) => {
+    await goToDefPosAcaoDefensiva(page)
+    await page.getByRole('button', { name: 'Bloqueio', exact: true }).click()
+    await page.waitForTimeout(200)
+    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.waitForTimeout(200)
+    await page.getByRole('button', { name: 'Atrasado', exact: true }).click()
+    await page.waitForTimeout(200)
+    await page.getByRole('button', { name: '6m concedido', exact: true }).click()
+    await page.waitForTimeout(200)
+    await fillTempo(page, '05:00')
+    await page.getByRole('button', { name: 'Registrar entrada' }).click()
+    await expect(page.locator('article').last()).toBeVisible({ timeout: 15_000 })
+
+    await expect
+      .poll(
+        () =>
+          queryScalar(
+            `SELECT COALESCE(tipo_finalizacao_code, 'NULL') FROM public.scout_live_entries
+             WHERE scout_game_id = '${gameId}'
+               AND classificacao_acao_code = 'ARREM_SIMPLES'
+               AND resultado_factual_code = 'TIRO_6M_CONCEDIDO'
+             ORDER BY created_at DESC, id DESC LIMIT 1`
+          ),
+        { timeout: 15_000 }
+      )
+      .toBe('NULL')
+  })
+
+  // ── Teste 5 ───────────────────────────────────────────────────────────────
+  test('5 — CEPR-0090A: Cobrança de 6m adversária aparece na UI e salva com tipo_finalizacao=6M', async ({ page }) => {
+    await goToDefPosAcaoDefensiva(page)
+    await page.getByRole('button', { name: 'Cobrança de 6m adversária', exact: true }).click()
+    await page.waitForTimeout(200)
+    // Nao deve haver classificacao para esse evento; o tipo 6m deve aparecer como automático
+    await expect(page.getByText('Classificação', { exact: true })).not.toBeVisible()
+    await expect(page.getByText('Tipo de finalização: 6m (automático).', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Gol sofrido', exact: true }).click()
+    await page.waitForTimeout(200)
+    await fillTempo(page, '05:30')
+    await page.getByRole('button', { name: 'Registrar entrada' }).click()
+    await expect(page.locator('article').last()).toBeVisible({ timeout: 15_000 })
+
+    await expect
+      .poll(
+        () =>
+          queryScalar(
+            `SELECT COALESCE(tipo_finalizacao_code, 'NULL') || '|' || resultado_factual_code
+             FROM public.scout_live_entries
+             WHERE scout_game_id = '${gameId}'
+               AND acao_basica_code = 'FINALIZACAO_6M_ADV'
+             ORDER BY created_at DESC, id DESC LIMIT 1`
+          ),
+        { timeout: 15_000 }
+      )
+      .toBe('6M|GOL')
+  })
+
+  // ── Teste 6 ───────────────────────────────────────────────────────────────
+  test('6 — DEF_POS + Interceptação: resultado "Gol sofrido" não aparece', async ({ page }) => {
     await goToDefPosAcaoDefensiva(page)
     await page.getByRole('button', { name: 'Interceptação', exact: true }).click()
     await page.waitForTimeout(200)
@@ -124,8 +212,8 @@ test.describe('Scout — DEF_POS semântico CEPR-0085', () => {
     await expect(page.getByRole('button', { name: 'Gol sofrido', exact: true })).not.toBeVisible()
   })
 
-  // ── Teste 5 ───────────────────────────────────────────────────────────────
-  test('5 — DEF_POS + Roubo de bola: resultado "Gol sofrido" não aparece', async ({ page }) => {
+  // ── Teste 7 ───────────────────────────────────────────────────────────────
+  test('7 — DEF_POS + Roubo de bola: resultado "Gol sofrido" não aparece', async ({ page }) => {
     await goToDefPosAcaoDefensiva(page)
     await page.getByRole('button', { name: 'Roubo de bola', exact: true }).click()
     await page.waitForTimeout(200)
@@ -133,8 +221,8 @@ test.describe('Scout — DEF_POS semântico CEPR-0085', () => {
     await expect(page.getByRole('button', { name: 'Gol sofrido', exact: true })).not.toBeVisible()
   })
 
-  // ── Teste 6 ───────────────────────────────────────────────────────────────
-  test('6 — DEF_POS + Interceptação: campo "Finalização adversária" não aparece', async ({ page }) => {
+  // ── Teste 8 ───────────────────────────────────────────────────────────────
+  test('8 — DEF_POS + Interceptação: campo "Finalização adversária" não aparece', async ({ page }) => {
     await goToDefPosAcaoDefensiva(page)
     await page.getByRole('button', { name: 'Interceptação', exact: true }).click()
     await page.waitForTimeout(200)
@@ -146,8 +234,8 @@ test.describe('Scout — DEF_POS semântico CEPR-0085', () => {
     await expect(page.getByLabel('Finalização adversária enfrentada')).not.toBeVisible()
   })
 
-  // ── Teste 7 ───────────────────────────────────────────────────────────────
-  test('7 — DEF_POS + Marcação/pressão + Gol sofrido: campo "Finalização adversária" aparece', async ({ page }) => {
+  // ── Teste 9 ───────────────────────────────────────────────────────────────
+  test('9 — DEF_POS + Marcação/pressão + Gol sofrido: campo "Finalização adversária" aparece', async ({ page }) => {
     await goToDefPosAcaoDefensiva(page)
     await page.getByRole('button', { name: 'Marcação/pressão', exact: true }).click()
     await page.waitForTimeout(200)
@@ -159,8 +247,8 @@ test.describe('Scout — DEF_POS semântico CEPR-0085', () => {
     await expect(page.getByLabel('Finalização adversária enfrentada')).toBeVisible()
   })
 
-  // ── Teste 8 ───────────────────────────────────────────────────────────────
-  test('8 — DEF_POS: opções de finalização filtradas (sem CONTRA, GOL_CONTRA, SHOOTOUT)', async ({ page }) => {
+  // ── Teste 10 ──────────────────────────────────────────────────────────────
+  test('10 — DEF_POS: opções de finalização filtradas (sem CONTRA, GOL_CONTRA, SHOOTOUT)', async ({ page }) => {
     await goToDefPosAcaoDefensiva(page)
     await page.getByRole('button', { name: 'Marcação/pressão', exact: true }).click()
     await page.waitForTimeout(200)
@@ -181,8 +269,8 @@ test.describe('Scout — DEF_POS semântico CEPR-0085', () => {
     expect(optionTexts.some((t) => t.includes('Aerea'))).toBe(true)
   })
 
-  // ── Teste 9 ───────────────────────────────────────────────────────────────
-  test('9 — scout_plays = 0 e scout_play_participations = 0 para entradas COLETA_AO_VIVO', async ({ page }) => {
+  // ── Teste 11 ──────────────────────────────────────────────────────────────
+  test('11 — scout_plays = 0 e scout_play_participations = 0 para entradas COLETA_AO_VIVO', async ({ page }) => {
     void page
     const playsCount = queryScalar(
       `SELECT COUNT(*) FROM public.scout_plays WHERE scout_game_id = '${gameId}'`

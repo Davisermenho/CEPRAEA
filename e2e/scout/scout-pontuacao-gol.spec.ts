@@ -8,8 +8,9 @@ import { execFileSync } from 'node:child_process'
  * Regras:
  *   GIRO/AEREA: sem chips de motivo; chips 1/2 visíveis; motivo derivado automaticamente.
  *   ARREM_SIMPLES + Simples: apenas 1 ponto.
- *   ARREM_SIMPLES + 6M/Goleira/Especialista: apenas 2 pontos.
+ *   ARREM_SIMPLES + Goleira/Especialista: apenas 2 pontos.
  *   ARREM_SIMPLES + Gol contra: apenas 1 ponto.
+ *   ARREM_SIMPLES não exibe motivos GIRO/AEREA/6M.
  *   GIRO/AEREA + 1 → persiste motivo_pontuacao_code = GIRO ou AEREA (não VALIDACAO_ARBITRAL).
  *   SHOOTOUT removido de LISTA_MOTIVO_PONTUACAO.
  */
@@ -25,24 +26,21 @@ async function expectEntryCreated(page: import('@playwright/test').Page) {
   await expect(page.getByText(/Entrada criada como/i)).toBeVisible({ timeout: 15_000 })
 }
 
+async function fillTempo(page: import('@playwright/test').Page, tempo = '03:21') {
+  await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill(tempo)
+}
+
 async function selectNaoObservadoSlice(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Não observado', exact: true }).click()
   await page.waitForTimeout(200)
   await page.getByRole('button', { name: 'Nao observado', exact: true }).click()
 }
 
-/** Navega até a tela de coleta ao vivo e seleciona AT_POS + ARREMESSO + ARREMESSO.
- *
- * A ação básica ARREMESSO é auto-selecionada pelo useEffect [0028] assim que a categoria
- * ARREMESSO é escolhida (a lista tem apenas 1 opção). NÃO clicar no botão de ação básica
- * manualmente — isso causaria toggle off e quebraria o estado.
- */
 async function goToArremesso(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
   await page.getByLabel('Sistema ofensivo').selectOption({ label: 'Ataque 4:0' })
-  // Clicar na categoria Arremesso; o useEffect [0028] auto-seleciona a ação básica.
   await page.getByRole('button', { name: 'Arremesso', exact: true }).click()
-  // Aguardar que a seção de classificação apareça — prova que o auto-select rodou.
+  await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
   await page.getByRole('button', { name: 'Giro', exact: true }).waitFor({ state: 'visible', timeout: 5000 })
 }
 
@@ -82,7 +80,7 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
 
     // Verificação na UI: botão Shootout não deve aparecer
     await goToArremesso(page)
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).last().click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.waitForTimeout(300)
@@ -122,33 +120,121 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
   // ── Teste 4 ───────────────────────────────────────────────────────────────
   test('4 — ARREM_SIMPLES + Simples + GOL: apenas chip 1 disponível', async ({ page }) => {
     await goToArremesso(page)
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).last().click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.waitForTimeout(300)
-    await page.getByRole('button', { name: 'Simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).last().click()
     await page.waitForTimeout(200)
     await expect(page.getByRole('button', { name: '1', exact: true })).toBeVisible({ timeout: 5000 })
     await expect(page.getByRole('button', { name: '2', exact: true })).not.toBeVisible()
   })
 
   // ── Teste 5 ───────────────────────────────────────────────────────────────
-  test('5 — ARREM_SIMPLES + 6 metros + GOL: apenas chip 2 disponível', async ({ page }) => {
+  test('5 — ARREM_SIMPLES + GOL: não exibe motivos Giro, Aérea ou 6 metros', async ({ page }) => {
     await goToArremesso(page)
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.waitForTimeout(300)
-    await page.getByRole('button', { name: '6 metros', exact: true }).click()
-    await page.waitForTimeout(200)
+    await expect(page.getByRole('button', { name: 'Giro', exact: true })).toHaveCount(1)
+    await expect(page.getByRole('button', { name: 'Aérea', exact: true })).toHaveCount(1)
+    await expect(page.getByRole('button', { name: '6 metros', exact: true })).not.toBeVisible()
+  })
+
+  // ── Teste 5A ──────────────────────────────────────────────────────────────
+  test('5A — CEPR-0096: Cobrança de 6m favorável salva com tipo_finalizacao=6M, motivo=6M e 2 pontos', async ({ page }) => {
+    await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
+    await page.getByLabel('Sistema ofensivo').selectOption({ label: 'Ataque 4:0' })
+    await page.getByRole('button', { name: 'Arremesso', exact: true }).click()
+    await page.getByRole('button', { name: 'Cobrança de 6m favorável', exact: true }).click()
+    await expect(page.getByText('Classificação', { exact: true })).not.toBeVisible()
+    await expect(page.getByText('Tipo de finalização: 6m (automático).', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await expect(page.getByRole('button', { name: '2', exact: true })).toBeVisible({ timeout: 5000 })
     await expect(page.getByRole('button', { name: '1', exact: true })).not.toBeVisible()
+    await fillTempo(page, '05:30')
+    await page.getByRole('button', { name: 'Registrar entrada' }).click()
+    await expectEntryCreated(page)
+
+    await expect
+      .poll(
+        () =>
+          queryScalar(
+            `SELECT COALESCE(tipo_finalizacao_code, 'NULL') || '|' ||
+                    COALESCE(motivo_pontuacao_code, 'NULL') || '|' ||
+                    pontos_jogada::text || '|' || resultado_factual_code
+             FROM public.scout_live_entries
+             WHERE scout_game_id = '${gameId}'
+               AND acao_basica_code = 'FINALIZACAO_6M_FAV'
+             ORDER BY created_at DESC, id DESC LIMIT 1`
+          ),
+        { timeout: 15_000 }
+      )
+      .toBe('6M|6M|2|GOL')
+  })
+
+  // ── Teste 5B ──────────────────────────────────────────────────────────────
+  test('5B — AT_POS + Arremesso permite PASSIVO como interrupção da posse', async ({ page }) => {
+    await goToArremesso(page)
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Passivo', exact: true })).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: 'Passivo', exact: true }).click()
+    await expect(page.getByText('Motivo da pontuação', { exact: true })).not.toBeVisible()
+    await fillTempo(page, '05:45')
+    await expect(page.getByRole('button', { name: 'Registrar entrada' })).toBeEnabled({ timeout: 5_000 })
+    await page.getByRole('button', { name: 'Registrar entrada' }).click()
+    await expectEntryCreated(page)
+
+    await expect
+      .poll(
+        () =>
+          queryScalar(
+            `SELECT resultado_factual_code || '|' ||
+                    COALESCE(motivo_pontuacao_code, 'NULL') || '|' ||
+                    pontos_jogada::text
+             FROM public.scout_live_entries
+             WHERE scout_game_id = '${gameId}'
+               AND resultado_factual_code = 'PASSIVO'
+             ORDER BY created_at DESC, id DESC LIMIT 1`
+          ),
+        { timeout: 15_000 }
+      )
+      .toBe('PASSIVO|NULL|0')
+  })
+
+  // ── Teste 5C ──────────────────────────────────────────────────────────────
+  test('5C — CEPR-0100: AT_POS + Arremesso usa preset de passivo como contexto, não resultado', async ({ page }) => {
+    await goToArremesso(page)
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Arremesso forçado por passivo', exact: true }).click()
+    await page.getByRole('button', { name: 'Bloqueado', exact: true }).click()
+    await fillTempo(page, '05:55')
+    await page.getByRole('button', { name: 'Registrar entrada' }).click()
+    await expectEntryCreated(page)
+
+    await expect
+      .poll(
+        () =>
+          queryScalar(
+            `SELECT resultado_factual_code || '|' ||
+                    COALESCE(contexto_decisao_code, 'NULL') || '|' ||
+                    COALESCE(contexto_arremesso_code, 'NULL') || '|' ||
+                    COALESCE(tipo_finalizacao_code, 'NULL')
+             FROM public.scout_live_entries
+             WHERE scout_game_id = '${gameId}'
+               AND contexto_arremesso_code = 'SOB_PASSIVO'
+             ORDER BY created_at DESC, id DESC LIMIT 1`
+          ),
+        { timeout: 15_000 }
+      )
+      .toBe('BLOQUEADO|PASSIVO_SINALIZADO|SOB_PASSIVO|SIMPLES')
   })
 
   // ── Teste 6 ───────────────────────────────────────────────────────────────
   test('6 — ARREM_SIMPLES + Goleira + GOL: apenas chip 2 disponível', async ({ page }) => {
     await goToArremesso(page)
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.waitForTimeout(300)
@@ -161,7 +247,7 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
   // ── Teste 7 ───────────────────────────────────────────────────────────────
   test('7 — ARREM_SIMPLES + Especialista + GOL: apenas chip 2 disponível', async ({ page }) => {
     await goToArremesso(page)
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.waitForTimeout(300)
@@ -174,7 +260,7 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
   // ── Teste 8 ───────────────────────────────────────────────────────────────
   test('8 — ARREM_SIMPLES + Gol contra + GOL: apenas chip 1 disponível', async ({ page }) => {
     await goToArremesso(page)
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.waitForTimeout(300)
@@ -194,6 +280,7 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
     // Alterar para 1 ponto
     await page.getByRole('button', { name: '1', exact: true }).click()
     await page.waitForTimeout(200)
+    await fillTempo(page, '03:21')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await expectEntryCreated(page)
 
@@ -219,6 +306,7 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
     // Alterar para 1 ponto
     await page.getByRole('button', { name: '1', exact: true }).click()
     await page.waitForTimeout(200)
+    await fillTempo(page, '04:11')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await expectEntryCreated(page)
 
@@ -238,6 +326,7 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
   test('11 — COLETA_AO_VIVO cria somente scout_live_entries (não cria scout_plays)', async ({ page }) => {
     await page.getByRole('button', { name: 'Transição defensiva', exact: true }).click()
     await selectNaoObservadoSlice(page)
+    await fillTempo(page, '05:00')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await expectEntryCreated(page)
 

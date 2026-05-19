@@ -7,10 +7,10 @@ import { execFileSync } from 'node:child_process'
  *
  * Item 1: AT_POS + Sistema ofensivo nao mostra "Nao se aplica"
  * Item 2: AT_POS + Arremesso nao mostra 'Transição direta' nem desativados
- * Item 3: TRANS_OF + Arremesso mostra 'Transição direta' e 'Transição indireta' (CEPR-0089)
+ * Item 3: TRANS_OF + Arremesso mostra estrutura da transição em campo separado (CEPR-0089)
  * Item 4: AT_POS + Passe nao mostra Passe longo
  * Item 5: tipo_fin nao aparece para ARREMESSO+ARREMESSO (nao duplica tecnica)
- * Item 6: Gol com motivo Especialista/Goleira/6m gera 2 pontos
+ * Item 6: Gol simples com motivo Especialista/Goleira gera 2 pontos e não oferece 6m
  * Item 7: Defendido/Bloqueado/Fora/Trave nao exige motivo_pontuacao
  * Item 8: COLETA_AO_VIVO cria somente scout_live_entries (zero scout_plays)
  * Item 9: scout_play_participations = 0 para entradas COLETA_AO_VIVO
@@ -21,6 +21,10 @@ const DB_URL = process.env['E2E_SUPABASE_DB_URL'] ?? 'postgresql://postgres:post
 
 function queryScalar(sql: string): string {
   return execFileSync('psql', [DB_URL, '-t', '-c', sql], { encoding: 'utf-8' }).trim()
+}
+
+async function fillTempo(page: import('@playwright/test').Page, tempo = '03:21') {
+  await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill(tempo)
 }
 
 async function selectNaoObservadoSlice(page: import('@playwright/test').Page) {
@@ -79,24 +83,24 @@ test.describe('Scout — matriz de compatibilidade CEPR-0085', () => {
     await expect(page.getByRole('button', { name: 'Goleira', exact: true })).not.toBeVisible()
     await expect(page.getByRole('button', { name: 'Gol contra', exact: true })).not.toBeVisible()
     // Classificacoes validas para AT_POS devem aparecer
-    await expect(page.getByRole('button', { name: 'Arremesso simples', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Simples', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Giro', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Aérea', exact: true })).toBeVisible()
   })
 
   // ── Item 3 ───────────────────────────────────────────────────────────────
-  test('Item 3 — TRANS_OF + Arremesso: exibe Transicao direta e Transicao indireta (CEPR-0089)', async ({ page }) => {
+  test('Item 3 — TRANS_OF + Arremesso: exibe estrutura da transição e oculta classificações legadas (CEPR-0089)', async ({ page }) => {
     await page.getByRole('button', { name: 'Transição ofensiva', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Arremesso', exact: true }).first().click()
     await page.waitForTimeout(200)
-    await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
-    await page.waitForTimeout(200)
-    await expect(page.getByRole('button', { name: 'Transição direta', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Transição indireta', exact: true })).toBeVisible()
-    // Classificacoes de AT_POS nao devem aparecer em TRANS_OF
-    await expect(page.getByRole('button', { name: 'Arremesso simples', exact: true })).not.toBeVisible()
-    await expect(page.getByRole('button', { name: 'Giro', exact: true })).not.toBeVisible()
+    const options = await page.getByLabel('Estrutura da transição').evaluate(
+      (el: HTMLSelectElement) => Array.from(el.options).map((option) => option.text),
+    )
+    expect(options).toContain('Transição direta')
+    expect(options).toContain('Transição indireta (2x1)')
+    await expect(page.getByRole('button', { name: 'Transição direta', exact: true })).not.toBeVisible()
+    await expect(page.getByRole('button', { name: 'Transição indireta', exact: true })).not.toBeVisible()
   })
 
   // ── Item 4 ───────────────────────────────────────────────────────────────
@@ -122,7 +126,7 @@ test.describe('Scout — matriz de compatibilidade CEPR-0085', () => {
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
     await page.waitForTimeout(200)
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.waitForTimeout(300)
@@ -131,14 +135,14 @@ test.describe('Scout — matriz de compatibilidade CEPR-0085', () => {
   })
 
   // ── Item 6 ───────────────────────────────────────────────────────────────
-  test('Item 6 — motivo Especialista/Goleira/6m gera pontos = 2', async ({ page }) => {
+  test('Item 6 — arremesso simples oferece Especialista/Goleira e não oferece 6m', async ({ page }) => {
     await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
     await page.getByLabel('Sistema ofensivo').selectOption({ label: 'Ataque 4:0' })
     await page.getByRole('button', { name: 'Arremesso', exact: true }).first().click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
     await page.waitForTimeout(200)
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.waitForTimeout(300)
@@ -153,10 +157,7 @@ test.describe('Scout — matriz de compatibilidade CEPR-0085', () => {
     await page.waitForTimeout(200)
     await expect(page.getByRole('button', { name: '2', exact: true })).toHaveClass(/bg-cep-lime-400/, { timeout: 5000 })
 
-    // 6 metros -> pontos = 2
-    await page.getByRole('button', { name: '6 metros', exact: true }).click()
-    await page.waitForTimeout(200)
-    await expect(page.getByRole('button', { name: '2', exact: true })).toHaveClass(/bg-cep-lime-400/, { timeout: 5000 })
+    await expect(page.getByRole('button', { name: '6 metros', exact: true })).not.toBeVisible()
   })
 
   // ── Item 7 ───────────────────────────────────────────────────────────────
@@ -167,19 +168,20 @@ test.describe('Scout — matriz de compatibilidade CEPR-0085', () => {
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
     await page.waitForTimeout(200)
-    await page.getByRole('button', { name: 'Arremesso simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Defendido', exact: true }).click()
     await page.waitForTimeout(300)
     // Secao de motivo da pontuacao nao deve aparecer para resultado nao-GOL
     await expect(page.getByText('Motivo da pontuação')).not.toBeVisible()
-    await expect(page.getByRole('button', { name: 'Simples', exact: true })).not.toBeVisible()
+    await expect(page.getByText('Pontos da jogada')).not.toBeVisible()
   })
 
   // ── Item 8 ───────────────────────────────────────────────────────────────
   test('Item 8 — COLETA_AO_VIVO cria somente scout_live_entries (zero scout_plays)', async ({ page }) => {
     await page.getByRole('button', { name: 'Transição defensiva', exact: true }).click()
     await selectNaoObservadoSlice(page)
+    await fillTempo(page, '03:21')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await expect(page.getByText(/Entrada criada como/i)).toBeVisible({ timeout: 15_000 })
     await expect(

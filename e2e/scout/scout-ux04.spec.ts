@@ -3,6 +3,10 @@ import { loginAsCoach } from '../helpers/auth'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
+async function fillTempo(page: import('@playwright/test').Page, tempo = '03:21') {
+  await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill(tempo)
+}
+
 async function createGame(browser: import('@playwright/test').Browser, rival: string) {
   const page = await browser.newPage()
   await loginAsCoach(page)
@@ -69,11 +73,12 @@ test.describe('Scout UX-04 — filtro factual pela matriz central', () => {
     await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
     await page.getByLabel('Sistema ofensivo').selectOption({ label: 'Ataque 4:0' })
     await page.getByRole('button', { name: 'Arremesso', exact: true }).first().click()
+    await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
 
     await expect(page.getByRole('button', { name: 'Arremesso', exact: true }).last()).toHaveClass(/bg-cep-lime/)
     await expect(page.getByRole('button', { name: 'Giro', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Aérea', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Arremesso simples', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Simples', exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Shootout', exact: true })).not.toBeVisible()
 
     await page.getByRole('button', { name: 'Giro', exact: true }).click()
@@ -92,7 +97,7 @@ test.describe('Scout UX-04 — filtro factual pela matriz central', () => {
     await page.getByLabel('Sistema defensivo').selectOption({ label: 'Defesa 3×0' })
     await page.getByRole('button', { name: 'Ação defensiva', exact: true }).click()
     await page.getByRole('button', { name: 'Bloqueio', exact: true }).click()
-    await page.getByRole('button', { name: 'Bloqueio de giro', exact: true }).click()
+    await page.getByRole('button', { name: 'Giro', exact: true }).click()
     await page.getByRole('button', { name: 'Bloqueado', exact: true }).click()
 
     await expect(page.getByLabel('Finalização adversária enfrentada')).not.toBeVisible()
@@ -165,8 +170,7 @@ test.describe('Scout UX-04 — filtro factual pela matriz central', () => {
     await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
     await page.getByLabel('Sistema ofensivo').selectOption({ label: 'Ataque 4:0' })
     await page.getByRole('button', { name: 'Passe', exact: true }).first().click()
-    await page.getByRole('button', { name: 'Registrar entrada' }).click()
-
-    await expect(page.getByText('Selecione o desfecho da sequência.')).toBeVisible()
+    await fillTempo(page, '03:21')
+    await expect(page.getByRole('button', { name: 'Registrar entrada' })).toBeDisabled()
   })
 })

@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { BarChart2, CheckCircle2, ChevronDown, ChevronUp, ClipboardList, LayoutDashboard, MessageSquare, Radar, RotateCcw, Shield, TimerReset, UserCheck } from 'lucide-react'
+import { BarChart2, CheckCircle2, ChevronDown, ChevronUp, ClipboardList, LayoutDashboard, MessageSquare, Pencil, Radar, RotateCcw, Shield, TimerReset, Trash2, UserCheck } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/shared/components/Button'
 import { EmptyState } from '@/shared/components/EmptyState'
 import {
   createScoutLiveEntry,
+  discardPendingScoutLiveEntry,
   fetchScoutAthletes,
   fetchScoutCodebook,
   fetchScoutGameAthletes,
   fetchScoutGames,
   fetchScoutLiveEntriesForGame,
+  updatePendingScoutLiveEntry,
 } from '@/features/scout/scoutApi'
 import {
   deriveFinishTypeFromClassification,
@@ -23,8 +25,18 @@ import {
   getAllowedScoringReasons,
   getBasicActionListKey,
   getClassificationListKey,
+  deriveScoringReasonFromFinishType,
+  getContextoArremessoListKey,
+  getContextoDecisaoListKey,
+  getExecucaoBloqueioListKey,
+  shouldShowAcaoPreparatoria,
+  shouldShowContextoArremesso,
+  shouldShowContextoDecisao,
+  shouldShowExecucaoBloqueio,
   shouldShowFinishTypeField,
+  shouldSubmitDerivedFinishType,
   shouldShowScoringFields,
+  shouldShowTransicaoStructure,
   type LiveCollectionBasicActionCode,
   type LiveCollectionCategoryCode,
   type LiveCollectionClassificationCode,
@@ -69,6 +81,13 @@ const CODEBOOK_KEYS = [
   'LISTA_CLASSIF_BLOQUEIO',
   'LISTA_CLASSIF_INTERC_ROUBO',
   'LISTA_CLASSIF_TROCA_TRANSICAO',
+  'LISTA_CLASSIF_COBERTURA',
+  'LISTA_CLASSIF_MARCACAO_PRESSAO',
+  'LISTA_EXECUCAO_BLOQUEIO',
+  'LISTA_ESTRUTURA_TRANSICAO',
+  'LISTA_ACAO_PREPARATORIA',
+  'LISTA_CONTEXTO_DECISAO',
+  'LISTA_CONTEXTO_ARREMESSO',
 ] as const
 
 type LiveEntryDraft = {
@@ -90,12 +109,17 @@ type LiveEntryDraft = {
   categoriaAcaoCode: string
   acaoBasicaCode: string
   classificacaoAcaoCode: string
+  execucaoBloqueioCode: string
+  estruturaTransicaoCode: string
+  contextoDecisaoCode: string
+  contextoArremessoCode: string
+  acaoPreparatoriaCode: string
 }
 
 function buildDraft(entryNumber: number, seed: Partial<LiveEntryDraft> = {}): LiveEntryDraft {
   return {
     idJogada: `LIVE-${String(entryNumber).padStart(4, '0')}`,
-    tempoJogo: '00:00',
+    tempoJogo: '',
     faseDaBolaCode: 'AT_POS',
     faseEquipeAnalisadaCode: 'ATAQUE',
     sistemaOfensivoCode: '',
@@ -112,13 +136,72 @@ function buildDraft(entryNumber: number, seed: Partial<LiveEntryDraft> = {}): Li
     categoriaAcaoCode: '',
     acaoBasicaCode: '',
     classificacaoAcaoCode: '',
+    execucaoBloqueioCode: '',
+    estruturaTransicaoCode: '',
+    contextoDecisaoCode: '',
+    contextoArremessoCode: '',
+    acaoPreparatoriaCode: '',
     ...seed,
   }
+}
+
+function getNextLiveEntryNumber(entries: ScoutLiveEntry[]) {
+  const highest = entries.reduce((max, entry) => {
+    const match = entry.idJogada.match(/^LIVE-(\d+)$/)
+    if (!match) return max
+    const current = Number.parseInt(match[1] ?? '', 10)
+    return Number.isFinite(current) ? Math.max(max, current) : max
+  }, 0)
+  return highest + 1
 }
 
 function toOptional(value: string): string | undefined {
   const trimmed = value.trim()
   return trimmed ? trimmed : undefined
+}
+
+function validateTempoInput(value: string, zeroTimeConfirmed: boolean) {
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return 'Informe o tempo do lance no vídeo.'
+  }
+  if (trimmed === '00:00' && !zeroTimeConfirmed) {
+    return 'Informe o tempo do lance no vídeo. O valor 00:00 parece não preenchido.'
+  }
+  return ''
+}
+
+function isScoringReasonCompatibleWithFinishType(
+  reason: ScoutScoringReasonCode,
+  finishType?: ScoutFinishTypeCode | '',
+) {
+  if (!finishType) return true
+
+  if (finishType === 'SIMPLES') {
+    return ['SIMPLES', 'GOLEIRA', 'ESPECIALISTA', 'GOL_CONTRA', 'NAO_OBSERVADO'].includes(reason)
+  }
+
+  if (finishType === 'GIRO') {
+    return ['GIRO', 'NAO_OBSERVADO'].includes(reason)
+  }
+
+  if (finishType === 'AEREA') {
+    return ['AEREA', 'NAO_OBSERVADO'].includes(reason)
+  }
+
+  if (finishType === '6M') {
+    return ['6M', 'NAO_OBSERVADO'].includes(reason)
+  }
+
+  return reason === 'NAO_OBSERVADO'
+}
+
+function getOffensiveFinishLabel(code: string, fallback: string) {
+  if (code === 'ARREM_SIMPLES' || code === 'SIMPLES') return 'Simples'
+  if (code === 'AEREA') return 'Aérea'
+  if (code === 'GIRO') return 'Giro'
+  if (code === '6M') return '6 metros'
+  return fallback
 }
 
 function toPointChipValues(points: readonly (1 | 2)[]): Array<'1' | '2'> {
@@ -146,6 +229,8 @@ function humanizeBackendError(message: string) {
   if (message.includes('sistema_defensivo_code required for DEF_POS')) return 'Em defesa posicionada, o sistema defensivo é obrigatório.'
   if (message.includes('tipo_finalizacao_code required for finalization result')) return 'Informe o tipo de finalização quando houve finalização.'
   if (message.includes('tipo_finalizacao_code not allowed without finalization result')) return 'Não informe tipo de finalização quando não houve finalização.'
+  if (message.includes('tipo_finalizacao_code not allowed in this action/result context')) return 'Esse tipo de finalização não deve ser informado para essa ação.'
+  if (message.includes('tipo_finalizacao_code incompatible with derived action semantics')) return 'O tipo de finalização informado contradiz a derivação automática da ação.'
   if (message.includes('motivo_pontuacao_code required for GOL')) return 'Quando houver gol, informe o motivo da pontuação.'
   if (message.includes('motivo_pontuacao_code only allowed for GOL')) return 'Motivo da pontuação só deve aparecer quando o resultado factual for gol.'
   if (message.includes('pontos_jogada required for GOL')) return 'Informe a pontuação da jogada quando o resultado factual for gol.'
@@ -164,6 +249,20 @@ function humanizeBackendError(message: string) {
   if (message.includes('scout game not found')) return 'O jogo selecionado não foi encontrado.'
   if (message.includes('permission denied')) return 'Você não tem permissão para registrar essa entrada.'
   return message
+}
+
+function canEditPendingEntry(entry: ScoutLiveEntry) {
+  return entry.statusValidacaoCode === 'PENDENTE'
+}
+
+function getDeleteBlockReason(entry: ScoutLiveEntry) {
+  if (entry.statusValidacaoCode !== 'PENDENTE') {
+    return 'Somente entradas PENDENTE podem ser excluídas.'
+  }
+  if (entry.derivedScoutPlayId) {
+    return 'Entradas já vinculadas a scout_play precisam seguir o fluxo de revisão.'
+  }
+  return ''
 }
 
 
@@ -339,8 +438,12 @@ export default function ScoutWorkspacePage() {
   const [feedback, setFeedback] = useState('')
   const [error, setError] = useState('')
   const [detailsExpanded, setDetailsExpanded] = useState(false)
+  const [transOfAdvancedExpanded, setTransOfAdvancedExpanded] = useState(false)
   const [teamPhaseExpanded, setTeamPhaseExpanded] = useState(false)
   const [incompatibleResultWarning, setIncompatibleResultWarning] = useState(false)
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
+  const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null)
+  const [confirmZeroTime, setConfirmZeroTime] = useState(false)
 
   const codebookMap = useMemo(
     () => new Map(codebook.map((list) => [list.listKey, list.values])),
@@ -394,6 +497,40 @@ export default function ScoutWorkspacePage() {
         allowedClassifications.includes(option.code as LiveCollectionClassificationCode),
       )
     : []
+
+  const showExecucaoBloqueio = shouldShowExecucaoBloqueio(
+    draft.faseDaBolaCode,
+    selectedCategoryCode,
+    selectedActionCode,
+  )
+  const execucaoBloqueioListKey = showExecucaoBloqueio
+    ? getExecucaoBloqueioListKey(draft.faseDaBolaCode, selectedCategoryCode as LiveCollectionCategoryCode, selectedActionCode as LiveCollectionBasicActionCode)
+    : undefined
+  const execucaoBloqueioOptions = execucaoBloqueioListKey
+    ? (codebookMap.get(execucaoBloqueioListKey) ?? [])
+    : []
+
+  const showContextoDecisao = shouldShowContextoDecisao(draft.faseDaBolaCode, selectedCategoryCode, selectedActionCode)
+  const contextoDecisaoListKey = showContextoDecisao
+    ? getContextoDecisaoListKey(draft.faseDaBolaCode, selectedCategoryCode as LiveCollectionCategoryCode, selectedActionCode as LiveCollectionBasicActionCode)
+    : undefined
+  const contextoDecisaoOptions = contextoDecisaoListKey ? (codebookMap.get(contextoDecisaoListKey) ?? []) : []
+
+  const showContextoArremesso = shouldShowContextoArremesso(draft.faseDaBolaCode, selectedCategoryCode, selectedActionCode)
+  const contextoArremessoListKey = showContextoArremesso
+    ? getContextoArremessoListKey(draft.faseDaBolaCode, selectedCategoryCode as LiveCollectionCategoryCode, selectedActionCode as LiveCollectionBasicActionCode)
+    : undefined
+  const contextoArremessoOptions = contextoArremessoListKey ? (codebookMap.get(contextoArremessoListKey) ?? []) : []
+
+  const derivedScoringReasonFromFinish =
+    selectedCategoryCode && selectedActionCode && draft.tipoFinalizacaoCode
+      ? deriveScoringReasonFromFinishType(
+          draft.faseDaBolaCode,
+          selectedCategoryCode as LiveCollectionCategoryCode,
+          selectedActionCode as LiveCollectionBasicActionCode,
+          draft.tipoFinalizacaoCode,
+        )
+      : undefined
 
   const phaseLabelMap = useMemo(() => new Map(phaseOptions.map((item) => [item.code, item.label])), [phaseOptions])
   const factualResultLabelMap = useMemo(
@@ -450,7 +587,6 @@ export default function ScoutWorkspacePage() {
       )
     : false
   const requiresPoints = requiresScoringReason
-  const classifAutoDerivesMotivo = Boolean(requiresScoringReason && derivedScoringReason)
   const allowedFinishTypes = selectedCategoryCode && selectedActionCode
     ? getAllowedFinishTypes(draft.faseDaBolaCode, selectedCategoryCode, selectedActionCode)
     : []
@@ -460,14 +596,24 @@ export default function ScoutWorkspacePage() {
   const allowedScoringReasons = selectedCategoryCode && selectedActionCode
     ? getAllowedScoringReasons(draft.faseDaBolaCode, selectedCategoryCode, selectedActionCode)
     : []
-  const scoringReasonOptionsForUI = scoringReasonOptions.filter((option) =>
-    allowedScoringReasons.includes(option.code as ScoutScoringReasonCode),
+  const activeFinishTypeForScoring = derivedFinishType ?? draft.tipoFinalizacaoCode
+  const scoringReasonOptionsForUI = useMemo(() => scoringReasonOptions.filter((option) =>
+    allowedScoringReasons.includes(option.code as ScoutScoringReasonCode) &&
+    isScoringReasonCompatibleWithFinishType(option.code as ScoutScoringReasonCode, activeFinishTypeForScoring),
+  ), [activeFinishTypeForScoring, allowedScoringReasons, scoringReasonOptions])
+  const compatibleScoringReasonCodes = useMemo(
+    () => scoringReasonOptionsForUI.map((option) => option.code as ScoutScoringReasonCode),
+    [scoringReasonOptionsForUI],
   )
-  const allowedPoints = classifAutoDerivesMotivo && derivedScoringReason
-    ? toPointChipValues(getAllowedPointsForScoringReason(derivedScoringReason))
+  const effectiveDerivedScoringReasonForUI = derivedScoringReason ?? derivedScoringReasonFromFinish
+  const autoDerivesScoringReason = Boolean(requiresScoringReason && effectiveDerivedScoringReasonForUI)
+  const allowedPoints = autoDerivesScoringReason && effectiveDerivedScoringReasonForUI
+    ? toPointChipValues(getAllowedPointsForScoringReason(effectiveDerivedScoringReasonForUI))
     : draft.motivoPontuacaoCode
       ? toPointChipValues(getAllowedPointsForScoringReason(draft.motivoPontuacaoCode))
-      : (['1', '2'] as Array<'1' | '2'>)
+      : effectiveDerivedScoringReasonForUI
+        ? toPointChipValues(getAllowedPointsForScoringReason(effectiveDerivedScoringReasonForUI))
+        : (['1', '2'] as Array<'1' | '2'>)
   const hasOptionalDetails = Boolean(
     draft.causaProvavelCode || draft.prioridadeTreinoCode || draft.videoRef.trim() || draft.obsGeral.trim(),
   )
@@ -484,9 +630,9 @@ export default function ScoutWorkspacePage() {
   // [0085-2] Microcopy contextual por classificação/motivo.
   const scoringMicrocopy = useMemo(() => {
     if (!requiresScoringReason) return ''
-    if (derivedScoringReason === 'GIRO')
+    if (effectiveDerivedScoringReasonForUI === 'GIRO')
       return 'Giro normalmente vale 2 pontos. Marque 1 se a arbitragem não validou a execução como pontuação dupla.'
-    if (derivedScoringReason === 'AEREA')
+    if (effectiveDerivedScoringReasonForUI === 'AEREA')
       return 'Aérea normalmente vale 2 pontos. Marque 1 se a arbitragem não validou a execução como pontuação dupla.'
     if (draft.motivoPontuacaoCode === 'SIMPLES')
       return 'Arremesso simples vale 1 ponto, exceto quando for especialista, goleira ou 6 metros.'
@@ -496,17 +642,45 @@ export default function ScoutWorkspacePage() {
       return 'Gol contra registrado como 1 ponto.'
     return 'Pontuação validada pela arbitragem.'
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requiresScoringReason, derivedScoringReason, draft.motivoPontuacaoCode])
+  }, [requiresScoringReason, effectiveDerivedScoringReasonForUI, draft.motivoPontuacaoCode])
 
   const allowedFactualResults = useMemo(() => {
     const allowed = getAllowedResultsForSelection(
       draft.faseDaBolaCode,
       selectedCategoryCode,
       selectedActionCode,
+      selectedClassificationCode,
     )
     const allowedSet = new Set(allowed)
     return factualResultOptions.filter((option) => allowedSet.has(option.code as ScoutFactualResultCode))
-  }, [draft.faseDaBolaCode, factualResultOptions, selectedCategoryCode, selectedActionCode])
+  }, [draft.faseDaBolaCode, factualResultOptions, selectedCategoryCode, selectedActionCode, selectedClassificationCode])
+
+  const showTransicaoStructure = shouldShowTransicaoStructure(
+    draft.faseDaBolaCode,
+    selectedCategoryCode,
+    selectedActionCode,
+  )
+  const isAtPosArremesso = draft.faseDaBolaCode === 'AT_POS' && selectedCategoryCode === 'ARREMESSO' && selectedActionCode === 'ARREMESSO'
+  const isTransOfArremesso = draft.faseDaBolaCode === 'TRANS_OF' && selectedCategoryCode === 'ARREMESSO' && selectedActionCode === 'ARREMESSO'
+  const showCommonFinalizationBlock = isAtPosArremesso || isTransOfArremesso
+  const showCommonFinishChoices = showCommonFinalizationBlock
+  const keepFinishTypeInDraft = requiresFinishType || showCommonFinalizationBlock
+  const commonFinishTypeOptions = finishTypeOptionsForUI.filter((option) => option.code !== 'NAO_OBSERVADO')
+  const legacyAtPosFinishTypeOptions = isAtPosArremesso && commonFinishTypeOptions.length === 0
+    ? ([
+        { code: 'GIRO', label: 'Giro' },
+        { code: 'AEREA', label: 'Aérea' },
+        { code: 'SIMPLES', label: 'Simples' },
+      ] satisfies Array<{ code: ScoutFinishTypeCode; label: string }>)
+    : commonFinishTypeOptions
+  const showAcaoPreparatoria = shouldShowAcaoPreparatoria(
+    draft.faseDaBolaCode,
+    selectedCategoryCode,
+    selectedActionCode,
+  )
+  const estruturaTransicaoOptions = codebookMap.get('LISTA_ESTRUTURA_TRANSICAO') ?? []
+  const acaoPreparatoriaOptions = codebookMap.get('LISTA_ACAO_PREPARATORIA') ?? []
+  const is6mAction = draft.acaoBasicaCode === 'FINALIZACAO_6M_ADV' || draft.acaoBasicaCode === 'FINALIZACAO_6M_FAV'
 
   // [0028] Em DEF_POS/TRANS_DEF o resultado GOL é exibido como "Gol sofrido" para clareza semântica
   const displayedFactualResults = useMemo(() => {
@@ -516,6 +690,14 @@ export default function ScoutWorkspacePage() {
     )
   }, [allowedFactualResults, isDefensiveContext])
   const optionalDetailsCount = [draft.causaProvavelCode, draft.prioridadeTreinoCode, draft.videoRef.trim(), draft.obsGeral.trim()].filter(Boolean).length
+  const transOfAdvancedCount = [
+    draft.contextoDecisaoCode,
+    draft.contextoArremessoCode,
+  ].filter(Boolean).length
+  const passiveShotPresetActive = draft.contextoDecisaoCode === 'PASSIVO_SINALIZADO' && draft.contextoArremessoCode === 'SOB_PASSIVO'
+  const tempoValidationMessage = validateTempoInput(draft.tempoJogo, confirmZeroTime)
+  const isEditing = editingEntryId !== null
+  const isSubmitBlocked = !selectedGame || !draft.resultadoFactualCode || Boolean(tempoValidationMessage)
 
   // UX-04 — quando a ação muda, limpar resultado factual se incompatível
   useEffect(() => {
@@ -555,13 +737,13 @@ export default function ScoutWorkspacePage() {
       let changed = false
       const next = { ...current }
 
-      if (!requiresFinishType && current.tipoFinalizacaoCode) {
+      if (!keepFinishTypeInDraft && current.tipoFinalizacaoCode) {
         next.tipoFinalizacaoCode = ''
         changed = true
       }
 
       if (
-        requiresFinishType &&
+        keepFinishTypeInDraft &&
         allowedFinishTypes.length > 0 &&
         current.tipoFinalizacaoCode &&
         !allowedFinishTypes.includes(current.tipoFinalizacaoCode)
@@ -579,12 +761,13 @@ export default function ScoutWorkspacePage() {
         return changed ? next : current
       }
 
-      if (derivedScoringReason) {
-        const derivedPoints = toPointChipValues(getAllowedPointsForScoringReason(derivedScoringReason))
+      const effectiveDerivedScoringReason = derivedScoringReason ?? derivedScoringReasonFromFinish
+      if (effectiveDerivedScoringReason) {
+        const derivedPoints = toPointChipValues(getAllowedPointsForScoringReason(effectiveDerivedScoringReason))
         const fallbackPoint = derivedPoints.includes('2') ? '2' : (derivedPoints[0] ?? '1')
 
-        if (current.motivoPontuacaoCode !== derivedScoringReason) {
-          next.motivoPontuacaoCode = derivedScoringReason
+        if (current.motivoPontuacaoCode !== effectiveDerivedScoringReason) {
+          next.motivoPontuacaoCode = effectiveDerivedScoringReason
           changed = true
         }
 
@@ -596,7 +779,7 @@ export default function ScoutWorkspacePage() {
         return changed ? next : current
       }
 
-      if (current.motivoPontuacaoCode && !allowedScoringReasons.includes(current.motivoPontuacaoCode)) {
+      if (current.motivoPontuacaoCode && !compatibleScoringReasonCodes.includes(current.motivoPontuacaoCode)) {
         next.motivoPontuacaoCode = ''
         next.pontosJogada = '0'
         changed = true
@@ -621,7 +804,7 @@ export default function ScoutWorkspacePage() {
 
       return changed ? next : current
     })
-  }, [allowedFinishTypes, allowedScoringReasons, derivedScoringReason, requiresFinishType, requiresScoringReason])
+  }, [allowedFinishTypes, compatibleScoringReasonCodes, derivedScoringReason, derivedScoringReasonFromFinish, keepFinishTypeInDraft, requiresScoringReason])
 
   useEffect(() => {
     let active = true
@@ -704,22 +887,24 @@ export default function ScoutWorkspacePage() {
     if (!selectedGame) {
       setDraft(buildDraft(1))
       setTeamPhaseExpanded(false)
+      setEditingEntryId(null)
+      setConfirmZeroTime(false)
       return
     }
 
+    if (isEditing) return
+
     setDraft((current) => {
-      const next = buildDraft(liveEntries.length + 1, {
+      const next = buildDraft(getNextLiveEntryNumber(liveEntries), {
         faseDaBolaCode: current.faseDaBolaCode,
         faseEquipeAnalisadaCode: current.faseEquipeAnalisadaCode,
         sistemaOfensivoCode: current.sistemaOfensivoCode,
         sistemaDefensivoCode: current.sistemaDefensivoCode,
       })
-      return {
-        ...next,
-        tempoJogo: current.tempoJogo === '00:00' ? next.tempoJogo : current.tempoJogo,
-      }
+      return next
     })
-  }, [selectedGame, liveEntries.length])
+    setConfirmZeroTime(false)
+  }, [isEditing, selectedGame, liveEntries])
 
   // [0028] Auto-seleciona acao_basica quando a categoria tem apenas uma opção
   // (PASSE → PASSE, ARREMESSO → ARREMESSO). Evita clique extra desnecessário.
@@ -730,6 +915,7 @@ export default function ScoutWorkspacePage() {
       ...cur,
       acaoBasicaCode: acaoBasicaOptions[0].code,
       classificacaoAcaoCode: '',
+      execucaoBloqueioCode: '',
     }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft.categoriaAcaoCode, acaoBasicaOptions])
@@ -750,11 +936,43 @@ export default function ScoutWorkspacePage() {
     })
   }
 
+  function buildDraftFromEntry(entry: ScoutLiveEntry): LiveEntryDraft {
+    return buildDraft(getNextLiveEntryNumber(liveEntries), {
+      idJogada: entry.idJogada,
+      tempoJogo: entry.tempoJogo,
+      faseDaBolaCode: entry.faseDaBolaCode,
+      faseEquipeAnalisadaCode: entry.faseEquipeAnalisadaCode,
+      sistemaOfensivoCode: entry.sistemaOfensivoCode ?? '',
+      sistemaDefensivoCode: entry.sistemaDefensivoCode ?? '',
+      atletaPrincipalId: entry.atletaPrincipalId ?? '',
+      tipoFinalizacaoCode: entry.tipoFinalizacaoCode ?? '',
+      resultadoFactualCode: entry.resultadoFactualCode,
+      motivoPontuacaoCode: entry.motivoPontuacaoCode ?? '',
+      pontosJogada: entry.pontosJogada == null ? '0' : String(entry.pontosJogada) as LiveEntryDraft['pontosJogada'],
+      causaProvavelCode: entry.causaProvavelCode ?? '',
+      prioridadeTreinoCode: entry.prioridadeTreinoCode ?? '',
+      videoRef: entry.videoRef ?? '',
+      obsGeral: entry.obsGeral ?? '',
+      categoriaAcaoCode: entry.categoriaAcaoCode ?? '',
+      acaoBasicaCode: entry.acaoBasicaCode ?? '',
+      classificacaoAcaoCode: entry.classificacaoAcaoCode ?? '',
+      execucaoBloqueioCode: entry.execucaoBloqueioCode ?? '',
+      estruturaTransicaoCode: entry.estruturaTransicaoCode ?? '',
+      contextoDecisaoCode: entry.contextoDecisaoCode ?? '',
+      contextoArremessoCode: entry.contextoArremessoCode ?? '',
+      acaoPreparatoriaCode: entry.acaoPreparatoriaCode ?? '',
+    })
+  }
+
 
   function updateDraft<K extends keyof LiveEntryDraft>(field: K, value: LiveEntryDraft[K]) {
     if (field === 'faseDaBolaCode') {
       setTeamPhaseExpanded(false)
       setIncompatibleResultWarning(true) // UX-04 — aviso ao trocar fase
+    }
+
+    if (field === 'tempoJogo') {
+      setConfirmZeroTime(false)
     }
 
     setDraft((current) => {
@@ -773,28 +991,46 @@ export default function ScoutWorkspacePage() {
         next.tipoFinalizacaoCode = ''
         next.motivoPontuacaoCode = ''
         next.pontosJogada = '0'
+        next.estruturaTransicaoCode = ''
+        next.contextoDecisaoCode = ''
+        next.contextoArremessoCode = ''
+        next.acaoPreparatoriaCode = ''
         if (!next.categoriaAcaoCode || !getAllowedCategoriesForPhase(phase).includes(next.categoriaAcaoCode as LiveCollectionCategoryCode)) {
           next.categoriaAcaoCode = ''
           next.acaoBasicaCode = ''
           next.classificacaoAcaoCode = ''
+          next.execucaoBloqueioCode = ''
         }
       }
 
       if (field === 'categoriaAcaoCode') {
         next.acaoBasicaCode = ''
         next.classificacaoAcaoCode = ''
+        next.execucaoBloqueioCode = ''
         next.resultadoFactualCode = ''
         next.tipoFinalizacaoCode = ''
         next.motivoPontuacaoCode = ''
         next.pontosJogada = '0'
+        next.estruturaTransicaoCode = ''
+        next.contextoDecisaoCode = ''
+        next.contextoArremessoCode = ''
+        next.acaoPreparatoriaCode = ''
       }
 
       if (field === 'acaoBasicaCode') {
         next.classificacaoAcaoCode = ''
+        next.execucaoBloqueioCode = ''
         next.resultadoFactualCode = ''
         next.tipoFinalizacaoCode = ''
         next.motivoPontuacaoCode = ''
         next.pontosJogada = '0'
+        next.estruturaTransicaoCode = ''
+        next.contextoDecisaoCode = ''
+        next.contextoArremessoCode = ''
+        next.acaoPreparatoriaCode = ''
+        if (value === 'FINALIZACAO_6M_ADV' || value === 'FINALIZACAO_6M_FAV') {
+          next.tipoFinalizacaoCode = '6M'
+        }
       }
 
       if (field === 'classificacaoAcaoCode') {
@@ -855,6 +1091,36 @@ export default function ScoutWorkspacePage() {
         if (!nextRequiresFinish) {
           next.tipoFinalizacaoCode = ''
         }
+
+        if (factual === 'PASSIVO') {
+          next.contextoDecisaoCode = ''
+          next.contextoArremessoCode = ''
+        }
+      }
+
+      if (field === 'tipoFinalizacaoCode') {
+        const finishType = value as ScoutFinishTypeCode | ''
+        if (finishType && next.resultadoFactualCode === 'PASSIVO') {
+          next.resultadoFactualCode = ''
+        }
+        const derivedScoring = finishType && next.categoriaAcaoCode && next.acaoBasicaCode
+          ? deriveScoringReasonFromFinishType(
+              next.faseDaBolaCode,
+              next.categoriaAcaoCode as LiveCollectionCategoryCode,
+              next.acaoBasicaCode as LiveCollectionBasicActionCode,
+              finishType,
+            )
+          : undefined
+
+        next.motivoPontuacaoCode = derivedScoring ?? ''
+        next.pontosJogada = '0'
+
+        if (derivedScoring) {
+          const nextAllowedPoints = toPointChipValues(getAllowedPointsForScoringReason(derivedScoring))
+          if (nextAllowedPoints.length === 1) {
+            next.pontosJogada = nextAllowedPoints[0]
+          }
+        }
       }
 
       if (field === 'motivoPontuacaoCode') {
@@ -876,11 +1142,72 @@ export default function ScoutWorkspacePage() {
   }
 
   function handleResetDraft() {
-    setDraft(buildFollowUpDraft(liveEntries.length + 1, draft))
+    setDraft(buildFollowUpDraft(getNextLiveEntryNumber(liveEntries), draft))
     setDetailsExpanded(false)
+    setEditingEntryId(null)
+    setConfirmZeroTime(false)
     setError('')
     setFeedback('Rascunho limpo para a próxima sequência.')
     focusTempoField()
+  }
+
+  function handleStartEditing(entry: ScoutLiveEntry) {
+    if (!canEditPendingEntry(entry)) {
+      setError('Somente entradas PENDENTE podem ser editadas na coleta ao vivo.')
+      return
+    }
+
+    setDraft(buildDraftFromEntry(entry))
+    setEditingEntryId(entry.id)
+    setDetailsExpanded(Boolean(entry.causaProvavelCode || entry.prioridadeTreinoCode || entry.videoRef || entry.obsGeral))
+    setTeamPhaseExpanded(false)
+    setConfirmZeroTime(false)
+    setError('')
+    setFeedback(`Editando ${entry.idJogada}.`)
+    focusTempoField()
+  }
+
+  function handleCancelEditing() {
+    setEditingEntryId(null)
+    setDraft(buildFollowUpDraft(getNextLiveEntryNumber(liveEntries), draft))
+    setDetailsExpanded(false)
+    setConfirmZeroTime(false)
+    setError('')
+    setFeedback('Edição cancelada.')
+    focusTempoField()
+  }
+
+  async function handleDeleteEntry(entry: ScoutLiveEntry) {
+    const blockReason = getDeleteBlockReason(entry)
+    if (blockReason) {
+      setError(blockReason)
+      return
+    }
+
+    const confirmed = window.confirm(`Excluir a entrada ${entry.idJogada}? Esta ação remove a entrada pendente da coleta ao vivo.`)
+    if (!confirmed) return
+
+    setDeletingEntryId(entry.id)
+    setError('')
+    setFeedback('')
+
+    try {
+      await discardPendingScoutLiveEntry(entry.id)
+      const nextEntries = liveEntries.filter((item) => item.id !== entry.id)
+      setLiveEntries(nextEntries)
+      if (editingEntryId === entry.id) {
+        setEditingEntryId(null)
+        setDraft(buildFollowUpDraft(getNextLiveEntryNumber(nextEntries), draft))
+        setDetailsExpanded(false)
+        setConfirmZeroTime(false)
+      }
+      setFeedback(`Entrada ${entry.idJogada} excluída da coleta ao vivo.`)
+    } catch (err) {
+      const rawMessage = err instanceof Error ? err.message : 'Falha ao excluir entrada pendente.'
+      setError(humanizeBackendError(rawMessage))
+    } finally {
+      setDeletingEntryId(null)
+    }
   }
 
   async function handleSubmitEntry(event: React.FormEvent<HTMLFormElement>) {
@@ -893,6 +1220,12 @@ export default function ScoutWorkspacePage() {
 
     if (!draft.resultadoFactualCode) {
       setError('Selecione o desfecho da sequência.')
+      return
+    }
+
+    if (tempoValidationMessage) {
+      setError(tempoValidationMessage)
+      focusTempoField()
       return
     }
 
@@ -916,16 +1249,22 @@ export default function ScoutWorkspacePage() {
         acaoPrincipalIsCustom: null,
         tipoFinalizacaoCode: requiresFinishType
           ? (toOptional(draft.tipoFinalizacaoCode) as ScoutFinishTypeCode | undefined)
-          : draft.tipoFinalizacaoCode
-            ? (draft.tipoFinalizacaoCode as ScoutFinishTypeCode)
-            : derivedFinishType
+          : selectedCategoryCode &&
+              selectedActionCode &&
+              shouldSubmitDerivedFinishType(
+                draft.faseDaBolaCode,
+                selectedCategoryCode,
+                selectedActionCode,
+                draft.resultadoFactualCode,
+              ) &&
+              derivedFinishType
               ? (derivedFinishType as ScoutFinishTypeCode)
               : undefined,
         resultadoFactualCode: draft.resultadoFactualCode,
         motivoPontuacaoCode: requiresScoringReason
           ? (
-              classifAutoDerivesMotivo
-                ? (draft.motivoPontuacaoCode || derivedScoringReason)
+              autoDerivesScoringReason
+                ? (draft.motivoPontuacaoCode || effectiveDerivedScoringReasonForUI)
                 : toOptional(draft.motivoPontuacaoCode)
             ) as ScoutScoringReasonCode | undefined
           : undefined,
@@ -937,15 +1276,33 @@ export default function ScoutWorkspacePage() {
         categoriaAcaoCode: toOptional(draft.categoriaAcaoCode),
         acaoBasicaCode: toOptional(draft.acaoBasicaCode),
         classificacaoAcaoCode: toOptional(draft.classificacaoAcaoCode),
+        execucaoBloqueioCode: toOptional(draft.execucaoBloqueioCode),
+        estruturaTransicaoCode: toOptional(draft.estruturaTransicaoCode),
+        contextoDecisaoCode: toOptional(draft.contextoDecisaoCode),
+        contextoArremessoCode: toOptional(draft.contextoArremessoCode),
+        acaoPreparatoriaCode: toOptional(draft.acaoPreparatoriaCode),
       }
 
-      const created = await createScoutLiveEntry(input)
-      const nextEntries = [...liveEntries, created]
-      setLiveEntries(nextEntries)
-      setDraft(buildFollowUpDraft(nextEntries.length + 1, draft))
-      setDetailsExpanded(false)
-      setTeamPhaseExpanded(false)
-      setFeedback(`Entrada criada como ${statusOptions.find((item) => item.code === created.statusValidacaoCode)?.label ?? created.statusValidacaoCode}.`)
+      if (editingEntryId) {
+        const updated = await updatePendingScoutLiveEntry(editingEntryId, input)
+        const nextEntries = liveEntries.map((entry) => (entry.id === updated.id ? updated : entry))
+        setLiveEntries(nextEntries)
+        setDraft(buildFollowUpDraft(getNextLiveEntryNumber(nextEntries), draft))
+        setEditingEntryId(null)
+        setDetailsExpanded(false)
+        setTeamPhaseExpanded(false)
+        setConfirmZeroTime(false)
+        setFeedback(`Entrada ${updated.idJogada} atualizada.`)
+      } else {
+        const created = await createScoutLiveEntry(input)
+        const nextEntries = [...liveEntries, created]
+        setLiveEntries(nextEntries)
+        setDraft(buildFollowUpDraft(getNextLiveEntryNumber(nextEntries), draft))
+        setDetailsExpanded(false)
+        setTeamPhaseExpanded(false)
+        setConfirmZeroTime(false)
+        setFeedback(`Entrada criada como ${statusOptions.find((item) => item.code === created.statusValidacaoCode)?.label ?? created.statusValidacaoCode}.`)
+      }
       focusTempoField()
     } catch (err) {
       const rawMessage = err instanceof Error ? err.message : 'Falha ao criar entrada da coleta ao vivo.'
@@ -1107,6 +1464,34 @@ export default function ScoutWorkspacePage() {
                             </div>
                           ) : null}
                         </div>
+                        <div className="mt-4 flex flex-wrap items-center gap-2">
+                          {canEditPendingEntry(entry) ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleStartEditing(entry)}
+                              aria-label={`Editar ${entry.idJogada}`}
+                            >
+                              <Pencil className="h-4 w-4" />
+                              Editar
+                            </Button>
+                          ) : null}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            disabled={Boolean(getDeleteBlockReason(entry)) || deletingEntryId === entry.id}
+                            onClick={() => handleDeleteEntry(entry)}
+                            aria-label={`Excluir ${entry.idJogada}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Excluir
+                          </Button>
+                          {getDeleteBlockReason(entry) ? (
+                            <span className="text-xs text-cep-muted">{getDeleteBlockReason(entry)}</span>
+                          ) : null}
+                        </div>
                       </article>
                     ))}
                   </div>
@@ -1128,8 +1513,8 @@ export default function ScoutWorkspacePage() {
           </div>
 
           <SectionCard
-            title="Nova entrada ao vivo"
-            description="Registre só a informação rápida e central da sequência. A análise detalhada vem depois."
+            title={isEditing ? 'Editar entrada pendente' : 'Nova entrada ao vivo'}
+            description={isEditing ? 'Corrija a entrada pendente sem sair da coleta ao vivo.' : 'Registre só a informação rápida e central da sequência. A análise detalhada vem depois.'}
           >
             {selectedGame ? (
               <form className="space-y-6 pb-32" onSubmit={handleSubmitEntry}>
@@ -1142,7 +1527,7 @@ export default function ScoutWorkspacePage() {
                       Equipe: <span className="text-cep-white">{selectedGame.analyzedTeam ?? 'CEPRAEA'}</span>
                     </span>
                     <span className="rounded-full border border-cep-purple-700 px-3 py-1">
-                      Status: <span className="text-cep-lime-300">PENDENTE</span>
+                      Status: <span className="text-cep-lime-300">{isEditing ? 'PENDENTE (edição)' : 'PENDENTE'}</span>
                     </span>
                   </div>
                 </div>
@@ -1150,7 +1535,7 @@ export default function ScoutWorkspacePage() {
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]">
                   <TextField label="ID da jogada" value={draft.idJogada} onChange={(value) => updateDraft('idJogada', value)} />
                   <TextField
-                    label="Tempo do jogo"
+                    label="Tempo do vídeo / relógio"
                     value={draft.tempoJogo}
                     onChange={(value) => updateDraft('tempoJogo', value)}
                     placeholder="Ex.: 03:21"
@@ -1169,6 +1554,24 @@ export default function ScoutWorkspacePage() {
                     </p>
                   </div>
                 </div>
+
+                {tempoValidationMessage ? (
+                  <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                    {tempoValidationMessage}
+                  </div>
+                ) : null}
+
+                {draft.tempoJogo.trim() === '00:00' ? (
+                  <label className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-100">
+                    <input
+                      type="checkbox"
+                      checked={confirmZeroTime}
+                      onChange={(event) => setConfirmZeroTime(event.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-amber-300 bg-transparent"
+                    />
+                    <span>Confirmo que o lance ocorreu exatamente em 00:00.</span>
+                  </label>
+                ) : null}
 
                 <div className="space-y-3 rounded-2xl border border-cep-purple-700 bg-cep-purple-950/50 p-4">
                   <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Fase da bola</div>
@@ -1280,9 +1683,11 @@ export default function ScoutWorkspacePage() {
                     </div>
                   ) : null}
 
-                  {classificacaoOptions.length > 0 ? (
+                  {classificacaoOptions.length > 0 && !isAtPosArremesso ? (
                     <div className="space-y-2">
-                      <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Classificação</div>
+                      <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">
+                        {selectedActionCode === 'BLOQUEIO' ? 'Finalização adversária enfrentada' : 'Classificação'}
+                      </div>
                       <div className="flex flex-wrap gap-2">
                         {classificacaoOptions.map((option) => (
                           <ChoiceChip
@@ -1296,9 +1701,157 @@ export default function ScoutWorkspacePage() {
                       </div>
                     </div>
                   ) : null}
+
+                  {showExecucaoBloqueio && execucaoBloqueioOptions.length > 0 ? (
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Execução do bloqueio</div>
+                      <div className="flex flex-wrap gap-2">
+                        {execucaoBloqueioOptions.map((option) => (
+                          <ChoiceChip
+                            key={option.code}
+                            active={draft.execucaoBloqueioCode === option.code}
+                            onClick={() => setDraft((cur) => ({ ...cur, execucaoBloqueioCode: cur.execucaoBloqueioCode === option.code ? '' : option.code }))}
+                          >
+                            {option.label}
+                          </ChoiceChip>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {showTransicaoStructure ? (
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <SelectField
+                          label="Estrutura da transição"
+                          value={draft.estruturaTransicaoCode}
+                          onChange={(value) => setDraft((current) => ({ ...current, estruturaTransicaoCode: value }))}
+                          options={estruturaTransicaoOptions}
+                          placeholder="Selecione a estrutura"
+                        />
+                        <p className="text-xs leading-relaxed text-cep-muted">
+                          Obrigatório na coleta rápida: direta ou indireta 2x1, 3x2, 4x3 ou 3x3.
+                        </p>
+                      </div>
+
+                    </div>
+                  ) : null}
+
+                  {showCommonFinalizationBlock ? (
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Contexto rápido opcional</div>
+                      <p className="text-xs leading-relaxed text-cep-muted">
+                        Use quando houve arremesso sob passivo. Se a posse acabou pela regra, marque Passivo em resultado factual.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <ChoiceChip
+                          active={passiveShotPresetActive}
+                          onClick={() =>
+                            setDraft((cur) => ({
+                              ...cur,
+                              resultadoFactualCode: cur.resultadoFactualCode === 'PASSIVO' ? '' : cur.resultadoFactualCode,
+                              contextoDecisaoCode: passiveShotPresetActive ? '' : 'PASSIVO_SINALIZADO',
+                              contextoArremessoCode: passiveShotPresetActive ? '' : 'SOB_PASSIVO',
+                            }))
+                          }
+                        >
+                          Arremesso forçado por passivo
+                        </ChoiceChip>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {!isTransOfArremesso && showContextoDecisao && contextoDecisaoOptions.length > 0 ? (
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">
+                        Contexto decisional <span className="text-cep-muted/60 normal-case">(opcional)</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-cep-muted">
+                        Marque quando o arremesso nasceu de pressão da jogada, como passivo sinalizado, retorno da bola ou chance clara recusada.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {contextoDecisaoOptions.map((option) => (
+                          <ChoiceChip
+                            key={option.code}
+                            active={draft.contextoDecisaoCode === option.code}
+                            onClick={() =>
+                              setDraft((cur) => ({
+                                ...cur,
+                                contextoDecisaoCode: cur.contextoDecisaoCode === option.code ? '' : option.code,
+                              }))
+                            }
+                          >
+                            {option.label}
+                          </ChoiceChip>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {!isTransOfArremesso && showContextoArremesso && contextoArremessoOptions.length > 0 ? (
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">
+                        Contexto do arremesso <span className="text-cep-muted/60 normal-case">(opcional)</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-cep-muted">
+                        Use para qualificar a finalização sem trocar o tipo dela, como giro de longe, sob passivo ou arremesso forçado.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {contextoArremessoOptions.map((option) => (
+                          <ChoiceChip
+                            key={option.code}
+                            active={draft.contextoArremessoCode === option.code}
+                            onClick={() =>
+                              setDraft((cur) => ({
+                                ...cur,
+                                contextoArremessoCode: cur.contextoArremessoCode === option.code ? '' : option.code,
+                              }))
+                            }
+                          >
+                            {option.label}
+                          </ChoiceChip>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {showAcaoPreparatoria ? (
+                    <SelectField
+                      label="Ação preparatória (opcional)"
+                      value={draft.acaoPreparatoriaCode}
+                      onChange={(value) => setDraft((current) => ({ ...current, acaoPreparatoriaCode: value }))}
+                      options={acaoPreparatoriaOptions}
+                      placeholder="Sem ação preparatória"
+                    />
+                  ) : null}
                 </div>
 
-                <div className="space-y-3 rounded-2xl border border-cep-purple-700 bg-cep-purple-950/50 p-4">
+                <div className="space-y-4 rounded-2xl border border-cep-purple-700 bg-cep-purple-950/50 p-4">
+                  <div>
+                    <div className="text-sm font-medium text-cep-white">{showCommonFinalizationBlock ? 'Finalização' : 'Resultado factual'}</div>
+                    {showCommonFinalizationBlock ? (
+                      <p className="mt-1 text-xs leading-relaxed text-cep-muted">
+                        Tipo técnico e desfecho do arremesso. O contexto da fase fica nos blocos acima.
+                      </p>
+                    ) : null}
+                  </div>
+                  {showCommonFinishChoices ? (
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Tipo de finalização</div>
+                      <div className="flex flex-wrap gap-2">
+                        {legacyAtPosFinishTypeOptions.map((option) => (
+                          <ChoiceChip
+                            key={option.code}
+                            active={draft.tipoFinalizacaoCode === option.code}
+                            onClick={() => updateDraft('tipoFinalizacaoCode', draft.tipoFinalizacaoCode === option.code ? '' : (option.code as ScoutFinishTypeCode))}
+                          >
+                            {getOffensiveFinishLabel(option.code, option.label)}
+                          </ChoiceChip>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
                   <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Resultado factual</div>
                   {incompatibleResultWarning ? (
                     <p className="text-xs text-amber-400">
@@ -1320,7 +1873,7 @@ export default function ScoutWorkspacePage() {
                     ))}
                   </div>
                   <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_auto_auto]">
-                    {requiresFinishType ? (
+                    {requiresFinishType && !is6mAction && !showCommonFinishChoices ? (
                       <div className="space-y-1.5">
                         <SelectField
                           label={isDefensiveContext ? 'Finalização adversária enfrentada' : 'Tipo de finalização'}
@@ -1332,8 +1885,10 @@ export default function ScoutWorkspacePage() {
                           <p className="text-xs text-cep-muted">Finalização adversária enfrentada.</p>
                         )}
                       </div>
+                    ) : requiresFinishType && is6mAction ? (
+                      <p className="text-xs text-cep-muted">Tipo de finalização: 6m (automático).</p>
                     ) : null}
-                    {requiresScoringReason && !classifAutoDerivesMotivo ? (
+                    {requiresScoringReason && !autoDerivesScoringReason ? (
                       <div className="space-y-1.5 md:col-span-2 xl:col-span-1">
                         <span className="block text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Motivo da pontuação</span>
                         <div className="flex flex-wrap gap-2">
@@ -1370,6 +1925,86 @@ export default function ScoutWorkspacePage() {
                     ) : null}
                   </div>
                 </div>
+
+                {isTransOfArremesso ? (
+                  <div className="rounded-2xl border border-cep-purple-700 bg-cep-purple-950/50 p-4">
+                    <button
+                      type="button"
+                      onClick={() => setTransOfAdvancedExpanded((current) => !current)}
+                      className="flex w-full items-center justify-between gap-3 text-left"
+                    >
+                      <div>
+                        <div className="text-sm font-medium text-cep-white">Detalhes avançados da transição / revisar depois</div>
+                        <div className="mt-1 text-sm text-cep-muted">
+                          Use só quando precisar detalhar passivo, retorno da bola, giro de longe ou arremesso forçado.
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-cep-muted">
+                        {transOfAdvancedCount ? <span>{transOfAdvancedCount} preenchido(s)</span> : <span>Opcional</span>}
+                        {transOfAdvancedExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </div>
+                    </button>
+
+                    {transOfAdvancedExpanded ? (
+                      <div className="mt-4 space-y-4">
+                        {showContextoDecisao && contextoDecisaoOptions.length > 0 ? (
+                          <div className="space-y-2">
+                            <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">
+                              Contexto decisional <span className="text-cep-muted/60 normal-case">(opcional)</span>
+                            </div>
+                            <p className="text-xs leading-relaxed text-cep-muted">
+                              O passivo pode ocorrer em ataque posicionado ou transição ofensiva. Aqui, marque apenas se ele explicar a decisão da finalização.
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {contextoDecisaoOptions.map((option) => (
+                                <ChoiceChip
+                                  key={option.code}
+                                  active={draft.contextoDecisaoCode === option.code}
+                                  onClick={() =>
+                                    setDraft((cur) => ({
+                                      ...cur,
+                                      contextoDecisaoCode: cur.contextoDecisaoCode === option.code ? '' : option.code,
+                                    }))
+                                  }
+                                >
+                                  {option.label}
+                                </ChoiceChip>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
+
+                        {showContextoArremesso && contextoArremessoOptions.length > 0 ? (
+                          <div className="space-y-2">
+                            <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">
+                              Contexto do arremesso <span className="text-cep-muted/60 normal-case">(opcional)</span>
+                            </div>
+                            <p className="text-xs leading-relaxed text-cep-muted">
+                              Qualifica a finalização sem trocar o tipo dela, como giro de longe, sob passivo ou arremesso forçado.
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {contextoArremessoOptions.map((option) => (
+                                <ChoiceChip
+                                  key={option.code}
+                                  active={draft.contextoArremessoCode === option.code}
+                                  onClick={() =>
+                                    setDraft((cur) => ({
+                                      ...cur,
+                                      contextoArremessoCode: cur.contextoArremessoCode === option.code ? '' : option.code,
+                                    }))
+                                  }
+                                >
+                                  {option.label}
+                                </ChoiceChip>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
+
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 <div className="rounded-2xl border border-cep-purple-700 bg-cep-purple-950/50 p-4">
                   <button
@@ -1438,13 +2073,19 @@ export default function ScoutWorkspacePage() {
                       </div>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row">
+                      {isEditing ? (
+                        <Button type="button" variant="ghost" onClick={handleCancelEditing}>
+                          <RotateCcw className="h-4 w-4" />
+                          Cancelar edição
+                        </Button>
+                      ) : null}
                       <Button type="button" variant="ghost" onClick={handleResetDraft}>
                         <RotateCcw className="h-4 w-4" />
                         Limpar
                       </Button>
-                      <Button type="submit" loading={savingEntry}>
+                      <Button type="submit" loading={savingEntry} disabled={isSubmitBlocked}>
                         <CheckCircle2 className="h-4 w-4" />
-                        Registrar entrada
+                        {isEditing ? 'Salvar edição' : 'Registrar entrada'}
                       </Button>
                     </div>
                   </div>

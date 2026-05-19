@@ -13,6 +13,10 @@ import { loginAsCoach } from '../helpers/auth'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
+async function fillTempo(page: import('@playwright/test').Page, tempo = '03:21') {
+  await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill(tempo)
+}
+
 test.describe('Scout — filtro de categoria por fase', () => {
   let gameId: string
 
@@ -134,6 +138,7 @@ test.describe('Scout — filtro de categoria por fase', () => {
     await page.getByRole('button', { name: 'Nao observado', exact: true }).click()
     await page.waitForTimeout(300)
     // Clicar Registrar
+    await fillTempo(page, '03:21')
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     // Após registro, um artigo deve aparecer na lista de entradas registradas
     await expect(page.locator('article').first()).toBeVisible({ timeout: 15_000 })
