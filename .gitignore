@@ -66,6 +66,8 @@ Thumbs.db
 .claude/
 .files/
 .copilot/
+.codex/codex-CHANGELOG.md
+.codex/codex-EXECUTION_LOG.md
 #---
 
 # PASTAS DE TESTES AUTOMATIZADOS:
@@ -83,10 +85,9 @@ test-results/
 #---
 
 # ARQUIVOS DE DOCUMENTAÇÃO DE AGENTES:
-# Esses arquivos podem conter documentação específica de agentes de inteligência artificial, como Claude, Codex e Copilot. Esses arquivos podem ser específicos do ambiente de desenvolvimento ou conter informações sensíveis, e não devem ser versionados.
-# Esses arquivos podem conter informações detalhadas sobre o funcionamento, configuração e uso dos agentes, e podem ser específicos do ambiente de desenvolvimento ou conter informações sensíveis. Por isso, eles não devem ser versionados para evitar a exposição de informações confidenciais e para permitir que cada desenvolvedor tenha suas próprias documentações locais sem afetar os outros.
-CLAUDE.md
-AGENT.md
+# AGENTS.md, CLAUDE.md e .github/copilot-instructions.md são arquivos de configuração
+# de agentes que DEVEM ser versionados — são a fonte de verdade operacional do projeto.
+# Os logs e changelogs dos agentes (.claude/, .copilot/, .codex/codex-*.md) NÃO devem ser versionados.
 #---
 
 #ARQUIVOS DE CONFIGURAÇÃO DE DEPLOYMENT:
