@@ -5,11 +5,11 @@ papel: "Expõe em texto versionável as famílias de listas do scout e seus valo
 autoridade: "Hierarquia 3/4 para o domínio scout — prevalece sobre inferência livre de enums no código; perde para correção factual revalidada do workbook se algum valor estiver divergente."
 lido_por: "Humano, Claude, Codex, Copilot"
 quando_ler: "antes de modelar enums, colunas categóricas, validações, filtros, dashboards, importadores e UI do scout."
-atualizado_por: "Agente executor + confirmação humana"
+atualizado_por: "Codex — 18 de maio de 2026"
 quando_atualizar: "uma lista ganhar ou perder valores; uma nova família categórica entrar no scout; o workbook alterar um enum canônico."
-validade: "2026-05-07"
+validade: "2026-05-18"
 status: PARCIAL
-status_nota: "Catálogo textual inicial das listas da Etapa A. Já cobre as 124 famílias da aba `LISTAS`, mas ainda não substitui o dicionário de códigos nem as regras completas de validação."
+status_nota: "Catálogo textual inicial das listas da Etapa A. Já cobre as 124 famílias da aba `LISTAS`, distingue catálogo amplo do domínio de contratos do produto CEPRAEA atual, mas ainda não substitui o dicionário de códigos nem as regras completas de validação."
 conflito: "Se este documento divergir do workbook em valor exato, ordem operacional ou presença de item, o workbook prevalece até correção textual; se divergir de código residual, este documento prevalece."
 proibido:
   - "Agentes NÃO devem criar enums ad hoc fora deste catálogo sem revalidação no workbook."
@@ -76,6 +76,15 @@ Regra:
 - listas de ataque, defesa, transição, `OUT`, mental e feedback não devem ser misturadas.
 - listas auxiliares como `LISTA_BOOLEANO` e `LISTA_BOOLEANO_OBS` devem ser mantidas separadas.
 
+### 4.1 Catálogo amplo do scout vs contrato do produto CEPRAEA
+
+Regra:
+
+- este documento expõe o catálogo amplo revalidado do workbook de scout;
+- catálogo amplo não significa que todo valor aqui vira filtro obrigatório do produto CEPRAEA atual;
+- quando o produto atual operar com contexto fixo da equipe `adulto feminino`, `alto rendimento`, `competição`, isso deve ser tratado como regra do produto, não como escolha solta em toda tela;
+- listas derivadas futuras para `VISAO_ATLETA_SCOUT` e metas derivadas do scout não devem ser inventadas aqui se ainda não existirem no workbook; elas devem nascer em contrato derivado explícito.
+
 ## 5. Contexto e governança
 
 - `LISTA_FASES` (4): `AT_POS`, `DEF_POS`, `TRANS_OF`, `TRANS_DEF`
@@ -139,6 +148,8 @@ Regra:
 - `LISTA_QUALIDADE_REPOSICAO_GOL` (5): `EXCELENTE`, `EFICAZ`, `LENTA`, `ERRO`, `NAO_OBSERVADO`
 - `LISTA_TIPO_PASSE_GOL` (4): `LONGO_DIRETO`, `CURTO_SEGURANCA`, `AEREA_TRANS`, `NAO_OBSERVADO`
 - `LISTA_VISAO_JOGO_GOL` (4): `LEITURA_CORRETA`, `IGNOROU_VANTAGEM`, `PRECIPITADA`, `NAO_OBSERVADO`
+
+> **Mapeamento mínimo para o produto atual:** no CEPRAEA, a leitura operacional do PRD deve conseguir reconciliar pelo menos `DEF_SOLTA -> Defensora Solta`, `DEF_BASE -> Defensora Base` e `DEF_ATRAS_PIVO -> Defensora API`. Outros valores do catálogo continuam válidos no scout, mas não devem ser apagados nem confundidos com o rótulo reduzido do produto.
 
 ## 8. Transições
 
@@ -230,6 +241,14 @@ Regra:
 - `LISTA_TIPO_EQUIPE` (4): `PROPRIA`, `ADVERSARIA`, `TREINO`, `OUTRA`
 - `LISTA_CATEGORIA` (5): `ADULTO`, `JUVENIL`, `BASE`, `MISTO`, `OUTRA`
 
+Regras obrigatórias para uso no produto:
+
+- `LISTA_TIPO_FEEDBACK`, `LISTA_DESTINATARIO_FEEDBACK` e `LISTA_PRIORIDADE_TREINO` podem originar metas derivadas do scout, mas não são sinônimos de meta;
+- meta derivada do scout exige contrato próprio e rastreabilidade para feedback, prioridade ou evidência;
+- `LISTA_FUNCAO_PRINCIPAL` e `LISTA_CATEGORIA` pertencem ao catálogo amplo do scout e não devem ser interpretadas como filtros obrigatórios de cadastro no produto CEPRAEA atual;
+- no produto atual, o contexto operacional da equipe principal é `ADULTO` e `Feminino`; isso reduz escolhas em fluxos do produto, mas não invalida o catálogo amplo do workbook;
+- a futura visualização atleta-facing do scout precisará de listas derivadas explícitas para `tipo de visão`, `status de publicação` ou projeções equivalentes, e essas listas não devem ser inferidas deste documento sem contrato adicional.
+
 ## 13. Implicações técnicas imediatas
 
 Este catálogo já força algumas decisões:
@@ -238,7 +257,9 @@ Este catálogo já força algumas decisões:
 2. listas compartilhadas por múltiplos campos devem nascer de fonte única;
 3. `NAO_APLICA` e `NAO_OBSERVADO` devem ser preservados como estados distintos;
 4. `LISTA_PRIORIDADE_TREINO` é grande demais para virar texto livre;
-5. `LISTA_CODIGO_MENTAL` e `LISTA_PRIORIDADE_TREINO` exigem tratamento cuidadoso no futuro dicionário de códigos.
+5. `LISTA_CODIGO_MENTAL` e `LISTA_PRIORIDADE_TREINO` exigem tratamento cuidadoso no futuro dicionário de códigos;
+6. o produto atual precisa de mapeamentos explícitos entre listas amplas do scout e taxonomias reduzidas do PRD, sem destruir o catálogo original;
+7. listas futuras de `VISAO_ATLETA_SCOUT` e metas derivadas do scout devem nascer como contratos derivados, não como inferência automática deste catálogo.
 
 ## 14. Próximos artefatos obrigatórios
 

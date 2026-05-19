@@ -5,11 +5,11 @@ papel: "Abre a Etapa B do scout com o desenho técnico canônico para persistên
 autoridade: "Hierarquia 4/4 para implementação do scout — prevalece sobre frontend legado órfão, sobre o payload genérico atual de `scout_events`, e sobre decisões ad hoc de schema; perde apenas para correção factual revalidada da Etapa A ou decisão explícita humana posterior."
 lido_por: "Humano, Claude, Codex, Copilot"
 quando_ler: "antes de criar migrações, tabelas, RPCs, tipos TypeScript, stores, formulários ou testes do scout."
-atualizado_por: "Agente executor + confirmação humana"
+atualizado_por: "Codex — 18 de maio de 2026"
 quando_atualizar: "uma decisão estrutural de persistência mudar; uma tabela nova entrar; a estratégia de migração do scout legado mudar; uma regra de RLS do scout for refinada."
-validade: "2026-05-08"
+validade: "2026-05-18"
 status: INICIAL
-status_nota: "Primeira abertura formal da Etapa B. Fecha decisões estruturais principais, mas ainda não substitui o DDL final nem o plano detalhado de migração campo a campo."
+status_nota: "Abertura formal consolidada da Etapa B. Fecha a decisão de persistência da COLETA_AO_VIVO, separa captura rápida de camada analítica normalizada e fixa a leitura atleta-facing como projeção derivada controlada."
 conflito: "Se este documento divergir da Etapa A em semântica, a Etapa A prevalece. Se divergir do schema Supabase atual, este documento governa a evolução futura do scout, não a leitura histórica do legado."
 proibido:
   - "Agentes NÃO devem reativar o scout criando runtime novo sobre `scout_events.payload` como fonte canônica."
@@ -78,17 +78,21 @@ Decisão:
 - o banco será **normalizado por contrato lógico**
 - não por layout do workbook.
 
-### 3.3 `COLETA_AO_VIVO` não vira tabela canônica separada no primeiro slice
+### 3.3 `COLETA_AO_VIVO` terá camada própria de persistência
 
-`COLETA_AO_VIVO` será tratado, inicialmente, como:
+`COLETA_AO_VIVO` será tratado como:
 
-- projeção compacta de captura;
-- modo de entrada rápida;
-- draft de UI derivado do contrato principal.
+- camada própria de captura rápida;
+- modo de entrada operacional enxuto;
+- superfície auditável anterior à promoção analítica.
 
-No primeiro slice técnico, ele **não** precisa de tabela própria.
+Decisão:
 
-Se for necessário persistir rascunhos depois, isso deve entrar como camada de draft, não como fonte de verdade paralela.
+- o nome de trabalho recomendado é `public.scout_live_entries`;
+- essa tabela representa a captura rápida fiel à aba `COLETA_AO_VIVO`;
+- ela não substitui `scout_plays`;
+- ela pode permanecer apenas como coleta auditável, ou ser promovida para `scout_plays` + `scout_play_participations`;
+- `PARTICIPACOES` não deve nascer automaticamente da coleta rápida como regra cega.
 
 ### 3.4 `RELATORIO` e `FEEDBACK` são contratos persistidos, mas derivados
 
@@ -105,6 +109,17 @@ Decisão:
 
 - podem ser persistidos como materialização editorial/auditável;
 - mas nunca como substituto da evidência de jogada.
+
+### 3.5 `VISAO_ATLETA_SCOUT` e metas derivadas também são contratos derivados
+
+O produto atual exige leitura do scout pela atleta e metas derivadas do scout.
+
+Decisão:
+
+- a atleta não lê `scout_plays`, `scout_play_participations` ou `scout_mental_events` diretamente;
+- a leitura atleta-facing deve existir em projeções derivadas controladas;
+- metas derivadas do scout devem manter vínculo com evidência, relatório, feedback ou prioridade de treino;
+- a política de exposição para atleta deve incidir apenas sobre projeções e metas elegíveis, nunca sobre a base analítica bruta completa.
 
 ## 4. Modelo alvo de persistência
 
@@ -147,6 +162,46 @@ Regra:
 - `team_id` continua sendo o time proprietário dos dados;
 - `opponent` textual deve tender a virar referência a catálogo, sem quebrar o histórico.
 
+### 4.1.1 Camada de captura rápida: `public.scout_live_entries`
+
+Representa um lance registrado na camada rápida de `COLETA_AO_VIVO`.
+
+Campos-base mínimos:
+
+- `id uuid primary key`
+- `team_id uuid not null`
+- `scout_game_id uuid not null`
+- `entry_code text not null`
+- `game_clock text not null`
+- `phase_of_ball text not null`
+- `analyzed_team_side text`
+- `analyzed_team_phase text`
+- `offensive_system text`
+- `defensive_system text`
+- `main_athlete_id uuid`
+- `main_athlete_label text`
+- `main_action_code text`
+- `finish_type text`
+- `factual_result text not null`
+- `score_reason text`
+- `play_points smallint`
+- `probable_cause text`
+- `training_priority text`
+- `video_ref text`
+- `validation_status text not null default 'PENDENTE'`
+- `promoted_to_play_id uuid`
+- `promotion_status text not null default 'CAPTURADA'`
+- `captured_by uuid`
+- `captured_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+Regra:
+
+- `scout_live_entries` é a camada de captura rápida;
+- `scout_plays` é a camada analítica normalizada do lance;
+- a promoção de uma entrada rápida para jogada analítica deve ser explícita e auditável;
+- o mesmo jogo pode conter entradas apenas capturadas e entradas já promovidas.
+
 ## 4.2 Contrato canônico da jogada
 
 ### Nova tabela: `public.scout_plays`
@@ -154,6 +209,11 @@ Regra:
 Equivale ao contrato lógico `COLETA_SCOUT`.
 
 Uma linha = uma `ID_JOGADA`.
+
+Regra adicional:
+
+- `scout_plays` não é o destino direto obrigatório de toda entrada rápida;
+- ele representa a jogada analítica normalizada, seja criada diretamente por fluxo completo, seja por promoção a partir de `scout_live_entries`.
 
 Campos-base obrigatórios:
 
@@ -386,7 +446,75 @@ Regra:
 
 - feedback sem evidência vinculada não deve ser publicado como oficial.
 
-## 4.8 Extensão scout do cadastro de atletas
+## 4.8 Projeções atleta-facing do scout
+
+### Nova tabela: `public.scout_athlete_views`
+
+Equivale ao contrato derivado `VISAO_ATLETA_SCOUT`.
+
+Campos-base:
+
+- `id uuid primary key`
+- `team_id uuid not null`
+- `athlete_id uuid not null`
+- `scout_game_id uuid`
+- `view_type text not null`
+- `reference_period text`
+- `summary_text text`
+- `indicator_code text`
+- `indicator_value numeric`
+- `sample_size int`
+- `source_play_ids uuid[] not null default '{}'`
+- `source_report_item_ids uuid[] not null default '{}'`
+- `source_feedback_item_ids uuid[] not null default '{}'`
+- `training_priority text`
+- `publication_status text not null default 'RASCUNHO'`
+- `published_by uuid`
+- `published_at timestamptz`
+- `created_at timestamptz not null default now()`
+- `updated_at timestamptz not null default now()`
+
+Tipos mínimos de visão:
+
+- `EVENTO_BRUTO`
+- `RESUMO_POR_JOGO`
+- `INDICADOR_AGREGADO`
+- `HISTORICO_POR_PERIODO`
+
+Regra:
+
+- esta tabela é a superfície oficial de leitura do scout pela atleta;
+- só deve receber dado validado ou explicitamente publicado;
+- deve preservar rastreabilidade com jogadas, relatórios e feedbacks de origem.
+
+## 4.9 Metas derivadas do scout
+
+### Nova tabela: `public.scout_goal_links`
+
+Vincula evidências do scout a metas do produto sem duplicar a tabela principal de metas.
+
+Campos-base:
+
+- `id uuid primary key`
+- `team_id uuid not null`
+- `goal_scope text not null`
+- `goal_id uuid not null`
+- `athlete_id uuid`
+- `scout_game_id uuid`
+- `source_play_ids uuid[] not null default '{}'`
+- `source_report_item_ids uuid[] not null default '{}'`
+- `source_feedback_item_ids uuid[] not null default '{}'`
+- `source_training_priority text`
+- `created_by uuid`
+- `created_at timestamptz not null default now()`
+
+Regra:
+
+- `goal_scope` deve distinguir `INDIVIDUAL` e `EQUIPE`;
+- metas derivadas do scout devem manter evidência rastreável;
+- esta tabela não substitui a tabela principal de metas do produto; ela apenas preserva o vínculo de origem analítica.
+
+## 4.10 Extensão scout do cadastro de atletas
 
 ### Nova tabela: `public.athlete_scout_profiles`
 
@@ -412,7 +540,7 @@ Decisão:
 - o cadastro civil continua em `athletes`;
 - o perfil tático do scout fica separado.
 
-## 4.9 Catálogo externo de equipes
+## 4.11 Catálogo externo de equipes
 
 ### Nova tabela: `public.scout_catalog_teams`
 
@@ -492,16 +620,23 @@ Papel:
 
 O scout novo deve herdar a filosofia do produto atual:
 
-- membros do time podem ler;
-- `owner` e `coach` podem escrever;
+- `owner` e `coach` leem e escrevem a base analítica;
+- atletas leem apenas projeções derivadas autorizadas;
 - efeitos derivados críticos podem ser editoriais.
 
 ## 6.1 Leituras
 
-Devem usar `public.is_team_member(team_id)`.
+Leituras não devem usar uma única policy genérica para todos os contratos.
+
+Regra:
+
+- contratos analíticos brutos devem usar predicate de staff do time (`owner`/`coach`) ou equivalente;
+- projeções atleta-facing podem usar predicate de membro do time com filtro adicional por `athlete_id`;
+- codebooks continuam leitura global para `authenticated`.
 
 Aplica-se a:
 
+- `scout_live_entries`
 - `scout_games`
 - `scout_plays`
 - `scout_play_participations`
@@ -510,10 +645,13 @@ Aplica-se a:
 - `scout_report_items`
 - `scout_feedback_items`
 - `athlete_scout_profiles`
+- `scout_goal_links`
+- `scout_athlete_views`
 - `scout_catalog_teams`
 
-Exceção:
+Exceções:
 
+- `scout_athlete_views` admite leitura da atleta apenas sobre a própria projeção publicada;
 - os codebooks do scout não têm `team_id`, então a leitura deles deve ser global para `authenticated`, e não filtrada por time.
 
 ## 6.2 Escrita
@@ -523,6 +661,12 @@ Regra padrão:
 - `owner` e `coach` escrevem contratos-base;
 - contratos derivados editoriais podem continuar restritos a `owner`/`coach`.
 
+Exceção controlada da atleta:
+
+- atleta autenticada não escreve contratos de scout;
+- atleta pode ler apenas `scout_athlete_views` onde `athlete_id` corresponda ao seu vínculo no time;
+- atleta pode ler metas derivadas do scout apenas pelo fluxo principal de metas do produto, respeitando o vínculo da meta.
+
 Para codebooks:
 
 - `authenticated` lê;
@@ -530,11 +674,13 @@ Para codebooks:
 
 ## 6.3 Observação importante
 
-Se atletas autenticadas forem futuramente expostas a algum recorte do scout, isso deve ser:
+No produto atual, atletas autenticadas **serão** expostas a recortes do scout.
 
-- política nova;
-- leitura derivada controlada;
-- nunca acesso bruto automático a todos os contratos táticos e mentais.
+Regra:
+
+- isso deve ocorrer apenas por `scout_athlete_views` e pelo fluxo principal de metas;
+- não há leitura bruta automática de `scout_plays`, `scout_play_participations`, `scout_mental_events` ou `scout_play_validations` para atleta;
+- campos mentais sensíveis não devem vazar para atleta sem decisão editorial explícita.
 
 ## 7. Estratégia de migração do legado
 
@@ -571,10 +717,11 @@ O primeiro slice da Etapa B não deve tentar cobrir todo o workbook.
 Implementar primeiro:
 
 1. `scout_games` evoluído
-2. `scout_plays`
-3. `scout_play_participations`
-4. `athlete_scout_profiles`
-5. codebook mínimo para:
+2. `scout_live_entries`
+3. `scout_plays`
+4. `scout_play_participations`
+5. `athlete_scout_profiles`
+6. codebook mínimo para:
    - `FASE_DA_BOLA`
    - `SISTEMA_OFENSIVO`
    - `CONFIGURACAO_OFENSIVA`
@@ -587,7 +734,7 @@ Implementar primeiro:
 
 Motivo:
 
-- isso já habilita coleta de jogada e participação;
+- isso já habilita captura rápida, promoção de jogada e participação;
 - evita começar pela camada mental/editorial;
 - permite validar o coração do scout com menor risco.
 
@@ -597,6 +744,8 @@ Motivo:
 - `scout_play_validations`
 - `scout_report_items`
 - `scout_feedback_items`
+- `scout_athlete_views`
+- `scout_goal_links`
 - contextos especiais completos
 - import do legado
 
@@ -609,6 +758,7 @@ Sequência sugerida:
 3. `0010_scout_security_policies_and_grants.sql`
 4. `0011_scout_rpc_write_read.sql`
 5. `0012_scout_derived_contracts.sql`
+6. `0013_scout_athlete_views_and_goal_links.sql`
 
 ## 9.1 RPCs do slice 1
 
@@ -616,9 +766,37 @@ O primeiro slice de runtime do scout não deve abrir acesso bruto às tabelas no
 
 Decisão:
 
-- escrita via `public.upsert_scout_play_bundle(uuid, uuid, jsonb, jsonb)`;
+- escrita da captura rápida via `public.upsert_scout_live_entry(uuid, uuid, jsonb)`;
+- promoção opcional via `public.promote_scout_live_entry(uuid, uuid)`;
+- escrita da camada analítica completa via `public.upsert_scout_play_bundle(uuid, uuid, jsonb, jsonb)`;
 - leitura via `public.get_scout_play_bundle(uuid, uuid)`;
+- leitura atleta-facing via `public.get_athlete_scout_view(uuid, uuid, text, text)`;
 - validação de codebook via helper interno `public.scout_field_value_allowed(...)`, sem grant para cliente.
+
+### `upsert_scout_live_entry`
+
+Contrato:
+
+- recebe `team_id`, `scout_game_id` e um objeto `entry`;
+- exige `auth.uid()` com papel `owner` ou `coach` no `team_id`;
+- persiste a camada rápida de `COLETA_AO_VIVO` sem obrigar normalização imediata em participações;
+- grava `audit_logs` ao final da operação.
+
+Validações mínimas do slice 1:
+
+- campos obrigatórios da captura rápida;
+- listas de `phase_of_ball`, `offensive_system`, `defensive_system`, `factual_result` e `probable_cause` quando aplicáveis;
+- lista de `training_priority` via codebook;
+- semântica de `NAO_APLICA` e `NAO_OBSERVADO` respeitada pelo mapeamento de codebook.
+
+### `promote_scout_live_entry`
+
+Contrato:
+
+- recebe `team_id` e `scout_live_entry_id`;
+- exige `auth.uid()` com papel `owner` ou `coach` no `team_id`;
+- promove a entrada rápida para `scout_plays` e, quando houver detalhe suficiente, para `scout_play_participations`;
+- atualiza `promotion_status` e `promoted_to_play_id`.
 
 ### `upsert_scout_play_bundle`
 
@@ -642,7 +820,7 @@ Validações mínimas do slice 1:
 Contrato:
 
 - recebe `team_id` e `scout_play_id`;
-- exige `auth.uid()` membro do time;
+- exige `auth.uid()` com papel `owner` ou `coach` no `team_id`;
 - retorna um `jsonb` com:
   - `play`
   - `participations`
@@ -651,6 +829,14 @@ Objetivo:
 
 - expor um bundle estável para o frontend do slice 1;
 - evitar acoplamento inicial a múltiplas queries cliente-side.
+
+### `get_athlete_scout_view`
+
+Contrato:
+
+- recebe `team_id`, `athlete_id`, `view_type` e `reference_period` opcional;
+- exige `auth.uid()` membro do time; quando o papel for atleta, a função só retorna dados do próprio vínculo;
+- retorna projeções publicadas da tabela `scout_athlete_views`.
 
 ## 10. Tipos TypeScript
 
@@ -688,7 +874,8 @@ O que o sistema precisa agora é:
 2. RLS e grants corretos;
 3. codebook mínimo versionado;
 4. tipos novos;
-5. um slice de escrita/leitura de jogada + participação.
+5. um slice de captura rápida + promoção analítica;
+6. projeções controladas para a atleta.
 
 ## 12. Veredito
 
@@ -696,9 +883,10 @@ A Etapa B fica aberta com esta posição:
 
 - manter `scout_games`;
 - congelar `scout_events.payload` como legado;
+- adotar `scout_live_entries` como camada própria de `COLETA_AO_VIVO`;
 - normalizar o scout por contratos;
 - não espelhar a planilha literalmente;
-- começar por `scout_plays` + `scout_play_participations` + codebook mínimo;
-- adiar mental/relatório/feedback para o segundo slice.
+- começar por `scout_live_entries` + `scout_plays` + `scout_play_participations` + codebook mínimo;
+- adiar mental/relatório/feedback/projeções da atleta para o segundo slice.
 
 Esse é o menor caminho tecnicamente correto para recolocar o scout no produto sem voltar ao modelo frágil anterior.

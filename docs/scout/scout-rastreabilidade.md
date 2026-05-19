@@ -5,11 +5,11 @@ papel: "Fecha a ponte explícita entre conceito de domínio, contrato lógico, c
 autoridade: "Hierarquia 3/4 para o domínio scout — prevalece sobre leitura solta de artefatos isolados; perde apenas para correção factual revalidada quando um vínculo estiver materialmente errado no workbook ou na SSOT."
 lido_por: "Humano, Claude, Codex, Copilot"
 quando_ler: "antes de implementar schema, queries, formulários, pipelines de validação, relatórios ou feedbacks do scout; ao decidir qual campo ou lista concretiza um conceito do domínio."
-atualizado_por: "Agente executor + confirmação humana"
+atualizado_por: "Codex — 18 de maio de 2026"
 quando_atualizar: "um conceito ganhar novo campo, lista, regra ou derivado; a SSOT mudar; um vínculo de rastreabilidade for corrigido."
-validade: "2026-05-08"
+validade: "2026-05-18"
 status: PARCIAL
-status_nota: "Matriz inicial da Etapa A. Cobre os conceitos centrais do scout e seus vínculos principais, suficiente para planejamento técnico; não replica ainda toda a rastreabilidade linha a linha das 466 linhas brutas da `TABELA_MESTRE`."
+status_nota: "Matriz inicial consolidada da Etapa A. Cobre os conceitos centrais do scout, a captura rápida, as projeções atleta-facing e os vínculos com metas derivadas, suficiente para planejamento técnico; não replica ainda toda a rastreabilidade linha a linha das 466 linhas brutas da `TABELA_MESTRE`."
 conflito: "Se esta matriz divergir da SSOT semântica, a SSOT prevalece; se divergir da `TABELA_MESTRE` ou da aba `DICIONARIO_CODIGOS` em vínculo factual de campo/lista, revalidar o workbook e corrigir a matriz."
 proibido:
   - "Agentes NÃO devem implementar o scout mapeando conceito diretamente para UI sem passar por contrato, campo, lista e validação."
@@ -52,8 +52,9 @@ Regra:
 - `Primário`: onde o conceito nasce.
 - `Secundário`: onde o conceito reaparece para decomposição, revisão ou saída.
 - `Derivado`: onde o conceito influencia leitura técnica, relatório, feedback ou prioridade.
+- `Projeção`: onde o conceito aparece em superfície publicada para consumo da atleta.
 - `Campos-chave`: nesta matriz, só entram nomes canônicos de campo já existentes no workbook; quando um conceito for representado por família repetida, usamos curingas explícitos como `ATQ_*` ou `DEF_*`.
-- `COLETA_AO_VIVO`: pode aparecer como superfície auxiliar de captura, mas não substitui os campos canônicos de `COLETA_SCOUT` na modelagem principal.
+- `COLETA_AO_VIVO`: aparece como camada própria de captura rápida; não substitui os campos canônicos de `COLETA_SCOUT` na modelagem principal.
 
 ## 4. Invariantes de rastreabilidade
 
@@ -62,15 +63,17 @@ Regra:
 3. Lista sem campo associado é metadado morto.
 4. Campo sem gate de validação é risco operacional.
 5. Derivado sem rastro até a jogada é leitura fraca.
+6. Projeção atleta-facing sem filtro de escopo e origem rastreável é publicação inválida.
 
 ## 5. Núcleo estrutural
 
 | Conceito | Contrato primário | Campos-chave | Listas | Validação mínima | Derivados |
 |---|---|---|---|---|---|
-| Unidade de observação | `COLETA_SCOUT` | `ID_JOGADA`, `ID_JOGO` | n/a | IDs obrigatórios e não órfãos | `PARTICIPACOES`, `EVENTOS_MENTAIS`, `VALIDACAO`, `FEEDBACK` |
+| Unidade de observação analítica | `COLETA_SCOUT` | `ID_JOGADA`, `ID_JOGO` | n/a | IDs obrigatórios e não órfãos | `PARTICIPACOES`, `EVENTOS_MENTAIS`, `VALIDACAO`, `RELATORIO`, `FEEDBACK`, `VISAO_ATLETA_SCOUT` |
+| Unidade de observação rápida | `COLETA_AO_VIVO` | `ID_JOGADA`, `ID_JOGO`, `TEMPO_JOGO` | n/a | entrada rápida válida, promoção auditável | promoção para `COLETA_SCOUT`, UX ao vivo |
 | Contexto da sessão | `COLETA_SCOUT` | `DATA_SESSAO`, `TIPO_SESSAO`, `ADVERSARIO`, `PERIODO`, `TEMPO_JOGO`, `FONTE_COLETA` | `LISTA_TIPO_SESSAO`, `LISTA_PERIODO`, `LISTA_FONTE_COLETA` | `ADVERSARIO` obrigatório em `JOGO`/`AMISTOSO` | interpretação do jogo, relatório, filtros |
 | Fase global da jogada | `COLETA_SCOUT` | `FASE_DA_BOLA` | `LISTA_FASES` | coerência entre fase, bloco e contexto | `PARTICIPACOES`, transições, leitura técnica |
-| Status de validação operacional | `COLETA_SCOUT`, `EVENTOS_MENTAIS`, `VALIDACAO` | `STATUS_VALIDACAO` | `LISTA_STATUS_VALIDACAO` | enum válido, sem atalho textual | revisão, publicação analítica |
+| Status de validação operacional | `COLETA_SCOUT`, `COLETA_AO_VIVO`, `EVENTOS_MENTAIS`, `VALIDACAO` | `STATUS_VALIDACAO` | `LISTA_STATUS_VALIDACAO` | enum válido, sem atalho textual | revisão, publicação analítica |
 
 ## 6. Rastreabilidade tática ofensiva
 
@@ -159,32 +162,50 @@ Regra:
 | Bloco de relatório | `RELATORIO` | `BLOCO_RELATORIO`, `INDICADOR`, `VALOR`, `AMOSTRA`, `IDS_EVIDENCIA` | `LISTA_BLOCO_RELATORIO` | relatório sem bloco/evidência não publica | leitura técnica agregada |
 | Feedback | `FEEDBACK` | `DESTINATARIO_FEEDBACK`, `ATLETA_FEEDBACK`, `TIPO_FEEDBACK`, `TEMA_FEEDBACK`, `PRIORIDADE_FEEDBACK`, `STATUS_FEEDBACK` | `LISTA_DESTINATARIO_FEEDBACK`, `LISTA_TIPO_FEEDBACK`, `LISTA_PRIORIDADE_FEEDBACK`, `LISTA_STATUS_FEEDBACK` | destinatário deve bater com o alvo | ação prática no treino/jogo |
 
-## 15. Rastreabilidade de cadastros
+## 15. Rastreabilidade de projeções da atleta e metas derivadas
+
+| Conceito | Contrato primário | Campos-chave | Listas | Validação mínima | Derivados |
+|---|---|---|---|---|---|
+| Visão individual da atleta | `VISAO_ATLETA_SCOUT` | `ID_ATLETA`, `TIPO_VISAO`, `IDS_EVIDENCIA`, `ORIGEM_RELATORIO`, `ORIGEM_FEEDBACK` | tipos derivados do contrato técnico (`EVENTO_BRUTO`, `RESUMO_POR_JOGO`, `INDICADOR_AGREGADO`, `HISTORICO_POR_PERIODO`) | só publica visão rastreável, escopo individual correto | portal da atleta, leitura individual |
+| Resumo por jogo da atleta | `VISAO_ATLETA_SCOUT` | `ID_ATLETA`, `ID_JOGO`, `RESUMO_VISUALIZAVEL`, `LEITURA_TECNICA_RESUMIDA` | tipo derivado `RESUMO_POR_JOGO` | precisa apontar para jogo e evidência reais | portal da atleta, histórico por jogo |
+| Indicador agregado / histórico | `VISAO_ATLETA_SCOUT` | `PERIODO_REFERENCIA`, `INDICADOR`, `VALOR`, `AMOSTRA` | tipos derivados `INDICADOR_AGREGADO`, `HISTORICO_POR_PERIODO` | agregado não substitui origem rastreável | tendência, acompanhamento individual |
+| Meta individual derivada do scout | vínculo derivado scout -> meta | `ID_META_INDIVIDUAL_SCOUT`, `ATLETA_FEEDBACK`, `PRIORIDADE_TREINO`, `IDS_EVIDENCIA` | depende do contrato principal de metas + listas de feedback/prioridade | alvo individual precisa bater com a evidência | metas da atleta, plano de treino |
+| Meta de equipe derivada do scout | vínculo derivado scout -> meta | `ID_META_EQUIPE_SCOUT`, `DESTINATARIO_FEEDBACK`, `PRIORIDADE_TREINO`, `IDS_EVIDENCIA` | depende do contrato principal de metas + listas de feedback/prioridade | não publicar como meta individual | metas coletivas, planejamento da equipe |
+
+## 16. Rastreabilidade de cadastros
 
 | Conceito | Contrato primário | Campos-chave | Listas | Validação mínima | Derivados |
 |---|---|---|---|---|---|
 | Cadastro tático da atleta | `CAD_ATLETAS` | `ID_ATLETA`, `MAO_DOMINANTE`, `FUNCAO_PRINCIPAL`, `POS_OF_3X1`, `POS_OF_4X0`, `POS_DEF_3X0`, `GOLEIRA`, `ESPECIALISTA`, `PLAYMAKER` | listas de cadastro correspondentes | referência deve existir e ser padronizada | `PARTICIPACOES`, feedback, análise tática |
 | Cadastro de equipe | `CAD_EQUIPES` | `ID_EQUIPE`, `NOME_EQUIPE`, `TIPO_EQUIPE`, `CATEGORIA` | `LISTA_TIPO_EQUIPE`, `LISTA_CATEGORIA` | equipe referida na sessão precisa existir | contexto de jogo, adversário, filtros |
 
-## 16. Gates de rastreabilidade obrigatórios
+## 17. Gates de rastreabilidade obrigatórios
 
-### 16.1 Gate de origem
+### 17.1 Gate de origem
 
 Todo conceito precisa apontar para ao menos um campo operacional real.
 
-### 16.2 Gate de enum
+### 17.2 Gate de enum
 
 Todo campo categórico precisa apontar para ao menos uma lista oficial.
 
-### 16.3 Gate de consistência
+### 17.3 Gate de consistência
 
 Todo conceito precisa apontar para ao menos uma regra de validação relevante.
 
-### 16.4 Gate de derivação
+### 17.4 Gate de derivação
 
 Todo conceito relevante para análise precisa apontar para saída derivada ou justificar por que não deriva.
 
-## 17. Gaps residuais após a Etapa A
+### 17.5 Gate de publicação atleta-facing
+
+Toda projeção para a atleta precisa apontar para:
+
+- origem rastreável;
+- escopo individual ou coletivo elegível;
+- regra explícita de publicação.
+
+## 18. Gaps residuais após a Etapa A
 
 Depois desta matriz, os gaps restantes já não são de significado macro, mas de implementação detalhada:
 
@@ -193,7 +214,7 @@ Depois desta matriz, os gaps restantes já não são de significado macro, mas d
 3. converter esta matriz em schema e testes;
 4. sanear futuramente as linhas de template incorreto no workbook original.
 
-## 18. Veredito
+## 19. Veredito
 
 Com esta matriz, a Etapa A fica conceitualmente fechada.
 
@@ -205,6 +226,7 @@ Agora já existe ponte explícita entre:
 - lista
 - validação
 - derivado
+- projeção publicada
 
 O próximo passo lógico deixa de ser “descobrir o scout”.
 

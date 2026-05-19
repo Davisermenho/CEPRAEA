@@ -5,19 +5,22 @@ papel: "Explica como usar a rota /scout no estado atual do produto: fluxo de tra
 autoridade: "Guia operacional do frontend atual do scout. Não substitui a SSOT semântica nem o contrato técnico; traduz esses artefatos para uso prático."
 lido_por: "Humano, Claude, Codex, Copilot"
 quando_ler: "antes de usar a rota /scout; ao treinar equipe de coleta; ao revisar como preencher o scout novo em produção/local."
-atualizado_por: "Agente executor + confirmação humana"
-quando_atualizar: "sempre que a UX da rota /scout mudar; quando novos campos forem expostos; quando o fluxo operacional do slice 1 mudar."
-validade: "2026-05-08"
-status: ATUAL
-status_nota: "Manual do scout novo no estado do vertical slice mínimo já integrado na rota /scout."
+atualizado_por: "Codex — 18 de maio de 2026"
+quando_atualizar: "somente se este manual voltar a ser usado como registro histórico de uma UX específica já descontinuada ou congelada."
+validade: "2026-05-18"
+status: HISTORICO
+status_nota: "Documento histórico do runtime e da UX de um slice anterior do scout. Não é contrato vivo do produto nem referência para implementação nova."
 conflito: "Se este manual divergir da UX real da rota /scout, a UX real prevalece; se divergir da semântica canônica, prevalece a SSOT."
 proibido:
   - "Não usar este manual para inferir regras que ainda não existem na tela."
   - "Não tratar este manual como descrição do scout completo do MANUSCOUT."
+  - "Não usar este manual como base de escopo, schema, navegação ou contrato técnico do scout atual."
 nao_cobre: "Camada mental, validação editorial, relatórios, feedback agregado, import de legado e o scout antigo baseado em ScoutEvent."
 ---
 
 # Scout — Manual Operacional do Slice 1
+
+> **Status:** histórico. Use [scout-ssot.md](/home/davis/cepraea-pwa/docs/scout/scout-ssot.md:1), [scout-campos.md](/home/davis/cepraea-pwa/docs/scout/scout-campos.md:1), [scout-contrato-tecnico-supabase.md](/home/davis/cepraea-pwa/docs/scout/scout-contrato-tecnico-supabase.md:1) e documentos derivados ativos como fonte normativa.
 
 ## 1. O que esta tela já faz
 

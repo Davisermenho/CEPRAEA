@@ -5,11 +5,11 @@ papel: "Traduz a estrutura de campos do workbook do scout para um catálogo text
 autoridade: "Hierarquia 3/4 para o domínio scout — prevalece sobre interpretação livre de agentes na organização dos campos; perde para revalidação factual do workbook se algum campo, contagem ou nome estiver divergente."
 lido_por: "Humano, Claude, Codex, Copilot"
 quando_ler: "antes de modelar schema, types, formulários, importadores, relatórios ou telas do scout; ao decidir quais campos pertencem a cada contrato lógico."
-atualizado_por: "Agente executor + confirmação humana"
+atualizado_por: "Codex — 18 de maio de 2026"
 quando_atualizar: "um bloco funcional do workbook mudar; nova aba ou família de campos entrar no scout; divergência factual do catálogo for corrigida."
-validade: "2026-05-07"
+validade: "2026-05-18"
 status: PARCIAL
-status_nota: "Catálogo textual inicial da Etapa A. Organiza contratos e famílias de campos, mas não substitui ainda o dicionário completo, as listas e todas as validações."
+status_nota: "Catálogo textual inicial da Etapa A. Organiza contratos, famílias de campos e projeções atleta-facing do scout, mas não substitui ainda o dicionário completo, as listas e todas as validações."
 conflito: "Se este documento divergir do workbook em nome exato de campo, quantidade ou presença de aba, o workbook prevalece até correção textual; se divergir de código residual de frontend scout, este documento prevalece."
 proibido:
   - "Agentes NÃO devem usar este catálogo como licença para inferir enums não listados aqui; enums completos pertencem a `docs/scout/scout-listas.md`."
@@ -65,6 +65,7 @@ Sempre separar:
 - `camada mental`;
 - `revisão/validação`;
 - `saídas derivadas`;
+- `projeções atleta-facing`;
 - `cadastros de apoio`.
 
 ## 3. Mapa geral do catálogo
@@ -86,6 +87,7 @@ Convenção usada neste documento:
 - `VALIDACAO`: `10` campos
 - `RELATORIO`: `10` campos
 - `FEEDBACK`: `12` campos
+- `VISAO_ATLETA_SCOUT`: projeção derivada obrigatória para consumo individual
 - `DASHBOARD`: `6` linhas-resumo de auditoria
 - `COLETA_AO_VIVO`: `19` registros catalogados na `TABELA_MESTRE`
 
@@ -100,12 +102,14 @@ Convenção usada neste documento:
 | `VALIDACAO` | `VALIDACAO` | 10 | Correção e revisão dos dados coletados |
 | `RELATORIO` | `RELATORIO` | 10 | Leitura técnica agregada por jogo/sessão |
 | `FEEDBACK` | `FEEDBACK` | 12 | Transformação da leitura em orientação prática |
+| `VISAO_ATLETA_SCOUT` | projeção derivada | n/a no workbook atual | Consumo individual validado pela atleta |
 | `CAD_ATLETAS` | `CAD_ATLETAS` | 19 | Cadastro de atletas e perfis de uso |
 | `CAD_EQUIPES` | `CAD_EQUIPES` | 5 | Cadastro de equipes de referência |
 
 Regra:
 
 - qualquer implementação futura do scout deve preservar esses contratos;
+- projeções atleta-facing não podem nascer como payload improvisado fora desse mapa;
 - UI, schema e importadores devem nascer desse recorte, e não de componentes antigos órfãos.
 
 ## 5. `COLETA_SCOUT`
@@ -119,6 +123,7 @@ Ele concentra a jogada observada e serve de pivô para:
 - `VALIDACAO`;
 - `RELATORIO`;
 - `FEEDBACK`;
+- `VISAO_ATLETA_SCOUT`;
 - evidência de vídeo.
 
 ### 5.1 Estrutura por bloco funcional
@@ -163,8 +168,8 @@ Famílias que precisam existir em qualquer modelo futuro:
 - jogadora principal e relações táticas:
   - atleta principal
   - atletas associadas
-  - posição
-  - função especial
+  - posição ofensiva ou posição contextual observada
+  - função defensiva ou função especial contextual
   - ação principal
   - comportamento específico
 - resultado:
@@ -473,6 +478,7 @@ Campos atuais:
 Regra:
 
 - o relatório deriva do scout; ele não deve ser tratado como documento externo sem rastreabilidade para `ID_JOGO` e evidências.
+- ele deve ser capaz de alimentar projeções de `resumo por jogo`, `indicadores agregados` e `histórico por período`.
 
 ## 11. `FEEDBACK`
 
@@ -497,10 +503,55 @@ Regra:
 
 - feedback é contrato de saída, não comentário avulso;
 - ele deve continuar vinculado à evidência que o originou.
+- quando o feedback gerar meta formal, a referência de evidência e a atleta/equipe alvo devem permanecer preservadas.
 
-## 12. Cadastros de apoio
+## 12. `VISAO_ATLETA_SCOUT`
 
-### 12.1 `CAD_ATLETAS`
+`VISAO_ATLETA_SCOUT` é a projeção derivada que transforma scout validado em leitura individual no produto.
+
+Esta projeção não é nova coleta. Ela reorganiza dados já validados para consumo da atleta.
+
+Famílias mínimas que precisam existir em qualquer modelo futuro:
+
+- identidade e escopo:
+  - `ID_VISAO_ATLETA`
+  - `ID_ATLETA`
+  - `ID_EQUIPE`
+  - `TIPO_VISAO`
+  - `PERIODO_REFERENCIA`
+  - `ID_JOGO` quando aplicável
+- rastreabilidade:
+  - `IDS_EVIDENCIA`
+  - `ORIGEM_RELATORIO`
+  - `ORIGEM_FEEDBACK`
+  - `STATUS_VALIDACAO_FONTE`
+- conteúdo derivado:
+  - `RESUMO_VISUALIZAVEL`
+  - `INDICADOR`
+  - `VALOR`
+  - `AMOSTRA`
+  - `LEITURA_TECNICA_RESUMIDA`
+- vínculo com ação prática:
+  - `PRIORIDADE_TREINO`
+  - `ID_META_INDIVIDUAL_SCOUT` quando houver
+  - `ID_META_EQUIPE_SCOUT` quando houver
+
+Tipos mínimos de visão:
+
+- `EVENTO_BRUTO`
+- `RESUMO_POR_JOGO`
+- `INDICADOR_AGREGADO`
+- `HISTORICO_POR_PERIODO`
+
+Regra:
+
+- a atleta vê apenas a própria projeção individual e metas de equipe publicadas para seu grupo;
+- a projeção deve preservar distinção entre dado bruto, resumo, agregado e histórico;
+- nenhuma visão da atleta pode existir sem vínculo rastreável a `ID_JOGADA`, `ID_JOGO`, relatório ou feedback correspondente.
+
+## 13. Cadastros de apoio
+
+### 13.1 `CAD_ATLETAS`
 
 Campos atuais:
 
@@ -529,7 +580,7 @@ Regra:
 - o scout presume cadastro tático das atletas, não apenas nome e email;
 - posições e papéis por sistema fazem parte do contrato.
 
-### 12.2 `CAD_EQUIPES`
+### 13.2 `CAD_EQUIPES`
 
 Campos atuais:
 
@@ -543,7 +594,7 @@ Regra:
 
 - equipes são referência operacional para sessões, adversários e contexto competitivo.
 
-## 13. Abas auxiliares que não são contratos de persistência principal
+## 14. Abas auxiliares que não são contratos de persistência principal
 
 Estas abas existem no workbook, mas não devem ser confundidas com o núcleo transacional do scout:
 
@@ -565,7 +616,7 @@ Papel dessas abas:
 - auditoria;
 - acompanhamento de completude.
 
-## 14. Implicações técnicas imediatas
+## 15. Implicações técnicas imediatas
 
 Este catálogo já força algumas decisões de implementação futura:
 
@@ -574,9 +625,11 @@ Este catálogo já força algumas decisões de implementação futura:
 3. precisa de tabela/coleção filha para eventos mentais;
 4. precisa de pipeline formal de validação;
 5. precisa de saída derivada para relatório e feedback;
-6. precisa de cadastros táticos, não só cadastros administrativos.
+6. precisa de projeções atleta-facing para scout validado;
+7. precisa de vínculo explícito entre feedback, prioridade de treino e metas derivadas do scout;
+8. precisa de cadastros táticos, não só cadastros administrativos.
 
-## 15. Próximos artefatos obrigatórios
+## 16. Próximos artefatos obrigatórios
 
 Depois deste catálogo, a Etapa A ainda precisa fechar:
 
@@ -584,8 +637,9 @@ Depois deste catálogo, a Etapa A ainda precisa fechar:
 2. `docs/scout/scout-dicionario-codigos.md`
 3. `docs/scout/scout-validacoes.md`
 4. `docs/scout/scout-rastreabilidade.md`
+5. contrato técnico das projeções atleta-facing no documento técnico de scout
 
-## 16. Veredito
+## 17. Veredito
 
 O workbook já define um scout com estrutura suficientemente madura para implementação futura.
 

@@ -5,11 +5,11 @@ papel: "Define os gates de consistência, regras condicionais e critérios de bl
 autoridade: "Hierarquia 3/4 para o domínio scout — prevalece sobre validação ad hoc no runtime; perde para correção factual revalidada do workbook quando houver divergência material de regra ou obrigatoriedade."
 lido_por: "Humano, Claude, Codex, Copilot"
 quando_ler: "antes de implementar schema, constraints, formulários, importadores, revisão manual e pipelines de validação do scout."
-atualizado_por: "Agente executor + confirmação humana"
+atualizado_por: "Codex — 18 de maio de 2026"
 quando_atualizar: "um campo mudar de obrigatoriedade; uma regra contextual for refinada; a estrutura de revisão/relatório/feedback mudar; uma deriva do workbook for saneada."
-validade: "2026-05-08"
+validade: "2026-05-18"
 status: PARCIAL
-status_nota: "Contrato textual inicial de validações da Etapa A. Fecha os gates principais de consistência, mas ainda não substitui futura rastreabilidade linha a linha entre campo, lista e regra."
+status_nota: "Contrato textual inicial de validações da Etapa A. Fecha os gates principais de consistência, incluindo captura rápida, projeções atleta-facing e vínculos com metas derivadas, mas ainda não substitui futura rastreabilidade linha a linha entre campo, lista e regra."
 conflito: "Se este documento divergir da SSOT semântica, a SSOT prevalece; se divergir da `TABELA_MESTRE` em obrigatoriedade ou regra factual, revalidar o workbook; se a `TABELA_MESTRE` estiver omissa, este documento preenche o comportamento normativo mínimo."
 proibido:
   - "Agentes NÃO devem tratar ausência de `Obrigatório` na planilha como autorização automática para deixar o campo solto."
@@ -92,7 +92,7 @@ Regra:
 
 ## 4. Camadas de validação
 
-Toda linha do scout deve passar por seis camadas:
+Toda linha do scout deve passar por sete camadas:
 
 1. validação estrutural
 2. validação categórica
@@ -100,6 +100,7 @@ Toda linha do scout deve passar por seis camadas:
 4. validação referencial
 5. validação semântica
 6. validação derivada/revisional
+7. validação de publicação e visibilidade
 
 ### 4.1 Validação estrutural
 
@@ -151,6 +152,15 @@ Checa:
 - consistência de relatório e feedback com evidências;
 - correções registradas em `VALIDACAO`;
 - ausência de órfãos entre coleta e saídas derivadas.
+
+### 4.7 Validação de publicação e visibilidade
+
+Checa:
+
+- se o dado derivado está pronto para publicação;
+- se a atleta vê apenas projeções e metas elegíveis;
+- se contratos brutos do scout não vazam para a superfície atleta-facing;
+- se metas derivadas do scout mantêm vínculo com evidência publicada.
 
 ## 5. Severidades recomendadas
 
@@ -225,6 +235,25 @@ Regra:
 - `FASE_DA_BOLA` deve ser um valor de `LISTA_FASES`.
 - se `FASE_DA_BOLA` for `TRANS_OF` ou `TRANS_DEF`, a jogada entra no regime de transição.
 - se `FASE_DA_BOLA` for `AT_POS` ou `DEF_POS`, não é permitido usar bloco transitório como leitura principal da jogada.
+
+### 7.3.1 Passivo em `AT_POS` e `TRANS_OF`
+
+Jogo passivo pode ocorrer em ataque posicionado (`AT_POS`) e em transição ofensiva (`TRANS_OF`).
+
+Validação semântica:
+
+- usar `RESULTADO_FACTUAL = PASSIVO` somente quando a posse for perdida ou interrompida pela regra;
+- se ainda houver arremesso, manter o resultado factual como o desfecho do arremesso;
+- em lance com arremesso sob passivo, registrar passivo como contexto, não como resultado factual;
+- na `COLETA_AO_VIVO`, o preset `Arremesso forçado por passivo` grava `PASSIVO_SINALIZADO + SOB_PASSIVO`.
+
+Exemplo válido:
+
+- `TRANS_OF + ARREMESSO + TRANS_INDIRETA_3X3 + GIRO + BLOQUEADO + Arremesso forçado por passivo`
+
+Exemplo inválido:
+
+- `TRANS_OF + ARREMESSO + PASSIVO` quando o vídeo mostra que a equipe ainda arremessou e o arremesso foi bloqueado, defendido, fora, gol etc.
 
 ### 7.4 Regras de sistema ofensivo
 
@@ -340,11 +369,22 @@ Devem existir:
 Logo:
 
 - pode ser menos densa que `COLETA_SCOUT`;
-- não pode contradizer a jogada para a qual depois convergir.
+- não pode contradizer a jogada para a qual depois convergir;
+- deve permanecer distinguível da jogada analítica normalizada;
+- promoção para jogada analítica deve ser auditável.
 
 ### 8.3 `STATUS_VALIDACAO`
 
 Deve aceitar apenas lista válida e deve orientar o pipeline de revisão posterior.
+
+### 8.4 Promoção para `COLETA_SCOUT`
+
+Se uma entrada de `COLETA_AO_VIVO` for promovida para jogada analítica:
+
+- `ID_JOGO` deve permanecer idêntico;
+- `FASE_DA_BOLA` não pode mudar sem trilha de validação explícita;
+- `RESULTADO_FACTUAL` não pode divergir sem justificativa revisional;
+- a relação entre entrada rápida e jogada promovida deve ficar registrada.
 
 ## 9. Validações de `PARTICIPACOES`
 
@@ -524,7 +564,86 @@ Se houver `PRIORIDADE_FEEDBACK`:
 
 - ela não substitui a prioridade técnica do relatório, apenas a urgência de entrega do feedback.
 
-## 14. Validações de `CAD_ATLETAS`
+### 13.4 Feedback que origina meta
+
+Se um feedback originar meta derivada do scout:
+
+- a evidência do feedback deve existir;
+- o alvo da meta deve ser coerente com o destinatário do feedback;
+- meta individual exige vínculo com atleta específica;
+- meta de equipe não pode ser publicada como se fosse meta individual.
+
+## 14. Validações de `VISAO_ATLETA_SCOUT`
+
+### 16.1 Gate mínimo
+
+Devem existir:
+
+- `ID_ATLETA`
+- `TIPO_VISAO`
+- ao menos uma origem rastreável entre jogada, relatório ou feedback
+- status de publicação coerente
+
+### 14.2 Tipos de visão
+
+`TIPO_VISAO` deve ser um dos tipos derivados permitidos pelo contrato técnico:
+
+- `EVENTO_BRUTO`
+- `RESUMO_POR_JOGO`
+- `INDICADOR_AGREGADO`
+- `HISTORICO_POR_PERIODO`
+
+Erro bloqueante:
+
+- publicar visão atleta-facing com tipo fora do contrato derivado.
+
+### 14.3 Escopo e privacidade
+
+Regras obrigatórias:
+
+- a projeção deve apontar para a atleta dona da visualização;
+- não pode agregar dados individuais de outra atleta na mesma visão individual;
+- contratos mentais sensíveis não devem aparecer na visualização da atleta sem decisão editorial explícita;
+- somente projeções publicadas podem ser expostas à atleta.
+
+### 14.4 Rastreabilidade
+
+Ao menos uma destas origens deve existir:
+
+- jogada(s) de evidência;
+- item(ns) de relatório;
+- item(ns) de feedback.
+
+Erro de consistência:
+
+- visão publicada sem origem rastreável.
+
+## 15. Validações de vínculos com metas derivadas do scout
+
+### 15.1 Gate mínimo
+
+Se houver vínculo entre scout e meta, devem existir:
+
+- escopo da meta;
+- referência da meta;
+- ao menos uma evidência de origem;
+- coerência entre alvo da meta e alvo da evidência.
+
+### 15.2 Meta individual derivada do scout
+
+Se o escopo for individual:
+
+- a atleta vinculada à meta deve ser a mesma atleta da evidência individual ou do feedback correspondente;
+- não é válido associar meta individual a evidência de equipe sem critério de recorte individual.
+
+### 15.3 Meta de equipe derivada do scout
+
+Se o escopo for equipe:
+
+- a evidência pode vir de agregado, relatório, feedback coletivo ou conjunto de jogadas;
+- não deve ser publicada como se fosse evidência individual de uma única atleta.
+
+## 16. Validações de `CAD_ATLETAS`
 
 ### 14.1 Gate mínimo
 
@@ -536,14 +655,14 @@ Devem existir:
 - `GOLEIRA`
 - `ESPECIALISTA`
 
-### 14.2 Coerência tática
+### 16.2 Coerência tática
 
 - posições por sistema devem usar listas corretas;
 - campos booleano-observacionais devem respeitar a convenção `SIM`/`NAO`/`NAO_OBSERVADO` se o modelo final mantiver essa estrutura.
 
-## 15. Validações de `CAD_EQUIPES`
+## 17. Validações de `CAD_EQUIPES`
 
-### 15.1 Gate mínimo
+### 17.1 Gate mínimo
 
 Devem existir:
 
@@ -551,13 +670,13 @@ Devem existir:
 - `NOME_EQUIPE`
 - `TIPO_EQUIPE`
 
-### 15.2 Uso referencial
+### 17.2 Uso referencial
 
 - equipes usadas em sessão, adversário e contexto competitivo devem existir no cadastro ou em conjunto padronizado equivalente.
 
-## 16. Gates entre contratos
+## 18. Gates entre contratos
 
-### 16.1 Órfãos proibidos
+### 18.1 Órfãos proibidos
 
 Não pode existir:
 
@@ -565,14 +684,16 @@ Não pode existir:
 - `EVENTOS_MENTAIS` sem `COLETA_SCOUT`
 - `VALIDACAO` sem `COLETA_SCOUT`
 - `FEEDBACK` com `ID_JOGADA` sem jogada pai
+- `VISAO_ATLETA_SCOUT` publicada sem origem rastreável
+- vínculo de meta derivada sem evidência de scout
 
-### 16.2 Integridade de `ID_JOGO`
+### 18.2 Integridade de `ID_JOGO`
 
 Todo filho de jogada deve herdar:
 
 - o mesmo `ID_JOGO` da jogada pai
 
-### 16.3 Rastreamento analítico
+### 18.3 Rastreamento analítico
 
 `RELATORIO` e `FEEDBACK` devem poder voltar para:
 
@@ -580,7 +701,7 @@ Todo filho de jogada deve herdar:
 - `ID_JOGADA`
 - `IDS_EVIDENCIA` quando aplicável
 
-## 17. Regras de publicação analítica
+## 19. Regras de publicação analítica
 
 Uma linha pode existir tecnicamente e ainda assim não estar pronta para uso analítico.
 
@@ -592,7 +713,15 @@ Critério mínimo para “publicável”:
 - sem órfãos;
 - com evidência mínima quando houver interpretação técnica.
 
-## 18. Implicações técnicas imediatas
+Critério adicional para “publicável à atleta”:
+
+- projeção publicada;
+- escopo individual correto;
+- sem vazamento de dado bruto de outra atleta;
+- sem conteúdo mental sensível não autorizado;
+- meta derivada, quando exibida, com vínculo rastreável à origem.
+
+## 20. Implicações técnicas imediatas
 
 Este documento já impõe decisões concretas:
 
@@ -600,15 +729,17 @@ Este documento já impõe decisões concretas:
 2. `NAO_APLICA` e `NAO_OBSERVADO` devem ser persistidos separadamente;
 3. a pipeline deve suportar revisão formal em `VALIDACAO`;
 4. relatórios e feedbacks precisam de rastreabilidade;
-5. ausência de marcação de obrigatoriedade no workbook deve ser resolvida por regra de contrato.
+5. ausência de marcação de obrigatoriedade no workbook deve ser resolvida por regra de contrato;
+6. projeções da atleta exigem gate próprio de publicação e visibilidade;
+7. metas derivadas do scout exigem validação de evidência e alvo.
 
-## 19. Próximo artefato obrigatório
+## 21. Próximo artefato obrigatório
 
 Depois deste documento, a Etapa A ainda precisa fechar:
 
 1. `docs/scout/scout-rastreabilidade.md`
 
-## 20. Veredito
+## 22. Veredito
 
 Com semântica, campos, listas, dicionário e validações textuais, o scout já tem base suficiente para sair do estado de “planilha inteligente” e entrar em contrato técnico implementável.
 

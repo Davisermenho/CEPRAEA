@@ -1,4 +1,25 @@
+---
+tipo: MEMORANDO-ESTRATEGICO
+nome: "Refazer o Scout — versão validada"
+papel: "Memorando histórico de exploração, hipóteses e decisões intermediárias sobre o refactor do scout."
+autoridade: "Histórico de trabalho. Não é a autoridade normativa final quando conflitar com os contratos ativos do diretório docs/scout."
+lido_por: "Humano, Claude, Codex, Copilot"
+quando_ler: "somente para recuperar contexto de investigação, alternativas descartadas ou motivação histórica de decisões posteriores."
+atualizado_por: "Codex — 18 de maio de 2026"
+quando_atualizar: "apenas para anotação histórica adicional; novas decisões devem entrar nos contratos ativos."
+validade: "2026-05-18"
+status: HISTORICO
+status_nota: "Documento estratégico histórico. O contrato vivo do scout está nos documentos ativos `scout-ssot`, `scout-campos`, `scout-listas`, `scout-contrato-tecnico-supabase`, `scout-validacoes` e `scout-rastreabilidade`."
+conflito: "Se divergir dos documentos ativos do scout, prevalecem os documentos ativos."
+proibido:
+  - "Não usar este documento isoladamente para implementar schema, runtime, RLS, RPCs ou UX do scout."
+  - "Não tratar hipóteses ou alternativas aqui discutidas como decisão vigente sem confirmação nos contratos ativos."
+nao_cobre: "Contrato técnico final consolidado, políticas finais de visibilidade da atleta e estado normativo atual do scout."
+---
+
 # Refazer o Scout: versão validada
+
+> **Status:** histórico. Este arquivo preserva raciocínios, opções e conflitos intermediários. Para implementação e produto atuais, use os contratos ativos em `docs/scout/`.
 
 ## Base validada
 
@@ -2375,4 +2396,3 @@ Hoje, o scout **ainda não está pronto para implementação correta imediata**,
 - matriz de obrigatoriedade condicional
 
 O resto é importante, mas entra como ajuste de execução, não como impeditivo.
-
