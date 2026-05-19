@@ -17,7 +17,9 @@ Arquivos correlatos:
 - `src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
 - `e2e/scout/scout-matriz-compat.spec.ts`
 - `e2e/scout/scout-category-filter.spec.ts`
+- `e2e/scout/scout-cepr0090-piloto-regressions.spec.ts`
 - `supabase/tests/scout_ssot_audit.test.sql`
+- `supabase/tests/scout_cepr0090_semantics.test.sql`
 
 ## Fontes de autoridade
 
@@ -48,6 +50,7 @@ Ela cobre:
 - `CLASSIFICACAO_ACAO`
 - `RESULTADO_FACTUAL`
 - campos condicionais de finalizacao e pontuacao
+- campos de estrutura de transicao e acao preparatoria
 - invariantes de persistencia
 
 Ela nao cobre:
@@ -68,6 +71,7 @@ Ela nao cobre:
 6. `COLETA_AO_VIVO` cria somente `scout_live_entries`.
 7. `COLETA_AO_VIVO` nao cria `scout_plays`.
 8. `COLETA_AO_VIVO` nao cria `scout_play_participations`.
+9. Resultados permitidos podem variar por classificacao — ver `allowedResultsByClassification` na implementacao.
 
 ## Categorias permitidas por fase
 
@@ -126,15 +130,17 @@ Ela nao cobre:
 ### `AT_POS` + `ARREMESSO`
 
 - Categoria: `ARREMESSO`
-- Acao basica: `ARREMESSO`
+- Acoes basicas:
+  - `ARREMESSO`
+  - `FINALIZACAO_6M_FAV` — cobrança de 6m favorável
 - Classificacoes permitidas:
   - `GIRO`
   - `AEREA`
   - `ARREM_SIMPLES`
 - Classificacoes proibidas em `AT_POS`:
-  - `FINALIZ_CONTRA` (label: Transição direta — válido apenas em TRANS_OF)
-  - `FINALIZ_TRANS` (label: Transição indireta — válido apenas em TRANS_OF)
-  - `AEREA_TRANS` (label: Aérea na transição — válido apenas em TRANS_OF)
+  - `FINALIZ_CONTRA` (label: Transição direta — válido apenas em TRANS_OF) — **[LEGADO]**
+  - `FINALIZ_TRANS` (label: Transição indireta — válido apenas em TRANS_OF) — **[LEGADO]**
+  - `AEREA_TRANS` (label: Aérea na transição — válido apenas em TRANS_OF) — **[LEGADO]**
   - `ESPECIALISTA`
   - `GOLEIRA`
   - `6M`
@@ -147,6 +153,7 @@ Ela nao cobre:
   - `FORA`
   - `TRAVE`
   - `VIOLACAO`
+  - `PASSIVO`
   - `NAO_OBSERVADO`
 - Resultados proibidos:
   - `ERRO_PASSE`
@@ -157,62 +164,145 @@ Ela nao cobre:
   - `GIRO -> GIRO`
   - `AEREA -> AEREA`
   - `ARREM_SIMPLES -> SIMPLES`
+  - `FINALIZACAO_6M_FAV -> 6M`
 - Regras de pontuacao:
   - `SIMPLES -> 1`
   - `GOL_CONTRA -> 1`
-  - `6M -> 2`
+  - `6M -> 2` (somente na ação específica `FINALIZACAO_6M_FAV`)
   - `GOLEIRA -> 2`
   - `ESPECIALISTA -> 2`
   - `GIRO -> 1 ou 2`
   - `AEREA -> 1 ou 2`
+- Restrição de consistência:
+  - se a classificação for `ARREM_SIMPLES`, não exibir motivo `GIRO`, `AEREA` ou `6M`;
+  - se o ataque entrou em jogo passivo e a posse foi interrompida pela regra, usar `resultado_factual_code = PASSIVO`;
+  - se ainda houve arremesso, passivo é contexto do lance, não resultado factual.
+
+UX esperada na `COLETA_AO_VIVO` (CEPR-0099/CEPR-0100):
+- `AT_POS + ARREMESSO` e `TRANS_OF + ARREMESSO` compartilham o bloco visual `Finalização`;
+- o bloco `Finalização` contém tipo técnico da finalização, resultado factual, motivo de pontuação e pontos quando aplicável, sempre nessa ordem;
+- em `AT_POS` e `TRANS_OF`, a UI exibe `Simples`, `Giro` e `Aérea` como chips no bloco `Finalização`, persistindo a escolha em `tipo_finalizacao_code`;
+- `classificacao_acao_code` fica como compatibilidade legada para leituras antigas e outros fluxos que ainda dependem de classificação;
+- o preset `Arremesso forçado por passivo` aparece nos dois fluxos e grava `PASSIVO_SINALIZADO + SOB_PASSIVO`;
+- os contextos da fase permanecem fora do bloco `Finalização`.
+
+#### `FINALIZACAO_6M_FAV` — evento ofensivo observado (CEPR-0096)
+
+- Situacao real: CEPRAEA cobra tiro de 6m.
+- Fase da bola: `AT_POS`
+- Categoria: `ARREMESSO`
+- Acao basica: `FINALIZACAO_6M_FAV`
+- Classificacao: nao se aplica; o tipo e auto-derivado.
+- Tipo de finalizacao: `6M`
+- Resultados permitidos:
+  - `GOL`
+  - `DEFENDIDO`
+  - `FORA`
+  - `TRAVE`
+  - `VIOLACAO`
+  - `NAO_OBSERVADO`
+- Resultado proibido:
+  - `BLOQUEADO`
+- Regra de pontuacao:
+  - se `GOL`, `motivo_pontuacao_code = 6M` e `pontos_jogada = 2`
+  - se diferente de `GOL`, nao informar motivo nem pontos
+
+#### `ARREMESSO` — campo preparatorio opcional (CEPR-0090B)
+
+- Campo opcional: `acaoPreparatoriaCode`
+  - Visivel somente em `AT_POS + ARREMESSO + ARREMESSO`
+  - Nao bloqueia submit — campo opcional
+  - Valores (`LISTA_ACAO_PREPARATORIA`):
+    - `FINTA_PASSE` — Finta de passe
+    - `FINTA_ARREMESSO` — Finta de arremesso
+    - `FIXACAO` — Fixação
+    - `ENTRADA_MEIO` — Entrada pelo meio
+    - `QUEBRA_LINHA` — Quebra de linha
 
 ### `DEF_POS` + `ACAO_DEFENSIVA`
 
 #### `BLOQUEIO`
 
-- Classificacoes permitidas:
+- Regra CEPR-0092:
+  - `classificacao_acao_code` representa a finalizacao adversaria enfrentada;
+  - `execucao_bloqueio_code` representa a execucao do bloqueio;
+  - nao misturar tipo da finalizacao adversaria com qualidade/execucao do bloqueio.
+- Finalizacoes adversarias permitidas em `classificacao_acao_code`:
+  - `GIRO`
+  - `AEREA`
+  - `ARREM_SIMPLES`
+  - `6M_ADV`
+  - `NAO_OBSERVADO`
+- Execucoes permitidas em `execucao_bloqueio_code`:
+  - `EXECUTADO`
+  - `NAO_EXECUTADO`
+  - `ATRASADO`
+  - `MAL_SINCRONIZADO`
+  - `NAO_OBSERVADO`
+- Codes legados inativos:
   - `BLOQ_GIRO`
   - `BLOQ_ARREM_SIMPLES`
   - `BLOQ_AEREA`
-- Resultados permitidos:
+  - `BLOQ_NAO_EXECUTADO`
+- Regra de migracao historica:
+  - `BLOQ_GIRO -> classificacao_acao_code = GIRO + execucao_bloqueio_code = EXECUTADO`
+  - `BLOQ_ARREM_SIMPLES -> classificacao_acao_code = ARREM_SIMPLES + execucao_bloqueio_code = EXECUTADO`
+  - `BLOQ_AEREA -> classificacao_acao_code = AEREA + execucao_bloqueio_code = EXECUTADO`
+  - `BLOQ_NAO_EXECUTADO -> classificacao_acao_code = NAO_OBSERVADO + execucao_bloqueio_code = NAO_EXECUTADO`
+  - registros historicos migrados de `BLOQ_NAO_EXECUTADO` nao recebem `tipo_finalizacao_code` retroativo.
+- Resultados permitidos (default):
   - `BLOQUEADO`
   - `RECUPERACAO_POSSE`
   - `FALTA_ATAQUE`
   - `GOL`
   - `VIOLACAO`
   - `NAO_OBSERVADO`
-- Derivacao de finalizacao adversaria:
-  - `BLOQ_GIRO -> GIRO`
-  - `BLOQ_ARREM_SIMPLES -> SIMPLES`
-  - `BLOQ_AEREA -> AEREA`
-- Campo visual de finalizacao adversaria:
-  - oculto quando a derivacao existir
+- Resultado especial:
+  - `TIRO_6M_CONCEDIDO` pode ocorrer em bloqueio atrasado/mal sincronizado e nao e finalizacao concluida; nesse caso nao derivar `tipo_finalizacao_code`.
+- Derivacao de `tipo_finalizacao_code`:
+  - `GIRO -> GIRO`
+  - `AEREA -> AEREA`
+  - `ARREM_SIMPLES -> SIMPLES`
+  - `6M_ADV -> 6M`
+  - `NAO_OBSERVADO -> NULL`
+- Campo visual:
+  - exibir `Finalizacao adversaria enfrentada`;
+  - exibir `Execucao do bloqueio`;
+  - nao exibir campo manual de `tipo_finalizacao_code` quando a derivacao vier da classificacao do bloqueio.
 
 #### `INTERCEPTACAO` e `ROUBO`
 
-- Resultados permitidos:
+- Classificacoes permitidas em `INTERCEPTACAO`:
+  - `INTERCEPTACAO_MALSUCEDIDA` (CEPR-0090B) — tentativa de interceptar, falhou; adversaria converteu
+- Resultados permitidos (default — sem classificacao ou classificacao nao listada abaixo):
   - `RECUPERACAO_POSSE`
   - `FALTA_ATAQUE`
   - `DEFESA_ESTABILIZADA`
   - `VIOLACAO`
   - `NAO_OBSERVADO`
-- Resultados proibidos:
+- Resultados proibidos (default):
   - `GOL`
   - `DEFENDIDO`
   - `BLOQUEADO`
   - `FORA`
   - `TRAVE`
+- Resultados permitidos por classificacao (CEPR-0090B):
+  - `INTERCEPTACAO_MALSUCEDIDA`: `GOL`, `DEFENDIDO`, `NAO_OBSERVADO` — interceptacao falhou, resultado pela goleira ou adversaria
 - Campo visual de finalizacao adversaria:
   - nunca aparece
 
-#### `COBERTURA`, `MARCACAO_PRESSAO`, `RECOMPOSICAO`
+#### `COBERTURA`
 
+- Classificacoes permitidas (CEPR-0090B):
+  - `COBERTURA_PIVO` — cobertura da posicao de pivo
+  - `FECHAMENTO_CENTRAL` — base + solta fecham a entrada da especialista central
 - Resultados permitidos:
   - `RECUPERACAO_POSSE`
   - `FALTA_ATAQUE`
   - `DEFESA_ESTABILIZADA`
   - `GOL`
   - `VIOLACAO`
+  - `TIRO_6M_CONCEDIDO` (CEPR-0090A)
   - `NAO_OBSERVADO`
 - Campo visual de finalizacao adversaria:
   - aparece somente quando o resultado envolver arremesso adversario
@@ -221,6 +311,62 @@ Ela nao cobre:
   - `GIRO`
   - `AEREA`
   - `NAO_OBSERVADO`
+
+#### `MARCACAO_PRESSAO`
+
+- Classificacoes permitidas (CEPR-0090B):
+  - `TROCA_REFERENCIA` — troca de marcacao de referencia individual
+- Resultados permitidos:
+  - `RECUPERACAO_POSSE`
+  - `FALTA_ATAQUE`
+  - `DEFESA_ESTABILIZADA`
+  - `GOL`
+  - `VIOLACAO`
+  - `TIRO_6M_CONCEDIDO` (CEPR-0090A)
+  - `NAO_OBSERVADO`
+- Campo visual de finalizacao adversaria:
+  - aparece somente quando o resultado envolver arremesso adversario
+- Tipos permitidos de finalizacao adversaria:
+  - `SIMPLES`
+  - `GIRO`
+  - `AEREA`
+  - `NAO_OBSERVADO`
+
+#### `RECOMPOSICAO`
+
+- Resultados permitidos:
+  - `RECUPERACAO_POSSE`
+  - `FALTA_ATAQUE`
+  - `DEFESA_ESTABILIZADA`
+  - `GOL`
+  - `VIOLACAO`
+  - `TIRO_6M_CONCEDIDO` (CEPR-0090A)
+  - `NAO_OBSERVADO`
+- Campo visual de finalizacao adversaria:
+  - aparece somente quando o resultado envolver arremesso adversario
+- Tipos permitidos de finalizacao adversaria:
+  - `SIMPLES`
+  - `GIRO`
+  - `AEREA`
+  - `NAO_OBSERVADO`
+
+#### `FINALIZACAO_6M_ADV` — evento defensivo observado (CEPR-0090A)
+
+> **Natureza**: evento observado, nao acao executada pela equipe defensora.
+> Representa a cobranca de 6 metros pelo adversario. Nao confundir com acao defensiva.
+
+- Categoria: `ACAO_DEFENSIVA`
+- Acao basica: `FINALIZACAO_6M_ADV`
+- Classificacoes: nenhuma — campo nao aparece
+- Resultados permitidos:
+  - `GOL`
+  - `DEFENDIDO`
+  - `FORA`
+  - `TRAVE`
+  - `VIOLACAO`
+  - `NAO_OBSERVADO`
+- Tipo de finalizacao: fixo em `6M` — auto-derivado pela RPC; nao editavel na UI
+- Pontos: auto-calculados (2 pontos quando GOL, derivado de `6M`)
 
 ### `TRANS_OF`
 
@@ -242,10 +388,65 @@ Ela nao cobre:
 
 - Categoria: `ARREMESSO`
 - Acao basica: `ARREMESSO`
-- Classificacoes permitidas (CEPR-0089: labels atualizados, códigos internos preservados):
-  - `FINALIZ_TRANS` — label: **Transição indireta** — finalização em bloco parcial (2x1, 3x2 ou 4x3)
-  - `FINALIZ_CONTRA` — label: **Transição direta** — atacante entra livre ou com vantagem clara, sem defesa estabilizada
-  - `AEREA_TRANS` — label: **Aérea na transição** — passe repositor direto para finalização em aérea
+
+##### Fluxo atual (CEPR-0090B) — novos registros
+
+Dois campos separados, obrigatorio + opcional:
+
+1. **`estruturaTransicaoCode`** (`LISTA_ESTRUTURA_TRANSICAO`) — estrutura numerica da transicao:
+   - `TRANS_DIRETA` — atacante entra livre, sem bloqueio numerico
+   - `TRANS_INDIRETA_2X1` — transicao em superioridade 2x1
+   - `TRANS_INDIRETA_3X2` — transicao em superioridade 3x2
+   - `TRANS_INDIRETA_4X3` — transicao em superioridade 4x3
+   - `TRANS_INDIRETA_3X3` — transicao sem superioridade numerica, 3x3
+
+2. **`contextoDecisaoCode`** (`LISTA_CONTEXTO_DECISAO`) — contexto opcional da decisao:
+   - `CHANCE_CLARA_RECUSADA` — havia chance clara e a atleta recusou o arremesso
+   - `RETORNO_BOLA` — bola voltou e gerou nova decisao
+   - `PASSIVO_SINALIZADO` — equipe sob passivo
+   - `ARREMESSO_OBRIGATORIO` — arremesso tomado por obrigacao do contexto
+   - `NAO_OBSERVADO`
+
+3. **`contextoArremessoCode`** (`LISTA_CONTEXTO_ARREMESSO`) — contexto opcional do arremesso:
+   - `ARREMESSO_FORCADO` — arremesso sem condicao tecnica ideal
+   - `GIRO_DE_LONGE` — giro de longa distancia, tipicamente 9m ou mais
+   - `SOB_PASSIVO` — arremesso realizado sob passivo
+   - `NAO_OBSERVADO`
+
+4. **`tipoFinalizacaoCode`** — tipo tecnico da finalizacao (ativa quando estrutura preenchida):
+   - `SIMPLES`
+   - `GIRO`
+   - `AEREA`
+   - `NAO_OBSERVADO`
+
+Combinacoes validas (exemplos):
+- `TRANS_DIRETA + GIRO + GOL` — giro livre na transicao direta
+- `TRANS_INDIRETA_2X1 + AEREA + DEFENDIDO` — aerea em 2x1 defendida
+- `TRANS_INDIRETA_2X1 + GIRO + BLOQUEADO` — giro em 2x1 bloqueado
+- `TRANS_INDIRETA_3X3 + PASSIVO_SINALIZADO + GIRO_DE_LONGE + GIRO + BLOQUEADO` — lance do `PILOTO-01 #14`, giro forçado de longe sob passivo
+
+UX esperada na `COLETA_AO_VIVO`:
+- `Estrutura da transição` deve explicar que registra a forma da transição antes do arremesso;
+- a coleta rápida deve mostrar estrutura da transição, bloco visual `Finalização` e o preset opcional `Arremesso forçado por passivo`;
+- `Contexto decisional` e `Contexto do arremesso` detalhados devem ficar no bloco `Detalhes avançados da transição / revisar depois`;
+- motivo de pontuação e pontos pertencem ao bloco comum `Finalização`;
+- o passivo pode ocorrer em `AT_POS` ou `TRANS_OF`; nos dois fluxos, `PASSIVO` como resultado significa interrupção da posse pela regra, enquanto o preset significa arremesso executado sob passivo.
+
+##### Classificacoes legadas (dados anteriores ao CEPR-0090B)
+
+As classificacoes abaixo existem em dados historicos e continuam legiveis, mas **nao aparecem no select de novos registros**:
+
+| Codigo legado | Label | Status |
+|---|---|---|
+| `FINALIZ_TRANS` | Transição indireta | **[LEGADO — leitura apenas]** |
+| `FINALIZ_CONTRA` | Transição direta | **[LEGADO — leitura apenas]** |
+| `AEREA_TRANS` | Aérea na transição | **[LEGADO — leitura apenas]** |
+
+Derivacao de finalizacao legada (dados historicos):
+- `FINALIZ_TRANS -> SIMPLES`
+- `FINALIZ_CONTRA -> SIMPLES`
+- `AEREA_TRANS -> AEREA`
+
 - Resultados permitidos:
   - `GOL`
   - `DEFENDIDO`
@@ -254,13 +455,6 @@ Ela nao cobre:
   - `TRAVE`
   - `VIOLACAO`
   - `NAO_OBSERVADO`
-- Derivacao de finalizacao:
-  - `FINALIZ_TRANS -> SIMPLES`
-  - `FINALIZ_CONTRA -> SIMPLES`
-  - `AEREA_TRANS -> AEREA`
-- Derivacao de motivo de pontuacao (CEPR-0089):
-  - `AEREA_TRANS -> AEREA` (auto-derivado; motivo = Aérea, 2 pontos)
-  - `FINALIZ_CONTRA` e `FINALIZ_TRANS`: motivo não auto-derivado — requer seleção manual do chip (padrão: Simples)
 
 #### `TROCA_TRANSICAO`
 
@@ -316,6 +510,16 @@ Ela nao cobre:
   - `ERRO_TROCA`
   - `PERDA`
   - `NAO_OBSERVADO`
+
+## Notas de legado (CEPR-0090B)
+
+Classificacoes removidas do select de novos registros. Dados historicos continuam legiveis e mapeados.
+
+| Codigo | Contexto | Substituto em novos registros |
+|---|---|---|
+| `AEREA_TRANS` | `TRANS_OF + ARREMESSO` | `estruturaTransicaoCode + tipoFinalizacaoCode = AEREA` |
+| `FINALIZ_TRANS` | `TRANS_OF + ARREMESSO` | `TRANS_INDIRETA_2X1/3X2/4X3 + tipoFinalizacaoCode = SIMPLES` |
+| `FINALIZ_CONTRA` | `TRANS_OF + ARREMESSO` | `TRANS_DIRETA + tipoFinalizacaoCode = SIMPLES` |
 
 ## Invariantes de persistencia
 

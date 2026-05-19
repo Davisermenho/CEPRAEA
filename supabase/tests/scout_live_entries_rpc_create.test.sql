@@ -44,6 +44,8 @@ begin
     'sistema_ofensivo_code', 'AT_3X1',
     'atleta_principal_id', '20000000-0000-0000-0000-000000000001',
     'acao_principal_suggestion_code', 'GIRO',
+    'categoria_acao_code', 'ARREMESSO',
+    'acao_basica_code', 'ARREMESSO',
     'tipo_finalizacao_code', 'GIRO',
     'resultado_factual_code', 'GOL',
     'motivo_pontuacao_code', 'GIRO',
@@ -96,7 +98,10 @@ begin
     'fase_equipe_analisada_code', 'DEFESA',
     'sistema_defensivo_code', 'DEF_3X0',
     'atleta_principal_id', '20000000-0000-0000-0000-000000000001',
-    'acao_principal_suggestion_code', 'BLOQ_GIRO',
+    'categoria_acao_code', 'ACAO_DEFENSIVA',
+    'acao_basica_code', 'BLOQUEIO',
+    'classificacao_acao_code', 'GIRO',
+    'execucao_bloqueio_code', 'EXECUTADO',
     'tipo_finalizacao_code', 'GIRO',
     'resultado_factual_code', 'BLOQUEADO',
     'pontos_jogada', 0
@@ -231,7 +236,7 @@ begin
       'fase_da_bola_code', 'DEF_POS',
       'equipe_analisada_id', '10000000-0000-0000-0000-000000000001',
       'fase_equipe_analisada_code', 'DEFESA',
-      'acao_principal_text', 'BLOQ_GIRO',
+      'acao_principal_text', 'BLOQUEIO',
       'resultado_factual_code', 'PERDA'
     ));
     raise exception 'DEF_POS without sistema_defensivo_code unexpectedly succeeded';
@@ -249,6 +254,8 @@ begin
       'fase_equipe_analisada_code', 'ATAQUE',
       'sistema_ofensivo_code', 'AT_3X1',
       'acao_principal_text', 'GIRO',
+      'categoria_acao_code', 'ARREMESSO',
+      'acao_basica_code', 'ARREMESSO',
       'resultado_factual_code', 'GOL',
       'motivo_pontuacao_code', 'GIRO',
       'pontos_jogada', 2
@@ -268,6 +275,8 @@ begin
       'fase_equipe_analisada_code', 'ATAQUE',
       'sistema_ofensivo_code', 'AT_3X1',
       'acao_principal_text', 'GIRO',
+      'categoria_acao_code', 'ARREMESSO',
+      'acao_basica_code', 'ARREMESSO',
       'tipo_finalizacao_code', 'GIRO',
       'resultado_factual_code', 'GOL',
       'pontos_jogada', 2
@@ -288,6 +297,8 @@ begin
       'fase_equipe_analisada_code', 'ATAQUE',
       'sistema_ofensivo_code', 'AT_3X1',
       'acao_principal_suggestion_code', 'GIRO',
+      'categoria_acao_code', 'ARREMESSO',
+      'acao_basica_code', 'ARREMESSO',
       'tipo_finalizacao_code', 'GIRO',
       'resultado_factual_code', 'GOL',
       'motivo_pontuacao_code', 'GIRO',
@@ -307,6 +318,8 @@ begin
       'fase_equipe_analisada_code', 'ATAQUE',
       'sistema_ofensivo_code', 'AT_3X1',
       'acao_principal_suggestion_code', 'GIRO',
+      'categoria_acao_code', 'ARREMESSO',
+      'acao_basica_code', 'ARREMESSO',
       'tipo_finalizacao_code', 'GIRO',
       'resultado_factual_code', 'GOL',
       'motivo_pontuacao_code', 'ESPECIALISTA',

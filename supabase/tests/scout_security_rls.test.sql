@@ -92,7 +92,7 @@ insert into public.scout_play_participations (
     '71000000-0000-0000-0000-000000000502',
     'DEF', 'ANALYZED', 1,
     '20000000-0000-0000-0000-000000000003',
-    'DEF_POS', 'APOIO', 'DEF_BASE', 'BLOQ_GIRO'
+    'DEF_POS', 'APOIO', 'DEF_BASE', 'BLOQUEIO'
   );
 
 insert into public.scout_mental_events (
