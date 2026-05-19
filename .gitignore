@@ -96,3 +96,8 @@ AGENT.md
 
 # Local/offline reference files
 /googledrive/
+
+# Raw Scout pilot/chat exports
+# Keep raw conversation dumps local; commit curated context and normalized extracts instead.
+/pilot-chat.json
+/docs/piloto01.json
