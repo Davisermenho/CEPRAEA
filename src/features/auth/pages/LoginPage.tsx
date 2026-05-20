@@ -5,6 +5,12 @@ import { Eye, EyeOff } from 'lucide-react'
 import { AuthLoginScreen } from '@/features/auth/components/AuthLoginScreen'
 import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
 
+function normalizeLoginError(message?: string) {
+  if (!message) return 'Não foi possível entrar. Verifique os dados informados.'
+  if (/invalid login credentials/i.test(message)) return 'Não foi possível entrar. Verifique os dados informados.'
+  return message
+}
+
 export default function LoginPage() {
   const navigate = useNavigate()
   const { authenticated, configured, loading: authLoading, signInWithPassword } = useSupabaseAuth()
@@ -34,7 +40,7 @@ export default function LoginPage() {
     setError('')
     const result = await signInWithPassword(normalizedEmail, password)
     if (!result.ok) {
-      setError(result.error ?? 'Não foi possível entrar. Verifique os dados informados.')
+      setError(normalizeLoginError(result.error))
       setSubmitting(false)
       return
     }

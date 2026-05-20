@@ -39,6 +39,10 @@ test.beforeAll(async () => {
     delete from public.trainings
       where team_id = '${TEAM_ID}'
         and generation_key in ('${GENKEY_FUTURE}', '${GENKEY_PAST}');
+    delete from public.audit_logs
+      where actor_user_id in (
+        select id from auth.users where email = '${esc(ATHLETE_EMAIL)}'
+      );
     delete from auth.users where email = '${esc(ATHLETE_EMAIL)}';
   `)
 
@@ -97,8 +101,8 @@ test.beforeAll(async () => {
   )
 
   runSql(`
-    insert into public.attendance_records (training_id, athlete_id, status)
-    values ('${pastTrainingId}', '${athleteId}', 'presente');
+    insert into public.attendance_records (team_id, training_id, athlete_id, status)
+    values ('${TEAM_ID}', '${pastTrainingId}', '${athleteId}', 'presente');
   `)
 })
 
@@ -110,6 +114,11 @@ test.afterAll(() => {
       where generation_key in ('${GENKEY_FUTURE}', '${GENKEY_PAST}')
         and team_id = '${TEAM_ID}';
     delete from public.athletes where id = '${athleteId}';
+    delete from public.audit_logs
+      where actor_user_id in (
+        select id from auth.users
+        where email = '${esc(ATHLETE_EMAIL)}'
+      );
     delete from public.profiles
       where id = (
         select id from auth.users
@@ -195,7 +204,7 @@ test.describe('Fluxo autenticado da atleta', () => {
     await loginAsAthlete(page, ATHLETE_EMAIL, ATHLETE_PASSWORD)
     await page.getByRole('link', { name: 'Perfil' }).click()
     await page.waitForURL(/\/atleta\/perfil$/, { timeout: 10_000 })
-    await expect(page.getByText(ATHLETE_NAME)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByRole('heading', { name: ATHLETE_NAME })).toBeVisible({ timeout: 10_000 })
     await expect(page.getByText(ATHLETE_EMAIL)).toBeVisible({ timeout: 10_000 })
     await expect(page.getByText('Ativa')).toBeVisible({ timeout: 10_000 })
     await page.getByRole('button', { name: /sair/i }).click()

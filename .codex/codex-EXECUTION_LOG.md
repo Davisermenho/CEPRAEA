@@ -19,10 +19,23 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br> 
-*Última atualização*: 2026-05-20 - 00:14 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-20 - 07:14 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-20 07:14 BRT — CEPR-0099
+
+- **Objetivo:** resolver o E2E global fora do Scout, separando falhas por área (`coach`, `athlete`, `public`, `smoke`) e corrigindo apenas regressões reais sem misturar com Scout.
+- **Contexto obrigatório:** `CEPRAEA.md` lido; últimos 3 PRs verificados via `gh pr list`.
+- **Resultado inicial:** `npm run test:e2e` falhou com 10 falhas fora do Scout: `coach/login`, `coach/mobile-nav`, `public/presence-token-decline` e `athlete/training-flow`; smoke sem falha.
+- **Correções coach:** `login.spec.ts` alinhado à copy atual da landing; `LoginPage.tsx` normaliza `Invalid login credentials` para mensagem em português; `mobile-nav.spec.ts` passou a pular explicitamente em viewport desktop.
+- **Correções public:** `presenceTokenApi.ts` normaliza mensagem de sucesso para status `ausente`, evitando mostrar "Presença registrada." após recusa.
+- **Correções athlete:** `AtletaGuard.tsx` recarrega atletas, treinos e presenças após autenticação de atleta; `training-flow.spec.ts` inclui `team_id` no seed de `attendance_records`, limpa `audit_logs` do usuário E2E e usa seletor robusto para heading do perfil.
+- **Correções coach/reports:** `ReportsPage.tsx` recarrega atletas, treinos e presenças ao montar e assina os três stores, garantindo visibilidade de dados criados em outro contexto.
+- **Validação focada:** `coach/login` ✅; `coach/mobile-nav` ✅ (`5 passed`, `5 skipped`); `public/presence-token-decline` ✅; `athlete/training-flow` ✅ (`8 passed`); `coach/attendance` ✅.
+- **Validação final:** `npm run test:e2e` ✅ (`166 passed`, `5 skipped`); `npm run typecheck` ✅; `npm test` ✅ (`51 passed`); `npm run build` ✅; `git diff --check` ✅.
+- **Escopo preservado:** nenhum arquivo de Scout alterado; sem migration; sem PR.
 
 ## Entrada Rápida — 2026-05-20 00:35 BRT — CEPR-0089B
 

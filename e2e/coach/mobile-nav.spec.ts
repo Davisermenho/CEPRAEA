@@ -11,6 +11,8 @@ function nav(page: Page) {
 }
 
 test.describe('Coach — layout mobile', () => {
+  test.skip(({ viewport }) => !viewport || viewport.width >= 1024, 'Spec exclusiva do layout mobile.')
+
   test.beforeEach(async ({ page }) => {
     await loginAsCoach(page)
   })

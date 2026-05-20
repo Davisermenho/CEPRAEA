@@ -1,13 +1,21 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { BarChart2, Download } from 'lucide-react'
+import { useAthleteStore } from '@/stores/athleteStore'
 import { useAttendanceStore } from '@/stores/attendanceStore'
+import { useTrainingStore } from '@/stores/trainingStore'
 import { Button } from '@/shared/components/Button'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { formatPercent, todayISO } from '@/lib/utils'
 import { frequencyToCsv, downloadCsv } from '@/lib/export'
 
 export default function ReportsPage() {
-  const { getFrequencyReports } = useAttendanceStore()
+  const athletes = useAthleteStore((s) => s.athletes)
+  const loadAthletes = useAthleteStore((s) => s.loadAll)
+  const records = useAttendanceStore((s) => s.records)
+  const getFrequencyReports = useAttendanceStore((s) => s.getFrequencyReports)
+  const loadAttendance = useAttendanceStore((s) => s.loadAll)
+  const trainings = useTrainingStore((s) => s.trainings)
+  const loadTrainings = useTrainingStore((s) => s.loadAll)
   const [fromISO, setFromISO] = useState(() => {
     const d = new Date()
     d.setMonth(d.getMonth() - 3)
@@ -16,7 +24,18 @@ export default function ReportsPage() {
   const [toISO, setToISO] = useState(todayISO)
   const [sortBy, setSortBy] = useState<'nome' | 'pct'>('nome')
 
-  const reports = getFrequencyReports(fromISO, toISO)
+  useEffect(() => {
+    void Promise.all([
+      loadAthletes(),
+      loadTrainings(),
+      loadAttendance(),
+    ])
+  }, [loadAthletes, loadTrainings, loadAttendance])
+
+  const reports = useMemo(
+    () => getFrequencyReports(fromISO, toISO),
+    [athletes, fromISO, getFrequencyReports, records, toISO, trainings],
+  )
 
   const sorted = [...reports].sort((a, b) =>
     sortBy === 'pct'

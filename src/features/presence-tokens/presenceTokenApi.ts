@@ -18,6 +18,17 @@ type RawConfirmPresenceResult = {
   message: string
 }
 
+function normalizeConfirmPresenceMessage(
+  input: ConfirmPresenceByTokenInput,
+  result: RawConfirmPresenceResult | null | undefined,
+) {
+  if (!result?.ok) return result?.message || 'Link inválido, expirado ou indisponível.'
+  if (input.status === 'ausente' && (!result.message || result.message === 'Presença registrada.')) {
+    return 'Sua ausência foi comunicada.'
+  }
+  return result.message || 'Presença registrada.'
+}
+
 function assertSupabaseConfigured() {
   if (!isSupabaseConfigured()) {
     throw new Error('Supabase não configurado para tokens de presença.')
@@ -84,7 +95,7 @@ export async function confirmPresenceByToken(
 
   return {
     ok: Boolean(first?.ok),
-    message: first?.message || (first?.ok ? 'Presença registrada.' : 'Link inválido, expirado ou indisponível.'),
+    message: normalizeConfirmPresenceMessage(input, first),
   }
 }
 
