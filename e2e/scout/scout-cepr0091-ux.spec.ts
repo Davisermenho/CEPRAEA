@@ -174,10 +174,9 @@ test.describe('CEPR-0091 — COLETA_AO_VIVO prevenção e recuperação de erro'
        SELECT 'ok';`,
     )
 
-    await page.reload()
-    await page.waitForLoadState('networkidle', { timeout: 20_000 })
+    await page.reload({ waitUntil: 'domcontentloaded' })
 
-    await expect(page.getByRole('button', { name: 'Excluir LIVE-0001' })).toBeDisabled()
+    await expect(page.getByRole('button', { name: 'Excluir LIVE-0001' })).toBeDisabled({ timeout: 20_000 })
     await expect(page.getByText('Somente entradas PENDENTE podem ser excluídas.')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Editar LIVE-0001' })).toHaveCount(0)
   })
