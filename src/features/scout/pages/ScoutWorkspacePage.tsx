@@ -41,6 +41,13 @@ import {
   type LiveCollectionCategoryCode,
   type LiveCollectionClassificationCode,
 } from '@/features/scout/domain/liveCollectionCompatibility.matrix'
+import {
+  getLiveCollectionFlowContract,
+  liveCollectionFlowContracts,
+  type LiveCollectionFlowContract,
+  type LiveCollectionFlowField,
+  type LiveCollectionFlowId,
+} from '@/features/scout/domain/liveCollectionFlow.contract'
 import type {
   AthleteWithScoutProfile,
   ScoutAnalyzedTeamPhaseCode,
@@ -265,6 +272,16 @@ function getDeleteBlockReason(entry: ScoutLiveEntry) {
   return ''
 }
 
+function getActiveLiveCollectionFlowContract(
+  phase: ScoutPhaseCode,
+  category: LiveCollectionCategoryCode | '',
+  action: LiveCollectionBasicActionCode | '',
+): LiveCollectionFlowContract | undefined {
+  if (!category || !action) return undefined
+  const flowId = `${phase}.${category}.${action}` as LiveCollectionFlowId
+  return flowId in liveCollectionFlowContracts ? getLiveCollectionFlowContract(flowId) : undefined
+}
+
 
 function getStatusTone(status: ScoutLiveEntry['statusValidacaoCode']) {
   switch (status) {
@@ -471,6 +488,16 @@ export default function ScoutWorkspacePage() {
   const selectedCategoryCode = draft.categoriaAcaoCode as LiveCollectionCategoryCode | ''
   const selectedActionCode = draft.acaoBasicaCode as LiveCollectionBasicActionCode | ''
   const selectedClassificationCode = draft.classificacaoAcaoCode as LiveCollectionClassificationCode | ''
+  const activeFlowContract = useMemo(
+    () => getActiveLiveCollectionFlowContract(draft.faseDaBolaCode, selectedCategoryCode, selectedActionCode),
+    [draft.faseDaBolaCode, selectedCategoryCode, selectedActionCode],
+  )
+  const activeFlowFieldSets = useMemo(() => ({
+    main: new Set(activeFlowContract?.mainFields ?? []),
+    optional: new Set(activeFlowContract?.optionalFields ?? []),
+    advanced: new Set(activeFlowContract?.advancedFields ?? []),
+    forbidden: new Set(activeFlowContract?.forbiddenFields ?? []),
+  }), [activeFlowContract])
   const allowedCategories = getAllowedCategoriesForPhase(draft.faseDaBolaCode)
   const categoriaAcaoOptionsFinal = categoriaAcaoOptions.filter((option) =>
     allowedCategories.includes(option.code as LiveCollectionCategoryCode),
@@ -682,6 +709,41 @@ export default function ScoutWorkspacePage() {
   const acaoPreparatoriaOptions = codebookMap.get('LISTA_ACAO_PREPARATORIA') ?? []
   const is6mAction = draft.acaoBasicaCode === 'FINALIZACAO_6M_ADV' || draft.acaoBasicaCode === 'FINALIZACAO_6M_FAV'
 
+  function flowHasMainField(field: LiveCollectionFlowField, fallback = true) {
+    return activeFlowContract ? activeFlowFieldSets.main.has(field) : fallback
+  }
+
+  function flowHasOptionalField(field: LiveCollectionFlowField) {
+    return activeFlowContract ? activeFlowFieldSets.optional.has(field) : false
+  }
+
+  function flowHasAdvancedField(field: LiveCollectionFlowField, fallback = true) {
+    return activeFlowContract ? activeFlowFieldSets.advanced.has(field) : fallback
+  }
+
+  function isFlowFieldForbidden(field: LiveCollectionFlowField) {
+    return activeFlowContract ? activeFlowFieldSets.forbidden.has(field) : false
+  }
+
+  function getOrderedFlowFields(fields: readonly LiveCollectionFlowField[]) {
+    if (!activeFlowContract) return [...fields]
+    return [...fields].sort((a, b) => {
+      const orderA = activeFlowContract.uiOrder.indexOf(a)
+      const orderB = activeFlowContract.uiOrder.indexOf(b)
+      return (orderA === -1 ? Number.MAX_SAFE_INTEGER : orderA) - (orderB === -1 ? Number.MAX_SAFE_INTEGER : orderB)
+    })
+  }
+
+  function hasDraftFieldValue(field: LiveCollectionFlowField) {
+    const value = draft[field as keyof LiveEntryDraft]
+    if (typeof value !== 'string') return Boolean(value)
+    const trimmed = value.trim()
+    return trimmed !== '' && trimmed !== '0'
+  }
+
+  const flowOptionalFields = activeFlowContract ? getOrderedFlowFields(activeFlowContract.optionalFields) : []
+  const flowAdvancedFields = activeFlowContract ? getOrderedFlowFields(activeFlowContract.advancedFields) : []
+
   // [0028] Em DEF_POS/TRANS_DEF o resultado GOL é exibido como "Gol sofrido" para clareza semântica
   const displayedFactualResults = useMemo(() => {
     if (!isDefensiveContext) return allowedFactualResults
@@ -689,7 +751,10 @@ export default function ScoutWorkspacePage() {
       r.code === 'GOL' ? { ...r, label: 'Gol sofrido' } : r
     )
   }, [allowedFactualResults, isDefensiveContext])
-  const optionalDetailsCount = [draft.causaProvavelCode, draft.prioridadeTreinoCode, draft.videoRef.trim(), draft.obsGeral.trim()].filter(Boolean).length
+  const optionalDetailsCount = activeFlowContract
+    ? flowAdvancedFields.filter((field) => hasDraftFieldValue(field)).length
+    : [draft.causaProvavelCode, draft.prioridadeTreinoCode, draft.videoRef.trim(), draft.obsGeral.trim()].filter(Boolean).length
+  const flowOptionalCount = flowOptionalFields.filter((field) => hasDraftFieldValue(field)).length
   const transOfAdvancedCount = [
     draft.contextoDecisaoCode,
     draft.contextoArremessoCode,
@@ -1312,6 +1377,184 @@ export default function ScoutWorkspacePage() {
     }
   }
 
+  function renderFlowOptionalField(field: LiveCollectionFlowField) {
+    if (!activeFlowContract || !flowHasOptionalField(field) || isFlowFieldForbidden(field)) return null
+
+    if (field === 'atletaPrincipalId') {
+      return (
+        <div key={field} className="space-y-1.5">
+          <SelectField
+            label="Atleta principal"
+            value={draft.atletaPrincipalId}
+            onChange={(value) => updateDraft('atletaPrincipalId', value)}
+            options={athleteOptions}
+            placeholder="Sem protagonista clara"
+          />
+          <p className="text-xs text-cep-muted">
+            Marque apenas a atleta protagonista da ação. Posição/função detalhada será registrada na revisão.
+          </p>
+        </div>
+      )
+    }
+
+    if (field === 'acaoPreparatoriaCode' && showAcaoPreparatoria) {
+      return (
+        <SelectField
+          key={field}
+          label="Ação preparatória (opcional)"
+          value={draft.acaoPreparatoriaCode}
+          onChange={(value) => setDraft((current) => ({ ...current, acaoPreparatoriaCode: value }))}
+          options={acaoPreparatoriaOptions}
+          placeholder="Sem ação preparatória"
+        />
+      )
+    }
+
+    if (field === 'contextoDecisaoCode') {
+      const passivePreset = activeFlowContract.quickPresets?.find((preset) =>
+        preset.sets.contextoDecisaoCode === 'PASSIVO_SINALIZADO' &&
+        preset.sets.contextoArremessoCode === 'SOB_PASSIVO',
+      )
+
+      return (
+        <div key={field} className="space-y-3">
+          <div>
+            <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">
+              Contexto decisional <span className="text-cep-muted/60 normal-case">(opcional)</span>
+            </div>
+            <p className="mt-1 text-xs leading-relaxed text-cep-muted">
+              Use contexto quando o arremesso foi condicionado pela jogada; se a posse acabou pela regra, marque Passivo no resultado factual.
+            </p>
+          </div>
+
+          {passivePreset ? (
+            <div className="flex flex-wrap gap-2">
+              <ChoiceChip
+                active={passiveShotPresetActive}
+                onClick={() =>
+                  setDraft((cur) => ({
+                    ...cur,
+                    resultadoFactualCode: cur.resultadoFactualCode === 'PASSIVO' ? '' : cur.resultadoFactualCode,
+                    contextoDecisaoCode: passiveShotPresetActive ? '' : (passivePreset.sets.contextoDecisaoCode ?? ''),
+                    contextoArremessoCode: passiveShotPresetActive ? '' : (passivePreset.sets.contextoArremessoCode ?? ''),
+                  }))
+                }
+              >
+                Arremesso forçado por passivo
+              </ChoiceChip>
+            </div>
+          ) : null}
+
+          {showContextoDecisao && contextoDecisaoOptions.length > 0 && !isTransOfArremesso ? (
+            <div className="flex flex-wrap gap-2">
+              {contextoDecisaoOptions.map((option) => (
+                <ChoiceChip
+                  key={option.code}
+                  active={draft.contextoDecisaoCode === option.code}
+                  onClick={() =>
+                    setDraft((cur) => ({
+                      ...cur,
+                      contextoDecisaoCode: cur.contextoDecisaoCode === option.code ? '' : option.code,
+                    }))
+                  }
+                >
+                  {option.label}
+                </ChoiceChip>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      )
+    }
+
+    if (field === 'contextoArremessoCode' && showContextoArremesso && contextoArremessoOptions.length > 0 && !isTransOfArremesso) {
+      return (
+        <div key={field} className="space-y-2">
+          <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">
+            Contexto do arremesso <span className="text-cep-muted/60 normal-case">(opcional)</span>
+          </div>
+          <p className="text-xs leading-relaxed text-cep-muted">
+            Qualifica a finalização sem trocar o tipo dela, como giro de longe, sob passivo ou arremesso forçado.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {contextoArremessoOptions.map((option) => (
+              <ChoiceChip
+                key={option.code}
+                active={draft.contextoArremessoCode === option.code}
+                onClick={() =>
+                  setDraft((cur) => ({
+                    ...cur,
+                    contextoArremessoCode: cur.contextoArremessoCode === option.code ? '' : option.code,
+                  }))
+                }
+              >
+                {option.label}
+              </ChoiceChip>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    return null
+  }
+
+  function renderFlowAdvancedField(field: LiveCollectionFlowField) {
+    if (activeFlowContract && (!flowHasAdvancedField(field) || isFlowFieldForbidden(field))) return null
+
+    if (field === 'causaProvavelCode') {
+      return (
+        <SelectField
+          key={field}
+          label="Causa provável"
+          value={draft.causaProvavelCode}
+          onChange={(value) => updateDraft('causaProvavelCode', value)}
+          options={causeOptions}
+          placeholder="Se observável"
+        />
+      )
+    }
+
+    if (field === 'prioridadeTreinoCode') {
+      return (
+        <SelectField
+          key={field}
+          label="Prioridade de treino"
+          value={draft.prioridadeTreinoCode}
+          onChange={(value) => updateDraft('prioridadeTreinoCode', value)}
+          options={priorityOptions}
+          placeholder="Se evidente"
+        />
+      )
+    }
+
+    if (field === 'videoRef') {
+      return (
+        <TextField
+          key={field}
+          label="Referência de vídeo"
+          value={draft.videoRef}
+          onChange={(value) => updateDraft('videoRef', value)}
+          placeholder="Ex.: set1_03m21s"
+        />
+      )
+    }
+
+    if (field === 'obsGeral') {
+      return (
+        <TextAreaField
+          key={field}
+          label="Observação geral"
+          value={draft.obsGeral}
+          onChange={(value) => updateDraft('obsGeral', value)}
+          placeholder="Observação curta que complemente a sequência"
+        />
+      )
+    }
+
+    return null
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-full items-center justify-center px-6 py-20">
@@ -1532,27 +1775,31 @@ export default function ScoutWorkspacePage() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]">
+                <div className={activeFlowContract ? 'grid gap-4 md:grid-cols-2' : 'grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]'}>
                   <TextField label="ID da jogada" value={draft.idJogada} onChange={(value) => updateDraft('idJogada', value)} />
-                  <TextField
-                    label="Tempo do vídeo / relógio"
-                    value={draft.tempoJogo}
-                    onChange={(value) => updateDraft('tempoJogo', value)}
-                    placeholder="Ex.: 03:21"
-                    inputRef={tempoInputRef}
-                  />
-                  <div className="space-y-1.5">
-                    <SelectField
-                      label="Atleta principal"
-                      value={draft.atletaPrincipalId}
-                      onChange={(value) => updateDraft('atletaPrincipalId', value)}
-                      options={athleteOptions}
-                      placeholder="Sem protagonista clara"
+                  {flowHasMainField('tempoJogo') ? (
+                    <TextField
+                      label="Tempo do vídeo / relógio"
+                      value={draft.tempoJogo}
+                      onChange={(value) => updateDraft('tempoJogo', value)}
+                      placeholder="Ex.: 03:21"
+                      inputRef={tempoInputRef}
                     />
-                    <p className="text-xs text-cep-muted">
-                      Marque apenas a atleta protagonista da ação. Posição/função detalhada será registrada na revisão.
-                    </p>
-                  </div>
+                  ) : null}
+                  {flowHasMainField('atletaPrincipalId', !activeFlowContract) ? (
+                    <div className="space-y-1.5">
+                      <SelectField
+                        label="Atleta principal"
+                        value={draft.atletaPrincipalId}
+                        onChange={(value) => updateDraft('atletaPrincipalId', value)}
+                        options={athleteOptions}
+                        placeholder="Sem protagonista clara"
+                      />
+                      <p className="text-xs text-cep-muted">
+                        Marque apenas a atleta protagonista da ação. Posição/função detalhada será registrada na revisão.
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
 
                 {tempoValidationMessage ? (
@@ -1573,20 +1820,22 @@ export default function ScoutWorkspacePage() {
                   </label>
                 ) : null}
 
-                <div className="space-y-3 rounded-2xl border border-cep-purple-700 bg-cep-purple-950/50 p-4">
-                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Fase da bola</div>
-                  <div className="flex flex-wrap gap-2">
-                    {phaseOptions.map((option) => (
-                      <ChoiceChip
-                        key={option.code}
-                        active={draft.faseDaBolaCode === option.code}
-                        onClick={() => updateDraft('faseDaBolaCode', option.code as ScoutPhaseCode)}
-                      >
-                        {option.label}
-                      </ChoiceChip>
-                    ))}
+                {flowHasMainField('faseDaBolaCode') ? (
+                  <div className="space-y-3 rounded-2xl border border-cep-purple-700 bg-cep-purple-950/50 p-4">
+                    <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Fase da bola</div>
+                    <div className="flex flex-wrap gap-2">
+                      {phaseOptions.map((option) => (
+                        <ChoiceChip
+                          key={option.code}
+                          active={draft.faseDaBolaCode === option.code}
+                          onClick={() => updateDraft('faseDaBolaCode', option.code as ScoutPhaseCode)}
+                        >
+                          {option.label}
+                        </ChoiceChip>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                ) : null}
 
                 <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                   <div className="rounded-2xl border border-cep-purple-700 bg-cep-purple-950/50 p-4">
@@ -1619,7 +1868,7 @@ export default function ScoutWorkspacePage() {
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
-                    {requiresOffensiveSystem ? (
+                    {requiresOffensiveSystem && flowHasMainField('sistemaOfensivoCode') ? (
                       <SelectField
                         label="Sistema ofensivo"
                         value={draft.sistemaOfensivoCode}
@@ -1628,7 +1877,7 @@ export default function ScoutWorkspacePage() {
                       />
                     ) : null}
 
-                    {requiresDefensiveSystem ? (
+                    {requiresDefensiveSystem && flowHasMainField('sistemaDefensivoCode') ? (
                       <SelectField
                         label="Sistema defensivo"
                         value={draft.sistemaDefensivoCode}
@@ -1645,6 +1894,7 @@ export default function ScoutWorkspacePage() {
                     Ação
                   </div>
 
+                  {flowHasMainField('categoriaAcaoCode') ? (
                   <div className="space-y-2">
                     <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Categoria da ação</div>
                     <div className="flex flex-wrap gap-2">
@@ -1662,8 +1912,9 @@ export default function ScoutWorkspacePage() {
                       ))}
                     </div>
                   </div>
+                  ) : null}
 
-                  {acaoBasicaOptions.length > 0 ? (
+                  {flowHasMainField('acaoBasicaCode') && acaoBasicaOptions.length > 0 ? (
                     <div className="space-y-2">
                       <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Ação básica</div>
                       <div className="flex flex-wrap gap-2">
@@ -1683,7 +1934,7 @@ export default function ScoutWorkspacePage() {
                     </div>
                   ) : null}
 
-                  {classificacaoOptions.length > 0 && !isAtPosArremesso ? (
+                  {!activeFlowContract && classificacaoOptions.length > 0 && !isAtPosArremesso ? (
                     <div className="space-y-2">
                       <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">
                         {selectedActionCode === 'BLOQUEIO' ? 'Finalização adversária enfrentada' : 'Classificação'}
@@ -1702,7 +1953,7 @@ export default function ScoutWorkspacePage() {
                     </div>
                   ) : null}
 
-                  {showExecucaoBloqueio && execucaoBloqueioOptions.length > 0 ? (
+                  {!activeFlowContract && showExecucaoBloqueio && execucaoBloqueioOptions.length > 0 ? (
                     <div className="space-y-2">
                       <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Execução do bloqueio</div>
                       <div className="flex flex-wrap gap-2">
@@ -1719,7 +1970,7 @@ export default function ScoutWorkspacePage() {
                     </div>
                   ) : null}
 
-                  {showTransicaoStructure ? (
+                  {showTransicaoStructure && flowHasMainField('estruturaTransicaoCode') ? (
                     <div className="space-y-4">
                       <div className="space-y-1.5">
                         <SelectField
@@ -1737,7 +1988,7 @@ export default function ScoutWorkspacePage() {
                     </div>
                   ) : null}
 
-                  {showCommonFinalizationBlock ? (
+                  {!activeFlowContract && showCommonFinalizationBlock ? (
                     <div className="space-y-2">
                       <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Contexto rápido opcional</div>
                       <p className="text-xs leading-relaxed text-cep-muted">
@@ -1761,7 +2012,7 @@ export default function ScoutWorkspacePage() {
                     </div>
                   ) : null}
 
-                  {!isTransOfArremesso && showContextoDecisao && contextoDecisaoOptions.length > 0 ? (
+                  {!activeFlowContract && !isTransOfArremesso && showContextoDecisao && contextoDecisaoOptions.length > 0 ? (
                     <div className="space-y-2">
                       <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">
                         Contexto decisional <span className="text-cep-muted/60 normal-case">(opcional)</span>
@@ -1788,7 +2039,7 @@ export default function ScoutWorkspacePage() {
                     </div>
                   ) : null}
 
-                  {!isTransOfArremesso && showContextoArremesso && contextoArremessoOptions.length > 0 ? (
+                  {!activeFlowContract && !isTransOfArremesso && showContextoArremesso && contextoArremessoOptions.length > 0 ? (
                     <div className="space-y-2">
                       <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">
                         Contexto do arremesso <span className="text-cep-muted/60 normal-case">(opcional)</span>
@@ -1815,7 +2066,7 @@ export default function ScoutWorkspacePage() {
                     </div>
                   ) : null}
 
-                  {showAcaoPreparatoria ? (
+                  {!activeFlowContract && showAcaoPreparatoria ? (
                     <SelectField
                       label="Ação preparatória (opcional)"
                       value={draft.acaoPreparatoriaCode}
@@ -1835,7 +2086,7 @@ export default function ScoutWorkspacePage() {
                       </p>
                     ) : null}
                   </div>
-                  {showCommonFinishChoices ? (
+                  {showCommonFinishChoices && flowHasMainField('tipoFinalizacaoCode') ? (
                     <div className="space-y-2">
                       <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Tipo de finalização</div>
                       <div className="flex flex-wrap gap-2">
@@ -1852,26 +2103,30 @@ export default function ScoutWorkspacePage() {
                     </div>
                   ) : null}
 
-                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Resultado factual</div>
-                  {incompatibleResultWarning ? (
-                    <p className="text-xs text-amber-400">
-                      Você mudou a categoria ou a ação. O resultado anterior não combina mais com essa escolha. Escolha um novo resultado factual compatível.
-                    </p>
+                  {flowHasMainField('resultadoFactualCode') ? (
+                    <>
+                      <div className="text-xs font-medium uppercase tracking-[0.18em] text-cep-muted">Resultado factual</div>
+                      {incompatibleResultWarning ? (
+                        <p className="text-xs text-amber-400">
+                          Você mudou a categoria ou a ação. O resultado anterior não combina mais com essa escolha. Escolha um novo resultado factual compatível.
+                        </p>
+                      ) : null}
+                      <div className="flex flex-wrap gap-2">
+                        {displayedFactualResults.map((option) => (
+                          <ChoiceChip
+                            key={option.code}
+                            active={draft.resultadoFactualCode === option.code}
+                            onClick={() => {
+                              updateDraft('resultadoFactualCode', option.code as ScoutFactualResultCode)
+                              setIncompatibleResultWarning(false)
+                            }}
+                          >
+                            {option.label}
+                          </ChoiceChip>
+                        ))}
+                      </div>
+                    </>
                   ) : null}
-                  <div className="flex flex-wrap gap-2">
-                    {displayedFactualResults.map((option) => (
-                      <ChoiceChip
-                        key={option.code}
-                        active={draft.resultadoFactualCode === option.code}
-                        onClick={() => {
-                          updateDraft('resultadoFactualCode', option.code as ScoutFactualResultCode)
-                          setIncompatibleResultWarning(false)
-                        }}
-                      >
-                        {option.label}
-                      </ChoiceChip>
-                    ))}
-                  </div>
                   <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_auto_auto]">
                     {requiresFinishType && !is6mAction && !showCommonFinishChoices ? (
                       <div className="space-y-1.5">
@@ -1926,7 +2181,26 @@ export default function ScoutWorkspacePage() {
                   </div>
                 </div>
 
-                {isTransOfArremesso ? (
+                {activeFlowContract && flowOptionalFields.length > 0 ? (
+                  <div className="rounded-2xl border border-cep-purple-700 bg-cep-purple-950/50 p-4">
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-medium text-cep-white">Campos opcionais do fluxo</div>
+                        <div className="mt-1 text-sm text-cep-muted">
+                          Preencha só quando a informação ajudar a leitura do lance.
+                        </div>
+                      </div>
+                      <span className="rounded-full border border-cep-purple-700 px-3 py-1 text-xs text-cep-muted">
+                        {flowOptionalCount ? `${flowOptionalCount} preenchido(s)` : 'Opcional'}
+                      </span>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {flowOptionalFields.map((field) => renderFlowOptionalField(field))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {isTransOfArremesso && (!activeFlowContract || flowHasOptionalField('contextoDecisaoCode') || flowHasOptionalField('contextoArremessoCode')) ? (
                   <div className="rounded-2xl border border-cep-purple-700 bg-cep-purple-950/50 p-4">
                     <button
                       type="button"
@@ -2027,37 +2301,20 @@ export default function ScoutWorkspacePage() {
                   {detailsExpanded ? (
                     <div className="mt-4 space-y-4">
                       <div className="grid gap-4 md:grid-cols-2">
-                        <SelectField
-                          label="Causa provável"
-                          value={draft.causaProvavelCode}
-                          onChange={(value) => updateDraft('causaProvavelCode', value)}
-                          options={causeOptions}
-                          placeholder="Se observável"
-                        />
-                        <SelectField
-                          label="Prioridade de treino"
-                          value={draft.prioridadeTreinoCode}
-                          onChange={(value) => updateDraft('prioridadeTreinoCode', value)}
-                          options={priorityOptions}
-                          placeholder="Se evidente"
-                        />
+                        {(activeFlowContract ? flowAdvancedFields : (['causaProvavelCode', 'prioridadeTreinoCode'] as const)).map((field) =>
+                          field === 'causaProvavelCode' || field === 'prioridadeTreinoCode' ? renderFlowAdvancedField(field) : null,
+                        )}
                       </div>
 
                       <div className="grid gap-4 md:grid-cols-2">
-                        <TextField
-                          label="Referência de vídeo"
-                          value={draft.videoRef}
-                          onChange={(value) => updateDraft('videoRef', value)}
-                          placeholder="Ex.: set1_03m21s"
-                        />
+                        {(activeFlowContract ? flowAdvancedFields : (['videoRef'] as const)).map((field) =>
+                          field === 'videoRef' ? renderFlowAdvancedField(field) : null,
+                        )}
                       </div>
 
-                      <TextAreaField
-                        label="Observação geral"
-                        value={draft.obsGeral}
-                        onChange={(value) => updateDraft('obsGeral', value)}
-                        placeholder="Observação curta que complemente a sequência"
-                      />
+                      {(activeFlowContract ? flowAdvancedFields : (['obsGeral'] as const)).map((field) =>
+                        field === 'obsGeral' ? renderFlowAdvancedField(field) : null,
+                      )}
                     </div>
                   ) : null}
                 </div>

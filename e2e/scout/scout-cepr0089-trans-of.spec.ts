@@ -96,14 +96,19 @@ test.describe('Scout — TRANS_OF semântico CEPR-0089', () => {
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await page.waitForTimeout(1000)
 
-    const estruturaCode = queryScalar(
-      `SELECT estrutura_transicao_code FROM public.scout_live_entries ORDER BY created_at DESC LIMIT 1`
-    )
-    const tipoFin = queryScalar(
-      `SELECT tipo_finalizacao_code FROM public.scout_live_entries ORDER BY created_at DESC LIMIT 1`
-    )
-    expect(estruturaCode).toBe('TRANS_DIRETA')
-    expect(tipoFin).toBe('SIMPLES')
+    await expect
+      .poll(
+        () =>
+          queryScalar(
+            `SELECT estrutura_transicao_code || '|' || tipo_finalizacao_code
+             FROM public.scout_live_entries
+             WHERE scout_game_id = '${gameId}'
+               AND estrutura_transicao_code = 'TRANS_DIRETA'
+             ORDER BY created_at DESC, id DESC LIMIT 1`
+          ),
+        { timeout: 15_000 },
+      )
+      .toBe('TRANS_DIRETA|SIMPLES')
   })
 
   // ── Teste 4 ───────────────────────────────────────────────────────────────
@@ -119,14 +124,20 @@ test.describe('Scout — TRANS_OF semântico CEPR-0089', () => {
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await page.waitForTimeout(1000)
 
-    const estruturaCode = queryScalar(
-      `SELECT estrutura_transicao_code FROM public.scout_live_entries ORDER BY created_at DESC LIMIT 1`
-    )
-    const tipoFin = queryScalar(
-      `SELECT tipo_finalizacao_code FROM public.scout_live_entries ORDER BY created_at DESC LIMIT 1`
-    )
-    expect(estruturaCode).toBe('TRANS_INDIRETA_2X1')
-    expect(tipoFin).toBe('SIMPLES')
+    await expect
+      .poll(
+        () =>
+          queryScalar(
+            `SELECT estrutura_transicao_code || '|' || tipo_finalizacao_code
+             FROM public.scout_live_entries
+             WHERE scout_game_id = '${gameId}'
+               AND estrutura_transicao_code = 'TRANS_INDIRETA_2X1'
+               AND tipo_finalizacao_code = 'SIMPLES'
+             ORDER BY created_at DESC, id DESC LIMIT 1`
+          ),
+        { timeout: 15_000 },
+      )
+      .toBe('TRANS_INDIRETA_2X1|SIMPLES')
   })
 
   // ── Teste 5 ───────────────────────────────────────────────────────────────
@@ -141,14 +152,20 @@ test.describe('Scout — TRANS_OF semântico CEPR-0089', () => {
     await page.getByRole('button', { name: 'Registrar entrada' }).click()
     await page.waitForTimeout(1000)
 
-    const estruturaCode = queryScalar(
-      `SELECT estrutura_transicao_code FROM public.scout_live_entries ORDER BY created_at DESC LIMIT 1`
-    )
-    const tipoFin = queryScalar(
-      `SELECT tipo_finalizacao_code FROM public.scout_live_entries ORDER BY created_at DESC LIMIT 1`
-    )
-    expect(estruturaCode).toBe('TRANS_INDIRETA_2X1')
-    expect(tipoFin).toBe('AEREA')
+    await expect
+      .poll(
+        () =>
+          queryScalar(
+            `SELECT estrutura_transicao_code || '|' || tipo_finalizacao_code
+             FROM public.scout_live_entries
+             WHERE scout_game_id = '${gameId}'
+               AND estrutura_transicao_code = 'TRANS_INDIRETA_2X1'
+               AND tipo_finalizacao_code = 'AEREA'
+             ORDER BY created_at DESC, id DESC LIMIT 1`
+          ),
+        { timeout: 15_000 },
+      )
+      .toBe('TRANS_INDIRETA_2X1|AEREA')
   })
 
   // ── Teste 6 ───────────────────────────────────────────────────────────────
