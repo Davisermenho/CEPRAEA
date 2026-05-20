@@ -4224,6 +4224,12 @@ Resolver a falha pós-merge do gate `npm run validate:mvp:v1` em `main`, limitad
 
 ## Pendências finais
 
-- Abrir PR de hotfix.
-- Aguardar checks/preview da PR de hotfix.
+- PR de hotfix aberta como draft: #17.
+- Checks da PR #17: Vercel `SUCCESS`, Vercel Preview Comments `SUCCESS`, Supabase Preview/Actions esperadamente `SKIPPED`.
+- Preview da PR #17: `https://cepraea-o8jhubb9x-davi-sermenhos-projects.vercel.app`, Vercel `READY`.
+- Smoke do preview da PR #17: falhou em `homepage inicializa sem erros fatais de frontend` por console error `VITE_SUPABASE_TEAM_ID não configurado ou inválido`.
+- Logs runtime do preview via `vercel logs`: apenas `GET / 200`, sem erro crítico server-side.
+- Produção após merge da PR #14: `https://cepraea.vercel.app`, Vercel `READY`.
+- Smoke de produção: passou, `4 passed`.
+- Build logs via Vercel MCP: não disponíveis por 401 no endpoint; validação alternativa feita com `vercel inspect`, `vercel logs` e smoke.
 - Não fazer merge do hotfix sem confirmação humana explícita.
