@@ -1991,4 +1991,5 @@ Após o merge da PR #14, `npm run validate:mvp:v1` em `main` falhou em 1 E2E por
   - `npm run validate:mvp:v1` na branch `fix/post-merge-main-gate-cepr0091`: passou, incluindo E2E global com `166 passed / 5 skipped`.
   - PR #17 aberta como draft; checks GitHub/Vercel reportados como estáveis.
   - Smoke em produção `https://cepraea.vercel.app`: passou, `4 passed`.
-  - Smoke no preview da PR #17 bloqueado por configuração de ambiente: `VITE_SUPABASE_TEAM_ID não configurado ou inválido`.
+  - Preview geral da Vercel recebeu `VITE_SUPABASE_TEAM_ID` após autorização humana.
+  - Smoke no preview redeployado da PR #17 `https://cepraea-anynjnllg-davi-sermenhos-projects.vercel.app`: passou, `4 passed`.
