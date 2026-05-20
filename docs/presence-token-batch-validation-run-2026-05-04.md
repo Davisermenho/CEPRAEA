@@ -1,4 +1,25 @@
+---
+tipo: RELATÓRIO
+nome: "Execução do Checklist de Presence Tokens — 2026-05-04"
+papel: "Registro imutável do resultado de uma rodada específica de validação manual do checklist de tokens em 2026-05-04."
+autoridade: "Histórico — não normativo; descreve estado em uma data específica."
+lido_por: "Humano ou agente investigando histórico de validação"
+quando_ler: "ao entender por que tokens ainda estão em legacy em produção"
+atualizado_por: "Não atualizar"
+quando_atualizar: "N/A — este relatório é imutável; criar novo relatório para nova rodada de execução"
+validade: "2026-05-04"
+status: HISTÓRICO
+status_nota: "Itens 6–10 estavam pendentes nesta data; verificar estado atual separadamente"
+conflito: "Estado atual do sistema prevalece sobre este relatório; não inferir estado atual a partir de relatório histórico."
+proibido:
+  - "Agentes NÃO devem alterar este relatório"
+  - "NÃO devem usar itens pendentes deste relatório como prova do estado atual sem re-executar o checklist"
+nao_cobre: "Estado atual do sistema, execuções posteriores a 2026-05-04"
+---
+
 # Execução do checklist — lotes de Presence Tokens Supabase
+
+> **Status:** histórico. Este documento registra uma execução específica em `2026-05-04` e não deve ser usado como retrato do estado atual do sistema.
 
 Data: 2026-05-04
 

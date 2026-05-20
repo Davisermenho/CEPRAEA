@@ -3,8 +3,19 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
 import { supabase } from '@/lib/supabase'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { useAthleteStore } from '@/stores/athleteStore'
+import { useAttendanceStore } from '@/stores/attendanceStore'
+import { useTrainingStore } from '@/stores/trainingStore'
 
 type AthleteCheck = 'loading' | 'found' | 'not-found' | 'unauthenticated' | 'error'
+
+async function loadAthleteAreaData() {
+  await Promise.all([
+    useAthleteStore.getState().loadAll(),
+    useTrainingStore.getState().loadAll(),
+    useAttendanceStore.getState().loadAll(),
+  ])
+}
 
 export function AtletaGuard() {
   const { authenticated, loading: authLoading, user } = useSupabaseAuth()
@@ -31,14 +42,22 @@ export function AtletaGuard() {
         .maybeSingle()
 
       if (selectError) { setCheck('error'); return }
-      if (byUserId) { setCheck('found'); return }
+      if (byUserId) {
+        await loadAthleteAreaData()
+        setCheck('found')
+        return
+      }
 
       // First-login path: claim the athlete record via SECURITY DEFINER RPC.
       // The RPC exclusively sets user_id = auth.uid(), preventing a client from
       // modifying team_id or other columns in the same request.
       const { data: linkedId, error: rpcError } = await supabase.rpc('link_athlete_user_id')
       if (rpcError) { setCheck('error'); return }
-      if (linkedId) { setCheck('found'); return }
+      if (linkedId) {
+        await loadAthleteAreaData()
+        setCheck('found')
+        return
+      }
 
       setCheck('not-found')
     }

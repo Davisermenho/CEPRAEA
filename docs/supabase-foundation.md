@@ -1,3 +1,22 @@
+---
+tipo: SPEC-TÉCNICA
+nome: "Fundação Supabase — Branch feat/supabase-foundation"
+papel: "Define o escopo e os critérios de aceite da fase de fundação Supabase: schema, RLS, RPCs, grants, CI — sem migrar telas ou stores nesta etapa."
+autoridade: "Hierarquia 4/4 — spec de branch já mergeada; mantida como referência histórica de decisões arquiteturais."
+lido_por: "Agente responsável por migrations ou RLS"
+quando_ler: "ao criar nova migration ou RPC; ao revisar política de RLS existente"
+atualizado_por: "Não atualizar"
+quando_atualizar: "N/A — esta spec documenta uma fase concluída; criar nova spec para fase seguinte"
+validade: "2026-05-04"
+status: HISTÓRICO
+status_nota: "Branch mergeada; artefatos desta fase existem no repositório; spec descreve intenção original, não estado atual"
+conflito: "Código e migrations existentes prevalecem; esta spec descreve intenção original da fase, não estado atual."
+proibido:
+  - "Agentes NÃO devem alterar esta spec para refletir fases posteriores"
+  - "NÃO devem interpretar fora do escopo desta fase como proibição permanente"
+nao_cobre: "Migração de stores (→ T03–T05 em plan.md), fase de auth da atleta, fase de tokens"
+---
+
 # Fundação Supabase — CEPRAEA
 
 Branch: `feat/supabase-foundation`

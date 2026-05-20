@@ -84,6 +84,7 @@ test('vínculo de conta: não vinculada → atleta cria conta → painel mostra 
   const ctxAthlete = await browser.newContext({ baseURL: BASE_URL })
   const pageAthlete = await ctxAthlete.newPage()
   await loginAsAthlete(pageAthlete, ATHLETE_EMAIL, ATHLETE_PASSWORD)
+  await expect(pageAthlete.getByText(/Olá,/i)).toBeVisible({ timeout: 20_000 })
   await ctxAthlete.close()
 
   // — Passo 4: SQL convergence — AtletaGuard chama link_athlete_user_id de forma assíncrona;

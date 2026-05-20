@@ -32,6 +32,16 @@ export default defineConfig({
       use: { ...devices['Pixel 5'] },
       testMatch: ['**/athlete/**'],
     },
+    {
+      name: 'mobile-coach',
+      use: { ...devices['Pixel 5'] },
+      testMatch: [
+        '**/guards.spec.ts',
+        '**/coach/login.spec.ts',
+        '**/settings.spec.ts',
+        '**/coach/mobile-nav.spec.ts',
+      ],
+    },
   ],
 
   webServer: {

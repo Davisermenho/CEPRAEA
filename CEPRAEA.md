@@ -7,7 +7,7 @@ lido_por: "Claude, Codex, Copilot"
 quando_ler: "antes de propor nova feature; ao avaliar se algo é ou não escopo do MVP; ao definir critério de aceite de produto"
 atualizado_por: "Humano (decisão de produto)"
 quando_atualizar: "mudança de objetivo, escopo funcional, critério de sucesso ou fronteira MVP/pós-MVP"
-validade: "2026-05-06"
+validade: "2026-05-18"
 status: ATUAL
 status_nota: "PARCIAL para Seção 6 — estado atual do sistema pode divergir do código; verificar código antes de agir"
 conflito: "CEPRAEA.md define O QUÊ construir. Se contradiz código → código prevalece para estado atual; se define escopo e agente discorda → CEPRAEA.md prevalece até decisão humana contrária."
@@ -19,8 +19,8 @@ nao_cobre: "Sequência de tarefas, provas de implementação, status de progress
 
 # CEPRAEA — PRD Oficial do Produto
 
-**Versão:** 2.0.0  
-**Data:** 6 de maio de 2026  
+**Versão:** 2.1.0
+**Data:** 18 de maio de 2026
 **Status:** Ativo  
 **Escopo:** Produto, MVP v1.0, direção arquitetural e critérios de produto
 
@@ -82,9 +82,9 @@ Mudança local de implementação sem impacto no produto não exige alteração 
 
 ## 2. Resumo executivo
 
-CEPRAEA é um sistema PWA para gestão de atletas, treinos, presença e scout tático para handebol de praia.
+CEPRAEA é um sistema PWA para gestão operacional de uma equipe adulta feminina de handebol de praia, formada por atletas de alto rendimento em nível de competição.
 
-O produto deve permitir que treinador e atletas operem os fluxos principais de treino e presença com autenticação segura, baixa fricção operacional e base de dados centralizada.
+O produto deve permitir que treinador e atletas operem, com autenticação segura, baixa fricção operacional e base de dados centralizada, os fluxos de treino, presença, plano de treino do dia, metas individuais, metas da equipe, scout, agenda da equipe, jogos, viagens, convocações e competições.
 
 O produto existe para substituir um processo manual que consome tempo demais do treinador, gera erro operacional e empurra a equipe para uma rotina improvisada de planilhas, mensagens soltas e retrabalho.
 
@@ -93,21 +93,26 @@ O **MVP v1.0** existe quando o sistema:
 1. autentica treinador e atleta com segurança;
 2. centraliza os dados operacionais do MVP no Supabase;
 3. registra presença manual e por confirmação da atleta no mesmo modelo de dados;
-4. permite uso real por atletas e treinador sem dependência do legado;
-5. pode ser validado por testes reais e critérios objetivos.
+4. permite à atleta consultar seu plano do dia, suas metas, seu scout e sua agenda competitiva;
+5. permite ao treinador operar treinos, metas, scout e agenda competitiva sem dependência do legado;
+6. pode ser validado por testes reais e critérios objetivos.
 
 ---
 
 ## 3. Problema do produto
 
-Equipes e centros de treino pequenos precisam controlar:
+Equipes e centros de treino precisam controlar:
 
 - atletas ativas e inativas;
 - agenda recorrente de treinos;
+- plano de treino do dia;
 - presença e ausência;
+- metas individuais e metas da equipe;
 - comunicação operacional com atletas;
 - histórico de frequência;
-- observação tática básica.
+- observação tática;
+- agenda de jogos, viagens e competições;
+- convocações e confirmações ativas das atletas.
 
 ### 3.1 Dor operacional real do treinador
 
@@ -120,7 +125,11 @@ Antes do CEPRAEA, o processo operacional do treinador dependia de:
 - leitura manual das respostas das atletas em meio à conversa do grupo;
 - consolidação manual da informação para saber quem vai ao treino;
 - revisão manual de horários e datas dos treinos;
-- correção manual de treino marcado errado em feriado.
+- correção manual de treino marcado errado em feriado;
+- distribuição manual do plano de treino do dia;
+- acompanhamento informal de metas individuais;
+- consulta fragmentada de dados de scout;
+- montagem manual de listagens de jogos, viagens e competições.
 
 Esse processo gerava um custo recorrente e improdutivo:
 
@@ -138,7 +147,10 @@ Os problemas atuais desse contexto são:
 - baixa rastreabilidade;
 - alto risco de inconsistência entre presença informada e presença registrada;
 - dificuldade para operar com segurança sem uma base central;
-- dependência de soluções improvisadas para login, sync e confirmação.
+- dependência de soluções improvisadas para login, sync e confirmação;
+- metas individuais sem contrato funcional único;
+- scout sem trilha clara de leitura individual para a atleta;
+- agenda competitiva dispersa entre planilhas, mensagens e documentos soltos.
 
 ### 3.3 Exemplo concreto de erro recorrente
 
@@ -163,6 +175,10 @@ O CEPRAEA deve gerar valor direto nestes pontos:
 - preservar informação importante sem perdê-la no fluxo do WhatsApp;
 - organizar a equipe com mais clareza;
 - melhorar a comunicação de presença;
+- estruturar o plano de treino do dia;
+- transformar metas em rotina acompanhável;
+- tornar o scout útil para a evolução individual e coletiva;
+- centralizar jogos, viagens, convocações e competições;
 - liberar tempo do treinador para atividades mais produtivas para a equipe.
 
 ---
@@ -176,10 +192,16 @@ Responsabilidades:
 - entrar no painel administrativo;
 - cadastrar e manter atletas;
 - gerar e manter treinos;
+- publicar o plano de treino do dia;
 - registrar presença manual;
 - acompanhar frequência;
 - disparar fluxos de confirmação;
-- operar scout tático.
+- operar scout tático;
+- criar metas individuais por observação técnica;
+- criar metas da equipe;
+- acompanhar metas originadas por scout;
+- publicar agenda, jogos, viagens, convocações e competições;
+- acompanhar confirmações ativas das atletas para jogos e viagens.
 
 ### 4.2 Atleta
 
@@ -187,12 +209,33 @@ Responsabilidades:
 
 - entrar no portal da atleta;
 - acessar seus treinos;
+- consultar o plano de treino do dia;
 - confirmar presença;
 - informar ausência quando permitido;
+- criar metas individuais próprias ligadas a treinos e jogos;
+- acompanhar metas individuais criadas por ela, pelo treinador e pelo scout;
+- acompanhar metas da equipe;
+- acessar seus dados completos de scout;
+- consultar agenda da equipe;
+- confirmar participação em jogos e viagens quando convocada;
 - redefinir senha;
 - consultar seu próprio contexto.
 
-### 4.3 Administrador técnico do sistema
+### 4.3 Contexto esportivo oficial do produto
+
+Para este PRD, o contexto oficial do CEPRAEA é:
+
+- equipe `adulto feminino`;
+- atletas de `alto rendimento`;
+- nível `competição`;
+- modalidade `handebol de praia`.
+
+As posições e funções esportivas oficiais do produto são:
+
+- `posição_ofensiva`: `Central`, `Lateral Esquerda`, `Lateral Direita`, `Pivô`, `Goleira`;
+- `função_defensiva`: `Defensora Solta`, `Defensora Base`, `Defensora API`.
+
+### 4.4 Administrador técnico do sistema
 
 Responsabilidades:
 
@@ -260,7 +303,7 @@ As implementações legadas abaixo podem ainda existir no repositório durante a
 
 ## 7. Objetivo do MVP v1.0
 
-O objetivo do MVP v1.0 é colocar o CEPRAEA em uso real para atletas e treinador com um núcleo confiável de operação.
+O objetivo do MVP v1.0 é colocar o CEPRAEA em uso real para uma equipe adulta feminina de alto rendimento com um núcleo confiável de operação esportiva e administrativa.
 
 No ponto de vista do treinador, o MVP precisa trocar um processo de:
 
@@ -268,14 +311,22 @@ No ponto de vista do treinador, o MVP precisa trocar um processo de:
 - mensagens dispersas;
 - conferência humana de resposta;
 - correção manual de agenda;
+- distribuição manual de plano de treino;
+- acompanhamento informal de metas;
+- consulta fragmentada de scout;
+- controle paralelo de jogos, viagens e convocações;
 
 por um processo de:
 
 - cadastro único da atleta;
 - agenda organizada;
+- plano de treino estruturado;
 - confirmação rastreável;
 - presença consolidada;
-- consulta rápida do estado real do treino.
+- metas individuais e metas da equipe acompanháveis;
+- consulta estruturada do scout;
+- gestão centralizada de jogos, viagens, convocações e competições;
+- consulta rápida do estado real do treino e da agenda competitiva.
 
 ### 7.1 Resultado esperado
 
@@ -285,7 +336,11 @@ Ao final do MVP v1.0:
 - a atleta acessa seu portal por Supabase Auth;
 - o cadastro de atleta comporta vínculo de conta;
 - treinos do MVP têm persistência central;
+- o plano de treino do dia fica disponível para o grupo correto;
 - presença manual e confirmação da atleta convergem no mesmo registro;
+- metas individuais e metas da equipe ficam persistidas e rastreáveis;
+- a atleta consegue visualizar seus dados completos de scout;
+- jogos, viagens, convocações e competições ficam centralizados no produto;
 - o painel reflete presença real sem divergência silenciosa;
 - o sistema pode ser validado por testes e scripts objetivos;
 - o legado não fica no caminho crítico.
@@ -299,11 +354,12 @@ O MVP v1.0 só existe quando todas as condições abaixo forem verdadeiras:
 3. o sistema aplica isolamento de acesso coerente com o escopo do usuário;
 4. os dados operacionais do MVP usam Supabase como fonte principal;
 5. a presença por treinador, atleta e token converge no mesmo modelo;
-6. não há dependência operacional obrigatória de Apps Script ou Google Sheets;
-7. não há comportamento falso no lugar de persistência real;
-8. o sistema está validado por testes e gate final verificável;
-9. a documentação mínima de operação está atualizada;
-10. o produto está apto a uso real e evolução segura.
+6. o plano do treino, as metas, o scout visível à atleta e a agenda competitiva usam o mesmo contrato oficial do produto;
+7. não há dependência operacional obrigatória de Apps Script ou Google Sheets;
+8. não há comportamento falso no lugar de persistência real;
+9. o sistema está validado por testes e gate final verificável;
+10. a documentação mínima de operação está atualizada;
+11. o produto está apto a uso real e evolução segura.
 
 ---
 
@@ -325,7 +381,8 @@ O MVP v1.0 só existe quando todas as condições abaixo forem verdadeiras:
 - cadastro de atleta;
 - edição de atleta;
 - ativação e inativação;
-- armazenamento de nome, email, telefone, categoria, nível e observações;
+- armazenamento de nome, email, telefone, status, observações e dados esportivos necessários ao contexto do time;
+- armazenamento de `posição_ofensiva` e `função_defensiva`;
 - visualização do estado de vínculo da conta da atleta.
 
 #### 8.1.3 Gestão de treinos
@@ -337,7 +394,16 @@ O MVP v1.0 só existe quando todas as condições abaixo forem verdadeiras:
 - detecção de conflito com feriados;
 - detalhamento do treino.
 
-#### 8.1.4 Presença
+#### 8.1.4 Plano de treino do dia
+
+- publicação do objetivo principal do treino;
+- publicação de blocos com objetivo específico;
+- publicação de exercícios principais;
+- associação entre exercícios principais e metas das atletas quando aplicável;
+- publicação de observações operacionais e técnicas;
+- leitura do plano de treino pela atleta no portal.
+
+#### 8.1.5 Presença
 
 - marcação manual pelo treinador;
 - confirmação pela atleta no portal;
@@ -346,25 +412,48 @@ O MVP v1.0 só existe quando todas as condições abaixo forem verdadeiras:
 - visualização consolidada de presença no detalhe do treino;
 - leitura de frequência e resumo em cima do mesmo conjunto final de dados.
 
-#### 8.1.5 Relatórios
+#### 8.1.6 Metas individuais e metas da equipe
+
+- metas individuais do tipo `atleta`, criadas pela própria atleta para jogos e treinos;
+- metas individuais do tipo `treinador`, criadas pelo treinador para uma atleta específica;
+- metas individuais do tipo `scout`, criadas a partir do resultado do scout para uma atleta específica;
+- metas da equipe do tipo `treinador`, criadas pelo treinador para a equipe;
+- metas da equipe do tipo `scout`, criadas a partir do resultado do scout para a equipe;
+- acompanhamento de status, histórico e contexto esportivo das metas.
+
+#### 8.1.7 Relatórios
 
 - resumo por treino;
 - frequência por atleta;
-- leitura de participação para o período.
+- leitura de participação para o período;
+- leitura de evolução de metas quando aplicável;
+- leitura agregada de agenda competitiva quando aplicável.
 
-#### 8.1.6 Exportação e contingência
+#### 8.1.8 Exportação e contingência
 
 - exportação CSV;
 - exportação XLSX;
 - backup local em JSON;
 - restauração local de backup quando suportada pelo fluxo do produto.
 
-#### 8.1.7 Scout tático
+#### 8.1.9 Scout tático e leitura individual de scout
 
 - cadastro de jogo;
 - registro de eventos ao vivo;
 - resumo do jogo;
+- visualização pela atleta de eventos brutos próprios;
+- visualização pela atleta de resumo por jogo;
+- visualização pela atleta de indicadores agregados;
+- visualização pela atleta de histórico por período;
 - persistência do módulo de scout no escopo do MVP.
+
+#### 8.1.10 Agenda da equipe, jogos, viagens e competições
+
+- agenda da equipe com eventos de treino, jogo, viagem e competição;
+- publicação de convocações e listagens;
+- confirmação ativa da atleta para jogos e viagens;
+- leitura centralizada do status de confirmação pelo treinador;
+- persistência dos eventos competitivos no escopo oficial do produto.
 
 ### 8.2 Fora do escopo do MVP
 
@@ -448,6 +537,45 @@ O MVP v1.0 só existe quando todas as condições abaixo forem verdadeiras:
 4. enxerga o status de presença;
 5. interage conforme o fluxo permitido.
 
+### 9.9 Fluxo I — Publicação e consulta do plano de treino do dia
+
+1. treinador cria ou atualiza o plano de treino do dia;
+2. define objetivo principal, blocos, exercícios e observações;
+3. associa exercícios às metas quando aplicável;
+4. o sistema persiste o plano no escopo correto;
+5. atleta acessa o portal e consulta o plano correspondente.
+
+### 9.10 Fluxo J — Criação e acompanhamento de metas individuais
+
+1. a meta é criada pela atleta, pelo treinador ou pelo scout;
+2. o sistema registra a origem e o escopo da meta;
+3. a meta fica vinculada à atleta correta;
+4. atleta e treinador acompanham status e histórico dentro do escopo permitido;
+5. a evolução da meta pode ser relacionada a treinos, jogos e scout.
+
+### 9.11 Fluxo K — Criação e acompanhamento de metas da equipe
+
+1. o treinador ou o scout cria uma meta da equipe;
+2. o sistema registra a meta com escopo coletivo;
+3. a equipe visualiza a meta no contexto permitido;
+4. o treinador acompanha evolução e cumprimento ao longo de treinos, jogos e competições.
+
+### 9.12 Fluxo L — Consulta completa do scout individual
+
+1. atleta acessa a área de scout no portal;
+2. o sistema exibe eventos brutos relacionados à atleta;
+3. o sistema exibe resumos por jogo;
+4. o sistema exibe indicadores agregados;
+5. o sistema exibe histórico por período.
+
+### 9.13 Fluxo M — Publicação de listagens e confirmação ativa para jogos e viagens
+
+1. treinador publica uma listagem ou convocação;
+2. atleta convocada recebe a informação no seu contexto de agenda;
+3. atleta confirma ou recusa sua participação quando permitido;
+4. o sistema grava o estado da confirmação no banco oficial;
+5. treinador acompanha confirmadas, recusas e pendências em visão centralizada.
+
 ---
 
 ## 10. Requisitos funcionais
@@ -476,7 +604,9 @@ O sistema deve:
 - permitir criar, editar, inativar e consultar atletas;
 - armazenar email para suporte ao vínculo de conta;
 - identificar se a atleta já está vinculada a uma conta;
-- manter dados suficientes para presença, relatórios e contato operacional.
+- manter dados suficientes para presença, relatórios, contato operacional e contexto esportivo;
+- armazenar `posição_ofensiva` e `função_defensiva` com a taxonomia oficial do produto;
+- operar sob o contexto oficial de equipe `adulto feminino` em nível `competição`.
 
 ### 10.3 Requisitos de treinos
 
@@ -487,7 +617,19 @@ O sistema deve:
 - permitir definir horário, data, local, tipo, observações e status;
 - suportar leitura por treinador e por atleta dentro do escopo permitido.
 
-### 10.4 Requisitos de presença
+### 10.4 Requisitos de plano de treino
+
+O sistema deve:
+
+- permitir ao treinador publicar o plano de treino do dia;
+- registrar objetivo principal do treino;
+- registrar blocos do treino com objetivo específico;
+- registrar exercícios principais;
+- permitir relacionar exercícios principais às metas das atletas quando aplicável;
+- registrar observações operacionais e técnicas;
+- permitir leitura do plano pela atleta no seu portal.
+
+### 10.5 Requisitos de presença
 
 O sistema deve:
 
@@ -497,7 +639,20 @@ O sistema deve:
 - usar um modelo central de presença para os três fluxos;
 - refletir o mesmo estado em resumo, relatório e detalhe do treino.
 
-### 10.5 Requisitos de portal da atleta
+### 10.6 Requisitos de metas
+
+O sistema deve:
+
+- permitir criação de metas individuais do tipo `atleta` pela própria atleta;
+- permitir criação de metas individuais do tipo `treinador` para uma atleta específica;
+- permitir criação de metas individuais do tipo `scout` a partir de resultados de scout;
+- permitir criação de metas da equipe do tipo `treinador`;
+- permitir criação de metas da equipe do tipo `scout`;
+- registrar para cada meta seu `escopo` e sua `origem`;
+- permitir vincular metas a treinos, jogos, competições e dados de scout quando aplicável;
+- permitir acompanhamento de status, progresso e histórico.
+
+### 10.7 Requisitos de portal da atleta
 
 O sistema deve:
 
@@ -505,9 +660,14 @@ O sistema deve:
 - ter rotas próprias da atleta;
 - exibir apenas o que pertence à atleta autenticada;
 - impedir leitura de dados de outras atletas;
+- permitir leitura do plano de treino do dia;
+- permitir leitura das metas individuais da própria atleta;
+- permitir leitura das metas da equipe publicadas para sua equipe;
+- permitir leitura do scout individual completo da atleta;
+- permitir confirmação ativa em jogos e viagens quando convocada;
 - permitir saída da sessão.
 
-### 10.6 Requisitos de presença por token
+### 10.8 Requisitos de presença por token
 
 O sistema deve:
 
@@ -517,7 +677,7 @@ O sistema deve:
 - impedir uso indevido por escopo inválido;
 - gravar presença no banco final.
 
-### 10.7 Requisitos de relatórios
+### 10.9 Requisitos de relatórios
 
 O sistema deve:
 
@@ -526,7 +686,7 @@ O sistema deve:
 - operar a partir do mesmo dado final usado no painel;
 - evitar divergência entre leitura agregada e detalhe operacional.
 
-### 10.8 Requisitos de exportação
+### 10.10 Requisitos de exportação
 
 O sistema deve:
 
@@ -535,14 +695,29 @@ O sistema deve:
 - gerar XLSX;
 - permitir backup JSON local.
 
-### 10.9 Requisitos de scout
+### 10.11 Requisitos de scout
 
 O sistema deve:
 
 - permitir criação de jogos;
 - registrar eventos em tempo real;
 - manter resumo dos eventos;
+- permitir leitura individual da atleta sobre seus eventos brutos;
+- permitir leitura individual da atleta sobre seus resumos por jogo;
+- permitir leitura individual da atleta sobre indicadores agregados;
+- permitir leitura individual da atleta sobre histórico por período;
 - preservar esse módulo sem quebrar o MVP de presença.
+
+### 10.12 Requisitos de agenda, jogos, viagens e competições
+
+O sistema deve:
+
+- permitir criação e manutenção de eventos de agenda do tipo treino, jogo, viagem e competição;
+- permitir publicação de listagens e convocações para jogos e viagens;
+- permitir confirmação ativa da atleta para jogos e viagens;
+- permitir ao treinador acompanhar confirmações, recusas e pendências;
+- persistir esses eventos no banco oficial do produto;
+- exibir a agenda da equipe no escopo correto para treinador e atletas.
 
 ---
 
@@ -612,8 +787,13 @@ O sistema trata:
 - telefone;
 - status esportivo;
 - histórico de presença;
+- plano de treino;
+- metas individuais;
+- metas da equipe;
 - observações funcionais do contexto esportivo;
-- eventos de scout.
+- eventos de scout;
+- resumos e agregados de scout;
+- agenda, convocações e confirmações de jogos e viagens.
 
 ### 12.2 Regras obrigatórias
 
@@ -621,6 +801,10 @@ O sistema trata:
 - `service_role` é proibido no frontend;
 - o vínculo da atleta deve ser rastreável por usuário autenticado;
 - dados devem respeitar escopo por time e por atleta;
+- a atleta pode visualizar apenas suas metas individuais e as metas da equipe publicadas para sua equipe;
+- a atleta pode visualizar apenas seus próprios dados de scout individual;
+- a atleta pode confirmar apenas sua própria participação em jogos e viagens;
+- o treinador pode criar, editar e acompanhar metas individuais e metas da equipe dentro do escopo da equipe;
 - a documentação não deve instruir uso de legado como se fosse arquitetura oficial.
 
 ### 12.3 Ameaças prioritárias do MVP
@@ -628,6 +812,9 @@ O sistema trata:
 - acesso indevido ao portal da atleta;
 - leitura cruzada de dados entre atletas;
 - escrita de presença fora do escopo;
+- leitura indevida de metas de outras atletas;
+- leitura indevida de scout de outras atletas;
+- confirmação indevida em listagens de jogos e viagens;
 - divergência entre confirmação pública e painel;
 - release com dependência silenciosa do legado.
 
@@ -678,8 +865,20 @@ Eles não devem aparecer como arquitetura oficial futura.
 
 - `athletes`
 - `trainings`
+- `training_plans`
+- `training_plan_blocks`
+- `training_plan_exercises`
 - `attendance_records`
 - `presence_tokens`
+- `goals`
+- `goal_progress_updates`
+- `team_agenda_events`
+- `games`
+- `competitions`
+- `convocations`
+- `convocation_confirmations`
+- `scout_event_summaries`
+- `scout_period_aggregates`
 - `team_memberships`
 - `audit_logs`
 
@@ -689,7 +888,13 @@ Eles não devem aparecer como arquitetura oficial futura.
 - o treinador deve operar dentro do escopo do time;
 - o mesmo treino deve alimentar painel, portal e relatórios;
 - a presença deve existir em formato único no banco final;
-- token público deve resultar em escrita observável no mesmo modelo final.
+- token público deve resultar em escrita observável no mesmo modelo final;
+- toda meta deve possuir `escopo` (`individual` ou `equipe`) e `origem` (`atleta`, `treinador` ou `scout`);
+- metas individuais devem estar vinculadas à atleta correta;
+- metas da equipe devem estar vinculadas ao time correto;
+- `posição_ofensiva` e `função_defensiva` devem ser campos independentes;
+- eventos de agenda devem distinguir treino, jogo, viagem e competição;
+- confirmações de jogos e viagens devem ser rastreáveis por atleta e por evento.
 
 ---
 
@@ -722,12 +927,15 @@ O MVP v1.0 será considerado bem-sucedido quando:
 
 1. treinador entra no sistema sem mecanismo legado de auth;
 2. atleta entra no sistema sem mecanismo legado de auth;
-3. atleta vê seus treinos e seu estado real;
-4. treinador marca presença e o resultado aparece de forma consistente;
-5. token público confirma presença no mesmo modelo oficial;
-6. o runtime não depende do legado para operar o fluxo principal;
-7. a validação técnica final retorna sucesso;
-8. o produto pode ser usado por atletas reais sem intervenção manual do time técnico a cada operação.
+3. atleta vê seus treinos, seu plano de treino do dia e seu estado real;
+4. atleta consegue criar e acompanhar suas metas e visualizar metas recebidas do treinador e do scout;
+5. atleta consegue visualizar seus dados completos de scout;
+6. treinador marca presença e o resultado aparece de forma consistente;
+7. token público confirma presença no mesmo modelo oficial;
+8. jogos, viagens, convocações e competições ficam operáveis no produto com confirmação ativa da atleta;
+9. o runtime não depende do legado para operar o fluxo principal;
+10. a validação técnica final retorna sucesso;
+11. o produto pode ser usado por atletas reais sem intervenção manual do time técnico a cada operação.
 
 ### 16.1 Critérios de sucesso percebidos pelo treinador
 
@@ -737,6 +945,8 @@ O MVP também deve ser considerado bem-sucedido quando o treinador perceber, no 
 - não precisa procurar respostas antigas no WhatsApp para consolidar presença;
 - consegue saber rapidamente quem confirmou e quem não confirmou;
 - reduz erros de agendamento em feriados;
+- consegue publicar plano de treino e metas no mesmo ambiente;
+- consegue acompanhar scout, metas e agenda competitiva sem planilhas paralelas;
 - gasta menos tempo com operação e mais tempo com preparação da equipe.
 
 ---
@@ -763,7 +973,12 @@ Antes do release do MVP:
 - número de treinadores ativos;
 - número de atletas com conta vinculada;
 - número de confirmações feitas pelo portal ou por token;
-- taxa de treinos com presença registrada.
+- taxa de treinos com presença registrada;
+- número de consultas ao plano de treino do dia;
+- número de metas individuais ativas;
+- número de metas da equipe ativas;
+- número de confirmações ativas em jogos e viagens;
+- número de consultas ao scout individual.
 
 ### 18.1.1 Metas iniciais de adoção do MVP
 
@@ -772,7 +987,9 @@ Estas metas servem para validar se o produto começou a substituir o processo ma
 - pelo menos `1` equipe operando o fluxo principal no produto;
 - pelo menos `80%` das atletas ativas com conta vinculada;
 - pelo menos `80%` dos treinos novos criados dentro do sistema, e não fora dele;
-- pelo menos `70%` das confirmações de presença feitas pelo portal da atleta ou por token, e não por leitura manual do WhatsApp.
+- pelo menos `70%` das confirmações de presença feitas pelo portal da atleta ou por token, e não por leitura manual do WhatsApp;
+- pelo menos `70%` das atletas ativas consultando o plano de treino no fluxo principal;
+- pelo menos `70%` das convocações de jogos e viagens com confirmação ativa registrada no sistema.
 
 ### 18.2 Métricas de qualidade
 
@@ -780,7 +997,10 @@ Estas metas servem para validar se o produto começou a substituir o processo ma
 - divergência entre painel e confirmação pública;
 - taxa de atletas não vinculadas após cadastro;
 - erros por fluxo de presença;
-- incidentes de acesso indevido.
+- incidentes de acesso indevido;
+- divergência entre metas exibidas e metas persistidas;
+- divergência entre scout individual exibido e dados oficiais do scout;
+- divergência entre confirmação de jogo/viagem e status persistido.
 
 ### 18.2.1 Metas iniciais de qualidade do MVP
 
@@ -788,7 +1008,10 @@ Estas metas servem para validar se o produto começou a substituir o processo ma
 - `0` dependências obrigatórias de PIN no fluxo oficial;
 - `0` dependências operacionais obrigatórias de Apps Script no fluxo principal;
 - menos de `5%` dos treinos com necessidade de correção manual por erro operacional do sistema;
-- `0` divergências aceitas entre presença exibida no painel e presença registrada no banco final.
+- `0` divergências aceitas entre presença exibida no painel e presença registrada no banco final;
+- `0` divergências aceitas entre meta exibida e meta persistida;
+- `0` divergências aceitas entre scout individual exibido e dado oficial persistido;
+- `0` divergências aceitas entre confirmação de jogo/viagem exibida e confirmação persistida.
 
 ### 18.3 Métricas de ganho operacional
 
@@ -798,7 +1021,9 @@ Estas métricas existem para provar que o produto realmente reduz o trabalho do 
 - número de passos manuais para abrir um treino e saber quem confirmou;
 - número de correções manuais de agenda por mês;
 - número de mensagens manuais necessárias no WhatsApp para cobrar presença;
-- quantidade de planilhas operacionais ainda mantidas em paralelo.
+- quantidade de planilhas operacionais ainda mantidas em paralelo;
+- número de passos manuais para publicar um plano de treino;
+- número de passos manuais para montar e acompanhar uma listagem de jogo ou viagem.
 
 ### 18.3.1 Metas iniciais de ganho operacional
 
@@ -806,7 +1031,9 @@ Estas métricas existem para provar que o produto realmente reduz o trabalho do 
 - reduzir para `0` a necessidade de atualizar planilhas de presença para treinos do fluxo principal;
 - reduzir para no máximo `1` consulta operacional principal para saber o estado de presença de um treino;
 - reduzir de forma perceptível o uso do grupo de WhatsApp como fonte de verdade;
-- reduzir o retrabalho causado por informação perdida na conversa.
+- reduzir o retrabalho causado por informação perdida na conversa;
+- reduzir para `0` a necessidade de controle paralelo de metas em documentos externos;
+- reduzir para `0` a necessidade de listagens paralelas de jogos e viagens fora do fluxo principal.
 
 ### 18.4 Métricas de entrega do MVP
 
@@ -832,14 +1059,24 @@ Estas métricas existem para provar que o produto realmente reduz o trabalho do 
 - divergência temporária entre cache local e banco central;
 - cutover de dados mal reconciliado;
 - docs antigas induzirem agentes a reabrir legado;
-- E2E insuficientes esconderem falso positivo.
+- E2E insuficientes esconderem falso positivo;
+- modelagem inadequada de metas misturar origem e escopo em um único campo;
+- modelagem inadequada de posições misturar papéis ofensivos e defensivos;
+- crescimento do módulo de agenda competitiva sem regras claras de confirmação ativa.
 
 ### 19.2 Decisões que precisam continuar explícitas
 
 - política final de uso de IndexedDB após o MVP;
 - estratégia definitiva de onboarding da atleta;
 - nível de permanência do módulo scout na trilha principal de release;
-- política de exportação/importação após a migração completa.
+- política de exportação/importação após a migração completa;
+- metas usam obrigatoriamente a taxonomia `escopo` + `origem`;
+- metas individuais admitem origem `atleta`, `treinador` e `scout`;
+- metas da equipe admitem origem `treinador` e `scout`;
+- scout visível à atleta inclui eventos brutos, resumo por jogo, indicadores agregados e histórico por período;
+- listagens de jogos e viagens usam confirmação ativa da atleta;
+- plano de treino do dia inclui objetivo principal, blocos, exercícios principais e observações;
+- `posição_ofensiva` e `função_defensiva` permanecem separadas no contrato do produto.
 
 ---
 

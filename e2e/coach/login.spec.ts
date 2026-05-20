@@ -8,8 +8,9 @@ test.describe('WelcomePage', () => {
   })
 
   test('exibe a apresentação da landing', async ({ page }) => {
-    await expect(page.getByText(/gestão de treinos/i)).toBeVisible()
-    await expect(page.getByText(/cepraea · rio de janeiro/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: /bem-vindo ao cepraea/i })).toBeVisible()
+    await expect(page.getByText(/gestão e acompanhamento de treinos/i)).toBeVisible()
+    await expect(page.getByText(/cepraea • rio de janeiro/i)).toBeVisible()
   })
 
   test('mostra as opções de treinador e atleta', async ({ page }) => {
