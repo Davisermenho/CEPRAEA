@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-08 - 23:49 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-20 - 00:14 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,11 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-20 | 01:06 | CEPR-0098C | Gate E2E Scout estabilizado; roster passou isolado e `TRANS_OF` foi endurecido para consultas SQL por `scout_game_id` | `npx playwright test e2e/scout/scout-cepr0088a-roster.spec.ts --project=desktop --trace=on --reporter=line` ✅ (1 test) · `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line` ✅ (9 tests) · `npx playwright test e2e/scout --project=desktop --reporter=line` ✅ (102 tests) · `npm run typecheck` ✅ · `npm test` ✅ (51 tests) · `npm run build` ✅ · PR não aberto |
+| 2026-05-20 | 00:35 | CEPR-0089B | Governança do contrato operacional registrada em matriz local, contexto/handoff local e Notion, com ressalva da reexecução E2E focada intermediária | `npx playwright test e2e/scout --project=desktop --reporter=line` ❌ (101/102; falha transitória em `scout-cepr0088a-roster`) · Notion MCP update ✅ · PR não aberto |
+| 2026-05-20 | 00:14 | CEPR-0089 | `ScoutWorkspacePage.tsx` passou a consumir o contrato operacional dos 3 fluxos de arremesso para mainFields, optionalFields, advancedFields e uiOrder, preservando os E2E de Scout | `npm run typecheck` ✅ · `npm test` ✅ (51 tests) · `npm run build` ✅ · `npx playwright test e2e/scout --project=desktop --reporter=line` ✅ (102 tests) · `npm run test:e2e` ❌ por 10 falhas fora do Scout e 2 falhas intermediárias corrigidas com revalidação focada |
+| 2026-05-19 | 23:24 | CEPR-0088 | Contrato operacional inicial da `COLETA_AO_VIVO` criado para os 3 fluxos de arremesso auditados, com teste de conformidade contra a matriz semântica executável | `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts` ✅ (38 tests) · `npm run typecheck` ✅ · `npm test` ✅ (51 tests) · `npm run build` ✅ |
+| 2026-05-19 | 22:52 | CEPR-0087 | Auditoria local completa do Scout/`COLETA_AO_VIVO` concluída com verificação de fontes normativas/executáveis, validação de matriz semântica, inspeção de UI/RPC/SQL/E2E e proposta de contrato operacional único para reduzir reinterpretação de IA | `npm run typecheck` ✅ · `npx vitest run src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts` ✅ (30 tests) · `npm run build` ✅ · auditoria de artefatos com `find`/`rg`/`gh pr list`/Notion MCP |
 | 2026-05-08 | 23:49 | CEPR-0053 | Protocolo operacional do `PILOTO-01` da `COLETA_AO_VIVO` criado em `docs/scout`, consolidando objetivo, escopo, métricas, conferência de banco e critérios de decisão antes de ampliar o scout | `docs/scout/scout-piloto-01-coleta-ao-vivo.md` criado · `find docs/scout -maxdepth 1 -type f | sort` inclui o novo protocolo |
 | 2026-05-08 | 23:27 | CEPR-0052 | UX-02 da rota `/scout` implementado: submit fixo em viewport, opcionais recolhíveis, fase da equipe por default ajustável, chips para fase/resultado/pontos e fluxo pós-submit mais rápido, com validação operacional mantida em `scout_live_entries` | `npm run typecheck` e `npm run build` passaram · Playwright criou `24` entradas `UX02-*`/`UX02B-*` sem erro sem criar `scout_plays` ou `scout_play_participations` · medição estrutural caiu para `4–6` campos editáveis por cenário principal e `submitTop=717–783` em viewport `900px` |
 | 2026-05-08 | 23:12 | CEPR-0051 | Medição de atrito operacional da tela `/scout` concluída: o gargalo atual é densidade fixa de formulário e scroll, não persistência; a `COLETA_AO_VIVO` expõe `11–14` campos editáveis e mantém o submit abaixo da dobra em todas as fases | Playwright mediu `formHeight=3081`, `submitTop≈1383–1403` com viewport `900px` · contagem estrutural mostrou `11–12` campos em transições/perdas e até `14` em `AT_POS + GOL` · agregação da cadência por fase mostrou `AT_POS avgMs=1409` vs `TRANS_DEF avgMs=1200` |
@@ -1770,3 +1775,166 @@ Implementar UX guiada do scout com sistemas por fase, campos contextuais e bloco
 
 - **Status:** LOCAL
 - **Evidências:** `npm run typecheck` verde; `npx vitest run src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts` com `11/11` testes passando
+
+---
+
+### [CEPR-0087] — 2026-05-19 — Auditoria local do Scout e contrato operacional da COLETA_AO_VIVO
+
+#### ✨ Resumo
+
+Foi concluída uma auditoria local completa do Scout com foco em `COLETA_AO_VIVO`, incluindo mapeamento de fontes de verdade, conflitos de semântica/fluxo e definição de recomendação arquitetural para reduzir reinterpretação por IA.
+
+#### 🚀 Added
+
+- atualização de governança e rastreabilidade em:
+  - `.codex/codex-CHANGELOG.md`
+  - `.codex/codex-EXECUTION_LOG.md`
+
+#### 🛠️ Changed
+
+- validação objetiva do estado atual do repo para `COLETA_AO_VIVO` cobrindo:
+  - contrato executável semântico atual (`liveCollectionCompatibility.matrix.ts`);
+  - fluxo operacional real da UI (`ScoutWorkspacePage.tsx`);
+  - persistência RPC (`scoutApi.ts` + `create_scout_live_entry`);
+  - cobertura SQL/migrations/e2e;
+  - sincronização editorial com Notion (consulta MCP).
+- recomendação formal registrada: manter matriz canônica semântica e adicionar contrato operacional único de fluxo (sem contrato por ação).
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO (avaliação concluída sem alteração funcional).
+- **Evidências objetivas:**
+  - `git status --short`
+  - `git log --oneline -20`
+  - `gh pr list --limit 3 --state all`
+  - `find docs/scout ...`, `find src/features/scout ...`, `find supabase/...`, `find e2e/scout ...`
+  - `grep/rg` para `liveCollectionCompatibility`, `tipoFinalizacaoCode`, `motivoPontuacaoCode`, `estruturaTransicaoCode`, `contextoDecisaoCode`, `contextoArremessoCode`, `acaoPreparatoriaCode`
+  - `npm run typecheck` (passou)
+  - `npx vitest run src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts` (passou)
+  - `npm run build` (passou)
+  - Notion MCP (`notion_fetch`) para handoff/checklist/matriz canônica editorial.
+
+---
+
+### [CEPR-0088] — 2026-05-19 — Contrato operacional inicial da COLETA_AO_VIVO
+
+#### ✨ Resumo
+
+Foi criado o contrato operacional inicial da `COLETA_AO_VIVO` apenas para os 3 fluxos de arremesso auditados, separando regra semântica da matriz e fluxo de tela/UX declarativo.
+
+#### 🚀 Added
+
+- `src/features/scout/domain/liveCollectionFlow.contract.ts`
+- `src/features/scout/domain/liveCollectionFlow.contract.test.ts`
+
+#### 🛠️ Changed
+
+- o novo contrato declara, por fluxo:
+  - `mainFields`;
+  - `optionalFields`;
+  - `advancedFields`;
+  - `requiredFields`;
+  - `derivedFields`;
+  - `forbiddenFields`;
+  - `uiOrder`;
+  - regras de pontuação, passivo, persistência e regressão.
+- escopo limitado aos fluxos:
+  - `AT_POS.ARREMESSO.ARREMESSO`;
+  - `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV`;
+  - `TRANS_OF.ARREMESSO.ARREMESSO`.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO (contrato criado e validado localmente).
+- **Evidências objetivas:**
+  - `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts` (passou, 38 testes)
+  - `npm run typecheck` (passou)
+  - `npm test` (passou, 51 testes)
+  - `npm run build` (passou)
+
+---
+
+### [CEPR-0089] — 2026-05-20 — ScoutWorkspacePage consumindo contrato operacional
+
+#### ✨ Resumo
+
+`ScoutWorkspacePage.tsx` passou a consultar o contrato operacional dos 3 fluxos de arremesso auditados para decidir campos principais, opcionais, avançados e ordem declarada por `uiOrder`.
+
+#### 🛠️ Changed
+
+- `src/features/scout/pages/ScoutWorkspacePage.tsx` agora identifica o contrato ativo por `fase.categoria.acao`.
+- Para fluxos com contrato ativo:
+  - campos principais são condicionados por `mainFields`;
+  - atleta, ação preparatória e contextos são tratados por `optionalFields`;
+  - causa provável, prioridade, vídeo e observação são renderizados por `advancedFields`;
+  - opcionais/avançados usam ordenação derivada de `uiOrder`.
+- `TRANS_OF + ARREMESSO` preserva o comportamento validado: preset de passivo visível e contexto detalhado recolhido em "Detalhes avançados da transição".
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO para Scout.
+- **Evidências objetivas:**
+  - `npm run typecheck` (passou)
+  - `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts` (passou, 38 testes)
+  - `npm test` (passou, 51 testes)
+  - `npm run build` (passou; aviso existente de chunk grande do Vite)
+  - `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line` (passou, 9 testes)
+  - `npx playwright test e2e/scout --project=desktop --reporter=line` (passou, 102 testes)
+  - `npm run test:e2e` falhou no run completo com 12 falhas: 10 fora do Scout (`coach`, `public`, `athlete`) e 2 de `TRANS_OF` causadas pela primeira versão do layout; as 2 de Scout foram corrigidas e revalidadas com a suíte `e2e/scout` completa.
+
+---
+
+### [CEPR-0089B] — 2026-05-20 — Registro de governança do contrato operacional
+
+#### ✨ Resumo
+
+Matriz local, contexto/handoff local e Notion foram atualizados para registrar que o contrato operacional da `COLETA_AO_VIVO` existe, cobre somente os 3 fluxos de arremesso auditados e ja e consumido pela UI via `mainFields`, `optionalFields`, `advancedFields` e `uiOrder`.
+
+#### 🛠️ Changed
+
+- `docs/scout/matriz-compatibilidade-coleta-ao-vivo.md` agora aponta explicitamente para `liveCollectionFlow.contract.ts` e separa o papel da matriz semantica do contrato operacional.
+- `docs/scout/contexto/03-estado-atual.md` registra os 3 fluxos cobertos e a regra de nao expandir para `DEF_POS + BLOQUEIO` antes de estabilizar `requiredFields`.
+- `docs/scout/contexto/05-roteiro-retomada-piloto-01.md` registra o estado tecnico do contrato antes de retomadas manuais do piloto.
+- Notion recebeu atualização no Handoff Operacional e na Matriz Canonica.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** SUPERADO por CEPR-0098C; a evidência E2E atual voltou a ficar verde.
+- **Evidências objetivas:**
+  - `npx playwright test e2e/scout --project=desktop --reporter=line` foi reexecutado conforme solicitado e falhou inicialmente com `101 passed / 1 failed`.
+  - Falha intermediaria: `e2e/scout/scout-cepr0088a-roster.spec.ts` ao localizar `Coletar ao vivo`.
+  - Evidência historica preservada: a mesma suite havia passado `102/102` apos a UI consumir o contrato.
+  - Evidencia posterior CEPR-0098C: teste falho passou isolado com trace; `scout-cepr0089-trans-of.spec.ts` foi endurecido para consultas SQL por `scout_game_id`; a suite `e2e/scout` passou `102/102`.
+  - E2E global continua com falhas conhecidas fora do Scout e nao foi reexecutado nesta etapa.
+  - PR nao foi aberto.
+
+---
+
+### [CEPR-0098C] — 2026-05-20 — Estabilização do gate E2E Scout
+
+#### ✨ Resumo
+
+Investigado o bloqueio do gate Scout causado inicialmente por `scout-cepr0088a-roster.spec.ts`. O teste passou isolado com trace. Na reexecução completa, foi identificado flake adicional em `scout-cepr0089-trans-of.spec.ts` causado por consultas globais em `scout_live_entries`; a spec foi endurecida para filtrar pelo `scout_game_id` do teste.
+
+#### 🛠️ Changed
+
+- Atualizados registros locais para distinguir:
+  - falha intermediaria `101/102`;
+  - reexecução isolada verde do teste falho;
+- hardening da spec `TRANS_OF` contra contaminação entre workers;
+- gate Scout atual verde `102/102`.
+- `e2e/scout/scout-cepr0089-trans-of.spec.ts` agora filtra as consultas SQL dos testes 3-5 por `scout_game_id`.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO para gate E2E Scout atual.
+- **Evidências objetivas:**
+  - `npx playwright test e2e/scout/scout-cepr0088a-roster.spec.ts --project=desktop --trace=on --reporter=line` (passou, 1 teste)
+  - `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line` (passou, 9 testes)
+  - `npx playwright test e2e/scout --project=desktop --reporter=line` (passou, 102 testes)
+  - `npm run typecheck` (passou)
+  - `npm test` (passou, 51 testes)
+  - `npm run build` (passou; aviso existente de chunk grande do Vite)
+  - Sem alterações em `liveCollectionFlow.contract.ts`, `liveCollectionCompatibility.matrix.ts`, `ScoutWorkspacePage.tsx` ou helpers nesta estabilização.
+  - E2E global continua pendente fora do Scout.
+  - PR nao foi aberto.

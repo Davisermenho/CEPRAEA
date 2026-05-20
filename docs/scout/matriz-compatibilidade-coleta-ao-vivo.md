@@ -15,6 +15,8 @@ Arquivos correlatos:
 
 - `src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
 - `src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+- `src/features/scout/domain/liveCollectionFlow.contract.ts`
+- `src/features/scout/domain/liveCollectionFlow.contract.test.ts`
 - `e2e/scout/scout-matriz-compat.spec.ts`
 - `e2e/scout/scout-category-filter.spec.ts`
 - `e2e/scout/scout-cepr0090-piloto-regressions.spec.ts`
@@ -52,6 +54,17 @@ Ela cobre:
 - campos condicionais de finalizacao e pontuacao
 - campos de estrutura de transicao e acao preparatoria
 - invariantes de persistencia
+
+Contrato operacional complementar:
+
+- `liveCollectionCompatibility.matrix.ts` continua sendo o contrato executavel semantico.
+- `liveCollectionFlow.contract.ts` e o contrato operacional executavel da tela para fluxos explicitamente cobertos.
+- Em 2026-05-20, o contrato operacional cobre somente:
+  - `AT_POS.ARREMESSO.ARREMESSO`
+  - `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV`
+  - `TRANS_OF.ARREMESSO.ARREMESSO`
+- A UI da `COLETA_AO_VIVO` ja consome `mainFields`, `optionalFields`, `advancedFields` e `uiOrder` desses 3 fluxos.
+- Nao expandir para `DEF_POS.BLOQUEIO` antes de estabilizar e testar `requiredFields`.
 
 Ela nao cobre:
 
@@ -185,6 +198,14 @@ UX esperada na `COLETA_AO_VIVO` (CEPR-0099/CEPR-0100):
 - `classificacao_acao_code` fica como compatibilidade legada para leituras antigas e outros fluxos que ainda dependem de classificação;
 - o preset `Arremesso forçado por passivo` aparece nos dois fluxos e grava `PASSIVO_SINALIZADO + SOB_PASSIVO`;
 - os contextos da fase permanecem fora do bloco `Finalização`.
+
+Contrato operacional executavel (2026-05-20):
+- A ordem e a visibilidade principal/opcional/avancada dos fluxos de arremesso acima ficam declaradas em `liveCollectionFlow.contract.ts`.
+- A matriz nao deve duplicar todos os campos de UX desses fluxos; ela fixa a semantica permitida e aponta para o contrato operacional quando a duvida for ordem, agrupamento ou nivel de detalhe na tela.
+- Evidencia historica: a suite `npx playwright test e2e/scout --project=desktop --reporter=line` teve execucao verde com `102/102` apos a UI passar a consumir o contrato.
+- Evidencia intermediaria em 2026-05-20: uma reexecucao focada retornou `101 passed / 1 failed`, com falha em `e2e/scout/scout-cepr0088a-roster.spec.ts` ao localizar `Coletar ao vivo`.
+- Evidencia atual em 2026-05-20: o teste `scout-cepr0088a-roster.spec.ts` passou isolado com trace; depois a spec `scout-cepr0089-trans-of.spec.ts` foi endurecida para filtrar consultas SQL por `scout_game_id`; a suite `npx playwright test e2e/scout --project=desktop --reporter=line` passou `102/102`.
+- O E2E global segue com falhas fora do Scout conhecidas; nao usar essas falhas para bloquear a decisao do contrato operacional, mas registrar separadamente quando executar `npm run test:e2e`.
 
 #### `FINALIZACAO_6M_FAV` — evento ofensivo observado (CEPR-0096)
 
@@ -537,8 +558,9 @@ Antes de alterar `COLETA_AO_VIVO`, o agente deve apontar:
 1. a secao desta matriz no Notion;
 2. a secao correspondente neste arquivo;
 3. a chave correspondente em `liveCollectionCompatibility.matrix.ts`;
-4. o teste positivo afetado;
-5. o teste negativo afetado;
-6. o comando de validacao executado.
+4. se o fluxo tiver contrato operacional, a chave correspondente em `liveCollectionFlow.contract.ts`;
+5. o teste positivo afetado;
+6. o teste negativo afetado;
+7. o comando de validacao executado.
 
 Sem isso, a mudanca nao deve prosseguir.

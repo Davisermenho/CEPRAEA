@@ -26,6 +26,21 @@ Antes da sessão manual:
 - não deixar a matriz aberta para consulta durante a coleta;
 - registrar para cada lance: tempo aproximado, caminho escolhido, se salvou, dúvida encontrada e dado final salvo;
 - ao final, comparar o registro salvo com a expectativa abaixo.
+- considerar `liveCollectionFlow.contract.ts` como contrato operacional da UI apenas para os fluxos de arremesso já cobertos;
+- não expandir o contrato operacional para `DEF_POS + BLOQUEIO` antes de estabilizar `requiredFields`.
+
+## Estado técnico do contrato operacional — 2026-05-20
+
+- Contrato criado em `src/features/scout/domain/liveCollectionFlow.contract.ts`.
+- Fluxos cobertos:
+  - `AT_POS.ARREMESSO.ARREMESSO`;
+  - `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV`;
+  - `TRANS_OF.ARREMESSO.ARREMESSO`.
+- `ScoutWorkspacePage.tsx` ja consome `mainFields`, `optionalFields`, `advancedFields` e `uiOrder`.
+- Evidencia historica: `npx playwright test e2e/scout --project=desktop --reporter=line` passou `102/102` apos a adaptacao da UI.
+- Evidencia intermediaria: a reexecucao de 2026-05-20 falhou `101/102` em `scout-cepr0088a-roster.spec.ts` ao procurar `Coletar ao vivo`.
+- Evidencia atual: em 2026-05-20, o teste falho `scout-cepr0088a-roster.spec.ts` passou isolado com trace; a spec `scout-cepr0089-trans-of.spec.ts` foi endurecida para filtrar consultas SQL por `scout_game_id`; a suite `e2e/scout` completa passou `102/102`.
+- O E2E global tem falhas conhecidas fora do Scout e nao deve ser usado sozinho para reabrir a decisao do contrato operacional.
 
 ## Caso Prioritário — PILOTO-01 #14
 

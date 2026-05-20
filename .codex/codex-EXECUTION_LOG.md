@@ -19,10 +19,35 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br> 
-*Última atualização*: 2026-05-08 - 23:49 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-20 - 00:14 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-20 00:35 BRT — CEPR-0089B
+
+- **Objetivo:** registrar em matriz local, handoff/contexto local e Notion que o contrato operacional da `COLETA_AO_VIVO` foi criado e ja e consumido pela UI.
+- **Comando focado solicitado:** `npx playwright test e2e/scout --project=desktop --reporter=line`.
+- **Resultado:** falhou `101/102`; falha em `e2e/scout/scout-cepr0088a-roster.spec.ts` ao localizar `Coletar ao vivo`.
+- **Decisão:** preservar evidencia historica `102/102`, mas nao declarar Scout verde naquele momento sem novo rerun limpo.
+- **Atualização CEPR-0098C:** rerun isolado do teste falho passou com trace; a spec `TRANS_OF` foi endurecida contra consulta SQL global; a suite `e2e/scout` passou `102/102`.
+- **PR:** nao aberto.
+
+## Entrada Rápida — 2026-05-20 01:06 BRT — CEPR-0098C
+
+- **Objetivo:** investigar o bloqueio do gate E2E Scout em `scout-cepr0088a-roster.spec.ts` sem mexer em contrato, matriz, UI, helpers ou novos fluxos.
+- **Comando isolado:** `npx playwright test e2e/scout/scout-cepr0088a-roster.spec.ts --project=desktop --trace=on --reporter=line`.
+- **Resultado isolado:** passou, `1 passed`.
+- **Comando suite Scout:** `npx playwright test e2e/scout --project=desktop --reporter=line`.
+- **Resultado suite Scout inicial:** falhou `101/102` por `scout-cepr0089-trans-of.spec.ts` consultar a última entrada global de `scout_live_entries`.
+- **Patch aplicado:** `e2e/scout/scout-cepr0089-trans-of.spec.ts` passou a filtrar as consultas SQL dos testes 3-5 por `scout_game_id`.
+- **Comando focado TRANS_OF:** `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line`.
+- **Resultado focado TRANS_OF:** passou, `9 passed`.
+- **Resultado suite Scout final:** passou, `102 passed`.
+- **Validação local adicional:** `npm run typecheck` passou; `npm test` passou com `51 passed`; `npm run build` passou com aviso existente de chunk grande do Vite.
+- **Decisão:** falha anterior classificada como evidência transitória/flaky; gate E2E Scout atual está verde.
+- **Escopo preservado:** sem alteração em `liveCollectionFlow.contract.ts`, `liveCollectionCompatibility.matrix.ts`, `ScoutWorkspacePage.tsx`, `requiredFields`, `DEF_POS/BLOQUEIO` ou helpers. Alteração restrita em spec E2E para remover flake de consulta global.
+- **PR:** nao aberto.
 
 # Execution Log: CEPR-0053
 
@@ -3729,3 +3754,333 @@ Nenhuma alteração em `COLETA_AO_VIVO` entra sem atualizar simultaneamente:
 5. Hardening de governança — impedir alteração futura sem matriz + testes.
 
 **Regra:** próximo trabalho deve partir da matriz canônica. Não alterar `COLETA_AO_VIVO` sem a cadeia completa de evidências.
+
+# Execution Log: CEPR-0087
+
+## 🎯 Objetivo
+
+Executar auditoria local completa do Scout (`COLETA_AO_VIVO`) para responder se o repo já reduz reinterpretação semântica por IA ou se precisa de contrato operacional rígido adicional.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-19
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** governança de documentação e rastreabilidade da decisão arquitetural do Scout
+- **Partes do sistema que podem quebrar:** nenhuma em runtime (sem alteração funcional)
+- **Testes que cobrem o risco:** validações locais de tipo, matriz semântica e build
+- **Comandos de validação:**
+  - `npm run typecheck`
+  - `npx vitest run src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+  - `npm run build`
+- **Arquivos proibidos nesta tarefa:** alterações funcionais de `src/**`, `supabase/migrations/**` e `supabase/tests/**`
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Pré-condições e contexto obrigatório
+
+- **Resultado:** leitura de `CEPRAEA.md` e verificação de contexto recente via Git/GitHub (`git log`, últimos 3 PRs com `gh`).
+
+### Passo 2 — Inventário local de artefatos
+
+- **Resultado:** mapeamento completo de arquivos em `docs/scout`, `src/features/scout`, `src/types`, `supabase/migrations`, `supabase/tests`, `e2e/scout`, `.files/analise/scout`.
+
+### Passo 3 — Rastreio de regras semânticas e operacionais
+
+- **Resultado:** correlação entre matriz executável, UI, API/RPC e testes usando `rg`/`grep` sobre campos críticos (`tipoFinalizacaoCode`, `motivoPontuacaoCode`, `estruturaTransicaoCode`, `contextoDecisaoCode`, `contextoArremessoCode`, `acaoPreparatoriaCode`).
+
+### Passo 4 — Validação executável
+
+- **Resultado:** `typecheck`, teste da matriz e `build` executados com sucesso, confirmando consistência de contrato semântico e compilação local.
+
+### Passo 5 — Confronto editorial (Notion)
+
+- **Resultado:** consulta dos documentos de handoff e matriz canônica no Notion via MCP para validar alinhamento repo/editorial e detectar pontos de desatualização potencial.
+
+### Passo 6 — Parecer arquitetural
+
+- **Resultado:** conclusão técnica de que o repo já tem contrato semântico executável robusto, mas ainda precisa de um contrato operacional único de fluxo da `COLETA_AO_VIVO` (não por ação) para fixar ordem de campos, obrigatoriedade e regras de derivação/ocultação na UI com testes de conformidade.
+
+---
+
+## ✅ Validação Final
+
+- auditoria concluída com evidência local e sem mudança funcional;
+- decisão arquitetural preparada para próxima etapa segura de implementação;
+- logs do Codex atualizados conforme regra do `AGENTS.md`.
+
+# Execution Log: CEPR-0088
+
+## 🎯 Objetivo
+
+Criar `liveCollectionFlow.contract.ts` apenas com os 3 fluxos de arremesso auditados da `COLETA_AO_VIVO`, mantendo a matriz semântica como fonte executável e adicionando teste para impedir drift.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-19
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `src/features/scout/domain/liveCollectionFlow.contract.ts`, `src/features/scout/domain/liveCollectionFlow.contract.test.ts`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** governança operacional da `COLETA_AO_VIVO`, próximos ajustes da UI de scout e testes de regressão de arremesso
+- **Partes do sistema que podem quebrar:** nenhuma em runtime neste passo; a UI ainda não consome o contrato novo
+- **Testes que cobrem o risco:** teste específico do contrato cruzando flows com `liveCollectionCompatibility.matrix.ts`, suíte unitária completa, typecheck e build
+- **Comandos de validação:**
+  - `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+  - `npm run typecheck`
+  - `npm test`
+  - `npm run build`
+- **Arquivos proibidos nesta tarefa:** migrations, RPCs, UI funcional fora do contrato solicitado
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Contrato operacional mínimo
+
+- **Arquivos:** `src/features/scout/domain/liveCollectionFlow.contract.ts`
+- **Resultado:** criado contrato declarativo para `AT_POS.ARREMESSO.ARREMESSO`, `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV` e `TRANS_OF.ARREMESSO.ARREMESSO`, com campos principais, opcionais, avancados, obrigatorios, derivados, proibidos e ordem operacional.
+
+### Passo 2 — Regras de fluxo
+
+- **Arquivos:** `src/features/scout/domain/liveCollectionFlow.contract.ts`
+- **Resultado:** registradas regras de derivacao de pontuacao, pontuacao manual de arremesso simples, passivo como contexto vs resultado, estrutura de transicao e invariantes de persistencia.
+
+### Passo 3 — Teste de conformidade
+
+- **Arquivos:** `src/features/scout/domain/liveCollectionFlow.contract.test.ts`
+- **Resultado:** adicionados testes que garantem somente os 3 fluxos solicitados, conferem alinhamento com a matriz semantica, validam ordem sem duplicidade e travam regressões de 6m, transicao, acao preparatoria e pontuacao manual.
+
+### Passo 4 — Validacao local
+
+- **Resultado:** todos os comandos de validacao passaram; `npm run build` manteve apenas o aviso existente de chunk grande do Vite.
+
+---
+
+## ✅ Validação Final
+
+- contrato operacional inicial criado sem alterar runtime da UI;
+- matriz semantica continua como contrato executavel de compatibilidade;
+- novo contrato ja e consumido por teste automatizado, evitando documento morto.
+
+# Execution Log: CEPR-0089
+
+## 🎯 Objetivo
+
+Adaptar `ScoutWorkspacePage.tsx` para usar `mainFields`, `optionalFields`, `advancedFields` e `uiOrder` do contrato operacional criado para os 3 fluxos de arremesso auditados.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-20
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `src/features/scout/pages/ScoutWorkspacePage.tsx`, `src/features/scout/domain/liveCollectionFlow.contract.ts`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos que podem ser afetados:** UX da `COLETA_AO_VIVO` para `AT_POS.ARREMESSO.ARREMESSO`, `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV` e `TRANS_OF.ARREMESSO.ARREMESSO`
+- **Partes do sistema que podem quebrar:** renderização de campos condicionais da coleta ao vivo, preset de passivo, contexto avançado de `TRANS_OF`, persistência de entradas ao vivo
+- **Testes que cobrem o risco:** unitários do contrato/matriz, suíte unitária geral, build, E2E focado de `TRANS_OF`, E2E completo de `e2e/scout`
+- **Comandos de validação:**
+  - `npm run typecheck`
+  - `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+  - `npm test`
+  - `npm run build`
+  - `npm run test:e2e`
+  - `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line`
+  - `npx playwright test e2e/scout --project=desktop --reporter=line`
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Identificação do contrato ativo
+
+- **Arquivos:** `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** a tela passou a resolver o contrato operacional por `fase.categoria.acao` quando a seleção bate com um dos 3 fluxos auditados.
+
+### Passo 2 — Consumo de campos principais
+
+- **Arquivos:** `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** blocos principais da UI passaram a consultar `mainFields` para tempo, fase, sistema, categoria, ação, estrutura de transição, tipo de finalização e resultado factual.
+
+### Passo 3 — Consumo de campos opcionais
+
+- **Arquivos:** `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** atleta principal, ação preparatória e contextos passaram a ser derivados de `optionalFields`, preservando o preset rápido de passivo.
+
+### Passo 4 — Consumo de campos avançados
+
+- **Arquivos:** `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** causa provável, prioridade de treino, referência de vídeo e observação geral passaram a ser renderizados por `advancedFields` e ordenados por `uiOrder`.
+
+### Passo 5 — Correção após E2E
+
+- **Arquivos:** `src/features/scout/pages/ScoutWorkspacePage.tsx`
+- **Resultado:** a primeira versão expôs contextos de `TRANS_OF` fora do bloco avançado; os E2E `scout-cepr0089-trans-of` falharam. A UI foi ajustada para manter "Detalhes avançados da transição" recolhido por padrão, com `optionalFields` ainda governando a existência dos campos.
+
+---
+
+## ✅ Validação Final
+
+- `npm run typecheck`: passou
+- `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`: passou, 38 testes
+- `npm test`: passou, 51 testes
+- `npm run build`: passou com aviso existente de chunk grande do Vite
+- `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line`: passou, 9 testes
+- `npx playwright test e2e/scout --project=desktop --reporter=line`: passou, 102 testes
+- `npm run test:e2e`: falhou no run completo com 12 falhas; 10 sao fora do Scout e 2 de Scout foram corrigidas e revalidadas pela suíte `e2e/scout`.
+
+# Execution Log: CEPR-0089B
+
+## 🎯 Objetivo
+
+Atualizar Notion, matriz local e handoff/contexto local para registrar a criação do contrato operacional da `COLETA_AO_VIVO`, os fluxos cobertos, o consumo pela UI e o estado real da validação focada solicitada, sem abrir PR e sem expandir o contrato para `DEF_POS + BLOQUEIO`.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-20
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** `docs/scout/matriz-compatibilidade-coleta-ao-vivo.md`, `docs/scout/contexto/03-estado-atual.md`, `docs/scout/contexto/05-roteiro-retomada-piloto-01.md`, `.codex/codex-CHANGELOG.md`, `.codex/codex-EXECUTION_LOG.md`
+- **Arquivos Notion alterados:** Handoff Operacional Atual, Matriz Canonica de Compatibilidade
+- **Partes do sistema que podem quebrar:** nenhuma alteração runtime nesta etapa
+- **Restrição preservada:** nao expandir para `DEF_POS + BLOQUEIO` antes de estabilizar `requiredFields`
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Contexto obrigatório do repo
+
+- **Comandos:** `git status --short`, leitura de `CEPRAEA.md`, `gh pr list --limit 3 --state all --json number,title,state,mergedAt,updatedAt,headRefName,baseRefName`
+- **Resultado:** contexto obrigatório conferido; PR nao aberto.
+
+### Passo 2 — Validação focada solicitada
+
+- **Comando:** `npx playwright test e2e/scout --project=desktop --reporter=line`
+- **Resultado:** falhou inicialmente com `101 passed / 1 failed`.
+- **Falha intermediaria:** `e2e/scout/scout-cepr0088a-roster.spec.ts` nao encontrou `Coletar ao vivo`.
+- **Nota atualizada:** CEPR-0098C reexecutou o teste falho isolado com trace, endureceu `scout-cepr0089-trans-of.spec.ts` contra consulta SQL global e revalidou a suite Scout completa.
+
+### Passo 3 — Matriz local
+
+- **Arquivo:** `docs/scout/matriz-compatibilidade-coleta-ao-vivo.md`
+- **Resultado:** adicionada seção de contrato operacional complementar, apontando para `liveCollectionFlow.contract.ts`, os 3 fluxos cobertos, consumo pela UI e ressalva sobre a validação atual.
+
+### Passo 4 — Handoff/contexto local
+
+- **Arquivos:** `docs/scout/contexto/03-estado-atual.md`, `docs/scout/contexto/05-roteiro-retomada-piloto-01.md`
+- **Resultado:** registrado estado atual do contrato operacional, fluxos cobertos, consumo por `ScoutWorkspacePage.tsx`, pendência de `requiredFields` e bloqueio de expansão para `DEF_POS + BLOQUEIO`.
+
+### Passo 5 — Notion
+
+- **Ferramenta:** Notion MCP
+- **Resultado:** Handoff Operacional Atual e Matriz Canonica de Compatibilidade receberam atualização de governança com o mesmo estado.
+
+---
+
+## ✅ Validação Final
+
+- `npx playwright test e2e/scout --project=desktop --reporter=line`: falhou inicialmente, `101 passed / 1 failed`; superado por CEPR-0098C com `102 passed`
+- `npm run typecheck`: nao executado nesta etapa; alteracao documental/local e Notion
+- `npm test`: nao executado nesta etapa; alteracao documental/local e Notion
+- `npm run build`: nao executado nesta etapa; alteracao documental/local e Notion
+- `npm run test:e2e`: nao executado nesta etapa; falha global fora do Scout ja estava registrada na etapa anterior
+
+## Pendências
+
+- `e2e/scout/scout-cepr0088a-roster.spec.ts` investigado em CEPR-0098C; passou isolado com trace.
+- `e2e/scout/scout-cepr0089-trans-of.spec.ts` endurecido em CEPR-0098C para filtrar consultas SQL por `scout_game_id`; passou `9/9`.
+- Suite `e2e/scout` reexecutada em CEPR-0098C; passou `102/102`.
+
+# Execution Log: CEPR-0098C
+
+## 🎯 Objetivo
+
+Investigar e estabilizar o gate E2E Scout atual, começando pelo teste `e2e/scout/scout-cepr0088a-roster.spec.ts` e corrigindo flake adicional em `e2e/scout/scout-cepr0089-trans-of.spec.ts`, sem alterar contrato operacional, matriz semantica, UI, helpers ou expandir fluxos.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-20
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados nesta estabilização:** `e2e/scout/scout-cepr0089-trans-of.spec.ts`, documentação/logs de evidência
+- **Arquivos deliberadamente não alterados:** `src/features/scout/domain/liveCollectionFlow.contract.ts`, `src/features/scout/domain/liveCollectionCompatibility.matrix.ts`, `src/features/scout/pages/ScoutWorkspacePage.tsx`, `e2e/scout/scout-cepr0088a-roster.spec.ts`, `e2e/helpers/*`
+- **Partes do sistema que podem quebrar:** nenhuma alteração runtime nesta etapa
+- **Restrição preservada:** nao expandir `DEF_POS/BLOQUEIO`, nao ligar `requiredFields`, nao abrir PR
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Reprodução isolada com trace
+
+- **Comando:** `npx playwright test e2e/scout/scout-cepr0088a-roster.spec.ts --project=desktop --trace=on --reporter=line`
+- **Resultado:** passou, `1 passed`.
+
+### Passo 2 — Reexecução da suite Scout
+
+- **Comando:** `npx playwright test e2e/scout --project=desktop --reporter=line`
+- **Resultado inicial:** falhou `101/102` em `scout-cepr0089-trans-of.spec.ts`, teste 5.
+
+### Passo 3 — Hardening da spec TRANS_OF
+
+- **Arquivo:** `e2e/scout/scout-cepr0089-trans-of.spec.ts`
+- **Resultado:** consultas SQL dos testes 3-5 passaram a filtrar por `scout_game_id`, evitando ler entrada criada por outro worker.
+
+### Passo 4 — Revalidação TRANS_OF
+
+- **Comando:** `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line`
+- **Resultado:** passou, `9 passed`.
+
+### Passo 5 — Revalidação final Scout
+
+- **Comando:** `npx playwright test e2e/scout --project=desktop --reporter=line`
+- **Resultado:** passou, `102 passed`.
+
+### Passo 6 — Registro de evidência
+
+- **Arquivos:** matriz local, contexto/handoff local, logs Codex e Notion
+- **Resultado:** estado atualizado para registrar a falha intermediaria `101/102`, o hardening da spec e o gate Scout atual verde `102/102`.
+
+---
+
+## ✅ Validação Final
+
+- `npx playwright test e2e/scout/scout-cepr0088a-roster.spec.ts --project=desktop --trace=on --reporter=line`: passou, 1 teste
+- `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line`: passou, 9 testes
+- `npx playwright test e2e/scout --project=desktop --reporter=line`: passou, 102 testes
+- `npm run typecheck`: passou
+- `npm test`: passou, 51 testes
+- `npm run build`: passou com aviso existente de chunk grande do Vite
+- `npm run test:e2e`: nao executado nesta etapa; global continua com falhas conhecidas fora do Scout
+
+## Pendências
+
+- E2E global fora do Scout permanece pendente em trilha separada.
+- Se algum E2E de Scout voltar a falhar por leitura de banco, verificar primeiro se a consulta está escopada por `scout_game_id` antes de alterar UI ou contrato.

@@ -20,14 +20,21 @@ Referencia curta para um agente entrar no trabalho sem reler todo o historico.
 
 - necessidade de separar semantica do dominio de implementacao casual de UI;
 - uso de matriz canonica para governar compatibilidades da `COLETA_AO_VIVO`;
+- contrato operacional executavel complementar para fluxo de tela da `COLETA_AO_VIVO`;
 - leitura do scout em camadas, nao apenas captura de evento bruto;
 - distincao entre contexto vivo, SSOT, historico e evidência.
+- `liveCollectionCompatibility.matrix.ts` continua como contrato semantico executavel;
+- `liveCollectionFlow.contract.ts` governa `mainFields`, `optionalFields`, `advancedFields` e `uiOrder` apenas dos fluxos ja cobertos.
+- Fluxos cobertos pelo contrato operacional em 2026-05-20:
+  - `AT_POS.ARREMESSO.ARREMESSO`;
+  - `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV`;
+  - `TRANS_OF.ARREMESSO.ARREMESSO`.
 - `6m` na `COLETA_AO_VIVO`:
   - cobrança adversária: `DEF_POS + ACAO_DEFENSIVA + FINALIZACAO_6M_ADV`;
   - cobrança favorável ao CEPRAEA: `AT_POS + ARREMESSO + FINALIZACAO_6M_FAV`;
   - ambos derivam `tipo_finalizacao_code = 6M`;
   - no caso favorável com `GOL`, deriva `motivo_pontuacao_code = 6M` e `pontos_jogada = 2`;
-  - validação ampla do Scout passou com `102` E2E.
+  - validação ampla do Scout teve execução verde com `102` E2E após a UI consumir o contrato operacional.
 
 ## O que continua sensivel
 
@@ -35,6 +42,10 @@ Referencia curta para um agente entrar no trabalho sem reler todo o historico.
 - `DEF_POS` quando duas defensoras falham juntas em fechamento/cobertura/sincronia;
 - `TRANS_OF` quando a modelagem precisa diferenciar estrutura, contexto decisional e contexto do arremesso;
 - UX operacional que induz dado impreciso mesmo quando a matriz esta melhor.
+- `requiredFields` do contrato operacional ainda precisa estabilizar antes de expandir o mesmo modelo para `DEF_POS + BLOQUEIO`.
+- Evidencia intermediaria: em 2026-05-20, uma reexecucao de `npx playwright test e2e/scout --project=desktop --reporter=line` falhou `101/102` em `scout-cepr0088a-roster.spec.ts` ao localizar `Coletar ao vivo`.
+- Evidencia atual: em 2026-05-20, o teste `scout-cepr0088a-roster.spec.ts` passou isolado com trace; depois `scout-cepr0089-trans-of.spec.ts` foi endurecido para filtrar consultas SQL por `scout_game_id`; a suite `e2e/scout` passou `102/102`. Tratar as falhas anteriores como problemas de estabilidade de E2E, nao como quebra do contrato operacional.
+- O E2E global tem falhas conhecidas fora do Scout; tratar separadamente de evolucoes do contrato operacional.
 
 ## Proximo foco recomendado
 
@@ -61,6 +72,7 @@ Estado atual:
 - a UI foi simplificada para `TRANS_OF + ARREMESSO`: estrutura e contexto detalhado ficam fora do bloco de finalização;
 - existe preset rápido `Arremesso forçado por passivo` em `AT_POS + ARREMESSO` e `TRANS_OF + ARREMESSO`;
 - `AT_POS + ARREMESSO` e `TRANS_OF + ARREMESSO` compartilham o bloco visual `Finalização` (CEPR-0099/CEPR-0100), mantendo contextos separados por fase;
+- esses fluxos agora sao governados por `liveCollectionFlow.contract.ts` para campos principais, opcionais, avancados e ordem de UI;
 - o passivo pode ocorrer em `AT_POS` ou `TRANS_OF`;
 - o próximo risco é validação humana em velocidade real de coleta, não mais ausência de caminho técnico.
 
