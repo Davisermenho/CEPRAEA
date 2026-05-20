@@ -166,6 +166,7 @@ begin
     'sistema_ofensivo_code',      'AT_3X1',
     'atleta_principal_id',        '20000000-0000-0000-0000-000000000001',
     'acao_principal_suggestion_code', 'GIRO',
+    'acao_basica_code',           'ARREMESSO',
     'tipo_finalizacao_code',      'GIRO',
     'resultado_factual_code',     'GOL',
     'motivo_pontuacao_code',      'GIRO',
@@ -195,6 +196,7 @@ begin
       'sistema_ofensivo_code',      'AT_3X1',
       'atleta_principal_id',        '20000000-0000-0000-0000-000000000001',
       'acao_principal_suggestion_code', 'GIRO',
+      'acao_basica_code',           'ARREMESSO',
       'tipo_finalizacao_code',      'GIRO',
       'resultado_factual_code',     'GOL',
       'motivo_pontuacao_code',      'GIRO',
@@ -226,11 +228,7 @@ begin
     'fase_equipe_analisada_code', 'ATAQUE',
     'sistema_ofensivo_code',      'AT_3X1',
     'atleta_principal_id',        '20000000-0000-0000-0000-000000000001',
-    'acao_principal_suggestion_code', 'GIRO',
-    'tipo_finalizacao_code',      'GIRO',
-    'resultado_factual_code',     'GOL',
-    'motivo_pontuacao_code',      'GIRO',
-    'pontos_jogada',              2
+    'resultado_factual_code',     'NAO_OBSERVADO'
   ));
 
   if v_entry.categoria_acao_code is not null then

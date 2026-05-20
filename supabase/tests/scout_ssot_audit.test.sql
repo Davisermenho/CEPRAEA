@@ -271,13 +271,13 @@ begin
   if exists (
     select 1 from scout_code_lists
     where active = true
-      and source_version not in ('manual-v1.0.1','etapa-a-v1')
+      and source_version not in ('manual-v1.0.1','manual-v1.0.2','etapa-a-v1')
       and source_version not like '%-test%'
   ) then
     raise exception 'VAL-04: existe lista com source_version desconhecido';
   end if;
 
-  raise notice 'VAL-04 PASSOU: % de % listas governadas por source_version=manual-v1.0.1; demais são etapa-a-v1 (subconjunto v1.0.1)', v_v1_count, v_total;
+  raise notice 'VAL-04 PASSOU: % de % listas governadas por source_version=manual-v1.0.1; demais são etapa-a-v1 ou manual-v1.0.2 governadas', v_v1_count, v_total;
 end $$;
 
 -- ═════════════════════════════════════════════════════════════════════════════

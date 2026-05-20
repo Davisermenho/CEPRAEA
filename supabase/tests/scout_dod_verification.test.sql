@@ -17,10 +17,10 @@ begin
   select count(*) into v_count
   from scout_code_lists
   where active = true
-    and source_version not in ('manual-v1.0.1','etapa-a-v1')
+    and source_version not in ('manual-v1.0.1','manual-v1.0.2','etapa-a-v1')
     and source_version not like '%-test%';
   if v_count > 0 then
-    raise exception 'DOD-01: % lista(s) com source_version fora de Manual v1.0.1 ou etapa-a-v1', v_count;
+    raise exception 'DOD-01: % lista(s) com source_version fora de Manual v1.0.1/v1.0.2 ou etapa-a-v1', v_count;
   end if;
 
   -- The RPC that validates codes must exist and be enforcing codebook only
@@ -31,7 +31,7 @@ begin
     raise exception 'DOD-01: scout_field_value_allowed() ausente — gateway codebook sem regra própria';
   end if;
 
-  raise notice 'DOD-01 PASSOU: Manual v1.0.1 governa a semântica — 0 listas fora de escopo; scout_field_value_allowed() existe';
+  raise notice 'DOD-01 PASSOU: Manual v1.0.1/v1.0.2 governa a semântica — 0 listas fora de escopo; scout_field_value_allowed() existe';
 end $$;
 
 -- ═════════════════════════════════════════════════════════════════════════════

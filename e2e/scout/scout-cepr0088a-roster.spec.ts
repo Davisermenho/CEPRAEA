@@ -78,5 +78,5 @@ test('CEPR0088A: atleta scout real aparece no elenco de confirmação', async ({
   // NOTA: o select "Atleta principal" usa useAthleteStore (populado no boot).
   // Atleta criada mid-session não aparece sem reload — fora do escopo CEPR-0088A.
   // Verificamos apenas que a página renderiza corretamente.
-  await expect(page.getByText(/Coletar ao vivo/i).first()).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText(/Coleta ao vivo/i).first()).toBeVisible({ timeout: 15_000 })
 })

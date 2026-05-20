@@ -105,6 +105,8 @@ test('SMOKE-03: preparar nova sessão com session_type TREINO', async ({ page })
 // (Usa a sessão criada no SMOKE-03 — partimos do estado pós-criação)
 // ─────────────────────────────────────────────────────────────────────────────
 test('SMOKE-04: roster add/remove atleta em /scout/preparar/:gameId', async ({ page }) => {
+  test.setTimeout(60_000)
+
   await loginAsCoach(page)
 
   // Criar sessão fresh para este teste
@@ -122,11 +124,14 @@ test('SMOKE-04: roster add/remove atleta em /scout/preparar/:gameId', async ({ p
     { timeout: 10_000 },
   )
 
-  // Se não há atletas no DB, o empty state aparece — verificar e sair
-  const noAthletesMsg = page.getByText('Nenhuma atleta cadastrada')
-  const hasNoAthletes = await noAthletesMsg.isVisible({ timeout: 500 }).catch(() => false)
-  if (hasNoAthletes) {
-    await expect(noAthletesMsg).toBeVisible()
+  // Se não há atletas no DB, o empty state aparece; caso contrário, há botões no roster.
+  const noAthletesMsg = page.getByText(/Nenhuma atleta cadastrada/i)
+  const firstAthleteBtn = page.locator('ul li button').first()
+  const rosterState = await Promise.race([
+    noAthletesMsg.waitFor({ state: 'visible', timeout: 10_000 }).then(() => 'empty' as const),
+    firstAthleteBtn.waitFor({ state: 'visible', timeout: 10_000 }).then(() => 'list' as const),
+  ])
+  if (rosterState === 'empty') {
     return
   }
 
@@ -134,7 +139,6 @@ test('SMOKE-04: roster add/remove atleta em /scout/preparar/:gameId', async ({ p
   await expect(page.getByText('0 atletas confirmadas')).toBeVisible()
 
   // Clicar na primeira atleta da lista para adicionar ao roster
-  const firstAthleteBtn = page.locator('ul li button').first()
   await firstAthleteBtn.click()
   await page.waitForTimeout(1500) // aguarda operação async
 

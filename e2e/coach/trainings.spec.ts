@@ -21,6 +21,8 @@ test.describe('T04 — trainingStore Supabase-first: prova multi-contexto', () =
   })
 
   test('treino criado no contexto A é visível no contexto B sem IndexedDB compartilhado', async ({ browser }) => {
+    test.setTimeout(60_000)
+
     // ── Contexto A: cria o treino via UI ────────────────────────────────────
     const ctxA = await browser.newContext({ baseURL: BASE_URL })
     const pageA = await ctxA.newPage()

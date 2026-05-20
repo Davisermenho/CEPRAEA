@@ -39,6 +39,8 @@ begin
     'sistema_ofensivo_code',      'AT_3X1',
     'atleta_principal_id',        '20000000-0000-0000-0000-000000000001',
     'acao_principal_suggestion_code', 'GIRO',
+    'categoria_acao_code',        'ARREMESSO',
+    'acao_basica_code',           'ARREMESSO',
     'tipo_finalizacao_code',      'GIRO',
     'resultado_factual_code',     'GOL',
     'motivo_pontuacao_code',      'GIRO',
@@ -67,6 +69,8 @@ begin
     'sistema_ofensivo_code',      'AT_4X0',
     'atleta_principal_id',        '20000000-0000-0000-0000-000000000001',
     'acao_principal_suggestion_code', 'AEREA',
+    'categoria_acao_code',        'ARREMESSO',
+    'acao_basica_code',           'ARREMESSO',
     'tipo_finalizacao_code',      'AEREA',
     'resultado_factual_code',     'DEFENDIDO'
   ));

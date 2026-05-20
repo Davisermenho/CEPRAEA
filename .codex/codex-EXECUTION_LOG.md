@@ -4097,3 +4097,78 @@ Investigar e estabilizar o gate E2E Scout atual, começando pelo teste `e2e/scou
 
 - E2E global fora do Scout permanece pendente em trilha separada.
 - Se algum E2E de Scout voltar a falhar por leitura de banco, verificar primeiro se a consulta está escopada por `scout_game_id` antes de alterar UI ou contrato.
+
+# Execution Log: CEPR-0099B
+
+## 🎯 Objetivo
+
+Resolver o gate final `npm run validate:mvp:v1`, separando falhas reais de fixtures/specs obsoletos, sem misturar novas features de Scout, sem expandir `DEF_POS/BLOQUEIO`, sem ligar `requiredFields` e sem abrir/mergear PR.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-20
+- **Branch:** `wip/post-merge-cleanup-clean`
+
+---
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:** specs E2E, fixtures SQL Supabase, testes de governança SQL, `package-lock.json`, logs Codex.
+- **Arquivos deliberadamente não alterados:** `src/features/scout/domain/liveCollectionFlow.contract.ts`, `src/features/scout/domain/liveCollectionCompatibility.matrix.ts`, `src/features/scout/pages/ScoutWorkspacePage.tsx`, migrations, runtime de app.
+- **Risco principal mitigado:** specs/fixtures antigas mascarando o estado real do gate MVP após endurecimento semântico da `COLETA_AO_VIVO`.
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Diagnóstico das falhas globais
+
+- **Entrada:** `npm run validate:mvp:v1` reportado pelo usuário com 4 falhas E2E e gate FAIL.
+- **Falhas iniciais:** `coach/trainings`, `scout-cepr0083-smoke`, `scout-cepr0088a-roster`, `athlete/onboarding`.
+- **Resultado:** testes focados indicaram instabilidade/obsolescência de spec, não regressão do contrato operacional.
+
+### Passo 2 — Hardening E2E
+
+- **Arquivos:** `e2e/coach/trainings.spec.ts`, `e2e/athlete/onboarding.spec.ts`, `e2e/scout/scout-cepr0083-smoke.spec.ts`, `e2e/scout/scout-cepr0088a-roster.spec.ts`.
+- **Resultado:** timeouts/esperas locais e seletor textual corrigidos sem alterar UI.
+
+### Passo 3 — Correção do audit
+
+- **Comando:** `npm audit fix --package-lock-only`
+- **Resultado:** `brace-expansion` e `ws` atualizados no lockfile; `npm audit` passou com `0 vulnerabilities`.
+
+### Passo 4 — Alinhamento de fixtures SQL
+
+- **Arquivos:** `supabase/tests/scout_codebook_labels.test.sql`, `supabase/tests/scout_dec006_acao_terminal.test.sql`, `supabase/tests/scout_rastreabilidade.test.sql`.
+- **Resultado:** payloads de arremesso ofensivo com `tipo_finalizacao_code` agora declaram `categoria_acao_code=ARREMESSO` e/ou `acao_basica_code=ARREMESSO` conforme a guarda semântica atual.
+
+### Passo 5 — Governança de source_version
+
+- **Arquivos:** `supabase/tests/scout_ssot_audit.test.sql`, `supabase/tests/scout_dod_verification.test.sql`.
+- **Resultado:** `manual-v1.0.2` aceito como versão governada para a lista `LISTA_EXECUCAO_BLOQUEIO`.
+
+---
+
+## ✅ Validação Final
+
+- `npm audit`: passou, `found 0 vulnerabilities`.
+- `npm run test:supabase`: passou completo.
+- `npx playwright test e2e/scout/scout-cepr0083-smoke.spec.ts --project=desktop --grep "SMOKE-04" --reporter=line`: passou, `1 passed`.
+- `npm run validate:mvp:v1`: passou completo.
+  - `typecheck`: OK.
+  - `unit tests`: OK, `51 passed`.
+  - `build`: OK, com aviso existente de chunk grande do Vite.
+  - `deps:check`: OK.
+  - `audit`: OK, `0 vulnerabilities`.
+  - `db reset`: OK.
+  - `test:supabase`: OK.
+  - `e2e tests`: OK, `166 passed / 5 skipped`.
+  - `check:runtime-legacy`: OK.
+
+## Pendências
+
+- Fazer commit limpo e push para a branch do PR #14.
+- Revalidar checks/preview da Vercel após o push.
+- Não fazer merge sem confirmação humana.

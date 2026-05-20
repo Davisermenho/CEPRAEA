@@ -1939,3 +1939,33 @@ Investigado o bloqueio do gate Scout causado inicialmente por `scout-cepr0088a-r
   - Sem alterações em `liveCollectionFlow.contract.ts`, `liveCollectionCompatibility.matrix.ts`, `ScoutWorkspacePage.tsx` ou helpers nesta estabilização.
   - E2E global continua pendente fora do Scout.
   - PR nao foi aberto.
+
+---
+
+### [CEPR-0099B] — 2026-05-20 — Gate MVP v1.0 verde após estabilização E2E/Supabase
+
+#### ✨ Resumo
+
+Estabilizado o gate final `npm run validate:mvp:v1` após falhas globais fora do Scout e falhas Supabase em fixtures antigas. O gate MVP voltou a passar completo, sem alterar contrato operacional, matriz semântica, UI de Scout ou migrations.
+
+#### 🛠️ Changed
+
+- `e2e/coach/trainings.spec.ts` recebeu timeout local para o fluxo multi-contexto T04.
+- `e2e/athlete/onboarding.spec.ts` passou a aguardar o painel da atleta antes da checagem SQL de vínculo assíncrono.
+- `e2e/scout/scout-cepr0083-smoke.spec.ts` ficou resiliente ao estado com roster vazio ou lista carregada no SMOKE-04.
+- `e2e/scout/scout-cepr0088a-roster.spec.ts` foi alinhado ao texto atual da UI: `Coleta ao vivo`.
+- Fixtures SQL antigas de arremesso ofensivo passaram a declarar `categoria_acao_code`/`acao_basica_code` quando enviam `tipo_finalizacao_code`.
+- Testes de governança SSOT/DOD passaram a aceitar `manual-v1.0.2` como `source_version` governada para `LISTA_EXECUCAO_BLOQUEIO`.
+- `package-lock.json` foi atualizado por `npm audit fix --package-lock-only`, resolvendo vulnerabilidades moderadas de `brace-expansion` e `ws` sem adicionar dependência de app.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO para gate MVP local.
+- **Evidências objetivas:**
+  - `npm audit`: passou, `found 0 vulnerabilities`.
+  - `npm run test:supabase`: passou completo.
+  - `npx playwright test e2e/scout/scout-cepr0083-smoke.spec.ts --project=desktop --grep "SMOKE-04" --reporter=line`: passou, `1 passed`.
+  - `npm run validate:mvp:v1`: passou completo.
+  - E2E global dentro do gate: `166 passed / 5 skipped`.
+  - `check:runtime-legacy`: passou.
+  - Sem PR aberto/mergeado nesta etapa; PR #14 apenas permanece como alvo para push posterior.
