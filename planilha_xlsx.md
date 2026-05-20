@@ -392,7 +392,7 @@ Coluna única por lista:
 | `MOD-` | Modelo de documento | `MOD-008` |
 | `DOC-` | Documento gerado | `DOC-031` |
 
-> **Regra:** IDs são sequenciais e imutáveis. Nunca reutilize um ID removido.  
+> **Regra:** IDs são sequenciais e imutáveis. Nunca reutilize um ID removido.
 > **Automação:** use Apps Script para gerar o próximo ID automaticamente (ver seção 3.4).
 
 ---

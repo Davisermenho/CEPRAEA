@@ -17,8 +17,8 @@ nao_cobre: "O que fazer (→ plan.md), o que é o produto (→ CEPRAEA.md), como
 ---
 
 # Auditoria Adversarial — plan.md
-**Data:** 2026-05-06  
-**Método:** Leitura cruzada entre plan.md, CEPRAEA.md, AGENT.md e estado real do repositório.  
+**Data:** 2026-05-06
+**Método:** Leitura cruzada entre plan.md, CEPRAEA.md, AGENT.md e estado real do repositório.
 **Veredicto geral:** O plano contém erros de estado factuais, lacunas estruturais que criam bloqueios permanentes, testes que validam comportamento legado em vez do comportamento novo, e uma definição de gate final que não inclui os próprios testes E2E que o plano exige.
 
 ---

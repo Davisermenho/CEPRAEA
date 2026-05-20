@@ -71,7 +71,7 @@ validade: "Atual até a última entrada registrada."
 status: ATUAL
 ---
 # 🤖 COPILOT ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
->Versão 1.0 — 2026-05-06 <br> 
+>Versão 1.0 — 2026-05-06 <br>
 >*Última atualização*: 2026-05-11 - BRT - Claude Sonnet 4.6 (Copilot)
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3>Copilot</font></b> ,incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
@@ -1000,8 +1000,8 @@ Eliminar as 4 vulnerabilidades `high` reportadas por `npm audit` sem breaking ch
 
 ## CEPR-0030 — Sessão de Migração MVP T02→T05 — 2025-07-14
 
-**Agente:** GitHub Copilot (Claude Sonnet 4.6)  
-**Branch:** `migration/athlete-auth-foundation` → PR #9  
+**Agente:** GitHub Copilot (Claude Sonnet 4.6)
+**Branch:** `migration/athlete-auth-foundation` → PR #9
 **Duração:** ~2 sessões acumuladas (compactação entre T03 e T04)
 
 ### Execução
@@ -1120,7 +1120,7 @@ Eliminar as 4 vulnerabilidades `high` reportadas por `npm audit` sem breaking ch
 
 ## CEPR-0042 — T08: Import e reconciliação de dados legados — 2026-05-07
 
-**Agente:** Claude Sonnet 4.6  
+**Agente:** Claude Sonnet 4.6
 **Branch:** `migration/athlete-auth-foundation`
 
 ### Escopo
@@ -1161,7 +1161,7 @@ Criar scripts de importação e reconciliação de backup JSON legado para o Sup
 
 ## CEPR-0041 — T07: Vínculo de conta da atleta — 2026-05-07
 
-**Agente:** Claude Sonnet 4.6  
+**Agente:** Claude Sonnet 4.6
 **Branch:** `migration/athlete-auth-foundation`
 
 ### Escopo
@@ -1206,7 +1206,7 @@ Expor estado de vínculo (`athletes.user_id`) na UI do treinador (`AthleteDetail
 
 ## CEPR-0043 — Diagnóstico: bug de paths WSL + docs de navegação — 2026-05-07
 
-**Agente:** GitHub Copilot (Claude Sonnet 4.6)  
+**Agente:** GitHub Copilot (Claude Sonnet 4.6)
 **Branch:** `feat/mvp-v1-complete`
 
 ### Escopo

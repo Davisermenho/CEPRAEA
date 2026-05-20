@@ -18,7 +18,7 @@ nao_cobre: "Decisões de produto, sequência futura de tarefas, logs de Claude o
 politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou no imediatamente subsequente. Não registrar valores sensíveis de ambiente."
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
->Versão 1.0 — 2026-05-06 <br> 
+>Versão 1.0 — 2026-05-06 <br>
 *Última atualização*: 2026-05-20 - 07:14 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
@@ -536,7 +536,7 @@ Implementar `0010` com RLS/policies e grants do scout novo, cobrindo tanto os co
 - **Arquivos que podem ser afetados:** próximas migrations do scout, integração PostgREST do scout, runtime do slice 1 e documentação de segurança
 - **Partes do sistema que podem quebrar:** nenhuma no runtime atual; o risco tratado era deixar o scout novo sem política explícita ou com política errada para o codebook
 - **Testes que cobrem o risco:** grants test dedicado, RLS test dedicado e validação por estágio das migrations do scout
-- **Comandos de validação:** 
+- **Comandos de validação:**
   - `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; sed \"4d;\\$d\" supabase/tests/scout_contract_foundation.test.sql; echo \"rollback;\"; } | psql ...'`
   - `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; cat supabase/migrations/0009_scout_codebook_foundation.sql; sed \"4d;\\$d\" supabase/tests/scout_contract_foundation.test.sql; sed \"4d;\\$d\" supabase/tests/scout_codebook_foundation.test.sql; echo \"rollback;\"; } | psql ...'`
   - `bash -lc '{ echo \"begin;\"; cat supabase/migrations/0008_scout_contract_foundation.sql; cat supabase/migrations/0009_scout_codebook_foundation.sql; cat supabase/migrations/0010_scout_security_policies_and_grants.sql; sed \"4d;\\$d\" supabase/tests/scout_security_grants.test.sql; sed \"4d;\\$d\" supabase/tests/scout_security_rls.test.sql; echo \"rollback;\"; } | psql ...'`
@@ -610,7 +610,7 @@ Produzir um manual operacional do scout atual da rota `/scout`, em formato usáv
 - **Arquivos que podem ser afetados:** onboarding operacional do scout, treinamento de uso interno, futura documentação de produto do scout
 - **Partes do sistema que podem quebrar:** nenhuma em runtime; o risco tratado era documentação humana descolada da UX real da rota `/scout`
 - **Testes que cobrem o risco:** não aplicável; validação foi por leitura direta da implementação real da tela
-- **Comandos de validação:** 
+- **Comandos de validação:**
   - `sed -n '1,320p' src/features/scout/pages/ScoutWorkspacePage.tsx`
   - `sed -n '321,720p' src/features/scout/pages/ScoutWorkspacePage.tsx`
   - `sed -n '721,1100p' src/features/scout/pages/ScoutWorkspacePage.tsx`

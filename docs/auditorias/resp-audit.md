@@ -1,8 +1,8 @@
 # Relatório de Verificação e Validação da Auditoria do Plano
 
-**Arquivo auditado:** `auditplan.md`  
-**Plano de referência auditado:** `plan.md`  
-**Data da validação:** 2026-05-06  
+**Arquivo auditado:** `auditplan.md`
+**Plano de referência auditado:** `plan.md`
+**Data da validação:** 2026-05-06
 **Critério:** cada afirmação do `auditplan.md` foi revalidada contra o repositório atual, scripts reais, testes existentes, `CEPRAEA.md` e `AGENT.md`.
 
 ## Legenda

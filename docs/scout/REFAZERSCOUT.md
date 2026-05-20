@@ -311,7 +311,7 @@ Você cria uma mentira técnica:
 - mas na prática ele só está guardando um resumo da coleta
 
 ### Veredito
-**Não recomendo como solução principal.**  
+**Não recomendo como solução principal.**
 Pode servir como gambiarra temporária, mas vai contaminar o domínio.
 
 ---
@@ -600,7 +600,7 @@ Importante:
 
 Aqui está a parte mais importante.
 
-`scout_live_entries` **não substitui** `scout_plays`.  
+`scout_live_entries` **não substitui** `scout_plays`.
 Ele antecede ou convive com ele.
 
 Eu recomendo três estados possíveis:
@@ -712,7 +712,7 @@ Então o risco real agora é este:
 
 Ele precisa de uma **auditoria de aderência da implementação ao scout aprovado**.
 
-Não é auditoria metodológica.  
+Não é auditoria metodológica.
 Essa fase já passou.
 
 É auditoria de implementação, para responder 4 perguntas objetivas:
@@ -759,17 +759,17 @@ Porque a planilha já define:
 - comportamento de listas
 - contexto de uso
 
-Então o trabalho certo não é “inventar uma tela”.  
+Então o trabalho certo não é “inventar uma tela”.
 É **mapear a implementação existente para a experiência já definida na planilha**.
 
 ## Portanto: qual é a melhor decisão?
 
 **Auditar primeiro, implementar logo em seguida.**
 
-Mas tem um detalhe importante:  
+Mas tem um detalhe importante:
 essa auditoria deve ser **curta, objetiva e orientada à refatoração**.
 
-Não é uma auditoria longa de descoberta.  
+Não é uma auditoria longa de descoberta.
 É uma auditoria de corte técnico.
 
 ## Como eu faria isso na prática
@@ -806,7 +806,7 @@ Isso é mais seguro do que continuar incrementando `ScoutWorkspacePage.tsx`.
 
 ## Resposta curta à sua pergunta
 
-**Não, eu não começaria pela tela diretamente.**  
+**Não, eu não começaria pela tela diretamente.**
 **Também não recomeçaria do zero.**
 
 O próximo passo lógico é:
@@ -940,7 +940,7 @@ Se quiser, o próximo passo eu posso te devolver como **plano de refatoração e
 
 **Plano**
 
-A melhor estratégia é **refatorar por camadas de coleta**, não por “feature solta”.  
+A melhor estratégia é **refatorar por camadas de coleta**, não por “feature solta”.
 A primeira tela deve ser **`COLETA_AO_VIVO` fiel à planilha**, porque ela já é o recorte operacional mais enxuto e mais próximo do uso real durante ou logo após o jogo.
 
 **Fase 0 — Congelamento e corte**
@@ -1117,12 +1117,12 @@ Motivo:
 **Veredito**
 A sequência correta é:
 
-1. congelar a UI atual como spike  
-2. mapear `COLETA_AO_VIVO`  
-3. refatorar codebook  
-4. construir a nova tela de `COLETA_AO_VIVO`  
-5. adaptar persistência  
-6. validar salvar/carregar  
+1. congelar a UI atual como spike
+2. mapear `COLETA_AO_VIVO`
+3. refatorar codebook
+4. construir a nova tela de `COLETA_AO_VIVO`
+5. adaptar persistência
+6. validar salvar/carregar
 7. só depois expandir para `COLETA_SCOUT` e `PARTICIPACOES`
 
 
@@ -1491,7 +1491,7 @@ Exemplos:
 - `Atleta principal`: exibir `NOME_ATLETA`, salvar `ID_ATLETA`
 
 **3. Respeitar obrigatoriedade condicional**
-A planilha marca vários campos como `Condicional`.  
+A planilha marca vários campos como `Condicional`.
 Então a tela deve suportar lógica contextual, não só `required` bruto.
 
 **4. Não expor abstrações do banco**
@@ -1644,7 +1644,7 @@ Você cria uma mentira técnica:
 - mas na prática ele só está guardando um resumo da coleta
 
 ### Veredito
-**Não recomendo como solução principal.**  
+**Não recomendo como solução principal.**
 Pode servir como gambiarra temporária, mas vai contaminar o domínio.
 
 ---
@@ -1930,7 +1930,7 @@ Importante:
 
 Aqui está a parte mais importante.
 
-`scout_live_entries` **não substitui** `scout_plays`.  
+`scout_live_entries` **não substitui** `scout_plays`.
 Ele antecede ou convive com ele.
 
 Eu recomendo três estados possíveis:
@@ -2158,7 +2158,7 @@ Mas isso é **decisão técnica**, não regra da SSOT.
 
 **O que falta para iniciar a implementação corretamente**
 
-A boa notícia: **não falta nova aprovação metodológica**.  
+A boa notícia: **não falta nova aprovação metodológica**.
 A SSOT já está suficiente para começar.
 
 O que falta agora é técnico e de recorte.
@@ -2271,7 +2271,7 @@ Para começar a implementação correta do scout conforme os SSOTs, faltam basic
 4. definir a estratégia controlada de `ACAO_PRINCIPAL`
 5. fechar a matriz de obrigatoriedade condicional
 
-Depois disso, **já dá para implementar de forma correta**.  
+Depois disso, **já dá para implementar de forma correta**.
 Não vejo mais bloqueio metodológico real.
 
 **Checklist de readiness para iniciar a implementação do scout**

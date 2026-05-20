@@ -907,8 +907,8 @@ Commit: `c7674d8`
 
 ## CEPR-0030 — Migração MVP Supabase-first (T02→T05) — 2025-07-14
 
-**Branch:** `migration/athlete-auth-foundation`  
-**PR:** #9  
+**Branch:** `migration/athlete-auth-foundation`
+**PR:** #9
 **Commits:** `f221097` (T02), `b9f69b2` (T03), `cfd3ad7` (T04), `9ff7efa` (T05)
 
 ### T02 — Contrato SQL de escrita de presença
@@ -1018,8 +1018,8 @@ Arquivos modificados no working tree (remoção de `syncFromRemote`, `getAtletaS
 
 ## CEPR-0034 — P1 #2: Substituir `athlete_link_user_id` UPDATE policy por RPC SECURITY DEFINER
 
-**Data:** 2026-05-07  
-**Branch:** `migration/athlete-auth-foundation` (PR #9)  
+**Data:** 2026-05-07
+**Branch:** `migration/athlete-auth-foundation` (PR #9)
 **Trigger:** Codex bot review comment `r3193398149` — RLS escalation via `athlete_link_user_id` policy (P1)
 
 ### Problema
@@ -1058,7 +1058,7 @@ exclusivamente `SET user_id = auth.uid()` — impossível ao cliente alterar qua
 
 ## CEPR-0042 — T08: Import e reconciliação de dados legados — 2026-05-07
 
-**Tipo:** Operacional — scripts + fixture + docs  
+**Tipo:** Operacional — scripts + fixture + docs
 **Branch:** `migration/athlete-auth-foundation`
 
 ### Arquivos criados/alterados
@@ -1080,7 +1080,7 @@ exclusivamente `SET user_id = auth.uid()` — impossível ao cliente alterar qua
 
 ## CEPR-0041 — T07: Vínculo de conta da atleta exposto na UI + E2E — 2026-05-07
 
-**Tipo:** Feature — UI + E2E  
+**Tipo:** Feature — UI + E2E
 **Branch:** `migration/athlete-auth-foundation`
 
 ### Alterações
@@ -1103,8 +1103,8 @@ exclusivamente `SET user_id = auth.uid()` — impossível ao cliente alterar qua
 
 ## CEPR-0035 — Correção: `VITE_SUPABASE_TEAM_ID` ausente em produção Vercel
 
-**Data:** 2026-05-07  
-**Tipo:** Operacional — configuração de ambiente (sem alteração de código)  
+**Data:** 2026-05-07
+**Tipo:** Operacional — configuração de ambiente (sem alteração de código)
 **Trigger:** Inspeção manual solicitada pelo desenvolvedor após suspeita de variável de env faltando
 
 ### Problema
@@ -1141,7 +1141,7 @@ Redeploy executado via `vercel --prod` e UUID verificado no bundle JS minificado
 
 ## CEPR-0043 — Diagnóstico: bug de paths WSL + docs de navegação — 2026-05-07
 
-**Tipo:** Operacional — docs + diagnóstico de ambiente  
+**Tipo:** Operacional — docs + diagnóstico de ambiente
 **Branch:** `feat/mvp-v1-complete`
 
 ### Alterações
@@ -1172,7 +1172,7 @@ Identificado e documentado bug estrutural do Copilot em workspaces WSL:
 
 ## CEPR-0044 — Scout RULES-03: smoke tests E2E corrigidos e passando — 2026-05-09
 
-**Tipo:** Test — E2E  
+**Tipo:** Test — E2E
 **Branch:** `wip/post-merge-cleanup-2026-05-07`
 
 ### Contexto
@@ -1223,8 +1223,8 @@ Melhoria futura: adicionar `data-testid="scout-live-entry-row"` + `data-phase` +
 
 ## CEPR-0045 — Scout UX-04/RULES-04: matriz Fase → Ação → Resultado — Pendente — 2026-05-09
 
-**Tipo:** Rule/UX  
-**Status:** CLOSED_SUPERSEDED_BY_CEPR-0046  
+**Tipo:** Rule/UX
+**Status:** CLOSED_SUPERSEDED_BY_CEPR-0046
 **Branch:** `wip/post-merge-cleanup-2026-05-07`
 
 ### Problema identificado
@@ -1293,8 +1293,8 @@ intensivo até fechamento da matriz de compatibilidade.
 
 ## CEPR-0046 — Scout UX-04/RULES-04: filtro de resultado factual por fase/ação — IMPLEMENTADO — 2026-05-10
 
-**Tipo:** Rule/UX  
-**Status:** APPROVED  
+**Tipo:** Rule/UX
+**Status:** APPROVED
 **Branch:** `wip/post-merge-cleanup-2026-05-07`
 
 ### Resumo
@@ -1893,8 +1893,8 @@ Filtro de Categoria da ação por fase: AT_POS não deve mostrar ACAO_DEFENSIVA;
 
 ## 2026-05-13 — CEPR-0085: Aprovação visual (evidência final)
 
-**Ticket:** CEPR-0085  
-**Branch:** wip/post-merge-cleanup-2026-05-07  
+**Ticket:** CEPR-0085
+**Branch:** wip/post-merge-cleanup-2026-05-07
 **Status:** VISUALMENTE APROVADO
 
 ### Bug de produção corrigido
@@ -1920,8 +1920,8 @@ Filtro de Categoria da ação por fase: AT_POS não deve mostrar ACAO_DEFENSIVA;
 
 ## 2026-05-13 — CEPR-0085 Solução 2: Pontuação de gol (scout-pontuacao-gol)
 
-**Ticket:** CEPR-0085  
-**Branch:** wip/post-merge-cleanup-2026-05-07  
+**Ticket:** CEPR-0085
+**Branch:** wip/post-merge-cleanup-2026-05-07
 **Status:** CONCLUÍDO — 17/17 testes E2E passando
 
 ### Problema
