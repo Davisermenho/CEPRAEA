@@ -4172,3 +4172,66 @@ Resolver o gate final `npm run validate:mvp:v1`, separando falhas reais de fixtu
 - Fazer commit limpo e push para a branch do PR #14.
 - Revalidar checks/preview da Vercel após o push.
 - Não fazer merge sem confirmação humana.
+
+# Execution Log: CEPR-0099C
+
+## 🎯 Objetivo
+
+Resolver a falha pós-merge do gate `npm run validate:mvp:v1` em `main`, limitada ao teste `e2e/scout/scout-cepr0091-ux.spec.ts`, sem alterar contrato operacional, matriz semântica, UI, migrations, dashboard, relatório ou feedback.
+
+## ⚙️ Ambiente
+
+- **Agente:** Codex (`gpt-5`)
+- **Root:** `/home/davis/cepraea-pwa`
+- **Data:** 2026-05-20
+- **Base:** `main` atualizado no merge commit `5dd94a9`
+- **Branch hotfix:** `fix/post-merge-main-gate-cepr0091`
+
+---
+
+## 📌 Diagnóstico
+
+- `npm run validate:mvp:v1` em `main` passou por `typecheck`, unit, build, deps, audit, db reset e `test:supabase`.
+- O E2E global falhou em 1 teste: `CEPR-0091 — bloqueia exclusão de entrada VALIDADA`.
+- Erro: timeout em `page.waitForLoadState('networkidle')` após `page.reload()`.
+- Snapshot mostrou a página renderizada, mas ainda com atividade assíncrona; `networkidle` é uma espera inadequada para esta tela.
+
+---
+
+## 🚀 Passos Executados
+
+### Passo 1 — Reprodução/diagnóstico
+
+- **Comando:** `npm run validate:mvp:v1`
+- **Resultado:** falhou no E2E global com `165 passed / 1 failed / 5 skipped`.
+
+### Passo 2 — Patch mínimo na spec
+
+- **Arquivo:** `e2e/scout/scout-cepr0091-ux.spec.ts`
+- **Resultado:** substituída espera genérica por condição de UI: botão `Excluir LIVE-0001` visível/desabilitado.
+
+### Passo 3 — Validação focada
+
+- **Comando:** `npx playwright test e2e/scout/scout-cepr0091-ux.spec.ts --project=desktop --grep "bloqueia exclusão de entrada VALIDADA" --reporter=line`
+- **Resultado:** passou, `1 passed`.
+
+### Passo 4 — Validação completa do hotfix
+
+- **Comando:** `npm run validate:mvp:v1`
+- **Resultado:** passou.
+- **Evidência:** `MVP v1.0: OK — todas as condições satisfeitas.`
+- **E2E global:** `166 passed / 5 skipped`.
+
+## Pendências finais
+
+- PR de hotfix aberta como draft: #17.
+- Checks da PR #17: Vercel `SUCCESS`, Vercel Preview Comments `SUCCESS`, Supabase Preview/Actions esperadamente `SKIPPED`.
+- Preview inicial da PR #17: Vercel `READY`, mas smoke falhou em `homepage inicializa sem erros fatais de frontend` por console error `VITE_SUPABASE_TEAM_ID não configurado ou inválido`.
+- Vercel env: após autorização humana, `VITE_SUPABASE_TEAM_ID` foi adicionado ao Preview geral.
+- Redeploy da PR #17: `https://cepraea-anynjnllg-davi-sermenhos-projects.vercel.app`, Vercel `READY`.
+- Smoke do preview redeployado da PR #17: passou, `4 passed`.
+- Logs runtime do preview via `vercel logs`: apenas `GET / 200`, sem erro crítico server-side.
+- Produção após merge da PR #14: `https://cepraea.vercel.app`, Vercel `READY`.
+- Smoke de produção: passou, `4 passed`.
+- Build logs via Vercel MCP: não disponíveis por 401 no endpoint; validação alternativa feita com `vercel inspect`, `vercel logs` e smoke.
+- Não fazer merge do hotfix sem confirmação humana explícita.

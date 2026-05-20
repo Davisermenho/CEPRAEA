@@ -1969,3 +1969,27 @@ Estabilizado o gate final `npm run validate:mvp:v1` após falhas globais fora do
   - E2E global dentro do gate: `166 passed / 5 skipped`.
   - `check:runtime-legacy`: passou.
   - Sem PR aberto/mergeado nesta etapa; PR #14 apenas permanece como alvo para push posterior.
+
+---
+
+### [CEPR-0099C] — 2026-05-20 — Hotfix pós-merge para estabilizar gate MVP em main
+
+#### ✨ Resumo
+
+Após o merge da PR #14, `npm run validate:mvp:v1` em `main` falhou em 1 E2E por espera frágil de `networkidle` no teste CEPR-0091 de exclusão bloqueada para entrada VALIDADA. A spec foi ajustada para aguardar estado observável da UI em vez de `networkidle`.
+
+#### 🛠️ Changed
+
+- `e2e/scout/scout-cepr0091-ux.spec.ts` troca `page.waitForLoadState('networkidle')` pós-reload por `page.reload({ waitUntil: 'domcontentloaded' })` e `expect(...).toBeDisabled({ timeout: 20_000 })`.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** HOTFIX VALIDADO LOCALMENTE.
+- **Evidências objetivas:**
+  - `npx playwright test e2e/scout/scout-cepr0091-ux.spec.ts --project=desktop --grep "bloqueia exclusão de entrada VALIDADA" --reporter=line`: passou, `1 passed`.
+  - `npm run validate:mvp:v1` em `main` antes do hotfix: falhou com `165 passed / 1 failed / 5 skipped` no E2E global.
+  - `npm run validate:mvp:v1` na branch `fix/post-merge-main-gate-cepr0091`: passou, incluindo E2E global com `166 passed / 5 skipped`.
+  - PR #17 aberta como draft; checks GitHub/Vercel reportados como estáveis.
+  - Smoke em produção `https://cepraea.vercel.app`: passou, `4 passed`.
+  - Preview geral da Vercel recebeu `VITE_SUPABASE_TEAM_ID` após autorização humana.
+  - Smoke no preview redeployado da PR #17 `https://cepraea-anynjnllg-davi-sermenhos-projects.vercel.app`: passou, `4 passed`.
