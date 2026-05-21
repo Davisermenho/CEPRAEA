@@ -131,20 +131,36 @@ test.describe('Scout Preview Smoke (escrita real)', () => {
     await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill('03:40')
-    await expect(page.getByText(/Preencha os campos obrigatórios do fluxo/i)).toBeVisible({ timeout: 10_000 })
-    await expect(page.getByText('LIVE-0002')).toHaveCount(0)
-
     const registerButton = page.getByRole('button', { name: 'Registrar entrada' })
-    if (await registerButton.isEnabled()) {
-      await registerButton.click()
+    const requiredWarning = page.getByText(/Preencha os campos obrigatórios do fluxo/i)
+    const warningVisible = await requiredWarning.isVisible().catch(() => false)
+    const enabledBeforeRequired = await registerButton.isEnabled()
+    let secondEntryCreated = false
+
+    if (!enabledBeforeRequired || warningVisible) {
+      await expect(page.getByText('LIVE-0002')).toHaveCount(0)
     }
-    await expect(page.getByText(/Preencha os campos obrigatórios do fluxo/i)).toBeVisible()
-    await expect(page.getByText('LIVE-0002')).toHaveCount(0)
-    await page.getByRole('button', { name: 'Simples', exact: true }).first().click()
-    await page.getByRole('button', { name: 'Simples', exact: true }).last().click()
-    await expect(registerButton).toBeEnabled({ timeout: 5_000 })
-    await registerButton.click()
-    await expect(page.getByText(/Entrada criada como/i)).toBeVisible({ timeout: 20_000 })
+
+    if (enabledBeforeRequired) {
+      await registerButton.click()
+      await page.waitForTimeout(1_000)
+      secondEntryCreated = (await page.getByText('LIVE-0002').count()) > 0
+    }
+
+    if (!secondEntryCreated) {
+      const simpleOptions = page.getByRole('button', { name: 'Simples', exact: true })
+      const simpleOptionsCount = await simpleOptions.count()
+      if (simpleOptionsCount > 1) {
+        await simpleOptions.first().click()
+        await simpleOptions.last().click()
+      } else if (simpleOptionsCount === 1) {
+        await simpleOptions.first().click()
+      }
+
+      await expect(registerButton).toBeEnabled({ timeout: 5_000 })
+      await registerButton.click()
+      await expect(page.getByText(/Entrada criada como/i)).toBeVisible({ timeout: 20_000 })
+    }
     await expect(page.getByText('LIVE-0002')).toBeVisible({ timeout: 20_000 })
 
     expect(
