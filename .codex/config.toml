@@ -11,7 +11,12 @@ startup_timeout_sec = 30
 tool_timeout_sec = 90
 
 [mcp_servers.supabase_local]
-url = "http://localhost:54321/mcp"
+url = "http://127.0.0.1:54321/mcp"
+startup_timeout_sec = 20
+tool_timeout_sec = 90
+
+[mcp_servers.supabase_remote_readonly]
+url = "https://mcp.supabase.com/mcp?project_ref=fcnyjmrknqaomamdzabt&read_only=true&features=database,docs,debugging,development"
 startup_timeout_sec = 20
 tool_timeout_sec = 90
 

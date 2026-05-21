@@ -20,7 +20,11 @@
     },
     "supabase-local": {
       "type": "http",
-      "url": "http://localhost:54321/mcp"
+      "url": "http://127.0.0.1:54321/mcp"
+    },
+    "supabase-remote-readonly": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=fcnyjmrknqaomamdzabt&read_only=true&features=database,docs,debugging,development"
     },
     "vercel": {
       "type": "http",
