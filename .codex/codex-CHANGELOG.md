@@ -1994,3 +1994,25 @@ Após o merge da PR #14, `npm run validate:mvp:v1` em `main` falhou em 1 E2E por
   - Smoke em produção `https://cepraea.vercel.app`: passou, `4 passed`.
   - Preview geral da Vercel recebeu `VITE_SUPABASE_TEAM_ID` após autorização humana.
   - Smoke no preview redeployado da PR #17 `https://cepraea-anynjnllg-davi-sermenhos-projects.vercel.app`: passou, `4 passed`.
+
+---
+
+### [CEPR-SMOKE-SCOUT-PREVIEW] — 2026-05-21 — Ajuste de robustez no gate do smoke de preview
+
+#### ✨ Resumo
+
+Ajustado o smoke `scout-preview-smoke` para validar bloqueio funcional de persistência sem campos obrigatórios no fluxo `AT_POS + ARREMESSO + GOL`, sem depender exclusivamente de estado visual `disabled` do botão.
+
+#### 🛠️ Changed
+
+- `e2e/scout/scout-preview-smoke.spec.ts`
+  - Remove assert rígido `toBeDisabled()` para `Registrar entrada`.
+  - Passa a exigir aviso de campos obrigatórios.
+  - Tenta submit apenas se o botão estiver habilitado.
+  - Garante ausência de persistência (`LIVE-0002` não aparece) antes de preencher os campos obrigatórios.
+  - Após preencher finalização/motivo, exige sucesso e presença de `LIVE-0002`.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck`: passou.
+- `SMOKE_BASE_URL=https://example.com npx playwright test --config=playwright.scout-preview-smoke.config.ts --list`: passou (`1 test listed`).

@@ -4255,3 +4255,34 @@ Resolver a falha pós-merge do gate `npm run validate:mvp:v1` em `main`, limitad
 - Smoke de produção: passou, `4 passed`.
 - Build logs via Vercel MCP: não disponíveis por 401 no endpoint; validação alternativa feita com `vercel inspect`, `vercel logs` e smoke.
 - Não fazer merge do hotfix sem confirmação humana explícita.
+
+# Execution Log: CEPR-SMOKE-SCOUT-PREVIEW (follow-up)
+
+## 🎯 Objetivo
+
+Corrigir falha real do check obrigatório `scout-preview-smoke` na PR #20, mantendo o gate de integração RLS/Auth/Supabase e reduzindo fragilidade de assert visual.
+
+## 📌 Diagnóstico
+
+- Workflow em PR #20 falhou no passo `Run Scout preview smoke`.
+- Falha em `e2e/scout/scout-preview-smoke.spec.ts` no assert:
+  - `expected to be disabled` no botão `Registrar entrada` após `AT_POS + ARREMESSO + GOL`.
+- Em preview real, validação de obrigatoriedade existe, mas o estado visual do botão pode permanecer habilitado até tentativa de submit.
+
+## 🚀 Ação executada
+
+- Arquivo alterado: `e2e/scout/scout-preview-smoke.spec.ts`.
+- Estratégia adotada:
+  - manter validação de obrigatoriedade via mensagem de erro;
+  - validar efeito de negócio (não criar `LIVE-0002` sem preenchimento obrigatório);
+  - preservar caminho positivo com preenchimento completo e criação de entrada.
+
+## ✅ Validação local
+
+- `npm run typecheck`: passou.
+- `SMOKE_BASE_URL=https://example.com npx playwright test --config=playwright.scout-preview-smoke.config.ts --list`: passou (`1 test`).
+
+## ⏭️ Próximo passo operacional
+
+- Commit/push na branch `chore/scout-preview-smoke-gate`.
+- Reexecutar check `scout-preview-smoke` na PR #20 e coletar evidência final de aprovação.

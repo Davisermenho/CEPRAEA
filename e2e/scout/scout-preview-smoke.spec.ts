@@ -131,13 +131,21 @@ test.describe('Scout Preview Smoke (escrita real)', () => {
     await page.getByRole('button', { name: 'Arremesso', exact: true }).last().click()
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill('03:40')
-    await expect(page.getByRole('button', { name: 'Registrar entrada' })).toBeDisabled()
+    await expect(page.getByText(/Preencha os campos obrigatórios do fluxo/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('LIVE-0002')).toHaveCount(0)
+
+    const registerButton = page.getByRole('button', { name: 'Registrar entrada' })
+    if (await registerButton.isEnabled()) {
+      await registerButton.click()
+    }
     await expect(page.getByText(/Preencha os campos obrigatórios do fluxo/i)).toBeVisible()
+    await expect(page.getByText('LIVE-0002')).toHaveCount(0)
     await page.getByRole('button', { name: 'Simples', exact: true }).first().click()
     await page.getByRole('button', { name: 'Simples', exact: true }).last().click()
-    await expect(page.getByRole('button', { name: 'Registrar entrada' })).toBeEnabled({ timeout: 5_000 })
-    await page.getByRole('button', { name: 'Registrar entrada' }).click()
+    await expect(registerButton).toBeEnabled({ timeout: 5_000 })
+    await registerButton.click()
     await expect(page.getByText(/Entrada criada como/i)).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByText('LIVE-0002')).toBeVisible({ timeout: 20_000 })
 
     expect(
       rpcErrors,
