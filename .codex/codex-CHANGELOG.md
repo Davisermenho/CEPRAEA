@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-20 - 07:14 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 07:45 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,7 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-21 | 07:45 | OPS-MCP-20260521 | Configuração Supabase MCP em camadas preparada em PR separada, com credenciais reais removidas de `AGENTS.md` e movidas para arquivo local ignorado | `python3 -m json.tool .mcp.json` ✅ · `python3 -m json.tool .vscode/mcp.json` ✅ · `tomllib.load(.codex/config.toml)` ✅ · `git diff --check` ✅ |
 | 2026-05-20 | 07:14 | CEPR-0099 | E2E global fora do Scout estabilizado: falhas separadas por coach, athlete, public e smoke; regressões reais de recarga de dados/mensagem corrigidas sem alterar Scout | `npm run test:e2e` ✅ (`166 passed`, `5 skipped`) · `npm run typecheck` ✅ · `npm test` ✅ (`51 passed`) · `npm run build` ✅ · `git diff --check` ✅ · PR não aberto |
 | 2026-05-20 | 01:06 | CEPR-0098C | Gate E2E Scout estabilizado; roster passou isolado e `TRANS_OF` foi endurecido para consultas SQL por `scout_game_id` | `npx playwright test e2e/scout/scout-cepr0088a-roster.spec.ts --project=desktop --trace=on --reporter=line` ✅ (1 test) · `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line` ✅ (9 tests) · `npx playwright test e2e/scout --project=desktop --reporter=line` ✅ (102 tests) · `npm run typecheck` ✅ · `npm test` ✅ (51 tests) · `npm run build` ✅ · PR não aberto |
 | 2026-05-20 | 00:35 | CEPR-0089B | Governança do contrato operacional registrada em matriz local, contexto/handoff local e Notion, com ressalva da reexecução E2E focada intermediária | `npx playwright test e2e/scout --project=desktop --reporter=line` ❌ (101/102; falha transitória em `scout-cepr0088a-roster`) · Notion MCP update ✅ · PR não aberto |
@@ -1993,3 +1994,27 @@ Após o merge da PR #14, `npm run validate:mvp:v1` em `main` falhou em 1 E2E por
   - Smoke em produção `https://cepraea.vercel.app`: passou, `4 passed`.
   - Preview geral da Vercel recebeu `VITE_SUPABASE_TEAM_ID` após autorização humana.
   - Smoke no preview redeployado da PR #17 `https://cepraea-anynjnllg-davi-sermenhos-projects.vercel.app`: passou, `4 passed`.
+---
+
+### [OPS-MCP-20260521] — 2026-05-21 — Configuração Supabase MCP em camadas
+
+#### ✨ Resumo
+
+Preparada PR separada para a configuração operacional Supabase MCP, sem misturar com a PR #18 de Scout. As credenciais reais encontradas em `AGENTS.md` foram removidas do arquivo versionado e movidas para `.env.preview.local`, que é ignorado por git via `.env.*.local`.
+
+#### 🛠️ Changed
+
+- `.codex/config.toml`, `.mcp.json` e `.vscode/mcp.json` passam a declarar Supabase local em `127.0.0.1` e Supabase remoto read-only.
+- `AGENTS.md` documenta a política de acesso Supabase: MCP local, MCP remoto read-only e Postgres direto apenas por exceção.
+- Logs Copilot existentes sobre essa configuração foram preservados no recorte.
+- Logs Codex foram atualizados para registrar a separação da PR operacional.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** PR operacional separada preparada.
+- **Evidências objetivas:**
+  - `python3 -m json.tool .mcp.json`: passou.
+  - `python3 -m json.tool .vscode/mcp.json`: passou.
+  - `python3 - <<'PY' ... tomllib.load(...)`: passou.
+  - `git diff --check`: passou.
+  - `AGENTS.md` não contém mais a credencial real `treinador@cepraea.com` nem linha de senha real.

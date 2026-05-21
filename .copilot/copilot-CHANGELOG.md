@@ -1,3 +1,13 @@
+
+## [2026-05-21] Configuração MCP Supabase em 3 camadas
+
+### O que foi feito
+
+- `.vscode/mcp.json`: adicionado `supabase-remote-readonly`, URL local alterada para `127.0.0.1`
+- `.codex/config.toml`: adicionado `supabase_remote_readonly`, URL local alterada para `127.0.0.1`
+- `.mcp.json`: adicionado `supabase-remote-readonly`, URL local alterada para `127.0.0.1`
+- `AGENTS.md`: seção 8 expandida para política completa de acesso Supabase (local / remoto read-only / Postgres direto por exceção)
+
 ---
 tipo: LOG-CHANGELOG
 nome: "Histórico de Mudanças — Agente Copilot"

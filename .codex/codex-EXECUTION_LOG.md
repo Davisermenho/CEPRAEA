@@ -19,10 +19,21 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-20 - 07:14 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 07:45 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+
+## Entrada Rápida — 2026-05-21 07:45 BRT — OPS-MCP-20260521
+
+- **Objetivo:** separar a configuração Supabase MCP dos arquivos da PR #18 e publicar em PR própria.
+- **Contexto obrigatório:** `AGENTS.md` e `CEPRAEA.md` lidos; últimos 3 PRs verificados (#18 aberta, #17 mergeada, #16 mergeada).
+- **Estratégia:** worktree isolado em `/tmp/cepraea-mcp-policy-worktree`, branch `chore/supabase-mcp-access-policy`, baseada em `origin/main`.
+- **Escopo incluído:** `.codex/config.toml`, `.mcp.json`, `.vscode/mcp.json`, `AGENTS.md`, logs Copilot e logs Codex.
+- **Segurança:** credenciais reais removidas de `AGENTS.md`; credenciais locais permanecem somente em `.env.preview.local`, ignorado por `.env.*.local`.
+- **Validação planejada:** `git diff --check`, validação JSON de `.mcp.json`/`.vscode/mcp.json` e parse TOML de `.codex/config.toml`.
+- **Escopo preservado:** sem alterações de Scout, sem migrations, sem Vercel env e sem merge.
 
 ## Entrada Rápida — 2026-05-20 07:14 BRT — CEPR-0099
 

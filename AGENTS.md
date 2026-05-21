@@ -339,25 +339,77 @@ O agente não pode:
 - commitar segredos;
 - exibir tokens, secrets ou keys.
 
-## 8. Supabase MCP
+## 8. Supabase access policy
 
-Prioridade:
+O padrão para agentes é usar Supabase MCP, não Postgres direto.
 
-1. Supabase local
-2. Supabase remoto read-only, apenas se necessário
-3. Supabase remoto com escrita, somente com confirmação explícita
+### Supabase local
 
-Endpoint local:
+Usar por padrão:
 
 ```txt
-http://localhost:54321/mcp
+supabase-local = http://127.0.0.1:54321/mcp
 ```
 
-Remote seguro preferencial:
+Finalidade:
+
+- consultar schema local;
+- validar migrations locais;
+- inspecionar tabelas;
+- investigar dados de teste;
+- apoiar testes E2E e Supabase local.
+
+### Supabase remoto
+
+Usar somente em modo leitura:
 
 ```txt
-https://mcp.supabase.com/mcp?project_ref=<PROJECT_REF>&read_only=true
+supabase-remote-readonly = https://mcp.supabase.com/mcp?project_ref=fcnyjmrknqaomamdzabt&read_only=true&features=database,docs,debugging,development
 ```
+
+Permitido:
+
+- listar tabelas;
+- ler schema;
+- listar migrations;
+- gerar tipos;
+- consultar logs/advisors;
+- comparar estrutura remota com local.
+
+Proibido sem confirmação humana explícita:
+
+- aplicar migration remota;
+- executar SQL destrutivo;
+- alterar dados;
+- alterar policies/RLS;
+- alterar secrets;
+- alterar configurações do projeto.
+
+### Postgres direto
+
+Postgres direto é exceção.
+
+Só pode ser usado quando:
+
+- Supabase MCP não resolver;
+- for necessária query SQL fina;
+- o usuário autorizar explicitamente.
+
+Nunca versionar connection strings com senha.
+
+Usar somente via variável de ambiente local:
+
+```bash
+SUPABASE_LOCAL_DB_URL
+SUPABASE_REMOTE_DB_URL
+```
+
+### Regra de preferência
+
+1. Supabase MCP local
+2. Supabase MCP remoto read-only
+3. Postgres local direto
+4. Postgres remoto direto, somente com autorização explícita
 
 ## 9. Vercel MCP
 
