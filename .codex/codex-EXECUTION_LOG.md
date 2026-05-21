@@ -19,10 +19,23 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-21 - 01:31 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 07:06 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-21 07:06 BRT — CEPR-0098D-PREVIEW-ENV
+
+- **Objetivo:** corrigir o RLS de `scout_games` no Preview da PR #18 ajustando `VITE_SUPABASE_TEAM_ID`.
+- **Autorização humana:** concedida explicitamente para alterar `VITE_SUPABASE_TEAM_ID` no ambiente Preview da Vercel.
+- **Escopo executado:** atualizado apenas o env branch-specific `Preview (feat/scout-required-fields-flow-contract)`; produção não foi alterada.
+- **Comando env:** `vercel env add VITE_SUPABASE_TEAM_ID preview feat/scout-required-fields-flow-contract --force --yes --scope davi-sermenhos-projects` passou.
+- **Redeploy seguro:** usado `vercel redeploy` sobre deployment existente, evitando `vercel --force` local porque o worktree contém mudanças não relacionadas de MCP/Copilot/AGENTS.
+- **Deployment novo:** `dpl_7gaEsroDR6uiXySCmQ3QyioxM8bt`, URL `https://cepraea-84ewy03rp-davi-sermenhos-projects.vercel.app`, alias `https://cepraea-git-feat-scout-required-651217-davi-sermenhos-projects.vercel.app`, status `Ready`.
+- **Smoke:** `SMOKE_BASE_URL=https://cepraea-84ewy03rp-davi-sermenhos-projects.vercel.app npm run test:smoke` passou, `4 passed`.
+- **Logs:** `vercel logs https://cepraea-84ewy03rp-davi-sermenhos-projects.vercel.app` retornou apenas `GET / 200`.
+- **Verificação de bundle:** asset JS do preview contém `866ba974-3ebe-4f73-881c-f5c754350b50`, confirmando env incorporado no build.
+- **Pendente:** validação autenticada manual de `/scout/preparar` com `treinador@cepraea.com`, pois a senha desse usuário não está disponível localmente.
 
 ## Entrada Rápida — 2026-05-21 01:31 BRT — CEPR-0098D-PREVIEW
 
