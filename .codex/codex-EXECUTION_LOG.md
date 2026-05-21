@@ -19,10 +19,31 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-20 - 07:14 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-20 - 14:49 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-20 14:49 BRT — CEPR-0098D-GATE
+
+- **Objetivo:** fechar a validação ampla do CEPR-0098D após conectar `requiredFields` condicionais ao submit da `COLETA_AO_VIVO`.
+- **Correção de flake sob carga:** `loginAsCoach` passou a aguardar estado observável da UI; `playwright.config.ts` recebeu timeout global de 60s; `scout-cepr0091-ux.spec.ts` foi ajustado para evitar interceptação do submit sticky.
+- **Validação Scout:** `npx playwright test e2e/scout --project=desktop --reporter=line` ✅ (`103 passed`).
+- **Gate final:** `npm run validate:mvp:v1` ✅; E2E global `167 passed / 5 skipped`; `MVP v1.0: OK — todas as condições satisfeitas.`
+- **Escopo preservado:** sem novos fluxos; sem `DEF_POS/BLOQUEIO`; sem migrations; sem dashboard, relatório ou feedback; PR não aberto.
+- **Observação de método:** reexecuções Playwright paralelas foram descartadas como evidência porque compartilham `.env.test` e podem interferir em setup/teardown; a evidência aceita foi obtida em runs sequenciais.
+
+## Entrada Rápida — 2026-05-20 13:48 BRT — CEPR-0098D
+
+- **Objetivo:** conectar `requiredFields` condicionais do contrato operacional ao submit da `COLETA_AO_VIVO` apenas nos 3 fluxos de arremesso já auditados.
+- **Contexto obrigatório:** `CEPRAEA.md` lido; últimos 3 PRs verificados antes da implementação; branch local `feat/scout-required-fields-flow-contract`.
+- **Escopo preservado:** sem novos fluxos; sem `DEF_POS/BLOQUEIO`; sem dashboard, relatório, feedback ou migrations.
+- **Contrato:** `liveCollectionFlow.contract.ts` passou a declarar `conditionalRequiredFields` e exportar `getLiveCollectionRequiredFields`.
+- **Regra conectada:** `PASSIVO` em arremesso ofensivo não exige `tipo_finalizacao_code`; `GOL` exige tipo de finalização, motivo da pontuação e pontos antes do submit.
+- **UI:** `ScoutWorkspacePage.tsx` calcula campos obrigatórios via contrato, bloqueia submit quando faltam campos e mostra mensagem de obrigatoriedade operacional.
+- **E2E:** `scout-pontuacao-gol.spec.ts` cobre `PASSIVO` sem finalização e `GOL` bloqueado até preencher condicionais.
+- **Validação focada:** `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts` ✅ (`11 passed`); `npm run typecheck` ✅; `npx playwright test e2e/scout/scout-pontuacao-gol.spec.ts --project=desktop --grep "CEPR-0098D" --reporter=line` ✅ (`1 passed`); `npx playwright test e2e/scout/scout-pontuacao-gol.spec.ts --project=desktop --reporter=line` ✅ (`16 passed`).
+- **Pendência:** ainda falta rodar gates amplos antes de abrir PR/merge; não expandir para defesa antes de validar o modelo condicional.
 
 ## Entrada Rápida — 2026-05-20 07:14 BRT — CEPR-0099
 

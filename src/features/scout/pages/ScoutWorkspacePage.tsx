@@ -43,6 +43,7 @@ import {
 } from '@/features/scout/domain/liveCollectionCompatibility.matrix'
 import {
   getLiveCollectionFlowContract,
+  getLiveCollectionRequiredFields,
   liveCollectionFlowContracts,
   type LiveCollectionFlowContract,
   type LiveCollectionFlowField,
@@ -121,6 +122,29 @@ type LiveEntryDraft = {
   contextoDecisaoCode: string
   contextoArremessoCode: string
   acaoPreparatoriaCode: string
+}
+
+const FLOW_FIELD_LABELS: Record<LiveCollectionFlowField, string> = {
+  tempoJogo: 'tempo do lance',
+  faseDaBolaCode: 'fase da bola',
+  sistemaOfensivoCode: 'sistema ofensivo',
+  sistemaDefensivoCode: 'sistema defensivo',
+  categoriaAcaoCode: 'categoria da ação',
+  acaoBasicaCode: 'ação básica',
+  estruturaTransicaoCode: 'estrutura da transição',
+  tipoFinalizacaoCode: 'tipo de finalização',
+  resultadoFactualCode: 'resultado factual',
+  motivoPontuacaoCode: 'motivo da pontuação',
+  pontosJogada: 'pontos da jogada',
+  atletaPrincipalId: 'atleta principal',
+  acaoPreparatoriaCode: 'ação preparatória',
+  contextoDecisaoCode: 'contexto decisional',
+  contextoArremessoCode: 'contexto do arremesso',
+  causaProvavelCode: 'causa provável',
+  prioridadeTreinoCode: 'prioridade de treino',
+  videoRef: 'referência de vídeo',
+  obsGeral: 'observação geral',
+  classificacaoAcaoCode: 'classificação da ação',
 }
 
 function buildDraft(entryNumber: number, seed: Partial<LiveEntryDraft> = {}): LiveEntryDraft {
@@ -741,8 +765,26 @@ export default function ScoutWorkspacePage() {
     return trimmed !== '' && trimmed !== '0'
   }
 
+  function isFlowRequiredFieldSatisfied(field: LiveCollectionFlowField) {
+    if (field === 'tipoFinalizacaoCode' && derivedFinishType) return true
+    if (field === 'motivoPontuacaoCode' && effectiveDerivedScoringReasonForUI) return true
+    if (field === 'pontosJogada') return draft.pontosJogada === '1' || draft.pontosJogada === '2'
+    return hasDraftFieldValue(field)
+  }
+
   const flowOptionalFields = activeFlowContract ? getOrderedFlowFields(activeFlowContract.optionalFields) : []
   const flowAdvancedFields = activeFlowContract ? getOrderedFlowFields(activeFlowContract.advancedFields) : []
+  const flowRequiredFields = activeFlowContract
+    ? getLiveCollectionRequiredFields(activeFlowContract, {
+        resultadoFactualCode: draft.resultadoFactualCode || undefined,
+        tipoFinalizacaoCode: (derivedFinishType ?? draft.tipoFinalizacaoCode) || undefined,
+      })
+    : []
+  const missingFlowRequiredFields = flowRequiredFields.filter((field) => !isFlowRequiredFieldSatisfied(field))
+  const flowRequiredValidationMessage = missingFlowRequiredFields.length
+    ? `Preencha os campos obrigatórios do fluxo: ${missingFlowRequiredFields.map((field) => FLOW_FIELD_LABELS[field]).join(', ')}.`
+    : ''
+
 
   // [0028] Em DEF_POS/TRANS_DEF o resultado GOL é exibido como "Gol sofrido" para clareza semântica
   const displayedFactualResults = useMemo(() => {
@@ -762,7 +804,7 @@ export default function ScoutWorkspacePage() {
   const passiveShotPresetActive = draft.contextoDecisaoCode === 'PASSIVO_SINALIZADO' && draft.contextoArremessoCode === 'SOB_PASSIVO'
   const tempoValidationMessage = validateTempoInput(draft.tempoJogo, confirmZeroTime)
   const isEditing = editingEntryId !== null
-  const isSubmitBlocked = !selectedGame || !draft.resultadoFactualCode || Boolean(tempoValidationMessage)
+  const isSubmitBlocked = !selectedGame || !draft.resultadoFactualCode || Boolean(tempoValidationMessage) || Boolean(flowRequiredValidationMessage)
 
   // UX-04 — quando a ação muda, limpar resultado factual se incompatível
   useEffect(() => {
@@ -1294,6 +1336,11 @@ export default function ScoutWorkspacePage() {
       return
     }
 
+    if (flowRequiredValidationMessage) {
+      setError(flowRequiredValidationMessage)
+      return
+    }
+
     setSavingEntry(true)
     setFeedback('')
     setError('')
@@ -1805,6 +1852,12 @@ export default function ScoutWorkspacePage() {
                 {tempoValidationMessage ? (
                   <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
                     {tempoValidationMessage}
+                  </div>
+                ) : null}
+
+                {!tempoValidationMessage && flowRequiredValidationMessage ? (
+                  <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                    {flowRequiredValidationMessage}
                   </div>
                 ) : null}
 

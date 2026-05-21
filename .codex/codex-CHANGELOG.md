@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-20 - 07:14 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-20 - 14:49 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,8 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-20 | 14:49 | CEPR-0098D-GATE | Gate amplo final validado após conectar `requiredFields` condicionais: Scout desktop passou com novo caso CEPR-0098D, E2E global voltou a verde e o gate MVP v1.0 fechou completo | `npx playwright test e2e/scout --project=desktop --reporter=line` ✅ (`103 passed`) · `npm run validate:mvp:v1` ✅ (`MVP v1.0: OK`, E2E global `167 passed / 5 skipped`) · `git diff --check` ✅ |
+| 2026-05-20 | 13:48 | CEPR-0098D | `requiredFields` condicionais do contrato operacional conectados ao submit da `COLETA_AO_VIVO` para os 3 fluxos de arremesso auditados, preservando `PASSIVO` sem finalização e bloqueando `GOL` sem finalização/pontuação | `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts` ✅ (`11 passed`) · `npm run typecheck` ✅ · `npx playwright test e2e/scout/scout-pontuacao-gol.spec.ts --project=desktop --reporter=line` ✅ (`16 passed`) |
 | 2026-05-20 | 07:14 | CEPR-0099 | E2E global fora do Scout estabilizado: falhas separadas por coach, athlete, public e smoke; regressões reais de recarga de dados/mensagem corrigidas sem alterar Scout | `npm run test:e2e` ✅ (`166 passed`, `5 skipped`) · `npm run typecheck` ✅ · `npm test` ✅ (`51 passed`) · `npm run build` ✅ · `git diff --check` ✅ · PR não aberto |
 | 2026-05-20 | 01:06 | CEPR-0098C | Gate E2E Scout estabilizado; roster passou isolado e `TRANS_OF` foi endurecido para consultas SQL por `scout_game_id` | `npx playwright test e2e/scout/scout-cepr0088a-roster.spec.ts --project=desktop --trace=on --reporter=line` ✅ (1 test) · `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line` ✅ (9 tests) · `npx playwright test e2e/scout --project=desktop --reporter=line` ✅ (102 tests) · `npm run typecheck` ✅ · `npm test` ✅ (51 tests) · `npm run build` ✅ · PR não aberto |
 | 2026-05-20 | 00:35 | CEPR-0089B | Governança do contrato operacional registrada em matriz local, contexto/handoff local e Notion, com ressalva da reexecução E2E focada intermediária | `npx playwright test e2e/scout --project=desktop --reporter=line` ❌ (101/102; falha transitória em `scout-cepr0088a-roster`) · Notion MCP update ✅ · PR não aberto |
@@ -1993,3 +1995,58 @@ Após o merge da PR #14, `npm run validate:mvp:v1` em `main` falhou em 1 E2E por
   - Smoke em produção `https://cepraea.vercel.app`: passou, `4 passed`.
   - Preview geral da Vercel recebeu `VITE_SUPABASE_TEAM_ID` após autorização humana.
   - Smoke no preview redeployado da PR #17 `https://cepraea-anynjnllg-davi-sermenhos-projects.vercel.app`: passou, `4 passed`.
+
+---
+
+### [CEPR-0098D] — 2026-05-20 — `requiredFields` condicionais no contrato operacional
+
+#### ✨ Resumo
+
+Conectada a primeira camada de `requiredFields` condicionais do contrato operacional da `COLETA_AO_VIVO` ao submit da UI, sem criar novos fluxos e sem expandir para `DEF_POS/BLOQUEIO`.
+
+#### 🛠️ Changed
+
+- `liveCollectionFlow.contract.ts` ganhou `conditionalRequiredFields` e helper `getLiveCollectionRequiredFields`.
+- Nos 3 fluxos de arremesso auditados, `tipoFinalizacaoCode` deixou de ser obrigatório estático e passou a ser obrigatório apenas para resultados de arremesso observado.
+- `GOL` passou a exigir `tipoFinalizacaoCode`, `motivoPontuacaoCode` e `pontosJogada` antes do submit.
+- `PASSIVO` permanece válido como interrupção de posse sem exigir `tipo_finalizacao_code`.
+- `ScoutWorkspacePage.tsx` passou a bloquear submit e exibir mensagem de obrigatoriedade derivada do contrato.
+- E2E de pontuação cobre `PASSIVO` sem finalização e `GOL` bloqueado até preencher campos condicionais.
+- Matriz/contexto local atualizados para registrar que `requiredFields` condicionais agora estão conectados nos fluxos cobertos.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO TECNICAMENTE no recorte dos 3 fluxos de arremesso.
+- **Evidências objetivas:**
+  - `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts`: passou, `11 passed`.
+  - `npm run typecheck`: passou.
+  - `npx playwright test e2e/scout/scout-pontuacao-gol.spec.ts --project=desktop --grep "CEPR-0098D" --reporter=line`: passou, `1 passed`.
+  - `npx playwright test e2e/scout/scout-pontuacao-gol.spec.ts --project=desktop --reporter=line`: passou, `16 passed`.
+  - Sem alteração em `liveCollectionCompatibility.matrix.ts`, migrations, dashboard, relatório ou feedback.
+  - PR ainda não aberto/mergeado nesta etapa.
+
+---
+
+### [CEPR-0098D-GATE] — 2026-05-20 — Gate amplo verde após `requiredFields` condicionais
+
+#### ✨ Resumo
+
+Revalidado o recorte CEPR-0098D em gates amplos após estabilização de E2E sob carga. O gate Scout desktop passou com 103 testes e o gate final `npm run validate:mvp:v1` fechou completo.
+
+#### 🛠️ Changed
+
+- `loginAsCoach` no helper E2E passou a aguardar estado observável da UI em vez de depender de `waitForURL(..., load)`.
+- `playwright.config.ts` recebeu timeout global de 60s para reduzir falso negativo sob carga da suíte completa.
+- `scout-cepr0091-ux.spec.ts` passou a clicar nos chips de ação com rolagem/força controlada quando o submit sticky intercepta o alvo no layout atual.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** APROVADO para gate local amplo.
+- **Evidências objetivas:**
+  - `npx playwright test e2e/scout/scout-cepr0091-ux.spec.ts --project=desktop --reporter=line`: passou, `6 passed`.
+  - `npx playwright test e2e/coach/mobile-nav.spec.ts --project=mobile-coach --reporter=line`: passou, `5 passed`.
+  - `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line`: passou, `9 passed`.
+  - `npx playwright test e2e/scout --project=desktop --reporter=line`: passou, `103 passed`.
+  - `npm run validate:mvp:v1`: passou completo; E2E global `167 passed / 5 skipped`; `MVP v1.0: OK — todas as condições satisfeitas.`
+  - `git diff --check`: passou.
+  - Sem novos fluxos, sem `DEF_POS/BLOQUEIO`, sem migrations, sem dashboard, sem relatório e sem feedback.
