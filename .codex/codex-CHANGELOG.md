@@ -2018,3 +2018,31 @@ Ajustado o smoke `scout-preview-smoke` para validar bloqueio funcional de persis
 - `SMOKE_BASE_URL=https://example.com npx playwright test --config=playwright.scout-preview-smoke.config.ts --list`: passou (`1 test listed`).
 - Follow-up CI hardening: o smoke deixou de exigir texto de warning fixo e passou a aceitar variação de UI, mantendo prova de persistência via `LIVE-0002`.
 - Smoke preview: filtro de ruído para console error de recurso HTTP 4xx (`Failed to load resource`), preservando detecção de erros críticos de integração.
+
+---
+
+### [CEPR-SMOKE-SCOUT-PREVIEW] — 2026-05-21 — Limpeza da esteira CI (passos 2 e 5)
+
+#### ✨ Resumo
+
+Aplicadas as ações de governança e estabilidade da esteira na PR #20:
+- branch protection de `main` agora exige `scout-preview-smoke` e `Vercel`;
+- workflow de smoke atualizado para reduzir warnings e remover dependência de action terceirizada com runtime legada.
+
+#### 🛠️ Changed
+
+- `.github/workflows/scout-preview-smoke.yml`
+  - adiciona `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` no workflow;
+  - atualiza `actions/checkout` para `@v6`;
+  - atualiza `actions/setup-node` para `@v6`;
+  - substitui `zentered/vercel-preview-url` por resolução direta da Preview URL via API da Vercel (`curl + jq`);
+  - remove dependência do `actions/create-github-app-token` para este fluxo;
+  - atualiza `actions/upload-artifact` para `@v6`;
+  - altera `if-no-files-found` para `ignore` no upload de artifacts.
+
+#### 🛡️ Evidências
+
+- Branch protection (`main`) atualizado via API GitHub:
+  - `strict: true`
+  - `contexts: ["scout-preview-smoke", "Vercel"]`
+- `npm run typecheck`: passou.

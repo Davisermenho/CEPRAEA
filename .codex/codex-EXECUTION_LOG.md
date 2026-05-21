@@ -4299,3 +4299,42 @@ Corrigir falha real do check obrigatório `scout-preview-smoke` na PR #20, mante
 
 - Run `26228675539` falhou por ruído de console não crítico: `Failed to load resource: the server responded with a status of 400 ()`.
 - A spec do smoke agora ignora apenas esse padrão de erro de recurso HTTP 4xx no listener de console, mantendo captura de erros críticos reais via listener de resposta Supabase (`RLS/Auth/permission`).
+
+# Execution Log: CEPR-SMOKE-SCOUT-PREVIEW (steps 2 and 5)
+
+## 🎯 Objetivo
+
+Executar na PR #20:
+1. passo 2: reforçar branch protection de `main` com checks corretos;
+2. passo 5: limpar ruído de CI (Node 20 deprecation + warning de artifact ausente).
+
+## ✅ Ações executadas
+
+### A) Branch protection atualizado
+
+- Comando aplicado:
+  - `gh api -X PATCH repos/Davisermenho/CEPRAEA/branches/main/protection/required_status_checks -F strict=true -f 'contexts[]=scout-preview-smoke' -f 'contexts[]=Vercel'`
+- Resultado confirmado:
+  - `strict: true`
+  - `contexts: ["scout-preview-smoke", "Vercel"]`
+
+### B) Limpeza da workflow de smoke
+
+- Arquivo: `.github/workflows/scout-preview-smoke.yml`
+- Alterações:
+  - `actions/checkout@v6`
+  - `actions/setup-node@v6`
+  - `actions/upload-artifact@v6`
+  - adicionada env `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`
+  - removida action `zentered/vercel-preview-url`
+  - removida action `actions/create-github-app-token`
+  - adicionada resolução de Preview URL por API da Vercel (`curl + jq`)
+  - `if-no-files-found: ignore`
+
+## 🧪 Validação local
+
+- `npm run typecheck`: passou.
+
+## ⏭️ Próximo passo
+
+- Push na branch `chore/scout-preview-smoke-gate` e acompanhar a nova execução do check `scout-preview-smoke` para validar ausência de regressão no fluxo.

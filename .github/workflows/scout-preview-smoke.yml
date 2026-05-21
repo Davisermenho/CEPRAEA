@@ -21,6 +21,9 @@ permissions:
   contents: read
   pull-requests: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   scout-preview-smoke:
     name: scout-preview-smoke
@@ -29,35 +32,24 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
-
-      - name: Generate GitHub App token
-        id: app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.APP_PEM }}
 
       - name: Validate required secrets
         shell: bash
         run: |
           missing=0
-          for key in VERCEL_TOKEN VERCEL_PROJECT_ID VERCEL_TEAM_ID SMOKE_COACH_EMAIL SMOKE_COACH_PASSWORD APP_PEM; do
+          for key in VERCEL_TOKEN VERCEL_PROJECT_ID VERCEL_TEAM_ID SMOKE_COACH_EMAIL SMOKE_COACH_PASSWORD; do
             if [ -z "${!key}" ]; then
               echo "Missing required secret: $key"
               missing=1
             fi
           done
-          if [ -z "${APP_ID:-}" ]; then
-            echo "Missing required variable: APP_ID"
-            missing=1
-          fi
           if [ "$missing" -ne 0 ]; then
             exit 1
           fi
@@ -67,8 +59,6 @@ jobs:
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           SMOKE_COACH_EMAIL: ${{ secrets.SMOKE_COACH_EMAIL }}
           SMOKE_COACH_PASSWORD: ${{ secrets.SMOKE_COACH_PASSWORD }}
-          APP_PEM: ${{ secrets.APP_PEM }}
-          APP_ID: ${{ vars.APP_ID }}
 
       - name: Install dependencies
         run: npm ci
@@ -80,15 +70,36 @@ jobs:
         run: sleep 45
 
       - name: Resolve Vercel preview URL
-        uses: zentered/vercel-preview-url@v1.4.0
         id: vercel_preview
+        shell: bash
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        with:
-          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel_team_id: ${{ secrets.VERCEL_TEAM_ID }}
-          vercel_target: preview
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          PR_BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          echo "Retrieving deployment preview for branch: $PR_BRANCH"
+          response="$(curl -fsSL \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID&teamId=$VERCEL_TEAM_ID&target=preview&limit=50")"
+
+          preview_host="$(jq -r --arg branch "$PR_BRANCH" '
+            [
+              .deployments[]
+              | select((.meta.githubCommitRef // "") == $branch)
+              | select((.readyState // .state // "") == "READY")
+              | .url
+            ][0] // empty
+          ' <<<"$response")"
+
+          if [ -z "$preview_host" ]; then
+            echo "preview_url=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Preview host: $preview_host"
+          echo "preview_url=$preview_host" >> "$GITHUB_OUTPUT"
 
       - name: Fail when preview URL is unavailable
         if: ${{ steps.vercel_preview.outputs.preview_url == '' }}
@@ -107,10 +118,10 @@ jobs:
 
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-scout-preview-smoke-report
           path: |
             playwright-report
             test-results
-          if-no-files-found: warn
+          if-no-files-found: ignore
