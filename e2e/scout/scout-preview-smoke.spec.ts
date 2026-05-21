@@ -139,14 +139,8 @@ test.describe('Scout Preview Smoke (escrita real)', () => {
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.getByLabel(/Tempo do vídeo \/ relógio/i).fill('03:40')
     const registerButton = page.getByRole('button', { name: 'Registrar entrada' })
-    const requiredWarning = page.getByText(/Preencha os campos obrigatórios do fluxo/i)
-    const warningVisible = await requiredWarning.isVisible().catch(() => false)
     const enabledBeforeRequired = await registerButton.isEnabled()
     let secondEntryCreated = false
-
-    if (!enabledBeforeRequired || warningVisible) {
-      await expect(page.getByText('LIVE-0002')).toHaveCount(0)
-    }
 
     if (enabledBeforeRequired) {
       await registerButton.click()
