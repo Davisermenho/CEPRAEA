@@ -30,19 +30,6 @@ jobs:
 
       - run: npm ci
 
-      - uses: supabase/setup-cli@v1
-        with:
-          version: 2.98.1
-
-      - name: Start Supabase local stack
-        run: supabase start
-
-      - name: Reset database (deterministic)
-        run: supabase db reset
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
       - name: Run CEPR-0098D contract tests
         run: |
-          npm run test:e2e -- --project=desktop e2e/scout/scout-pontuacao-gol.spec.ts --grep "5B|5D"
+          npm run test -- src/features/scout/domain/liveCollectionFlow.contract.test.ts src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts
