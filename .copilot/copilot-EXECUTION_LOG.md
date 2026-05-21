@@ -1,3 +1,27 @@
+
+---
+
+## Execução [2026-05-21] — Configuração MCP Supabase 3 camadas
+
+### Arquivos alterados
+- `.vscode/mcp.json`
+- `.codex/config.toml`
+- `.mcp.json`
+- `AGENTS.md` (seção 8)
+
+### Ferramentas usadas
+- Terminal (Python para reescrita de arquivos)
+- read_file / grep_search
+
+### Validação
+- Conteúdo dos arquivos inspecionado manualmente via `cat`
+- Nenhum comando de build necessário (alterações de config only)
+
+### Riscos / Pendências
+- `supabase-remote-readonly` exige OAuth na primeira conexão (VS Code, Codex, Claude Code)
+- `supabase-local` só funciona com `supabase start` rodando
+- Postgres direto: nunca versionar senha; usar `SUPABASE_LOCAL_DB_URL` / `SUPABASE_REMOTE_DB_URL` via env
+
 ---
 tipo: LOG-EXECUCAO
 nome: "Log de Execução — Agente Copilot"

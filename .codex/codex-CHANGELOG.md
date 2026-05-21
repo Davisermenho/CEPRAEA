@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-21 - 07:06 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 10:08 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,9 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-21 | 10:08 | CEPR-GITHUB-APP-SECRET | Secret `APP_PEM` configurado no repositório e pendência do GitHub App encerrada para o workflow `scout-preview-smoke` | `gh secret set APP_PEM --repo Davisermenho/CEPRAEA < /home/davis/cepraea-pwa/my-automation-agent-app.2026-05-21.private-key.pem` ✅ · `gh secret list --repo Davisermenho/CEPRAEA | rg '^APP_PEM'` ✅ · `gh variable list --repo Davisermenho/CEPRAEA | rg '^APP_ID'` ✅ |
+| 2026-05-21 | 10:03 | CEPR-GITHUB-APP-GATE | Integração de GitHub App no workflow de Scout Preview Smoke e proteção da branch `main` com check obrigatório `scout-preview-smoke`; variável `APP_ID` configurada no repositório | `gh variable set APP_ID --body 3794977 --repo Davisermenho/CEPRAEA` ✅ · `gh api -X PUT repos/Davisermenho/CEPRAEA/branches/main/protection --input /tmp/cepraea-branch-protection.json` ✅ · `gh api .../required_status_checks/contexts` → `["scout-preview-smoke"]` · workflow atualizado com `actions/create-github-app-token@v2` |
+| 2026-05-21 | 09:27 | CEPR-SCOUT-PREVIEW-SMOKE-GATE | Criado gate automatizado de Scout Preview Smoke com escrita real: spec dedicada de preview, config/script npm, workflow de CI, regra explícita no AGENTS e template de PR com checklist de evidências | `e2e/scout/scout-preview-smoke.spec.ts` criado · `playwright.scout-preview-smoke.config.ts` criado · `package.json` script `test:smoke:scout:preview` · `.github/workflows/scout-preview-smoke.yml` criado · `.github/pull_request_template.md` criado · `npm run typecheck` ✅ · `npm test` ✅ (`54 passed`) · `npm run build` ✅ · `SMOKE_BASE_URL=https://example.com npx playwright test --config=playwright.scout-preview-smoke.config.ts --list` ✅ |
 | 2026-05-21 | 07:06 | CEPR-0098D-PREVIEW-ENV | Corrigido `VITE_SUPABASE_TEAM_ID` no Preview geral e no Preview branch-specific da PR #18 e redeployado sem usar worktree local sujo | `vercel env add VITE_SUPABASE_TEAM_ID preview feat/scout-required-fields-flow-contract --force --yes` ✅ · `vercel api .../env/EP8BQXeuQOuAFeB7 -X PATCH` ✅ · `vercel redeploy ... --target preview` ✅ (`Ready`) · Preview `https://cepraea-84ewy03rp-davi-sermenhos-projects.vercel.app` · smoke ✅ (`4 passed`) · bundle contem o `team_id` correto |
 | 2026-05-21 | 01:31 | CEPR-0098D-PREVIEW | Preview Vercel da PR #18 validado com smoke verde e logs sem erro crítico server-side | Preview `https://cepraea-git-feat-scout-required-651217-davi-sermenhos-projects.vercel.app` · `SMOKE_BASE_URL=... npm run test:smoke` ✅ (`4 passed`) · `vercel inspect` `Ready` · `vercel logs` apenas `GET / 200` |
 | 2026-05-21 | 01:29 | CEPR-0098D-PR | PR draft separada aberta para o recorte CEPR-0098D de `requiredFields` condicionais da `COLETA_AO_VIVO` | Commit `05d35e7` · PR #18 `https://github.com/Davisermenho/CEPRAEA/pull/18` · `gh pr view 18` reportou `MERGEABLE`, draft, Vercel pendente no primeiro check |

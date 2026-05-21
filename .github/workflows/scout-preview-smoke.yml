@@ -1,0 +1,116 @@
+name: Scout Preview Smoke
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/features/scout/**'
+      - 'src/features/presence-tokens/**'
+      - 'src/lib/supabase.ts'
+      - 'src/types/**'
+      - 'supabase/**'
+      - 'e2e/scout/**'
+      - 'playwright.scout-preview-smoke.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'AGENTS.md'
+      - '.github/workflows/scout-preview-smoke.yml'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  scout-preview-smoke:
+    name: scout-preview-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+
+      - name: Validate required secrets
+        shell: bash
+        run: |
+          missing=0
+          for key in VERCEL_TOKEN VERCEL_PROJECT_ID VERCEL_TEAM_ID SMOKE_COACH_EMAIL SMOKE_COACH_PASSWORD APP_PEM; do
+            if [ -z "${!key}" ]; then
+              echo "Missing required secret: $key"
+              missing=1
+            fi
+          done
+          if [ -z "${APP_ID:-}" ]; then
+            echo "Missing required variable: APP_ID"
+            missing=1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          SMOKE_COACH_EMAIL: ${{ secrets.SMOKE_COACH_EMAIL }}
+          SMOKE_COACH_PASSWORD: ${{ secrets.SMOKE_COACH_PASSWORD }}
+          APP_PEM: ${{ secrets.APP_PEM }}
+          APP_ID: ${{ vars.APP_ID }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait preview build
+        run: sleep 45
+
+      - name: Resolve Vercel preview URL
+        uses: zentered/vercel-preview-url@v1.4.0
+        id: vercel_preview
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        with:
+          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel_team_id: ${{ secrets.VERCEL_TEAM_ID }}
+          vercel_target: preview
+
+      - name: Fail when preview URL is unavailable
+        if: ${{ steps.vercel_preview.outputs.preview_url == '' }}
+        run: |
+          echo "Preview URL não disponível para o branch/PR atual."
+          exit 1
+
+      - name: Run Scout preview smoke
+        env:
+          SMOKE_BASE_URL: https://${{ steps.vercel_preview.outputs.preview_url }}
+          SMOKE_COACH_EMAIL: ${{ secrets.SMOKE_COACH_EMAIL }}
+          SMOKE_COACH_PASSWORD: ${{ secrets.SMOKE_COACH_PASSWORD }}
+        run: |
+          echo "Running smoke against $SMOKE_BASE_URL"
+          npm run test:smoke:scout:preview
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-scout-preview-smoke-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: warn

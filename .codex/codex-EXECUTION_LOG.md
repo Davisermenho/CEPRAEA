@@ -19,10 +19,71 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-21 - 07:06 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 10:08 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-21 10:08 BRT — CEPR-GITHUB-APP-SECRET
+
+- **Objetivo:** concluir a pendência crítica do GitHub App configurando o secret `APP_PEM`.
+- **Entrada recebida:** caminho da chave privada: `/home/davis/cepraea-pwa/my-automation-agent-app.2026-05-21.private-key.pem`.
+- **Ações executadas:**
+  - validação de existência do arquivo (`FILE_OK`);
+  - gravação do secret no repositório `Davisermenho/CEPRAEA` com `gh secret set APP_PEM`.
+- **Evidências de sucesso:**
+  - `gh secret list --repo Davisermenho/CEPRAEA | rg '^APP_PEM'` retornou `APP_PEM` com timestamp;
+  - `gh variable list --repo Davisermenho/CEPRAEA | rg '^APP_ID'` confirmou `APP_ID=3794977`;
+  - required check da branch protegida permanece `["scout-preview-smoke"]`.
+- **Estado final do bloqueio:** pendência `APP_PEM` encerrada.
+
+## Entrada Rápida — 2026-05-21 10:03 BRT — CEPR-GITHUB-APP-GATE
+
+- **Objetivo:** executar a integração do GitHub App no workflow e configurar proteção de branch com check obrigatório.
+- **Configuração aplicada no repositório:**
+  - variável `APP_ID=3794977` criada em `Davisermenho/CEPRAEA`.
+  - `APP_PEM` ainda não configurado por ausência da chave privada no filesystem/local env desta sessão.
+- **Workflow atualizado:** `.github/workflows/scout-preview-smoke.yml`
+  - adicionada etapa `actions/create-github-app-token@v2` (`app-id: ${{ vars.APP_ID }}`, `private-key: ${{ secrets.APP_PEM }}`).
+  - validação de pré-requisitos agora exige `APP_ID` e `APP_PEM`.
+- **Branch protection aplicada via API:**
+  - branch `main` agora protegida;
+  - required status check configurado: `scout-preview-smoke`;
+  - confirmação: `gh api .../required_status_checks/contexts` retornou `["scout-preview-smoke"]`.
+- **Evidências de execução:**
+  - `gh variable set APP_ID --body "3794977" --repo Davisermenho/CEPRAEA` ✅
+  - `gh api -X PUT repos/Davisermenho/CEPRAEA/branches/main/protection --input /tmp/cepraea-branch-protection.json` ✅
+  - `python3` parse YAML do workflow (`YAML_OK`) ✅
+- **Pendência bloqueadora restante:** fornecer a chave privada do app para gravar `APP_PEM` no secret do repositório.
+
+## Entrada Rápida — 2026-05-21 09:27 BRT — CEPR-SCOUT-PREVIEW-SMOKE-GATE
+
+- **Objetivo:** transformar Scout Preview Smoke em gate automático real de merge com escrita no preview, não apenas smoke visual.
+- **Arquivos de teste/gate criados:**
+  - `e2e/scout/scout-preview-smoke.spec.ts`
+  - `playwright.scout-preview-smoke.config.ts`
+  - `.github/workflows/scout-preview-smoke.yml`
+  - `.github/pull_request_template.md`
+- **Scripts/contrato operacional atualizados:**
+  - `package.json` com `test:smoke:scout:preview`
+  - `AGENTS.md` com seção explícita de Scout Preview Smoke obrigatório e check obrigatório no branch protection.
+- **Cobertura de fluxo no smoke de preview:**
+  - login de treinador no preview;
+  - criação de equipe E2E com prefixo rastreável;
+  - criação de atleta E2E com prefixo rastreável;
+  - preparação de sessão/jogo;
+  - confirmação de elenco;
+  - abertura de coleta ao vivo;
+  - caso crítico `PASSIVO` (permite submit sem finalização);
+  - caso crítico `GOL` (bloqueia submit sem required fields condicionais).
+- **Detecção de falha crítica implementada:** falha automática em erro de Supabase/Auth/RLS/permission (`row-level security`, `42501`, `permission denied`, JWT/Auth) em respostas de rede, além de `pageerror` e `console.error`.
+- **Validação local executada:**
+  - `npm run typecheck` ✅
+  - `npm test` ✅ (`54 passed`)
+  - `npm run build` ✅
+  - `SMOKE_BASE_URL=https://example.com npx playwright test --config=playwright.scout-preview-smoke.config.ts --list` ✅ (`1 test listado`)
+- **Limitação conhecida:** smoke real contra Preview Vercel depende dos secrets de CI (`VERCEL_TOKEN`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID`, `SMOKE_COACH_EMAIL`, `SMOKE_COACH_PASSWORD`).
+- **Pendência externa:** configurar `scout-preview-smoke` como required check no branch protection de `main`.
 
 ## Entrada Rápida — 2026-05-21 07:06 BRT — CEPR-0098D-PREVIEW-ENV
 
