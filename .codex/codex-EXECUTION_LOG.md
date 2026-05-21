@@ -31,7 +31,8 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
   - `scout-preview-smoke.yml` passou a rodar sem `paths` no evento (evita required check preso em `Pending`) e aplica filtro por escopo com `dorny/paths-filter`;
   - inclusão de `merge_group` no workflow do smoke para reporte consistente de checks;
   - criação de `.github/CODEOWNERS` com owner global;
-  - criação de `.github/workflows/pr-evidence-guard.yml` para validar preenchimento obrigatório do template de PR, com exigência extra quando o PR toca Scout/Supabase/Auth/RLS.
+  - criação de `.github/workflows/pr-evidence-guard.yml` para validar preenchimento obrigatório do template de PR, com exigência extra quando o PR toca Scout/Supabase/Auth/RLS;
+  - pin de `supabase/setup-cli@v1` para `2.98.1` em workflows que iniciam stack Supabase, removendo dependência de `latest` (fonte de falha por rate limit).
 - **Execução de plataforma GitHub concluída:**
   - branch protection de `main` atualizado em `required_pull_request_reviews` com:
     - `required_approving_review_count=1`;
