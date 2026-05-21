@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-21 - 17:02 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 17:35 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,7 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-21 | 17:35 | CEPR-GOV-HARDENING-03 | Remoção de `dorny/paths-filter@v3` do Scout Preview Smoke para eliminar warning de Node 20; detecção de escopo migrada para `git diff` em shell, mantendo gate obrigatório e comportamento de skip por escopo | `.github/workflows/scout-preview-smoke.yml` atualizado com step shell `Detect Scout scope` · ausência de `dorny/paths-filter@v3` no workflow · `npm run typecheck` ✅ · `npm run build` ✅ |
 | 2026-05-21 | 17:02 | CEPR-GOV-HARDENING-02 | Hardening adicional de governança: `scout-preview-smoke` sem `paths` no gatilho, detecção de escopo intra-job, `CODEOWNERS`, guardião automático de evidências de PR, branch protection reforçado e estabilização do check `scout-contract-cepr0098d` em testes contratuais de domínio (sem `supabase start` no CI) | `.github/workflows/scout-preview-smoke.yml` atualizado · `.github/CODEOWNERS` criado · `.github/workflows/pr-evidence-guard.yml` criado · `.github/workflows/scout-contract-cepr0098d.yml` simplificado para `vitest` de contrato · `.github/workflows/{supabase-foundation,athlete-auth-foundation}.yml` com `supabase-cli 2.98.1` · `gh api .../required_pull_request_reviews` com `require_code_owner_reviews=true` e `require_last_push_approval=true` · `npm run typecheck` ✅ · `npm run build` ✅ |
 | 2026-05-21 | 10:08 | CEPR-SCOUT-PREVIEW-GATE | Pacote de gate obrigatório do Scout Preview Smoke publicado em branch dedicada: smoke de escrita real, workflow CI com GitHub App token, template PR e regra explícita em AGENTS | `e2e/scout/scout-preview-smoke.spec.ts` criado · `playwright.scout-preview-smoke.config.ts` criado · `.github/workflows/scout-preview-smoke.yml` criado · `.github/pull_request_template.md` criado · `package.json` script `test:smoke:scout:preview` · `APP_ID` e `APP_PEM` configurados no repo |
 | 2026-05-20 | 07:14 | CEPR-0099 | E2E global fora do Scout estabilizado: falhas separadas por coach, athlete, public e smoke; regressões reais de recarga de dados/mensagem corrigidas sem alterar Scout | `npm run test:e2e` ✅ (`166 passed`, `5 skipped`) · `npm run typecheck` ✅ · `npm test` ✅ (`51 passed`) · `npm run build` ✅ · `git diff --check` ✅ · PR não aberto |
