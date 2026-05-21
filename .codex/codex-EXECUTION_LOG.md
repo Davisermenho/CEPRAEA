@@ -19,10 +19,22 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-21 - 17:02 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 17:35 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-21 17:35 BRT — CEPR-GOV-HARDENING-03
+
+- **Objetivo:** eliminar warning de depreciação Node 20 no check `scout-preview-smoke`.
+- **Mudanças de código/processo:**
+  - remoção de `dorny/paths-filter@v3` do workflow `.github/workflows/scout-preview-smoke.yml`;
+  - substituição por detecção de escopo via shell (`git diff --name-only`) com regex equivalente;
+  - preservação da regra: `merge_group` sempre força execução do check obrigatório.
+- **Evidências objetivas:**
+  - `rg -n "dorny/paths-filter" .github/workflows/scout-preview-smoke.yml` sem resultados ✅
+  - `npm run typecheck` ✅
+  - `npm run build` ✅
 
 ## Entrada Rápida — 2026-05-21 17:02 BRT — CEPR-GOV-HARDENING-02
 
