@@ -19,10 +19,20 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-21 - 17:35 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 17:48 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-21 17:48 BRT — CEPR-GOV-HARDENING-04
+
+- **Objetivo:** alinhar `AGENTS.md` ao modo solo (sem review humano obrigatório de terceiros).
+- **Mudanças de código/processo:**
+  - inclusão da seção `5.9 Operação solo (sem equipe de revisão)` em `AGENTS.md`;
+  - regra explícita: sem exigência de aprovação de reviewer de terceiros, mantendo gates técnicos obrigatórios.
+- **Evidências objetivas:**
+  - `gh api repos/Davisermenho/CEPRAEA/branches/main/protection --jq ...` → `required_reviews=0`, `require_last_push_approval=false`, checks obrigatórios ativos ✅
+  - atualização documental versionada em `AGENTS.md` ✅
 
 ## Entrada Rápida — 2026-05-21 17:35 BRT — CEPR-GOV-HARDENING-03
 
