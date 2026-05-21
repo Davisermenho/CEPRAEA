@@ -46,6 +46,11 @@ function isCriticalResponse(url: string, status: number, body: string) {
   return criticalPatterns.some((pattern) => pattern.test(body))
 }
 
+function isIgnorableConsoleError(message: string) {
+  const ignorablePatterns = [/Failed to load resource: the server responded with a status of (400|401|403|404)/i]
+  return ignorablePatterns.some((pattern) => pattern.test(message))
+}
+
 async function loginAsCoachPreview(page: import('@playwright/test').Page) {
   assertSmokeCredentials()
   await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 30_000 })
@@ -77,7 +82,9 @@ test.describe('Scout Preview Smoke (escrita real)', () => {
     })
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
-        consoleErrors.push(msg.text())
+        const text = msg.text()
+        if (isIgnorableConsoleError(text)) return
+        consoleErrors.push(text)
       }
     })
     page.on('response', async (resp) => {

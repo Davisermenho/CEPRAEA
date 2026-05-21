@@ -2017,3 +2017,4 @@ Ajustado o smoke `scout-preview-smoke` para validar bloqueio funcional de persis
 - `npm run typecheck`: passou.
 - `SMOKE_BASE_URL=https://example.com npx playwright test --config=playwright.scout-preview-smoke.config.ts --list`: passou (`1 test listed`).
 - Follow-up CI hardening: o smoke deixou de exigir texto de warning fixo e passou a aceitar variação de UI, mantendo prova de persistência via `LIVE-0002`.
+- Smoke preview: filtro de ruído para console error de recurso HTTP 4xx (`Failed to load resource`), preservando detecção de erros críticos de integração.

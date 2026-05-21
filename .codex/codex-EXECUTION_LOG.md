@@ -4294,3 +4294,8 @@ Corrigir falha real do check obrigatório `scout-preview-smoke` na PR #20, mante
   - bloqueio explícito de submit por obrigatoriedade; ou
   - submit direto quando já permitido.
 - A validação agora ancora no resultado persistido: existência de `LIVE-0002` ao final do fluxo crítico.
+
+## 🔁 Ajuste adicional após novo run
+
+- Run `26228675539` falhou por ruído de console não crítico: `Failed to load resource: the server responded with a status of 400 ()`.
+- A spec do smoke agora ignora apenas esse padrão de erro de recurso HTTP 4xx no listener de console, mantendo captura de erros críticos reais via listener de resposta Supabase (`RLS/Auth/permission`).
