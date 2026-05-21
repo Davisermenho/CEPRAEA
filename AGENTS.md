@@ -312,6 +312,14 @@ Também verificar:
 - logs sem erro crítico;
 - nenhuma migration perigosa sem validação.
 
+### 5.9 Operação solo (sem equipe de revisão)
+
+Quando o repositório estiver em modo solo:
+
+- não exigir aprovação de reviewer humano de terceiros para merge;
+- manter obrigatórios os gates técnicos (`required_status_checks`) e validações de preview/smoke;
+- manter branch/PR como trilha de auditoria e evidência, mesmo sem review externo.
+
 ## 6. Pipelines obrigatórios
 
 ### Mudança simples sem UI e sem banco
