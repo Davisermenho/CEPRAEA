@@ -28,8 +28,9 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 
 - **Objetivo:** corrigir o RLS de `scout_games` no Preview da PR #18 ajustando `VITE_SUPABASE_TEAM_ID`.
 - **Autorização humana:** concedida explicitamente para alterar `VITE_SUPABASE_TEAM_ID` no ambiente Preview da Vercel.
-- **Escopo executado:** atualizado apenas o env branch-specific `Preview (feat/scout-required-fields-flow-contract)`; produção não foi alterada.
-- **Comando env:** `vercel env add VITE_SUPABASE_TEAM_ID preview feat/scout-required-fields-flow-contract --force --yes --scope davi-sermenhos-projects` passou.
+- **Escopo executado:** atualizados o env branch-specific `Preview (feat/scout-required-fields-flow-contract)` e o Preview geral (`gitBranch: null`); produção não foi alterada.
+- **Comando env branch-specific:** `vercel env add VITE_SUPABASE_TEAM_ID preview feat/scout-required-fields-flow-contract --force --yes --scope davi-sermenhos-projects` passou.
+- **Comando env Preview geral:** `vercel api /v9/projects/.../env/EP8BQXeuQOuAFeB7 -X PATCH` passou, mantendo `target=[preview]`, `gitBranch=null`, `type=sensitive`.
 - **Redeploy seguro:** usado `vercel redeploy` sobre deployment existente, evitando `vercel --force` local porque o worktree contém mudanças não relacionadas de MCP/Copilot/AGENTS.
 - **Deployment novo:** `dpl_7gaEsroDR6uiXySCmQ3QyioxM8bt`, URL `https://cepraea-84ewy03rp-davi-sermenhos-projects.vercel.app`, alias `https://cepraea-git-feat-scout-required-651217-davi-sermenhos-projects.vercel.app`, status `Ready`.
 - **Smoke:** `SMOKE_BASE_URL=https://cepraea-84ewy03rp-davi-sermenhos-projects.vercel.app npm run test:smoke` passou, `4 passed`.
