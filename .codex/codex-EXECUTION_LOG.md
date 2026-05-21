@@ -19,10 +19,30 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-20 - 07:14 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 10:08 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-21 10:08 BRT — CEPR-SCOUT-PREVIEW-GATE
+
+- **Objetivo:** criar o gate obrigatório de Scout Preview Smoke em PR dedicada baseada em `main`, sem misturar com a PR #18.
+- **Mudanças de código/processo:**
+  - smoke de preview com escrita real e validação de erros críticos (`RLS/Auth/permission`) em `e2e/scout/scout-preview-smoke.spec.ts`;
+  - config dedicada `playwright.scout-preview-smoke.config.ts`;
+  - script `test:smoke:scout:preview` em `package.json`;
+  - workflow `.github/workflows/scout-preview-smoke.yml` com `actions/create-github-app-token@v2`, resolução da URL de preview e upload de artifacts Playwright;
+  - template `.github/pull_request_template.md` com checklist obrigatório de evidências Scout;
+  - `AGENTS.md` com seção explícita de gate Scout Preview Smoke obrigatório.
+- **Execução de plataforma GitHub concluída:**
+  - variável `APP_ID=3794977` configurada;
+  - secret `APP_PEM` configurado a partir da chave privada fornecida;
+  - branch protection em `main` com required check `scout-preview-smoke`.
+- **Evidências objetivas:**
+  - `gh variable list --repo Davisermenho/CEPRAEA | rg '^APP_ID'` ✅
+  - `gh secret list --repo Davisermenho/CEPRAEA | rg '^APP_PEM'` ✅
+  - `gh api repos/Davisermenho/CEPRAEA/branches/main/protection/required_status_checks/contexts` → `["scout-preview-smoke"]` ✅
+  - parse YAML do workflow (`YAML_OK`) ✅
 
 ## Entrada Rápida — 2026-05-20 07:14 BRT — CEPR-0099
 
