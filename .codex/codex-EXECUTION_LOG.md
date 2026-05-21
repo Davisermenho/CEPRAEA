@@ -19,10 +19,20 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-21 - 01:29 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 01:31 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-21 01:31 BRT — CEPR-0098D-PREVIEW
+
+- **Objetivo:** validar Preview Vercel e smoke da PR #18 antes de qualquer decisão de merge.
+- **Preview:** `https://cepraea-git-feat-scout-required-651217-davi-sermenhos-projects.vercel.app`.
+- **Checks GitHub:** `gh pr checks 18` retornou Vercel `pass`, Vercel Preview Comments `pass`, Supabase Preview/Foundation/Athlete Auth `skipping`.
+- **Vercel inspect:** deployment `dpl_AJY8e49aEuyjw6oNG3qWDxDTV8kX`, target `preview`, status `Ready`.
+- **Smoke:** `SMOKE_BASE_URL=https://cepraea-git-feat-scout-required-651217-davi-sermenhos-projects.vercel.app npm run test:smoke` ✅ (`4 passed`).
+- **Logs:** `vercel logs ...` retornou apenas `GET / 200`, sem erro crítico server-side.
+- **Pendência:** PR #18 continua draft e sem merge; merge exige confirmação humana explícita.
 
 ## Entrada Rápida — 2026-05-21 01:29 BRT — CEPR-0098D-PR
 

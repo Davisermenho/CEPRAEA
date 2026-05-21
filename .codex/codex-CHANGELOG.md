@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-21 - 01:29 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 01:31 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,7 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-21 | 01:31 | CEPR-0098D-PREVIEW | Preview Vercel da PR #18 validado com smoke verde e logs sem erro crítico server-side | Preview `https://cepraea-git-feat-scout-required-651217-davi-sermenhos-projects.vercel.app` · `SMOKE_BASE_URL=... npm run test:smoke` ✅ (`4 passed`) · `vercel inspect` `Ready` · `vercel logs` apenas `GET / 200` |
 | 2026-05-21 | 01:29 | CEPR-0098D-PR | PR draft separada aberta para o recorte CEPR-0098D de `requiredFields` condicionais da `COLETA_AO_VIVO` | Commit `05d35e7` · PR #18 `https://github.com/Davisermenho/CEPRAEA/pull/18` · `gh pr view 18` reportou `MERGEABLE`, draft, Vercel pendente no primeiro check |
 | 2026-05-20 | 14:49 | CEPR-0098D-GATE | Gate amplo final validado após conectar `requiredFields` condicionais: Scout desktop passou com novo caso CEPR-0098D, E2E global voltou a verde e o gate MVP v1.0 fechou completo | `npx playwright test e2e/scout --project=desktop --reporter=line` ✅ (`103 passed`) · `npm run validate:mvp:v1` ✅ (`MVP v1.0: OK`, E2E global `167 passed / 5 skipped`) · `git diff --check` ✅ |
 | 2026-05-20 | 13:48 | CEPR-0098D | `requiredFields` condicionais do contrato operacional conectados ao submit da `COLETA_AO_VIVO` para os 3 fluxos de arremesso auditados, preservando `PASSIVO` sem finalização e bloqueando `GOL` sem finalização/pontuação | `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts` ✅ (`11 passed`) · `npm run typecheck` ✅ · `npx playwright test e2e/scout/scout-pontuacao-gol.spec.ts --project=desktop --reporter=line` ✅ (`16 passed`) |
@@ -2074,3 +2075,25 @@ Aberta PR draft separada para o recorte CEPR-0098D, mantendo o merge bloqueado a
   - `gh pr create --draft --base main --head feat/scout-required-fields-flow-contract`: passou, PR #18 criada.
   - `gh pr view 18`: PR `OPEN`, `isDraft=true`, `mergeable=MERGEABLE`; Vercel ainda pendente no primeiro check.
   - Supabase Preview/Foundation/Athlete Auth reportaram `SKIPPED`, conforme comportamento esperado dos checks atuais.
+
+---
+
+### [CEPR-0098D-PREVIEW] — 2026-05-21 — Preview e smoke da PR #18
+
+#### ✨ Resumo
+
+Validado o preview Vercel da PR #18 após a publicação da branch e dos logs Codex.
+
+#### 🛠️ Changed
+
+- PR #18 permanece draft, sem merge.
+- Preview validado: `https://cepraea-git-feat-scout-required-651217-davi-sermenhos-projects.vercel.app`.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** Preview validado.
+- **Evidências objetivas:**
+  - `gh pr checks 18`: Vercel `pass`, Vercel Preview Comments `pass`, Supabase Preview/Foundation/Athlete Auth `skipping`.
+  - `vercel inspect https://cepraea-git-feat-scout-required-651217-davi-sermenhos-projects.vercel.app --scope davi-sermenhos-projects`: status `Ready`, target `preview`.
+  - `SMOKE_BASE_URL=https://cepraea-git-feat-scout-required-651217-davi-sermenhos-projects.vercel.app npm run test:smoke`: passou, `4 passed`.
+  - `vercel logs ...`: apenas `GET / 200`, sem erro crítico server-side.
