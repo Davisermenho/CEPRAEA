@@ -263,7 +263,40 @@ Se houver erro no preview:
 5. atualizar PR;
 6. revalidar preview.
 
-### 5.7 Release / merge final
+### 5.7 Scout Preview Smoke obrigatório
+
+Para qualquer PR que altere Scout, cadastro Scout, sessão Scout, coleta ao vivo, Auth, Supabase, RLS, RPC ou fluxo de jogo:
+
+- é obrigatório executar smoke automatizado contra o Preview da Vercel;
+- o smoke não pode apenas abrir páginas; deve executar escrita real mínima;
+- o PR não pode ser considerado pronto se houver erro de RLS/Auth/insert/update/select.
+
+Fluxo mínimo obrigatório:
+
+1. abrir `/scout`;
+2. criar equipe Scout de teste;
+3. confirmar persistência da equipe;
+4. criar atleta Scout de teste;
+5. confirmar persistência da atleta;
+6. preparar nova sessão/jogo;
+7. confirmar elenco;
+8. abrir coleta ao vivo;
+9. executar o fluxo crítico impactado pelo PR;
+10. validar ausência de erro crítico no console;
+11. validar logs do Preview Vercel sem erro crítico.
+
+Comando dedicado:
+
+```bash
+SMOKE_BASE_URL="<preview-url>" npm run test:smoke:scout:preview
+```
+
+Branch protection:
+
+- o check de Scout Preview Smoke deve estar configurado como obrigatório para merge em `main`;
+- sem esse check em `SUCCESS`, o merge deve ser bloqueado.
+
+### 5.8 Release / merge final
 
 Antes de considerar um PR pronto para merge:
 
@@ -316,6 +349,16 @@ npm run build
 npm run test:smoke
 ```
 
+### Mudança de Scout com preview Vercel
+
+```bash
+npm run typecheck
+npm test
+npm run build
+SMOKE_BASE_URL="<preview-url>" npm run test:smoke:scout:preview
+vercel logs <preview-url>
+```
+
 ### Gate final
 
 ```bash
@@ -339,25 +382,77 @@ O agente não pode:
 - commitar segredos;
 - exibir tokens, secrets ou keys.
 
-## 8. Supabase MCP
+## 8. Supabase access policy
 
-Prioridade:
+O padrão para agentes é usar Supabase MCP, não Postgres direto.
 
-1. Supabase local
-2. Supabase remoto read-only, apenas se necessário
-3. Supabase remoto com escrita, somente com confirmação explícita
+### Supabase local
 
-Endpoint local:
+Usar por padrão:
 
 ```txt
-http://localhost:54321/mcp
+supabase-local = http://127.0.0.1:54321/mcp
 ```
 
-Remote seguro preferencial:
+Finalidade:
+
+- consultar schema local;
+- validar migrations locais;
+- inspecionar tabelas;
+- investigar dados de teste;
+- apoiar testes E2E e Supabase local.
+
+### Supabase remoto
+
+Usar somente em modo leitura:
 
 ```txt
-https://mcp.supabase.com/mcp?project_ref=<PROJECT_REF>&read_only=true
+supabase-remote-readonly = https://mcp.supabase.com/mcp?project_ref=fcnyjmrknqaomamdzabt&read_only=true&features=database,docs,debugging,development
 ```
+
+Permitido:
+
+- listar tabelas;
+- ler schema;
+- listar migrations;
+- gerar tipos;
+- consultar logs/advisors;
+- comparar estrutura remota com local.
+
+Proibido sem confirmação humana explícita:
+
+- aplicar migration remota;
+- executar SQL destrutivo;
+- alterar dados;
+- alterar policies/RLS;
+- alterar secrets;
+- alterar configurações do projeto.
+
+### Postgres direto
+
+Postgres direto é exceção.
+
+Só pode ser usado quando:
+
+- Supabase MCP não resolver;
+- for necessária query SQL fina;
+- o usuário autorizar explicitamente.
+
+Nunca versionar connection strings com senha.
+
+Usar somente via variável de ambiente local:
+
+```bash
+SUPABASE_LOCAL_DB_URL
+SUPABASE_REMOTE_DB_URL
+```
+
+### Regra de preferência
+
+1. Supabase MCP local
+2. Supabase MCP remoto read-only
+3. Postgres local direto
+4. Postgres remoto direto, somente com autorização explícita
 
 ## 9. Vercel MCP
 
@@ -396,6 +491,7 @@ Ao terminar uma tarefa, responder neste formato:
 - `npm run build`: passou/falhou/não executado
 - `npm run test:e2e`: passou/falhou/não executado
 - `npm run test:smoke`: passou/falhou/não executado
+- `npm run test:smoke:scout:preview`: passou/falhou/não executado
 - `npm run validate:mvp:v1`: passou/falhou/não executado
 
 ## Preview Vercel

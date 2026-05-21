@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-20 - 07:14 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 10:08 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,7 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-21 | 10:08 | CEPR-SCOUT-PREVIEW-GATE | Pacote de gate obrigatório do Scout Preview Smoke publicado em branch dedicada: smoke de escrita real, workflow CI com GitHub App token, template PR e regra explícita em AGENTS | `e2e/scout/scout-preview-smoke.spec.ts` criado · `playwright.scout-preview-smoke.config.ts` criado · `.github/workflows/scout-preview-smoke.yml` criado · `.github/pull_request_template.md` criado · `package.json` script `test:smoke:scout:preview` · `APP_ID` e `APP_PEM` configurados no repo |
 | 2026-05-20 | 07:14 | CEPR-0099 | E2E global fora do Scout estabilizado: falhas separadas por coach, athlete, public e smoke; regressões reais de recarga de dados/mensagem corrigidas sem alterar Scout | `npm run test:e2e` ✅ (`166 passed`, `5 skipped`) · `npm run typecheck` ✅ · `npm test` ✅ (`51 passed`) · `npm run build` ✅ · `git diff --check` ✅ · PR não aberto |
 | 2026-05-20 | 01:06 | CEPR-0098C | Gate E2E Scout estabilizado; roster passou isolado e `TRANS_OF` foi endurecido para consultas SQL por `scout_game_id` | `npx playwright test e2e/scout/scout-cepr0088a-roster.spec.ts --project=desktop --trace=on --reporter=line` ✅ (1 test) · `npx playwright test e2e/scout/scout-cepr0089-trans-of.spec.ts --project=desktop --reporter=line` ✅ (9 tests) · `npx playwright test e2e/scout --project=desktop --reporter=line` ✅ (102 tests) · `npm run typecheck` ✅ · `npm test` ✅ (51 tests) · `npm run build` ✅ · PR não aberto |
 | 2026-05-20 | 00:35 | CEPR-0089B | Governança do contrato operacional registrada em matriz local, contexto/handoff local e Notion, com ressalva da reexecução E2E focada intermediária | `npx playwright test e2e/scout --project=desktop --reporter=line` ❌ (101/102; falha transitória em `scout-cepr0088a-roster`) · Notion MCP update ✅ · PR não aberto |
@@ -1993,3 +1994,58 @@ Após o merge da PR #14, `npm run validate:mvp:v1` em `main` falhou em 1 E2E por
   - Smoke em produção `https://cepraea.vercel.app`: passou, `4 passed`.
   - Preview geral da Vercel recebeu `VITE_SUPABASE_TEAM_ID` após autorização humana.
   - Smoke no preview redeployado da PR #17 `https://cepraea-anynjnllg-davi-sermenhos-projects.vercel.app`: passou, `4 passed`.
+
+---
+
+### [CEPR-SMOKE-SCOUT-PREVIEW] — 2026-05-21 — Ajuste de robustez no gate do smoke de preview
+
+#### ✨ Resumo
+
+Ajustado o smoke `scout-preview-smoke` para validar bloqueio funcional de persistência sem campos obrigatórios no fluxo `AT_POS + ARREMESSO + GOL`, sem depender exclusivamente de estado visual `disabled` do botão.
+
+#### 🛠️ Changed
+
+- `e2e/scout/scout-preview-smoke.spec.ts`
+  - Remove assert rígido `toBeDisabled()` para `Registrar entrada`.
+  - Passa a exigir aviso de campos obrigatórios.
+  - Tenta submit apenas se o botão estiver habilitado.
+  - Garante ausência de persistência (`LIVE-0002` não aparece) antes de preencher os campos obrigatórios.
+  - Após preencher finalização/motivo, exige sucesso e presença de `LIVE-0002`.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck`: passou.
+- `SMOKE_BASE_URL=https://example.com npx playwright test --config=playwright.scout-preview-smoke.config.ts --list`: passou (`1 test listed`).
+- Follow-up CI hardening: o smoke deixou de exigir texto de warning fixo e passou a aceitar variação de UI, mantendo prova de persistência via `LIVE-0002`.
+- Smoke preview: filtro de ruído para console error de recurso HTTP 4xx (`Failed to load resource`), preservando detecção de erros críticos de integração.
+
+---
+
+### [CEPR-SMOKE-SCOUT-PREVIEW] — 2026-05-21 — Limpeza da esteira CI (passos 2 e 5)
+
+#### ✨ Resumo
+
+Aplicadas as ações de governança e estabilidade da esteira na PR #20:
+- branch protection de `main` agora exige `scout-preview-smoke` e `Vercel`;
+- workflow de smoke atualizado para reduzir warnings e remover dependência de action terceirizada com runtime legada.
+
+#### 🛠️ Changed
+
+- `.github/workflows/scout-preview-smoke.yml`
+  - adiciona `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` no workflow;
+  - atualiza `actions/checkout` para `@v6`;
+  - atualiza `actions/setup-node` para `@v6`;
+  - substitui `zentered/vercel-preview-url` por resolução direta da Preview URL via API da Vercel (`curl + jq`);
+  - remove dependência do `actions/create-github-app-token` para este fluxo;
+  - atualiza `actions/upload-artifact` para `@v6`;
+  - altera `if-no-files-found` para `ignore` no upload de artifacts.
+
+#### 🛡️ Evidências
+
+- Branch protection (`main`) atualizado via API GitHub:
+  - `strict: true`
+  - `contexts: ["scout-preview-smoke", "Vercel"]`
+- `npm run typecheck`: passou.
+- Workflow smoke: upload de artifacts condicionado a existência real (`artifact_check`) para remover log residual de caminho vazio.
+- Workflow smoke: restaurado `if-no-files-found: ignore` no upload para suprimir warning quando só houver saída não elegível.
+- Detector de artifacts ajustado para considerar apenas arquivos não ocultos via `find`, evitando falso positivo de upload.
