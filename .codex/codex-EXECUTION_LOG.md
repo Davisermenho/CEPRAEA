@@ -4345,3 +4345,4 @@ Executar na PR #20:
 - Foi adicionada a etapa `artifact_check` para detectar existência real de `playwright-report`/`test-results`.
 - O upload agora só ocorre quando `has_artifacts == true`.
 - Resultado esperado: run limpo sem mensagem residual de upload vazio.
+- Ajuste final no upload de artifact: `if-no-files-found: ignore` reaplicado para evitar anotação de warning em execuções com saída parcial.
