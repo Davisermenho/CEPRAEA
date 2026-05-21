@@ -1,0 +1,109 @@
+name: PR Evidence Guard
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-evidence-guard:
+    name: pr-evidence-guard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate PR template evidence fields
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+
+            const scoutRegexes = [
+              /^src\/features\/scout\//,
+              /^src\/features\/presence-tokens\//,
+              /^src\/lib\/supabase\.ts$/,
+              /^src\/types\//,
+              /^supabase\//,
+              /^e2e\/scout\//,
+              /^playwright\.scout-preview-smoke\.config\.ts$/,
+              /^\.github\/workflows\/scout-preview-smoke\.yml$/,
+              /^AGENTS\.md$/,
+            ];
+
+            const scoutTouched = files.some((file) =>
+              scoutRegexes.some((regex) => regex.test(file.filename)),
+            );
+
+            const mandatory = [
+              'Escopo alterado',
+              'Arquivos alterados',
+              'Comandos executados',
+              'Resultado dos comandos',
+            ];
+
+            const scoutMandatory = [
+              'URL do Preview Vercel',
+              'Link do run `scout-preview-smoke`',
+              'Logs críticos do preview',
+            ];
+
+            const extractValue = (label) => {
+              const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const regex = new RegExp(`^- ${escaped}:\\s*(.*)$`, 'm');
+              const match = body.match(regex);
+              return (match && match[1] ? match[1] : '').trim();
+            };
+
+            const isFilled = (value) => {
+              if (!value) return false;
+              if (value === '-') return false;
+              if (/^<!--.*-->$/.test(value)) return false;
+              return true;
+            };
+
+            const missing = [];
+
+            for (const field of mandatory) {
+              if (!isFilled(extractValue(field))) {
+                missing.push(field);
+              }
+            }
+
+            if (scoutTouched) {
+              for (const field of scoutMandatory) {
+                if (!isFilled(extractValue(field))) {
+                  missing.push(field);
+                }
+              }
+            }
+
+            if (missing.length > 0) {
+              core.setFailed(
+                [
+                  'PR template incompleto.',
+                  scoutTouched
+                    ? 'Este PR toca Scout/Supabase/Auth/RLS e exige evidências completas de preview smoke.'
+                    : 'Preencha as evidências técnicas mínimas do PR.',
+                  `Campos faltando: ${missing.join(', ')}`,
+                ].join(' '),
+              );
+            } else {
+              core.info('PR template validado com sucesso.');
+            }

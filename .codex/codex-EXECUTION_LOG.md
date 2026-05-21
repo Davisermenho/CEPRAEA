@@ -19,10 +19,28 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-21 - 10:08 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 17:02 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-21 17:02 BRT — CEPR-GOV-HARDENING-02
+
+- **Objetivo:** fechar gaps restantes de enforcement do gate Scout e da auditoria de PR.
+- **Mudanças de código/processo:**
+  - `scout-preview-smoke.yml` passou a rodar sem `paths` no evento (evita required check preso em `Pending`) e aplica filtro por escopo com `dorny/paths-filter`;
+  - inclusão de `merge_group` no workflow do smoke para reporte consistente de checks;
+  - criação de `.github/CODEOWNERS` com owner global;
+  - criação de `.github/workflows/pr-evidence-guard.yml` para validar preenchimento obrigatório do template de PR, com exigência extra quando o PR toca Scout/Supabase/Auth/RLS.
+- **Execução de plataforma GitHub concluída:**
+  - branch protection de `main` atualizado em `required_pull_request_reviews` com:
+    - `required_approving_review_count=1`;
+    - `require_code_owner_reviews=true`;
+    - `require_last_push_approval=true`.
+- **Evidências objetivas:**
+  - `gh api repos/Davisermenho/CEPRAEA/branches/main/protection --jq ...` → `enforce_admins=true`, checks obrigatórios `["scout-preview-smoke","Vercel","scout-contract-cepr0098d"]`, code-owner review e last-push approval habilitados ✅
+  - `npm run typecheck` ✅
+  - `npm run build` ✅
 
 ## Entrada Rápida — 2026-05-21 10:08 BRT — CEPR-SCOUT-PREVIEW-GATE
 
