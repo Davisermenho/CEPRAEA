@@ -2046,3 +2046,4 @@ Aplicadas as ações de governança e estabilidade da esteira na PR #20:
   - `strict: true`
   - `contexts: ["scout-preview-smoke", "Vercel"]`
 - `npm run typecheck`: passou.
+- Workflow smoke: upload de artifacts condicionado a existência real (`artifact_check`) para remover log residual de caminho vazio.

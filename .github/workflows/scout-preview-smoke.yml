@@ -116,12 +116,25 @@ jobs:
           echo "Running smoke against $SMOKE_BASE_URL"
           npm run test:smoke:scout:preview
 
-      - name: Upload Playwright report
+      - name: Detect Playwright artifacts
         if: always()
+        id: artifact_check
+        shell: bash
+        run: |
+          has_artifacts=false
+          if [ -d "playwright-report" ] && [ -n "$(ls -A playwright-report 2>/dev/null)" ]; then
+            has_artifacts=true
+          fi
+          if [ -d "test-results" ] && [ -n "$(ls -A test-results 2>/dev/null)" ]; then
+            has_artifacts=true
+          fi
+          echo "has_artifacts=$has_artifacts" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Playwright report
+        if: ${{ always() && steps.artifact_check.outputs.has_artifacts == 'true' }}
         uses: actions/upload-artifact@v6
         with:
           name: playwright-scout-preview-smoke-report
           path: |
             playwright-report
             test-results
-          if-no-files-found: ignore

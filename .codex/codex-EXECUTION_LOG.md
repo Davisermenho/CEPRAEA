@@ -4338,3 +4338,10 @@ Executar na PR #20:
 ## ⏭️ Próximo passo
 
 - Push na branch `chore/scout-preview-smoke-gate` e acompanhar a nova execução do check `scout-preview-smoke` para validar ausência de regressão no fluxo.
+
+## 🔧 Ajuste final de ruído no artifact
+
+- Mesmo com `if-no-files-found: ignore`, o runner ainda registrava mensagem de caminho vazio em runs sem falha.
+- Foi adicionada a etapa `artifact_check` para detectar existência real de `playwright-report`/`test-results`.
+- O upload agora só ocorre quando `has_artifacts == true`.
+- Resultado esperado: run limpo sem mensagem residual de upload vazio.
