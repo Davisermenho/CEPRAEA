@@ -63,8 +63,9 @@ Contrato operacional complementar:
   - `AT_POS.ARREMESSO.ARREMESSO`
   - `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV`
   - `TRANS_OF.ARREMESSO.ARREMESSO`
-- A UI da `COLETA_AO_VIVO` ja consome `mainFields`, `optionalFields`, `advancedFields` e `uiOrder` desses 3 fluxos.
-- Nao expandir para `DEF_POS.BLOQUEIO` antes de estabilizar e testar `requiredFields`.
+- A UI da `COLETA_AO_VIVO` ja consome `mainFields`, `optionalFields`, `advancedFields`, `uiOrder` e `requiredFields` condicionais desses 3 fluxos.
+- `requiredFields` condicionais foram conectados apenas para os fluxos cobertos, preservando `PASSIVO` como interrupcao de posse sem exigir `tipo_finalizacao_code`.
+- Nao expandir para `DEF_POS.BLOQUEIO` antes de estabilizar o modelo em uso real e definir as condicionais defensivas.
 
 Ela nao cobre:
 
@@ -201,11 +202,13 @@ UX esperada na `COLETA_AO_VIVO` (CEPR-0099/CEPR-0100):
 
 Contrato operacional executavel (2026-05-20):
 - A ordem e a visibilidade principal/opcional/avancada dos fluxos de arremesso acima ficam declaradas em `liveCollectionFlow.contract.ts`.
+- A obrigatoriedade de submit tambem fica declarada nesse contrato: campos estaticos em `requiredFields` e regras sensiveis ao resultado em `conditionalRequiredFields`.
 - A matriz nao deve duplicar todos os campos de UX desses fluxos; ela fixa a semantica permitida e aponta para o contrato operacional quando a duvida for ordem, agrupamento ou nivel de detalhe na tela.
 - Evidencia historica: a suite `npx playwright test e2e/scout --project=desktop --reporter=line` teve execucao verde com `102/102` apos a UI passar a consumir o contrato.
 - Evidencia intermediaria em 2026-05-20: uma reexecucao focada retornou `101 passed / 1 failed`, com falha em `e2e/scout/scout-cepr0088a-roster.spec.ts` ao localizar `Coletar ao vivo`.
 - Evidencia atual em 2026-05-20: o teste `scout-cepr0088a-roster.spec.ts` passou isolado com trace; depois a spec `scout-cepr0089-trans-of.spec.ts` foi endurecida para filtrar consultas SQL por `scout_game_id`; a suite `npx playwright test e2e/scout --project=desktop --reporter=line` passou `102/102`.
-- O E2E global segue com falhas fora do Scout conhecidas; nao usar essas falhas para bloquear a decisao do contrato operacional, mas registrar separadamente quando executar `npm run test:e2e`.
+- Evidencia CEPR-0098D: `npx playwright test e2e/scout/scout-pontuacao-gol.spec.ts --project=desktop --reporter=line` passou `16/16`, cobrindo `PASSIVO` sem tipo de finalizacao e `GOL` bloqueado ate preencher finalizacao, motivo e pontos.
+- Evidencia ampla atual: `npm run validate:mvp:v1` passou em 2026-05-20, incluindo E2E global `167 passed / 5 skipped`.
 
 #### `FINALIZACAO_6M_FAV` — evento ofensivo observado (CEPR-0096)
 

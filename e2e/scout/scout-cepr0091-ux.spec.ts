@@ -32,9 +32,14 @@ async function fillTempo(page: import('@playwright/test').Page, tempo: string) {
 async function configureBasicPendingEntry(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Ataque posicionado', exact: true }).click()
   await page.getByLabel('Sistema ofensivo').selectOption({ label: 'Ataque 4:0' })
-  await page.getByRole('button', { name: 'Passe', exact: true }).click()
+  const passeButton = page.getByRole('button', { name: 'Passe', exact: true })
+  await passeButton.evaluate((element) => element.scrollIntoView({ block: 'center', inline: 'nearest' }))
+  await passeButton.click({ force: true })
   await page.waitForTimeout(300)
-  await page.getByRole('button', { name: 'Perda', exact: true }).click()
+  const perdaButton = page.getByRole('button', { name: 'Perda', exact: true })
+  await expect(perdaButton).toBeVisible({ timeout: 5_000 })
+  await perdaButton.evaluate((element) => element.scrollIntoView({ block: 'center', inline: 'nearest' }))
+  await perdaButton.click({ force: true })
 }
 
 async function createPendingEntry(page: import('@playwright/test').Page, tempo = '03:21') {

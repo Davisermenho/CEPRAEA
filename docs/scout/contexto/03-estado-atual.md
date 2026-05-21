@@ -24,7 +24,7 @@ Referencia curta para um agente entrar no trabalho sem reler todo o historico.
 - leitura do scout em camadas, nao apenas captura de evento bruto;
 - distincao entre contexto vivo, SSOT, historico e evidência.
 - `liveCollectionCompatibility.matrix.ts` continua como contrato semantico executavel;
-- `liveCollectionFlow.contract.ts` governa `mainFields`, `optionalFields`, `advancedFields` e `uiOrder` apenas dos fluxos ja cobertos.
+- `liveCollectionFlow.contract.ts` governa `mainFields`, `optionalFields`, `advancedFields`, `uiOrder` e `requiredFields` condicionais apenas dos fluxos ja cobertos.
 - Fluxos cobertos pelo contrato operacional em 2026-05-20:
   - `AT_POS.ARREMESSO.ARREMESSO`;
   - `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV`;
@@ -42,10 +42,11 @@ Referencia curta para um agente entrar no trabalho sem reler todo o historico.
 - `DEF_POS` quando duas defensoras falham juntas em fechamento/cobertura/sincronia;
 - `TRANS_OF` quando a modelagem precisa diferenciar estrutura, contexto decisional e contexto do arremesso;
 - UX operacional que induz dado impreciso mesmo quando a matriz esta melhor.
-- `requiredFields` do contrato operacional ainda precisa estabilizar antes de expandir o mesmo modelo para `DEF_POS + BLOQUEIO`.
+- `requiredFields` condicionais ja foram conectados ao submit dos 3 fluxos cobertos: `PASSIVO` nao exige tipo de finalizacao, enquanto `GOL` exige finalizacao, motivo de pontuacao e pontos.
+- Ainda nao expandir o mesmo modelo para `DEF_POS + BLOQUEIO` antes de validar condicionais defensivas.
 - Evidencia intermediaria: em 2026-05-20, uma reexecucao de `npx playwright test e2e/scout --project=desktop --reporter=line` falhou `101/102` em `scout-cepr0088a-roster.spec.ts` ao localizar `Coletar ao vivo`.
 - Evidencia atual: em 2026-05-20, o teste `scout-cepr0088a-roster.spec.ts` passou isolado com trace; depois `scout-cepr0089-trans-of.spec.ts` foi endurecido para filtrar consultas SQL por `scout_game_id`; a suite `e2e/scout` passou `102/102`. Tratar as falhas anteriores como problemas de estabilidade de E2E, nao como quebra do contrato operacional.
-- O E2E global tem falhas conhecidas fora do Scout; tratar separadamente de evolucoes do contrato operacional.
+- Evidencia ampla atual: `npm run validate:mvp:v1` passou em 2026-05-20, incluindo E2E global `167 passed / 5 skipped`.
 
 ## Proximo foco recomendado
 
@@ -73,6 +74,7 @@ Estado atual:
 - existe preset rápido `Arremesso forçado por passivo` em `AT_POS + ARREMESSO` e `TRANS_OF + ARREMESSO`;
 - `AT_POS + ARREMESSO` e `TRANS_OF + ARREMESSO` compartilham o bloco visual `Finalização` (CEPR-0099/CEPR-0100), mantendo contextos separados por fase;
 - esses fluxos agora sao governados por `liveCollectionFlow.contract.ts` para campos principais, opcionais, avancados e ordem de UI;
+- o submit desses fluxos ja consulta `requiredFields`/`conditionalRequiredFields` do contrato operacional;
 - o passivo pode ocorrer em `AT_POS` ou `TRANS_OF`;
 - o próximo risco é validação humana em velocidade real de coleta, não mais ausência de caminho técnico.
 

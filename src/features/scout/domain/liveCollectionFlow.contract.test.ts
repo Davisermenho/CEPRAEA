@@ -9,6 +9,7 @@ import {
 } from './liveCollectionCompatibility.matrix'
 import {
   getLiveCollectionFlowContract,
+  getLiveCollectionRequiredFields,
   liveCollectionFlowContracts,
   liveCollectionFlowIds,
   type LiveCollectionFlowContract,
@@ -47,6 +48,7 @@ describe('liveCollectionFlowContracts', () => {
       expectNoDuplicateFields(contract.optionalFields)
       expectNoDuplicateFields(contract.advancedFields)
       expectNoDuplicateFields(contract.requiredFields)
+      expectNoDuplicateFields(contract.conditionalRequiredFields.map((rule) => rule.field))
       expectNoDuplicateFields(contract.derivedFields)
       expectNoDuplicateFields(contract.forbiddenFields)
       expectNoDuplicateFields(contract.uiOrder)
@@ -87,6 +89,7 @@ describe('liveCollectionFlowContracts', () => {
     expect(shouldShowTransicaoStructure(contract.phase, contract.category, contract.action)).toBe(false)
     expect(contract.allowedFinishTypes).toEqual(['SIMPLES', 'GIRO', 'AEREA'])
     expect(contract.allowedResults).toContain('PASSIVO')
+    expect(contract.requiredFields).not.toContain('tipoFinalizacaoCode')
   })
 
   test('AT_POS + FINALIZACAO_6M_FAV deriva 6M e bloqueia campos que confundem o fluxo', () => {
@@ -103,6 +106,7 @@ describe('liveCollectionFlowContracts', () => {
     ])
     expect(contract.allowedResults).not.toContain('BLOQUEADO')
     expect(contract.derivedFields).toEqual(['tipoFinalizacaoCode', 'motivoPontuacaoCode', 'pontosJogada'])
+    expect(contract.requiredFields).not.toContain('tipoFinalizacaoCode')
     expect(contract.forbiddenFields).toEqual([
       'estruturaTransicaoCode',
       'classificacaoAcaoCode',
@@ -120,6 +124,7 @@ describe('liveCollectionFlowContracts', () => {
     const contract = getLiveCollectionFlowContract('TRANS_OF.ARREMESSO.ARREMESSO')
 
     expect(contract.requiredFields).toContain('estruturaTransicaoCode')
+    expect(contract.requiredFields).not.toContain('tipoFinalizacaoCode')
     expect(contract.mainFields).toEqual([
       'tempoJogo',
       'faseDaBolaCode',
@@ -148,6 +153,50 @@ describe('liveCollectionFlowContracts', () => {
     expect(contract.passiveRule?.PASSIVO_AS_CONTEXT).toContain('condicionado por passivo')
     expect(shouldShowTransicaoStructure(contract.phase, contract.category, contract.action)).toBe(true)
     expect(shouldShowAcaoPreparatoria(contract.phase, contract.category, contract.action)).toBe(false)
+  })
+
+  test('requiredFields condicionais nao tratam PASSIVO como arremesso finalizado', () => {
+    for (const flowId of ['AT_POS.ARREMESSO.ARREMESSO', 'TRANS_OF.ARREMESSO.ARREMESSO'] as const) {
+      const contract = getLiveCollectionFlowContract(flowId)
+      const required = getLiveCollectionRequiredFields(contract, {
+        resultadoFactualCode: 'PASSIVO',
+      })
+
+      expect(required).toContain('resultadoFactualCode')
+      expect(required).not.toContain('tipoFinalizacaoCode')
+      expect(required).not.toContain('motivoPontuacaoCode')
+      expect(required).not.toContain('pontosJogada')
+    }
+  })
+
+  test('requiredFields condicionais exigem finalizacao e pontuacao em GOL observado', () => {
+    for (const flowId of ['AT_POS.ARREMESSO.ARREMESSO', 'TRANS_OF.ARREMESSO.ARREMESSO'] as const) {
+      const contract = getLiveCollectionFlowContract(flowId)
+      const required = getLiveCollectionRequiredFields(contract, {
+        resultadoFactualCode: 'GOL',
+      })
+
+      expect(required).toContain('tipoFinalizacaoCode')
+      expect(required).toContain('motivoPontuacaoCode')
+      expect(required).toContain('pontosJogada')
+    }
+  })
+
+  test('requiredFields condicionais preservam 6m favoravel como derivado e obrigatorio no submit', () => {
+    const contract = getLiveCollectionFlowContract('AT_POS.ARREMESSO.FINALIZACAO_6M_FAV')
+    const goalRequired = getLiveCollectionRequiredFields(contract, {
+      resultadoFactualCode: 'GOL',
+    })
+    const defendedRequired = getLiveCollectionRequiredFields(contract, {
+      resultadoFactualCode: 'DEFENDIDO',
+    })
+
+    expect(goalRequired).toContain('tipoFinalizacaoCode')
+    expect(goalRequired).toContain('motivoPontuacaoCode')
+    expect(goalRequired).toContain('pontosJogada')
+    expect(defendedRequired).toContain('tipoFinalizacaoCode')
+    expect(defendedRequired).not.toContain('motivoPontuacaoCode')
+    expect(defendedRequired).not.toContain('pontosJogada')
   })
 
   test('motivos manuais de pontuacao em arremesso simples nao reabrem GIRO, AEREA ou 6M', () => {

@@ -63,6 +63,16 @@ export interface LiveCollectionFlowQuickPreset {
   readonly sets: Readonly<Partial<Record<LiveCollectionFlowField, string>>>
 }
 
+export type LiveCollectionFlowCondition = Readonly<Partial<{
+  resultadoFactualCode: ScoutFactualResultCode | readonly ScoutFactualResultCode[]
+  tipoFinalizacaoCode: ScoutFinishTypeCode | readonly ScoutFinishTypeCode[]
+}>>
+
+export interface LiveCollectionFlowConditionalRequiredField {
+  readonly field: LiveCollectionFlowField
+  readonly when: LiveCollectionFlowCondition
+}
+
 export interface LiveCollectionFlowContract {
   readonly flowId: LiveCollectionFlowId
   readonly label: string
@@ -73,6 +83,7 @@ export interface LiveCollectionFlowContract {
   readonly optionalFields: readonly LiveCollectionFlowField[]
   readonly advancedFields: readonly LiveCollectionFlowField[]
   readonly requiredFields: readonly LiveCollectionFlowField[]
+  readonly conditionalRequiredFields: readonly LiveCollectionFlowConditionalRequiredField[]
   readonly derivedFields: readonly LiveCollectionFlowField[]
   readonly forbiddenFields: readonly LiveCollectionFlowField[]
   readonly uiOrder: readonly LiveCollectionFlowField[]
@@ -102,6 +113,9 @@ const LIVE_ENTRY_ONLY = {
   mustNotCreate: ['scout_plays', 'scout_play_participations'],
   initialValidationStatus: 'PENDENTE',
 } as const
+
+const OBSERVED_SHOT_RESULTS = ['GOL', 'DEFENDIDO', 'BLOQUEADO', 'FORA', 'TRAVE'] as const
+const GOAL_RESULT = ['GOL'] as const
 
 export const liveCollectionFlowContracts = {
   'AT_POS.ARREMESSO.ARREMESSO': {
@@ -137,8 +151,12 @@ export const liveCollectionFlowContracts = {
       'sistemaOfensivoCode',
       'categoriaAcaoCode',
       'acaoBasicaCode',
-      'tipoFinalizacaoCode',
       'resultadoFactualCode',
+    ],
+    conditionalRequiredFields: [
+      { field: 'tipoFinalizacaoCode', when: { resultadoFactualCode: OBSERVED_SHOT_RESULTS } },
+      { field: 'motivoPontuacaoCode', when: { resultadoFactualCode: GOAL_RESULT } },
+      { field: 'pontosJogada', when: { resultadoFactualCode: GOAL_RESULT } },
     ],
     derivedFields: ['motivoPontuacaoCode', 'pontosJogada'],
     forbiddenFields: ['estruturaTransicaoCode', 'classificacaoAcaoCode'],
@@ -246,6 +264,11 @@ export const liveCollectionFlowContracts = {
       'acaoBasicaCode',
       'resultadoFactualCode',
     ],
+    conditionalRequiredFields: [
+      { field: 'tipoFinalizacaoCode', when: { resultadoFactualCode: OBSERVED_SHOT_RESULTS } },
+      { field: 'motivoPontuacaoCode', when: { resultadoFactualCode: GOAL_RESULT } },
+      { field: 'pontosJogada', when: { resultadoFactualCode: GOAL_RESULT } },
+    ],
     derivedFields: ['tipoFinalizacaoCode', 'motivoPontuacaoCode', 'pontosJogada'],
     forbiddenFields: [
       'estruturaTransicaoCode',
@@ -330,8 +353,12 @@ export const liveCollectionFlowContracts = {
       'categoriaAcaoCode',
       'acaoBasicaCode',
       'estruturaTransicaoCode',
-      'tipoFinalizacaoCode',
       'resultadoFactualCode',
+    ],
+    conditionalRequiredFields: [
+      { field: 'tipoFinalizacaoCode', when: { resultadoFactualCode: OBSERVED_SHOT_RESULTS } },
+      { field: 'motivoPontuacaoCode', when: { resultadoFactualCode: GOAL_RESULT } },
+      { field: 'pontosJogada', when: { resultadoFactualCode: GOAL_RESULT } },
     ],
     derivedFields: ['motivoPontuacaoCode', 'pontosJogada'],
     forbiddenFields: ['sistemaOfensivoCode', 'classificacaoAcaoCode', 'acaoPreparatoriaCode'],
@@ -422,4 +449,35 @@ export const liveCollectionFlowIds = Object.keys(liveCollectionFlowContracts) as
 
 export function getLiveCollectionFlowContract(flowId: LiveCollectionFlowId): LiveCollectionFlowContract {
   return liveCollectionFlowContracts[flowId]
+}
+
+function conditionValueMatches<T extends string>(expected: T | readonly T[] | undefined, actual: string | undefined) {
+  if (expected === undefined) return true
+  if (!actual) return false
+  return Array.isArray(expected) ? expected.includes(actual as T) : expected === actual
+}
+
+function matchesCondition(
+  condition: LiveCollectionFlowCondition,
+  values: Readonly<Partial<Record<LiveCollectionFlowField, string | undefined>>>,
+) {
+  return (
+    conditionValueMatches(condition.resultadoFactualCode, values.resultadoFactualCode) &&
+    conditionValueMatches(condition.tipoFinalizacaoCode, values.tipoFinalizacaoCode)
+  )
+}
+
+export function getLiveCollectionRequiredFields(
+  contract: LiveCollectionFlowContract,
+  values: Readonly<Partial<Record<LiveCollectionFlowField, string | undefined>>>,
+): readonly LiveCollectionFlowField[] {
+  const required = new Set<LiveCollectionFlowField>(contract.requiredFields)
+
+  for (const rule of contract.conditionalRequiredFields) {
+    if (matchesCondition(rule.when, values)) {
+      required.add(rule.field)
+    }
+  }
+
+  return contract.uiOrder.filter((field) => required.has(field))
 }

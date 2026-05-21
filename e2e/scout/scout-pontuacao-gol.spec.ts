@@ -133,7 +133,7 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
   // ── Teste 5 ───────────────────────────────────────────────────────────────
   test('5 — ARREM_SIMPLES + GOL: não exibe motivos Giro, Aérea ou 6 metros', async ({ page }) => {
     await goToArremesso(page)
-    await page.getByRole('button', { name: 'Simples', exact: true }).click()
+    await page.getByRole('button', { name: 'Simples', exact: true }).first().click()
     await page.waitForTimeout(200)
     await page.getByRole('button', { name: 'Gol', exact: true }).click()
     await page.waitForTimeout(300)
@@ -175,9 +175,8 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
   })
 
   // ── Teste 5B ──────────────────────────────────────────────────────────────
-  test('5B — AT_POS + Arremesso permite PASSIVO como interrupção da posse', async ({ page }) => {
+  test('5B — AT_POS + Arremesso permite PASSIVO como interrupção da posse sem tipo de finalização', async ({ page }) => {
     await goToArremesso(page)
-    await page.getByRole('button', { name: 'Simples', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Passivo', exact: true })).toBeVisible({ timeout: 5000 })
     await page.getByRole('button', { name: 'Passivo', exact: true }).click()
     await expect(page.getByText('Motivo da pontuação', { exact: true })).not.toBeVisible()
@@ -191,6 +190,7 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
         () =>
           queryScalar(
             `SELECT resultado_factual_code || '|' ||
+                    COALESCE(tipo_finalizacao_code, 'NULL') || '|' ||
                     COALESCE(motivo_pontuacao_code, 'NULL') || '|' ||
                     pontos_jogada::text
              FROM public.scout_live_entries
@@ -200,7 +200,26 @@ test.describe('Scout — pontuação de gol CEPR-0085 Solução 2', () => {
           ),
         { timeout: 15_000 }
       )
-      .toBe('PASSIVO|NULL|0')
+      .toBe('PASSIVO|NULL|NULL|0')
+  })
+
+  // ── Teste 5D ──────────────────────────────────────────────────────────────
+  test('5D — CEPR-0098D: GOL observado exige requiredFields condicionais antes do submit', async ({ page }) => {
+    await goToArremesso(page)
+    await page.getByRole('button', { name: 'Gol', exact: true }).click()
+    await fillTempo(page, '05:50')
+
+    await expect(page.getByText(/Preencha os campos obrigatórios do fluxo:/i)).toContainText('tipo de finalização')
+    await expect(page.getByText(/Preencha os campos obrigatórios do fluxo:/i)).toContainText('motivo da pontuação')
+    await expect(page.getByText(/Preencha os campos obrigatórios do fluxo:/i)).toContainText('pontos da jogada')
+    await expect(page.getByRole('button', { name: 'Registrar entrada' })).toBeDisabled()
+
+    await page.getByRole('button', { name: 'Simples', exact: true }).first().click()
+    await expect(page.getByText(/Preencha os campos obrigatórios do fluxo:/i)).not.toContainText('tipo de finalização')
+    await expect(page.getByRole('button', { name: 'Registrar entrada' })).toBeDisabled()
+
+    await page.getByRole('button', { name: 'Simples', exact: true }).last().click()
+    await expect(page.getByRole('button', { name: 'Registrar entrada' })).toBeEnabled({ timeout: 5_000 })
   })
 
   // ── Teste 5C ──────────────────────────────────────────────────────────────

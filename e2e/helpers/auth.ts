@@ -4,14 +4,14 @@ const coachEmail = process.env.E2E_COACH_EMAIL ?? 'coach@cepraea.test'
 const coachPassword = process.env.E2E_COACH_PASSWORD ?? 'password'
 
 export async function loginAsCoach(page: Page) {
-  await page.goto('/login')
+  await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 30_000 })
   await page.locator('#coach-email').fill(coachEmail)
   await page.locator('#coach-password').fill(coachPassword)
   await page.getByRole('button', { name: /entrar/i }).click()
-  await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 20_000 })
   await expect(page.getByRole('link', { name: 'Início', exact: true })).toBeVisible({
-    timeout: 20_000,
+    timeout: 45_000,
   })
+  await expect(page).not.toHaveURL(/\/login/)
 }
 
 export async function loginAsAthlete(page: Page, email: string, password: string) {

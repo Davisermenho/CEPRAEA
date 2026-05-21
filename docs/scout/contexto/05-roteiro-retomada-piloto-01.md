@@ -27,7 +27,8 @@ Antes da sessão manual:
 - registrar para cada lance: tempo aproximado, caminho escolhido, se salvou, dúvida encontrada e dado final salvo;
 - ao final, comparar o registro salvo com a expectativa abaixo.
 - considerar `liveCollectionFlow.contract.ts` como contrato operacional da UI apenas para os fluxos de arremesso já cobertos;
-- não expandir o contrato operacional para `DEF_POS + BLOQUEIO` antes de estabilizar `requiredFields`.
+- considerar que `requiredFields` condicionais ja estao conectados nesses fluxos;
+- não expandir o contrato operacional para `DEF_POS + BLOQUEIO` antes de validar condicionais defensivas.
 
 ## Estado técnico do contrato operacional — 2026-05-20
 
@@ -36,11 +37,13 @@ Antes da sessão manual:
   - `AT_POS.ARREMESSO.ARREMESSO`;
   - `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV`;
   - `TRANS_OF.ARREMESSO.ARREMESSO`.
-- `ScoutWorkspacePage.tsx` ja consome `mainFields`, `optionalFields`, `advancedFields` e `uiOrder`.
+- `ScoutWorkspacePage.tsx` ja consome `mainFields`, `optionalFields`, `advancedFields`, `uiOrder` e `requiredFields` condicionais.
+- Regra conectada: `PASSIVO` em arremesso ofensivo nao exige `tipo_finalizacao_code`; `GOL` exige finalizacao, motivo de pontuacao e pontos antes do submit.
 - Evidencia historica: `npx playwright test e2e/scout --project=desktop --reporter=line` passou `102/102` apos a adaptacao da UI.
 - Evidencia intermediaria: a reexecucao de 2026-05-20 falhou `101/102` em `scout-cepr0088a-roster.spec.ts` ao procurar `Coletar ao vivo`.
 - Evidencia atual: em 2026-05-20, o teste falho `scout-cepr0088a-roster.spec.ts` passou isolado com trace; a spec `scout-cepr0089-trans-of.spec.ts` foi endurecida para filtrar consultas SQL por `scout_game_id`; a suite `e2e/scout` completa passou `102/102`.
-- O E2E global tem falhas conhecidas fora do Scout e nao deve ser usado sozinho para reabrir a decisao do contrato operacional.
+- Evidencia CEPR-0098D: `npx playwright test e2e/scout/scout-pontuacao-gol.spec.ts --project=desktop --reporter=line` passou `16/16`, incluindo os casos de `PASSIVO` sem finalizacao e `GOL` bloqueado por campos obrigatorios condicionais.
+- Evidencia ampla atual: `npm run validate:mvp:v1` passou em 2026-05-20, incluindo E2E global `167 passed / 5 skipped`.
 
 ## Caso Prioritário — PILOTO-01 #14
 
