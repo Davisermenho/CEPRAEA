@@ -4349,3 +4349,33 @@ Executar na PR #20:
 - Detector `artifact_check` revisado: usa `find` para identificar somente arquivos visíveis, prevenindo execução desnecessária de upload.
 - Após sync com `main`, a PR #18 falhou no smoke por expectativa rígida (`LIVE-0002` deveria não existir antes do preenchimento adicional).
 - A spec `e2e/scout/scout-preview-smoke.spec.ts` foi ajustada para aceitar variação de comportamento da branch e focar no sucesso do fluxo completo sem erro crítico de integração.
+
+# Execution Log: CEPR-CI-HARDENING
+
+## 🎯 Objetivo
+
+Fechar pendências de governança/CI após merge das PRs #20/#18/#19:
+- reforçar esteira com workflow de contrato CEPR-0098D;
+- reduzir risco operacional com Node 24;
+- incluir cleanup automatizado best-effort no smoke de preview;
+- tornar evidência do run explícita no template de PR.
+
+## ✅ Ações executadas
+
+- Atualizado `node-version` para 24 nas workflows:
+  - `scout-preview-smoke.yml`
+  - `supabase-foundation.yml`
+  - `athlete-auth-foundation.yml`
+  - `presence-token-batch-remote-validation.yml`
+- Criado workflow `.github/workflows/scout-contract-cepr0098d.yml` com job `scout-contract-cepr0098d`.
+- Atualizado `e2e/scout/scout-preview-smoke.spec.ts` com cleanup best-effort:
+  - exclusão de entradas LIVE pendentes via UI;
+  - tentativa de arquivamento/inativação via REST autenticado quando token/origem/apikey estão disponíveis.
+- Atualizado `.github/pull_request_template.md` com campo:
+  - `Link do run scout-preview-smoke`.
+
+## 🧪 Validação prevista
+
+- `npm run typecheck`
+- revisão das workflows alteradas
+- execução dos checks no PR após push

@@ -9,6 +9,7 @@
 - Comandos executados:
 - Resultado dos comandos:
 - URL do Preview Vercel:
+- Link do run `scout-preview-smoke`:
 - Logs críticos do preview:
 
 ## Scout / Preview checklist

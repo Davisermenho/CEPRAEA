@@ -2050,3 +2050,24 @@ Aplicadas as ações de governança e estabilidade da esteira na PR #20:
 - Workflow smoke: restaurado `if-no-files-found: ignore` no upload para suprimir warning quando só houver saída não elegível.
 - Detector de artifacts ajustado para considerar apenas arquivos não ocultos via `find`, evitando falso positivo de upload.
 - PR #18 sync fix: smoke de preview ajustado para não assumir ausência de `LIVE-0002` quando a branch permite submit imediato no fluxo `AT_POS + ARREMESSO + GOL`.
+
+---
+
+### [CEPR-CI-HARDENING] — 2026-05-21 — Hardening de governança Scout e CI
+
+#### ✨ Resumo
+
+- Node das workflows principais atualizado para 24.
+- Criado workflow dedicado `scout-contract-cepr0098d` para contrato AT_POS/ARREMESSO/PASSIVO/GOL.
+- Smoke de preview recebeu cleanup best-effort automatizado (UI + REST quando disponível).
+- Template de PR ganhou campo obrigatório para link do run de smoke.
+
+#### 🛠️ Changed
+
+- `.github/workflows/scout-preview-smoke.yml`
+- `.github/workflows/scout-contract-cepr0098d.yml` (novo)
+- `.github/workflows/supabase-foundation.yml`
+- `.github/workflows/athlete-auth-foundation.yml`
+- `.github/workflows/presence-token-batch-remote-validation.yml`
+- `e2e/scout/scout-preview-smoke.spec.ts`
+- `.github/pull_request_template.md`
