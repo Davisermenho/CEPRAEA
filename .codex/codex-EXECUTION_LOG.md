@@ -4346,3 +4346,4 @@ Executar na PR #20:
 - O upload agora só ocorre quando `has_artifacts == true`.
 - Resultado esperado: run limpo sem mensagem residual de upload vazio.
 - Ajuste final no upload de artifact: `if-no-files-found: ignore` reaplicado para evitar anotação de warning em execuções com saída parcial.
+- Detector `artifact_check` revisado: usa `find` para identificar somente arquivos visíveis, prevenindo execução desnecessária de upload.

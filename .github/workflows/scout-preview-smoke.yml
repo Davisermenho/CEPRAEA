@@ -121,13 +121,21 @@ jobs:
         id: artifact_check
         shell: bash
         run: |
+          set -euo pipefail
           has_artifacts=false
-          if [ -d "playwright-report" ] && [ -n "$(ls -A playwright-report 2>/dev/null)" ]; then
+
+          first_visible_file="$(
+            find playwright-report test-results \
+              -type f \
+              -not -path '*/.*' \
+              -print \
+              -quit 2>/dev/null || true
+          )"
+
+          if [ -n "$first_visible_file" ]; then
             has_artifacts=true
           fi
-          if [ -d "test-results" ] && [ -n "$(ls -A test-results 2>/dev/null)" ]; then
-            has_artifacts=true
-          fi
+
           echo "has_artifacts=$has_artifacts" >> "$GITHUB_OUTPUT"
 
       - name: Upload Playwright report

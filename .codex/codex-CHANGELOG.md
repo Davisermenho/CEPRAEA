@@ -2048,3 +2048,4 @@ Aplicadas as ações de governança e estabilidade da esteira na PR #20:
 - `npm run typecheck`: passou.
 - Workflow smoke: upload de artifacts condicionado a existência real (`artifact_check`) para remover log residual de caminho vazio.
 - Workflow smoke: restaurado `if-no-files-found: ignore` no upload para suprimir warning quando só houver saída não elegível.
+- Detector de artifacts ajustado para considerar apenas arquivos não ocultos via `find`, evitando falso positivo de upload.
