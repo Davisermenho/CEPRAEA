@@ -1,0 +1,48 @@
+name: Scout Contract CEPR-0098D
+
+on:
+  pull_request:
+    branches:
+      - main
+  merge_group:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  scout-contract-cepr0098d:
+    name: scout-contract-cepr0098d
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase local stack
+        run: supabase start
+
+      - name: Reset database (deterministic)
+        run: supabase db reset
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run CEPR-0098D contract tests
+        run: |
+          npm run test:e2e -- --project=desktop e2e/scout/scout-pontuacao-gol.spec.ts --grep "5B|5D"
