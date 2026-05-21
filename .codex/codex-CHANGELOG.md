@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-20 - 14:49 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 01:29 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,7 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-21 | 01:29 | CEPR-0098D-PR | PR draft separada aberta para o recorte CEPR-0098D de `requiredFields` condicionais da `COLETA_AO_VIVO` | Commit `05d35e7` · PR #18 `https://github.com/Davisermenho/CEPRAEA/pull/18` · `gh pr view 18` reportou `MERGEABLE`, draft, Vercel pendente no primeiro check |
 | 2026-05-20 | 14:49 | CEPR-0098D-GATE | Gate amplo final validado após conectar `requiredFields` condicionais: Scout desktop passou com novo caso CEPR-0098D, E2E global voltou a verde e o gate MVP v1.0 fechou completo | `npx playwright test e2e/scout --project=desktop --reporter=line` ✅ (`103 passed`) · `npm run validate:mvp:v1` ✅ (`MVP v1.0: OK`, E2E global `167 passed / 5 skipped`) · `git diff --check` ✅ |
 | 2026-05-20 | 13:48 | CEPR-0098D | `requiredFields` condicionais do contrato operacional conectados ao submit da `COLETA_AO_VIVO` para os 3 fluxos de arremesso auditados, preservando `PASSIVO` sem finalização e bloqueando `GOL` sem finalização/pontuação | `npx vitest run src/features/scout/domain/liveCollectionFlow.contract.test.ts` ✅ (`11 passed`) · `npm run typecheck` ✅ · `npx playwright test e2e/scout/scout-pontuacao-gol.spec.ts --project=desktop --reporter=line` ✅ (`16 passed`) |
 | 2026-05-20 | 07:14 | CEPR-0099 | E2E global fora do Scout estabilizado: falhas separadas por coach, athlete, public e smoke; regressões reais de recarga de dados/mensagem corrigidas sem alterar Scout | `npm run test:e2e` ✅ (`166 passed`, `5 skipped`) · `npm run typecheck` ✅ · `npm test` ✅ (`51 passed`) · `npm run build` ✅ · `git diff --check` ✅ · PR não aberto |
@@ -2050,3 +2051,26 @@ Revalidado o recorte CEPR-0098D em gates amplos após estabilização de E2E sob
   - `npm run validate:mvp:v1`: passou completo; E2E global `167 passed / 5 skipped`; `MVP v1.0: OK — todas as condições satisfeitas.`
   - `git diff --check`: passou.
   - Sem novos fluxos, sem `DEF_POS/BLOQUEIO`, sem migrations, sem dashboard, sem relatório e sem feedback.
+
+---
+
+### [CEPR-0098D-PR] — 2026-05-21 — PR draft do recorte `requiredFields` condicionais
+
+#### ✨ Resumo
+
+Aberta PR draft separada para o recorte CEPR-0098D, mantendo o merge bloqueado até checks/Preview Vercel e smoke.
+
+#### 🛠️ Changed
+
+- Branch publicada: `feat/scout-required-fields-flow-contract`.
+- Commit inicial publicado: `05d35e7` (`feat(scout): enforce conditional required fields`).
+- PR aberta: #18 — `https://github.com/Davisermenho/CEPRAEA/pull/18`.
+
+#### 🛡️ Auditoria Técnico/Executiva
+
+- **Status:** PR draft aberta, sem merge.
+- **Evidências objetivas:**
+  - `git push -u origin feat/scout-required-fields-flow-contract`: passou.
+  - `gh pr create --draft --base main --head feat/scout-required-fields-flow-contract`: passou, PR #18 criada.
+  - `gh pr view 18`: PR `OPEN`, `isDraft=true`, `mergeable=MERGEABLE`; Vercel ainda pendente no primeiro check.
+  - Supabase Preview/Foundation/Athlete Auth reportaram `SKIPPED`, conforme comportamento esperado dos checks atuais.
