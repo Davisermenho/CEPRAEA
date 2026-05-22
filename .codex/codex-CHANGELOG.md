@@ -2099,3 +2099,4 @@ Fortalecido o workflow `scout-preview-smoke` para evitar falso negativo quando a
 #### 🔧 Follow-up
 
 - `scout-preview-smoke.yml`: timeout por chamada da API da Vercel (`--connect-timeout 8 --max-time 20`) e janela de polling reduzida para evitar job pendurado.
+- Follow-up adicional: removido `--retry` do `curl` na resolução de preview para evitar multiplicação de timeout (loop externo já cobre retries).
