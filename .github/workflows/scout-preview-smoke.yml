@@ -100,7 +100,7 @@ jobs:
 
       - name: Install dependencies
         if: ${{ steps.scope.outputs.scout == 'true' }}
-        run: npm ci
+        run: npm ci --no-audit --no-fund --loglevel=error
 
       - name: Install Playwright browser
         if: ${{ steps.scope.outputs.scout == 'true' }}
