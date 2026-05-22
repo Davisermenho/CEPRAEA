@@ -4461,3 +4461,11 @@ Eliminar falha intermitente do check obrigatório `scout-preview-smoke` na PR #2
 
 - Commit/push na branch `chore/solo-mode-governance-and-ci-noise`.
 - Reexecutar checks da PR #26 e coletar evidência final.
+
+## 🔧 Ajuste adicional
+
+- Detectado tempo excessivo na etapa `Resolve Vercel preview URL`.
+- Adicionados limites de rede no `curl`:
+  - `--connect-timeout 8`
+  - `--max-time 20`
+- Polling reduzido para 12 tentativas com `sleep 10` para manter o job dentro de janela previsível.

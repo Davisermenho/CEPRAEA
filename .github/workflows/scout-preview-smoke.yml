@@ -122,7 +122,7 @@ jobs:
           echo "Retrieving deployment preview for branch: $PR_BRANCH (sha: $PR_HEAD_SHA)"
 
           preview_host=""
-          for attempt in $(seq 1 16); do
+          for attempt in $(seq 1 12); do
             response=""
             for endpoint in \
               "https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID&teamId=$VERCEL_TEAM_ID&target=preview&limit=100" \
@@ -130,6 +130,7 @@ jobs:
             do
               echo "Attempt $attempt: querying $endpoint"
               if response="$(curl -fsS --retry 3 --retry-all-errors --retry-delay 3 \
+                --connect-timeout 8 --max-time 20 \
                 -H "Authorization: Bearer $VERCEL_TOKEN" \
                 "$endpoint")"; then
                 break
@@ -159,7 +160,7 @@ jobs:
             fi
 
             echo "Attempt $attempt: READY deployment not found yet."
-            sleep 15
+            sleep 10
           done
 
           echo "preview_url=$preview_host" >> "$GITHUB_OUTPUT"

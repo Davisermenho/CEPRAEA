@@ -2095,3 +2095,7 @@ Fortalecido o workflow `scout-preview-smoke` para evitar falso negativo quando a
 
 - Falha anterior reproduzida no run `26265465281` por `preview_url` vazio.
 - Workflow ajustado para reduzir flake por sincronização de disponibilidade da preview.
+
+#### 🔧 Follow-up
+
+- `scout-preview-smoke.yml`: timeout por chamada da API da Vercel (`--connect-timeout 8 --max-time 20`) e janela de polling reduzida para evitar job pendurado.
