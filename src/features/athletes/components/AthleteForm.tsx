@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react'
+import type { FormEvent } from 'react'
 import type { Athlete } from '@/types'
-import { Modal } from '@/shared/components/Modal'
-import { Button } from '@/shared/components/Button'
+import {
+  ModalForm,
+  SelectInput,
+  StatusSegmentedControl,
+  TextareaInput,
+  TextInput,
+} from '@/shared/components/forms'
 
 interface AthleteFormProps {
   open: boolean
@@ -11,6 +17,24 @@ interface AthleteFormProps {
 }
 
 const CATEGORIAS = ['Iniciante', 'Intermediário', 'Avançado', 'Competidor']
+
+const categoriaOptions = CATEGORIAS.map((categoria) => ({
+  value: categoria,
+  label: categoria,
+}))
+
+const statusOptions = [
+  {
+    value: 'ativo' as const,
+    label: 'Ativo',
+    selectedClassName: 'bg-green-600 text-white border-green-600',
+  },
+  {
+    value: 'inativo' as const,
+    label: 'Inativo',
+    selectedClassName: 'bg-gray-400 text-white border-gray-400',
+  },
+]
 
 export function AthleteForm({ open, onClose, onSave, initial }: AthleteFormProps) {
   const [nome, setNome] = useState('')
@@ -36,7 +60,17 @@ export function AthleteForm({ open, onClose, onSave, initial }: AthleteFormProps
     }
   }, [open, initial])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const dirty = open && (
+    nome !== (initial?.nome ?? '') ||
+    email !== (initial?.email ?? '') ||
+    telefone !== (initial?.telefone ?? '') ||
+    categoria !== (initial?.categoria ?? '') ||
+    nivel !== (initial?.nivel ?? '') ||
+    status !== (initial?.status ?? 'ativo') ||
+    observacoes !== (initial?.observacoes ?? '')
+  )
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!nome.trim()) { setError('Nome é obrigatório.'); return }
     if (!email.trim() || !email.includes('@')) { setError('Email válido é obrigatório.'); return }
@@ -61,115 +95,91 @@ export function AthleteForm({ open, onClose, onSave, initial }: AthleteFormProps
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={initial ? 'Editar Atleta' : 'Nova Atleta'}>
-      <form onSubmit={handleSubmit} className="p-4 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
-          <input
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            placeholder="Nome completo"
-            className="w-full h-11 rounded-xl border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            autoFocus
-          />
-        </div>
+    <ModalForm
+      open={open}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      title={initial ? 'Editar Atleta' : 'Nova Atleta'}
+      loading={loading}
+      dirty={dirty}
+      confirmDirtyClose
+      dirtyCloseMessage="Existem alterações não salvas no cadastro da atleta. Deseja descartar?"
+    >
+      <TextInput
+        id="athlete-name"
+        label="Nome"
+        required
+        type="text"
+        value={nome}
+        onChange={(e) => setNome(e.target.value)}
+        placeholder="Nome completo"
+        autoFocus
+      />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="atleta@email.com"
-            className="w-full h-11 rounded-xl border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            autoComplete="off"
-            disabled={Boolean(initial)}
-          />
-          {initial && (
-            <p className="text-xs text-gray-400 mt-0.5">Email não pode ser alterado após o cadastro.</p>
-          )}
-          {!initial && (
-            <p className="text-xs text-gray-400 mt-0.5">A atleta usará este email para entrar no app.</p>
-          )}
-        </div>
+      <TextInput
+        id="athlete-email"
+        label="Email"
+        required
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="atleta@email.com"
+        autoComplete="off"
+        disabled={Boolean(initial)}
+        helperText={initial
+          ? 'Email não pode ser alterado após o cadastro.'
+          : 'A atleta usará este email para entrar no app.'}
+      />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
-          <input
-            type="tel"
-            inputMode="numeric"
-            value={telefone}
-            onChange={(e) => setTelefone(e.target.value.replace(/\D/g, '').slice(0, 11))}
-            placeholder="11987654321"
-            className="w-full h-11 rounded-xl border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <p className="text-xs text-gray-400 mt-0.5">Apenas dígitos, com DDD</p>
-        </div>
+      <TextInput
+        id="athlete-whatsapp"
+        label="WhatsApp"
+        type="tel"
+        inputMode="numeric"
+        value={telefone}
+        onChange={(e) => setTelefone(e.target.value.replace(/\D/g, '').slice(0, 11))}
+        placeholder="11987654321"
+        helperText="Apenas dígitos, com DDD"
+      />
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-            <select
-              value={categoria}
-              onChange={(e) => setCategoria(e.target.value)}
-              className="w-full h-11 rounded-xl border border-gray-300 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">— Selecionar —</option>
-              {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
+      <div className="grid grid-cols-2 gap-3">
+        <SelectInput
+          id="athlete-category"
+          label="Categoria"
+          value={categoria}
+          onChange={(e) => setCategoria(e.target.value)}
+          placeholder="— Selecionar —"
+          options={categoriaOptions}
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nível</label>
-            <input
-              type="text"
-              value={nivel}
-              onChange={(e) => setNivel(e.target.value)}
-              placeholder="Ex: Faixa azul"
-              className="w-full h-11 rounded-xl border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
+        <TextInput
+          id="athlete-level"
+          label="Nível"
+          type="text"
+          value={nivel}
+          onChange={(e) => setNivel(e.target.value)}
+          placeholder="Ex: Faixa azul"
+        />
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <div className="flex gap-2">
-            {(['ativo', 'inativo'] as const).map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setStatus(s)}
-                className={`flex-1 h-10 rounded-xl text-sm font-medium border transition-colors ${status === s
-                  ? s === 'ativo'
-                    ? 'bg-green-600 text-white border-green-600'
-                    : 'bg-gray-400 text-white border-gray-400'
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
-              >
-                {s === 'ativo' ? 'Ativo' : 'Inativo'}
-              </button>
-            ))}
-          </div>
-        </div>
+      <StatusSegmentedControl
+        id="athlete-status"
+        label="Status"
+        value={status}
+        onChange={setStatus}
+        options={statusOptions}
+      />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
-          <textarea
-            value={observacoes}
-            onChange={(e) => setObservacoes(e.target.value)}
-            placeholder="Informações adicionais..."
-            rows={3}
-            className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+      <TextareaInput
+        id="athlete-notes"
+        label="Observações"
+        value={observacoes}
+        onChange={(e) => setObservacoes(e.target.value)}
+        placeholder="Informações adicionais..."
+        rows={3}
+      />
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
-
-        <div className="flex gap-2 pt-1">
-          <Button type="button" variant="secondary" fullWidth onClick={onClose}>Cancelar</Button>
-          <Button type="submit" fullWidth loading={loading}>Salvar</Button>
-        </div>
-      </form>
-    </Modal>
+      {error ? <p className="text-sm text-red-300" role="alert">{error}</p> : null}
+    </ModalForm>
   )
 }
