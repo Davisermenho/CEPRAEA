@@ -4470,3 +4470,5 @@ Eliminar falha intermitente do check obrigatório `scout-preview-smoke` na PR #2
   - `--max-time 20`
 - Polling reduzido para 12 tentativas com `sleep 10` para manter o job dentro de janela previsível.
 - Ajuste final: removidos `--retry --retry-all-errors --retry-delay` do `curl`; retries permanecem somente no loop externo para manter upper-bound do tempo.
+- Root cause definitivo identificado: `VERCEL_TOKEN` do CI sem permissão para listar deploys (`403` em `/v6/deployments`).
+- Correção aplicada: resolução da preview URL via GitHub Deployments API (`repos/{repo}/deployments` + `statuses.environment_url`) com `github.token` e permissão `deployments: read`.
