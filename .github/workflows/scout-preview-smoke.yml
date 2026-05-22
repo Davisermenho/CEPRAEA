@@ -9,6 +9,7 @@ on:
       - checks_requested
 
 permissions:
+  checks: read
   contents: read
   pull-requests: read
 
@@ -82,7 +83,7 @@ jobs:
         shell: bash
         run: |
           missing=0
-          for key in VERCEL_TOKEN VERCEL_PROJECT_ID VERCEL_TEAM_ID SMOKE_COACH_EMAIL SMOKE_COACH_PASSWORD; do
+          for key in SMOKE_COACH_EMAIL SMOKE_COACH_PASSWORD; do
             if [ -z "${!key}" ]; then
               echo "Missing required secret: $key"
               missing=1
@@ -92,57 +93,59 @@ jobs:
             exit 1
           fi
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           SMOKE_COACH_EMAIL: ${{ secrets.SMOKE_COACH_EMAIL }}
           SMOKE_COACH_PASSWORD: ${{ secrets.SMOKE_COACH_PASSWORD }}
 
       - name: Install dependencies
         if: ${{ steps.scope.outputs.scout == 'true' }}
-        run: npm ci
+        run: npm ci --no-audit --no-fund --loglevel=error
 
       - name: Install Playwright browser
         if: ${{ steps.scope.outputs.scout == 'true' }}
         run: npx playwright install --with-deps chromium
 
-      - name: Wait preview build
-        if: ${{ steps.scope.outputs.scout == 'true' }}
-        run: sleep 45
-
-      - name: Resolve Vercel preview URL
+      - name: Resolve Vercel preview URL from Vercel check-run
         if: ${{ steps.scope.outputs.scout == 'true' }}
         id: vercel_preview
         shell: bash
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
-          PR_BRANCH: ${{ github.head_ref || github.event.pull_request.head.ref || github.event.merge_group.head_ref || github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
         run: |
           set -euo pipefail
-          PR_BRANCH="${PR_BRANCH#refs/heads/}"
-          echo "Retrieving deployment preview for branch: $PR_BRANCH"
-          response="$(curl -fsSL \
-            -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID&teamId=$VERCEL_TEAM_ID&target=preview&limit=50")"
+          echo "Retrieving deployment preview for sha: $PR_HEAD_SHA"
 
-          preview_host="$(jq -r --arg branch "$PR_BRANCH" '
-            [
-              .deployments[]
-              | select((.meta.githubCommitRef // "") == $branch)
-              | select((.readyState // .state // "") == "READY")
-              | .url
-            ][0] // empty
-          ' <<<"$response")"
+          preview_url=""
+          for attempt in $(seq 1 20); do
+            summary="$(
+              gh api "repos/$GITHUB_REPOSITORY/commits/$PR_HEAD_SHA/check-runs" \
+                | jq -r '.check_runs[] | select(.name == "Vercel Preview Comments") | (.output.summary // "")' \
+                | head -n 1
+            )"
 
-          if [ -z "$preview_host" ]; then
-            echo "preview_url=" >> "$GITHUB_OUTPUT"
-            exit 0
+            preview_host="$(
+              printf '%s' "$summary" \
+                | sed -nE 's#.*open-feedback/([^? )]+).*#\1#p' \
+                | head -n 1
+            )"
+
+            if [ -n "$preview_host" ]; then
+              preview_url="https://$preview_host"
+            fi
+
+            if [ -n "$preview_url" ]; then
+              break
+            fi
+
+            echo "Attempt $attempt: preview URL not ready yet."
+            sleep 6
+          done
+
+          echo "preview_url=$preview_url" >> "$GITHUB_OUTPUT"
+          if [ -n "$preview_url" ]; then
+            echo "Preview URL: $preview_url"
           fi
-
-          echo "Preview host: $preview_host"
-          echo "preview_url=$preview_host" >> "$GITHUB_OUTPUT"
 
       - name: Fail when preview URL is unavailable
         if: ${{ steps.scope.outputs.scout == 'true' && steps.vercel_preview.outputs.preview_url == '' }}
@@ -153,7 +156,7 @@ jobs:
       - name: Run Scout preview smoke
         if: ${{ steps.scope.outputs.scout == 'true' }}
         env:
-          SMOKE_BASE_URL: https://${{ steps.vercel_preview.outputs.preview_url }}
+          SMOKE_BASE_URL: ${{ steps.vercel_preview.outputs.preview_url }}
           SMOKE_COACH_EMAIL: ${{ secrets.SMOKE_COACH_EMAIL }}
           SMOKE_COACH_PASSWORD: ${{ secrets.SMOKE_COACH_PASSWORD }}
         run: |

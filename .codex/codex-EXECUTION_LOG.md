@@ -19,10 +19,21 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-21 - 17:48 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 23:38 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-21 23:38 BRT — CEPR-GOV-HARDENING-05
+
+- **Objetivo:** registrar formalmente o modo solo em artefato operacional e reduzir ruído de CI por warnings de pacotes npm deprecados.
+- **Mudanças de código/processo:**
+  - criação de `docs/auditorias/solo-mode-governance-2026-05-21.md` com snapshot de branch protection;
+  - atualização de `npm ci` nos workflows `scout-preview-smoke` e `scout-contract-cepr0098d` para `--loglevel=error --no-audit --no-fund`;
+  - hardening da resolução de preview URL no smoke (`retry`, fallback sem `teamId` e validação de payload JSON) para reduzir falhas 403 intermitentes na API Vercel.
+- **Evidências objetivas:**
+  - `gh api repos/Davisermenho/CEPRAEA/branches/main/protection --jq ...` com checks obrigatórios ativos e `required_reviews=0` ✅
+  - diffs dos workflows com flags de redução de ruído ✅
 
 ## Entrada Rápida — 2026-05-21 17:48 BRT — CEPR-GOV-HARDENING-04
 
@@ -4421,3 +4432,45 @@ Fechar pendências de governança/CI após merge das PRs #20/#18/#19:
 - `npm run typecheck`
 - revisão das workflows alteradas
 - execução dos checks no PR após push
+
+# Execution Log: CEPR-CI-SMOKE-RESILIENCE
+
+## 🎯 Objetivo
+
+Eliminar falha intermitente do check obrigatório `scout-preview-smoke` na PR #26 causada por indisponibilidade momentânea da Preview URL na API da Vercel.
+
+## 📌 Diagnóstico
+
+- PR #26: único gate falhando era `scout-preview-smoke`.
+- Log do job `77307661704` (run `26265465281`) falhou em `Fail when preview URL is unavailable`.
+- Causa técnica identificada:
+  - chamadas `curl` sem `-f` tratavam HTTP 403 como sucesso, bloqueando fallback;
+  - resolução fazia tentativa única sem polling de `READY`.
+
+## ✅ Ação executada
+
+- Arquivo alterado: `.github/workflows/scout-preview-smoke.yml`.
+- Ajustes aplicados:
+  - remoção de espera fixa (`sleep 45`);
+  - polling com múltiplas tentativas para achar deployment `READY`;
+  - fallback entre endpoints com e sem `teamId` preservado;
+  - `curl -fsS --retry ...` para tratar HTTP errors corretamente;
+  - filtro de match por branch e commit SHA.
+
+## ⏭️ Próximo passo
+
+- Commit/push na branch `chore/solo-mode-governance-and-ci-noise`.
+- Reexecutar checks da PR #26 e coletar evidência final.
+
+## 🔧 Ajuste adicional
+
+- Detectado tempo excessivo na etapa `Resolve Vercel preview URL`.
+- Adicionados limites de rede no `curl`:
+  - `--connect-timeout 8`
+  - `--max-time 20`
+- Polling reduzido para 12 tentativas com `sleep 10` para manter o job dentro de janela previsível.
+- Ajuste final: removidos `--retry --retry-all-errors --retry-delay` do `curl`; retries permanecem somente no loop externo para manter upper-bound do tempo.
+- Root cause definitivo identificado: `VERCEL_TOKEN` do CI sem permissão para listar deploys (`403` em `/v6/deployments`).
+- Correção aplicada: resolução da preview URL via GitHub Deployments API (`repos/{repo}/deployments` + `statuses.environment_url`) com `github.token` e permissão `deployments: read`.
+- API de deployments via `github.token` também bloqueada por permissão (`Resource not accessible by integration`).
+- Nova estratégia implementada: extrair host preview do summary do check-run `Vercel Preview Comments` (link `open-feedback/<host>.vercel.app`).

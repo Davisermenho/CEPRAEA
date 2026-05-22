@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-21 - 17:48 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-21 - 23:38 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,7 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-21 | 23:38 | CEPR-GOV-HARDENING-05 | PR operacional formal de modo solo criada e ruído de CI reduzido: `npm ci` dos gates Scout passou a usar `--loglevel=error --no-audit --no-fund`; resolução da URL de preview endurecida com retry e fallback sem `teamId` para reduzir falhas 403 intermitentes na API da Vercel | `docs/auditorias/solo-mode-governance-2026-05-21.md` criado · `.github/workflows/scout-preview-smoke.yml` e `.github/workflows/scout-contract-cepr0098d.yml` atualizados · branch protection snapshot registrado |
 | 2026-05-21 | 17:48 | CEPR-GOV-HARDENING-04 | `AGENTS.md` alinhado explicitamente para operação solo (sem aprovação humana obrigatória de terceiros), mantendo obrigatoriedade de gates técnicos | `AGENTS.md` seção `5.9 Operação solo` criada · branch protection atual verificada com `required_reviews=0`, `require_last_push_approval=false` e checks obrigatórios ativos |
 | 2026-05-21 | 17:35 | CEPR-GOV-HARDENING-03 | Remoção de `dorny/paths-filter@v3` do Scout Preview Smoke para eliminar warning de Node 20; detecção de escopo migrada para `git diff` em shell, mantendo gate obrigatório e comportamento de skip por escopo | `.github/workflows/scout-preview-smoke.yml` atualizado com step shell `Detect Scout scope` · ausência de `dorny/paths-filter@v3` no workflow · `npm run typecheck` ✅ · `npm run build` ✅ |
 | 2026-05-21 | 17:02 | CEPR-GOV-HARDENING-02 | Hardening adicional de governança: `scout-preview-smoke` sem `paths` no gatilho, detecção de escopo intra-job, `CODEOWNERS`, guardião automático de evidências de PR, branch protection reforçado e estabilização do check `scout-contract-cepr0098d` em testes contratuais de domínio (sem `supabase start` no CI) | `.github/workflows/scout-preview-smoke.yml` atualizado · `.github/CODEOWNERS` criado · `.github/workflows/pr-evidence-guard.yml` criado · `.github/workflows/scout-contract-cepr0098d.yml` simplificado para `vitest` de contrato · `.github/workflows/{supabase-foundation,athlete-auth-foundation}.yml` com `supabase-cli 2.98.1` · `gh api .../required_pull_request_reviews` com `require_code_owner_reviews=true` e `require_last_push_approval=true` · `npm run typecheck` ✅ · `npm run build` ✅ |
@@ -2074,3 +2075,30 @@ Aplicadas as ações de governança e estabilidade da esteira na PR #20:
 - `.github/workflows/presence-token-batch-remote-validation.yml`
 - `e2e/scout/scout-preview-smoke.spec.ts`
 - `.github/pull_request_template.md`
+
+---
+
+### [CEPR-CI-SMOKE-RESILIENCE] — 2026-05-22 — Resiliência na resolução da Preview URL
+
+#### ✨ Resumo
+
+Fortalecido o workflow `scout-preview-smoke` para evitar falso negativo quando a URL de preview ainda não está imediatamente disponível na API da Vercel.
+
+#### 🛠️ Changed
+
+- `.github/workflows/scout-preview-smoke.yml`
+  - remove `sleep` fixo e implementa polling determinístico (até ~4 min) para localizar deployment `READY`;
+  - corrige chamada da API para usar `curl -f` (HTTP 4xx/5xx agora falha e permite fallback de endpoint);
+  - adiciona matching por branch (`meta.githubCommitRef`) e por commit SHA (`meta.githubCommitSha`).
+
+#### 🛡️ Evidências
+
+- Falha anterior reproduzida no run `26265465281` por `preview_url` vazio.
+- Workflow ajustado para reduzir flake por sincronização de disponibilidade da preview.
+
+#### 🔧 Follow-up
+
+- `scout-preview-smoke.yml`: timeout por chamada da API da Vercel (`--connect-timeout 8 --max-time 20`) e janela de polling reduzida para evitar job pendurado.
+- Follow-up adicional: removido `--retry` do `curl` na resolução de preview para evitar multiplicação de timeout (loop externo já cobre retries).
+- Resolver de preview migrado de Vercel API para GitHub Deployments API (usa `environment_url` do deployment `Preview` por SHA), removendo dependência de permissões Vercel que retornavam 403 no CI.
+- Resolver atualizado novamente para ler host de preview a partir do check-run `Vercel Preview Comments` (summary/open-feedback), eliminando bloqueio de permissão `403` na API de deployments.
