@@ -4432,3 +4432,32 @@ Fechar pendências de governança/CI após merge das PRs #20/#18/#19:
 - `npm run typecheck`
 - revisão das workflows alteradas
 - execução dos checks no PR após push
+
+# Execution Log: CEPR-CI-SMOKE-RESILIENCE
+
+## 🎯 Objetivo
+
+Eliminar falha intermitente do check obrigatório `scout-preview-smoke` na PR #26 causada por indisponibilidade momentânea da Preview URL na API da Vercel.
+
+## 📌 Diagnóstico
+
+- PR #26: único gate falhando era `scout-preview-smoke`.
+- Log do job `77307661704` (run `26265465281`) falhou em `Fail when preview URL is unavailable`.
+- Causa técnica identificada:
+  - chamadas `curl` sem `-f` tratavam HTTP 403 como sucesso, bloqueando fallback;
+  - resolução fazia tentativa única sem polling de `READY`.
+
+## ✅ Ação executada
+
+- Arquivo alterado: `.github/workflows/scout-preview-smoke.yml`.
+- Ajustes aplicados:
+  - remoção de espera fixa (`sleep 45`);
+  - polling com múltiplas tentativas para achar deployment `READY`;
+  - fallback entre endpoints com e sem `teamId` preservado;
+  - `curl -fsS --retry ...` para tratar HTTP errors corretamente;
+  - filtro de match por branch e commit SHA.
+
+## ⏭️ Próximo passo
+
+- Commit/push na branch `chore/solo-mode-governance-and-ci-noise`.
+- Reexecutar checks da PR #26 e coletar evidência final.

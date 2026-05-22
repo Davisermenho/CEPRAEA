@@ -2075,3 +2075,23 @@ Aplicadas as ações de governança e estabilidade da esteira na PR #20:
 - `.github/workflows/presence-token-batch-remote-validation.yml`
 - `e2e/scout/scout-preview-smoke.spec.ts`
 - `.github/pull_request_template.md`
+
+---
+
+### [CEPR-CI-SMOKE-RESILIENCE] — 2026-05-22 — Resiliência na resolução da Preview URL
+
+#### ✨ Resumo
+
+Fortalecido o workflow `scout-preview-smoke` para evitar falso negativo quando a URL de preview ainda não está imediatamente disponível na API da Vercel.
+
+#### 🛠️ Changed
+
+- `.github/workflows/scout-preview-smoke.yml`
+  - remove `sleep` fixo e implementa polling determinístico (até ~4 min) para localizar deployment `READY`;
+  - corrige chamada da API para usar `curl -f` (HTTP 4xx/5xx agora falha e permite fallback de endpoint);
+  - adiciona matching por branch (`meta.githubCommitRef`) e por commit SHA (`meta.githubCommitSha`).
+
+#### 🛡️ Evidências
+
+- Falha anterior reproduzida no run `26265465281` por `preview_url` vazio.
+- Workflow ajustado para reduzir flake por sincronização de disponibilidade da preview.
