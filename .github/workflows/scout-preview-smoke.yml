@@ -123,9 +123,29 @@ jobs:
           set -euo pipefail
           PR_BRANCH="${PR_BRANCH#refs/heads/}"
           echo "Retrieving deployment preview for branch: $PR_BRANCH"
-          response="$(curl -fsSL \
-            -H "Authorization: Bearer $VERCEL_TOKEN" \
-            "https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID&teamId=$VERCEL_TEAM_ID&target=preview&limit=50")"
+          response=""
+          for endpoint in \
+            "https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID&teamId=$VERCEL_TEAM_ID&target=preview&limit=50" \
+            "https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID&target=preview&limit=50"
+          do
+            echo "Trying endpoint: $endpoint"
+            if response="$(curl -sS --retry 3 --retry-all-errors --retry-delay 3 \
+              -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "$endpoint")"; then
+              break
+            fi
+          done
+
+          if [ -z "$response" ]; then
+            echo "preview_url=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! jq -e '.deployments' >/dev/null 2>&1 <<<"$response"; then
+            echo "Preview API response is not valid deployments payload."
+            echo "preview_url=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           preview_host="$(jq -r --arg branch "$PR_BRANCH" '
             [

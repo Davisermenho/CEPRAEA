@@ -29,7 +29,8 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 - **Objetivo:** registrar formalmente o modo solo em artefato operacional e reduzir ruído de CI por warnings de pacotes npm deprecados.
 - **Mudanças de código/processo:**
   - criação de `docs/auditorias/solo-mode-governance-2026-05-21.md` com snapshot de branch protection;
-  - atualização de `npm ci` nos workflows `scout-preview-smoke` e `scout-contract-cepr0098d` para `--loglevel=error --no-audit --no-fund`.
+  - atualização de `npm ci` nos workflows `scout-preview-smoke` e `scout-contract-cepr0098d` para `--loglevel=error --no-audit --no-fund`;
+  - hardening da resolução de preview URL no smoke (`retry`, fallback sem `teamId` e validação de payload JSON) para reduzir falhas 403 intermitentes na API Vercel.
 - **Evidências objetivas:**
   - `gh api repos/Davisermenho/CEPRAEA/branches/main/protection --jq ...` com checks obrigatórios ativos e `required_reviews=0` ✅
   - diffs dos workflows com flags de redução de ruído ✅
