@@ -4472,3 +4472,5 @@ Eliminar falha intermitente do check obrigatório `scout-preview-smoke` na PR #2
 - Ajuste final: removidos `--retry --retry-all-errors --retry-delay` do `curl`; retries permanecem somente no loop externo para manter upper-bound do tempo.
 - Root cause definitivo identificado: `VERCEL_TOKEN` do CI sem permissão para listar deploys (`403` em `/v6/deployments`).
 - Correção aplicada: resolução da preview URL via GitHub Deployments API (`repos/{repo}/deployments` + `statuses.environment_url`) com `github.token` e permissão `deployments: read`.
+- API de deployments via `github.token` também bloqueada por permissão (`Resource not accessible by integration`).
+- Nova estratégia implementada: extrair host preview do summary do check-run `Vercel Preview Comments` (link `open-feedback/<host>.vercel.app`).

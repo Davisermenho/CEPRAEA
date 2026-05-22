@@ -9,8 +9,8 @@ on:
       - checks_requested
 
 permissions:
+  checks: read
   contents: read
-  deployments: read
   pull-requests: read
 
 env:
@@ -104,32 +104,34 @@ jobs:
         if: ${{ steps.scope.outputs.scout == 'true' }}
         run: npx playwright install --with-deps chromium
 
-      - name: Resolve Vercel preview URL from GitHub deployment
+      - name: Resolve Vercel preview URL from Vercel check-run
         if: ${{ steps.scope.outputs.scout == 'true' }}
         id: vercel_preview
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          PR_BRANCH: ${{ github.head_ref || github.event.pull_request.head.ref || github.event.merge_group.head_ref || github.ref_name }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
         run: |
           set -euo pipefail
-          PR_BRANCH="${PR_BRANCH#refs/heads/}"
-          echo "Retrieving deployment preview for branch: $PR_BRANCH (sha: $PR_HEAD_SHA)"
+          echo "Retrieving deployment preview for sha: $PR_HEAD_SHA"
 
           preview_url=""
           for attempt in $(seq 1 20); do
-            deployment_id="$(
-              gh api "repos/$GITHUB_REPOSITORY/deployments" -f sha="$PR_HEAD_SHA" -f per_page=20 \
-                | jq -r '[.[] | select((.environment // "") == "Preview")][0].id // empty'
+            summary="$(
+              gh api "repos/$GITHUB_REPOSITORY/commits/$PR_HEAD_SHA/check-runs" \
+                | jq -r '.check_runs[] | select(.name == "Vercel Preview Comments") | (.output.summary // "")' \
+                | head -n 1
             )"
 
-            if [ -n "$deployment_id" ]; then
-              preview_url="$(
-                gh api "repos/$GITHUB_REPOSITORY/deployments/$deployment_id/statuses" \
-                  | jq -r '[.[] | select((.state // "") == "success") | (.environment_url // .target_url // .log_url // empty)][0] // empty'
-              )"
+            preview_host="$(
+              printf '%s' "$summary" \
+                | sed -nE 's#.*open-feedback/([^? )]+).*#\1#p' \
+                | head -n 1
+            )"
+
+            if [ -n "$preview_host" ]; then
+              preview_url="https://$preview_host"
             fi
 
             if [ -n "$preview_url" ]; then
