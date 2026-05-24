@@ -46,7 +46,7 @@ de IA sem estar registrado aqui primeiro.
 - **Exemplo de uso**: situação real de jogo onde o conceito aparece
 ```
 
-Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `structures` | `enables` | `opposes` | `precedes` | `requires`
+Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `structures` | `enables` | `opposes` | `precedes` | `requires` | `has-attribute`
 
 ---
 

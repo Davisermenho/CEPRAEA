@@ -138,21 +138,35 @@ function parseRequiredEdgesFromManual(text) {
 }
 
 function parseAcceptedRelationsFromGlossary(text) {
-  const match = text.match(/Tipos de relação aceitos:\s*(.+)/)
-  if (!match) {
-    warnings.push('Lista de tipos de relação aceitos não encontrada no glossário; usando fallback interno.')
-    return new Set(defaultAllowedRelations)
+  const set = new Set()
+  let foundAny = false
+
+  // Formato textual em uma linha:
+  // Tipos de relação aceitos: `is-a` | `part-of` | ...
+  for (const match of text.matchAll(/Tipos de relação aceitos:\s*(.+)/g)) {
+    foundAny = true
+    const relRegex = /`([a-z-]+)`/g
+    let relMatch
+    while ((relMatch = relRegex.exec(match[1]))) {
+      set.add(relMatch[1])
+    }
   }
 
-  const set = new Set()
-  const relRegex = /`([a-z-]+)`/g
-  let relMatch
-  while ((relMatch = relRegex.exec(match[1]))) {
-    set.add(relMatch[1])
+  // Formato em tabela markdown (resiliente a futuras mudanças de redação):
+  // | `is-a` | descrição | direção |
+  for (const line of text.split('\n')) {
+    const m = line.match(/^\|\s*`([a-z-]+)`\s*\|/)
+    if (!m) continue
+    foundAny = true
+    set.add(m[1])
   }
 
   if (set.size === 0) {
-    warnings.push('Lista de tipos de relação no glossário está vazia; usando fallback interno.')
+    if (!foundAny) {
+      warnings.push('Lista de tipos de relação aceitos não encontrada no glossário; usando fallback interno.')
+    } else {
+      warnings.push('Lista de tipos de relação no glossário está vazia; usando fallback interno.')
+    }
     return new Set(defaultAllowedRelations)
   }
   return set
