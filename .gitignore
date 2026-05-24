@@ -102,3 +102,15 @@ test-results/
 # Keep raw conversation dumps local; commit curated context and normalized extracts instead.
 /pilot-chat.json
 /docs/piloto01.json
+
+# Ontologia - artefatos locais/derivados fora de escopo de versionamento
+backup_ocr_rebuild_*/
+design-plan.md
+docs/PDFs/
+docs/ontologia-handebol-praia.md
+docs/ontologia-mapeamento-supabase.md
+docs/ontologia-plano-implementacao.md
+docs/ontologia/artigos/
+docs/ontologia/images/
+docs/ontologia/manuais/agrvaidarcerto.md
+docs/ontologia/triagens/triagem-regras-ihf-2026.md

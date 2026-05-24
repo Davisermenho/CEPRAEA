@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-21 - 23:38 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-23 - 21:27 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -2102,3 +2102,485 @@ Fortalecido o workflow `scout-preview-smoke` para evitar falso negativo quando a
 - Follow-up adicional: removido `--retry` do `curl` na resolução de preview para evitar multiplicação de timeout (loop externo já cobre retries).
 - Resolver de preview migrado de Vercel API para GitHub Deployments API (usa `environment_url` do deployment `Preview` por SHA), removendo dependência de permissões Vercel que retornavam 403 no CI.
 - Resolver atualizado novamente para ler host de preview a partir do check-run `Vercel Preview Comments` (summary/open-feedback), eliminando bloqueio de permissão `403` na API de deployments.
+
+---
+
+### [AGENTS-CONTRACT] — 2026-05-22 — Inclusão de `source_text_exact` por seção no AGENTS.json
+
+#### ✨ Resumo
+
+Incluído `source_text_exact` em todas as seções do contrato em `AGENTS.json`, com a redação original extraída de `AGENTS.md`, mantendo as informações já existentes.
+
+#### 🛠️ Changed
+
+- `AGENTS.json`
+  - adiciona `document.source_text_exact` com o preâmbulo original do `AGENTS.md`;
+  - adiciona `source_text_exact` em cada seção `0_` a `11_` dentro de `contract`.
+
+#### 🛡️ Evidências
+
+- Validação de presença por seção via `jq`: todas as seções marcadas como `ok`.
+
+---
+
+### [AGENTS-SHIM] — 2026-05-22 — AGENTS.md convertido para loader de AGENTS.json
+
+#### ✨ Resumo
+
+`AGENTS.md` foi convertido para shim determinístico que delega integralmente a execução para `AGENTS.json` como fonte única de verdade.
+
+#### 🛠️ Changed
+
+- `AGENTS.md`
+  - remove contrato operacional extenso do Markdown;
+  - adiciona contrato de carregamento obrigatório;
+  - define bloqueio explícito quando `AGENTS.json` estiver inválido/inacessível/ambíguo.
+
+#### 🛡️ Evidências
+
+- Leitura do arquivo pós-edição confirma redirecionamento explícito para `./AGENTS.json`.
+
+---
+
+### [PDF-TOOLING-DIAGNOSTIC] — 2026-05-22 — Diagnóstico de leitura de PDF no workspace
+
+#### ✨ Resumo
+
+- Validado que o PDF informado existe e está íntegro no repositório (`67` páginas).
+- Confirmado que o ambiente atual não possui `pdfinfo` nem `pdftotext` instalados.
+- Respondido ao usuário o caminho recomendado para visualização no VS Code e para leitura/extração por agentes.
+
+#### 🛠️ Changed
+
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+#### 🛡️ Evidências
+
+- `file docs/scout/09B - Rules of the Game_Beach Handball_E.pdf` → `PDF document, version 1.7, 67 page(s)`.
+- `pdfinfo ...` → `command not found`.
+- `pdftotext ...` → `command not found`.
+
+---
+
+### [DESIGN-PLAN-DDR-ALIGNMENT] — 2026-05-23 — Ajustes de governança no plano do DDR
+
+#### ✨ Resumo
+
+Atualizado `design-plan.md` para alinhar o plano do `CEPRAEA Design Decision Record` aos critérios de oficialização: taxonomia Scout como UX-facing, coexistência real de tokens, inclusão de DDR-015 e delimitação explícita de escopo.
+
+#### 🛠️ Changed
+
+- `design-plan.md`
+  - remove linguagem de comprovação científica absoluta e troca por formato `Decisão` + `Evidência` contextual;
+  - adiciona seção `Referências externas usadas como apoio`;
+  - explicita que `docs/scout/*` continua como fonte técnica do domínio Scout;
+  - explicita coexistência atual entre `--color-cep-*` e `--auth-*`, com decisão de convergência gradual;
+  - atualiza estrutura alvo para `DDR-001` a `DDR-015`;
+  - adiciona `DDR-015 — Taxonomia de dados não deve ser deformada pela pressa da interface`;
+  - adiciona seção `O que este documento não decide`.
+
+#### 🛡️ Evidências
+
+- `rg -n -- '--auth-|--color-cep-' src/index.css` confirma coexistência de tokens.
+- Conteúdo do plano revisado com os cinco ajustes solicitados para oficialização.
+
+---
+
+### [DESIGN-PLAN-TOKEN-CLARITY] — 2026-05-23 — Clarificação de origem de tokens e classes utilitárias
+
+#### ✨ Resumo
+
+Ajustado o trecho de tokens em `design-plan.md` para explicitar que `--color-cep-*` vem do `@theme` do Tailwind e, por isso, é consumido como classes utilitárias (`bg-cep-*`, `text-cep-*`, `border-cep-*`).
+
+#### 🛠️ Changed
+
+- `design-plan.md`
+  - atualiza o título para: `Tokens --color-cep-* confirmados (origem: @theme do Tailwind)`;
+  - adiciona explicação de mapeamento para classes utilitárias;
+  - adiciona nota para evitar confusão entre variável CSS bruta e utilitário de classe.
+
+#### 🛡️ Evidências
+
+- Bloco de tokens em `design-plan.md` atualizado entre as linhas ~186-194.
+
+---
+
+### [DESIGN-DDR-OFFICIAL-DOC] — 2026-05-23 — Criação do documento oficial de decisão de design/UX
+
+#### ✨ Resumo
+
+Criado `docs/design/cepraea-design-decision-record.md` a partir do `design-plan.md`, consolidando o documento oficial de governança de design/UX do CEPRAEA com 15 DDRs, taxonomia Scout UX-facing e limites explícitos de escopo.
+
+#### 🛠️ Changed
+
+- `docs/design/cepraea-design-decision-record.md`
+  - define objetivo/escopo e hierarquia documental com `CEPRAEA.md` e `docs/scout/*`;
+  - formaliza `DDR-001` a `DDR-015`;
+  - inclui seção de taxonomia oficial do Scout como UX-facing;
+  - inclui contrato de UX com métricas objetivas (JSON + narrativa);
+  - inclui critérios de densidade por perfil (atleta/treinador);
+  - inclui checklist geral e checklist Scout ao vivo;
+  - inclui seção `O que este documento não decide`;
+  - explicita coexistência `--color-cep-*` e `--auth-*` e convergência planejada;
+  - explicita origem dos tokens `--color-cep-*` no `@theme` e uso como classes `bg-cep-*`, `text-cep-*`, `border-cep-*`.
+
+#### 🛡️ Evidências
+
+- Arquivo criado em `docs/design/cepraea-design-decision-record.md`.
+- Presença confirmada de blocos críticos via `rg` (`DDR-015`, `docs/scout/*`, seção de não decisão, bloco de tokens).
+
+---
+
+### [DESIGN-DDR-MINOR-PRECOMMIT-ADJUSTS] — 2026-05-23 — Ajustes finais de seção 12 e 13
+
+#### ✨ Resumo
+
+Aplicados dois ajustes pequenos no DDR oficial antes de commit: regra de manutenção para conferência de tokens em `src/index.css` e ajuste de linguagem da seção de referências para remover termo de verificabilidade.
+
+#### 🛠️ Changed
+
+- `docs/design/cepraea-design-decision-record.md`
+  - seção 12: adiciona `Regra de manutenção` exigindo conferência da lista factual de tokens em `src/index.css` antes de alterações;
+  - seção 13: troca `referência verificável` por `referência explícita` para manter o tom de apoio sem exigir formalismo não presente.
+
+#### 🛡️ Evidências
+
+- Diff local confirma alterações pontuais nas seções 12 e 13.
+
+---
+
+### [DESIGN-DDR-COMMIT-PUSH-PR] — 2026-05-23 — Commit, push e PR do DDR oficial
+
+#### ✨ Resumo
+
+Publicação do documento oficial `docs/design/cepraea-design-decision-record.md` em branch remota dedicada e abertura de PR de documentação.
+
+#### 🛠️ Changed
+
+- commit criado: `046271d`
+  - `docs/design/cepraea-design-decision-record.md`
+
+#### 🚀 Publicação
+
+- branch remota publicada: `docs/design-decision-record-ddr`
+- PR aberta: `#27`
+
+#### 🛡️ Evidências
+
+- Push efetuado com sucesso para branch remota nova.
+- URL da PR: `https://github.com/Davisermenho/CEPRAEA/pull/27`.
+
+---
+
+### [PR-27-VERIFICATION] — 2026-05-23 — Verificação e destravamento do PR #27
+
+#### ✨ Resumo
+
+Verificado o PR `#27` e resolvido bloqueio do check `pr-evidence-guard` via atualização do corpo da PR e novo disparo de pipeline.
+
+#### 🛠️ Changed
+
+- PR `#27` (metadados no GitHub):
+  - corpo da PR atualizado com campos obrigatórios de evidência;
+  - commit vazio `12e521d` adicionado para disparar novo evento `synchronize` e revalidar checks.
+
+#### 🛡️ Evidências
+
+- `pr-evidence-guard`: `SUCCESS`.
+- `scout-contract-cepr0098d`: `SUCCESS`.
+- `scout-preview-smoke`: `SUCCESS`.
+- `Vercel`: `SUCCESS`.
+- PR `#27` em estado `OPEN` e `MERGEABLE`.
+
+---
+
+### [CEPR-ONTOLOGIA-HB-PRAIA-01] — 2026-05-23 — Blueprint da ontologia do handebol de praia
+
+#### ✨ Resumo
+
+Formalização de um blueprint técnico de ontologia do domínio de handebol de praia para orientar o uso correto de agentes de IA no PWA, alinhado ao PRD e ao contrato semântico executável do Scout.
+
+#### 🚀 Added
+
+- `docs/ontologia-handebol-praia.md`
+
+#### 🛠️ Changed
+
+- definido contrato semântico mínimo do MVP para:
+  - contexto esportivo oficial;
+  - taxonomia de atleta (`posição_ofensiva`, `função_defensiva`);
+  - taxonomia de metas (`escopo`, `origem`);
+  - cadeia semântica obrigatória da `COLETA_AO_VIVO`;
+- documentado processo de criação/evolução da ontologia com gate de prova executável (docs + codebook + contratos + testes).
+
+#### 🛡️ Evidências
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `rg -n "ontolog|taxonomi|semant|codebook|posição_ofensiva|função_defensiva|escopo|origem|LISTA_" CEPRAEA.md plan.md docs supabase -S`
+- `nl -ba CEPRAEA.md | sed -n '220,260p'`
+- `nl -ba CEPRAEA.md | sed -n '596,615p'`
+- `nl -ba CEPRAEA.md | sed -n '642,655p'`
+- `nl -ba CEPRAEA.md | sed -n '884,900p'`
+- `nl -ba CEPRAEA.md | sed -n '1066,1082p'`
+- `nl -ba docs/scout/scout-contrato-tecnico-supabase.md | sed -n '560,640p'`
+- `nl -ba docs/scout/matriz-compatibilidade-coleta-ao-vivo.md | sed -n '1,90p'`
+
+
+---
+
+### [CEPR-ONTOLOGIA-AUDIT-MAP-01] — 2026-05-23 — Auditoria semântica campo-a-campo Ontologia x Supabase/TS
+
+#### ✨ Resumo
+
+Criado o documento de auditoria semântica campo-a-campo entre a Ontologia do Handebol de Praia e as estruturas atuais do projeto (Supabase + contratos TypeScript), com classificação por status: `mapped`, `missing`, `conflict`, `needs_review`.
+
+#### 🚀 Added
+
+- `docs/ontologia-mapeamento-supabase.md`
+
+#### 🛠️ Changed
+
+- mapeamento técnico de conceitos ontológicos nas camadas `esporte`, `scout`, `aplicação` e `agente IA`;
+- identificação explícita de lacunas críticas do PRD sem inventar tabelas/campos;
+- inclusão de critério de aceite sugerido por linha de auditoria.
+
+#### 🛡️ Evidências
+
+- `cat docs/ontologia-handebol-praia.md`
+- `cat CEPRAEA.md`
+- `cat docs/scout/matriz-compatibilidade-coleta-ao-vivo.md`
+- `cat docs/scout/scout-contrato-tecnico-supabase.md`
+- `rg --files supabase | sort`
+- `rg -n "create table if not exists public\." supabase/migrations/*.sql -S`
+- `nl -ba supabase/migrations/0001_initial_schema.sql | sed -n '28,180p'`
+- `nl -ba supabase/migrations/0008_scout_contract_foundation.sql | sed -n '1,260p'`
+- `nl -ba supabase/migrations/0012_scout_live_entries_foundation.sql | sed -n '1,220p'`
+- `nl -ba supabase/migrations/0017_scout_report_feedback_dashboard.sql | sed -n '1,230p'`
+- `nl -ba supabase/migrations/0009_scout_codebook_foundation.sql | sed -n '1,220p'`
+- `nl -ba src/types/index.ts | sed -n '1,920p'`
+- `nl -ba src/features/scout/domain/liveCollectionCompatibility.matrix.ts | sed -n '1,260p'`
+- `nl -ba src/features/scout/domain/liveCollectionFlow.contract.ts | sed -n '1,520p'`
+
+
+### [CEPR-ONTOLOGIA-IMPLEMENTACAO-PLAN-01] — 2026-05-23 — Plano incremental por PR para conflitos semânticos
+
+#### ✨ Resumo
+
+Criação do plano oficial de implementação incremental por PR para transformar os `conflict` e `needs_review` da auditoria semântica em sequência executável por módulo, sem alterar código, banco ou migrations nesta etapa.
+
+#### 🚀 Added
+
+- `docs/ontologia-plano-implementacao.md`
+
+#### 🛠️ Changed
+
+- plano estruturado por módulos:
+  - Atletas
+  - Metas
+  - Agenda competitiva
+  - Convocações
+  - Plano de treino do dia
+  - Scout nomenclatura/agregados
+  - Notion x repositório
+- para cada módulo, inclusão de:
+  - problema semântico
+  - arquivos prováveis afetados
+  - tabelas/colunas esperadas
+  - contratos TypeScript esperados
+  - codebooks envolvidos
+  - validações SQL/RPC necessárias
+  - testes necessários
+  - critério de aceite
+  - risco de regressão
+  - prioridade (P0/P1/P2)
+
+#### 🛡️ Evidências
+
+- `cat AGENTS.md`
+- `cat AGENTS.json`
+- `git log main --merges --oneline -n 3`
+- `cat docs/ontologia-handebol-praia.md`
+- `cat docs/ontologia-mapeamento-supabase.md`
+- `cat CEPRAEA.md`
+- `cat docs/scout/matriz-compatibilidade-coleta-ao-vivo.md`
+- `cat docs/scout/scout-contrato-tecnico-supabase.md`
+- `find supabase/migrations -maxdepth 1 -type f -name '*.sql' | sort`
+- `find src/features/athletes src/features/trainings src/features/scout/domain -type f | sort`
+- `cat src/types/index.ts > /dev/null`
+- `rg -n "..." CEPRAEA.md docs/ontologia-mapeamento-supabase.md src/types/index.ts supabase/migrations -S`
+
+
+### [CEPR-ONTOLOGIA-VALIDACAO-ARTEFATOS-2026-05-24] — 2026-05-24 — Consolidação e validação cruzada da ontologia
+
+#### ✨ Resumo
+
+Validação técnica e semântica dos artefatos de ontologia do handebol de praia com correções de consistência entre glossário, matriz de relações e diagrama Draw.io.
+
+#### 🚀 Added
+
+- cobertura explícita de relações para `AgeCategory` e `Ball` na matriz (`#109` a `#112`).
+
+#### 🛠️ Changed
+
+- `docs/ontolgia/matriz-relacoes.md`
+  - preenchimento de fontes faltantes nas relações `#1` a `#10`;
+  - normalização de tipos de relação (`uses`→`causes`, `contains`→`part-of`, `constrains`→`influences`);
+  - inclusão de relações de taxonomia etária e vínculo da bola com superfície de areia.
+- `docs/ontolgia/glossario-ontologico-controlado.md`
+  - alinhamento das relações de `ShootOut`, `PlayingCourt` e `PassivePlay` com a matriz.
+- `docs/design/navegacao.drawio.svg`
+  - reconstrução do wrapper SVG para formato válido (XML íntegro com `content` contendo apenas `mxfile`).
+
+#### 🛡️ Evidências
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `git log --merges --oneline -n 12`
+- `cat docs/ontolgia/manual-ontologia-handebol-de-praia.md`
+- `cat docs/ontolgia/glossario-ontologico-controlado.md`
+- `cat docs/ontolgia/registro-fontes.md`
+- `cat docs/ontolgia/matriz-relacoes.md`
+- `cat docs/design/navegacao.drawio.svg`
+- scripts de validação cruzada via `python3` (cobertura 81/81 conceitos entre manual, glossário, matriz e SVG)
+- validação de integridade SVG via `python3 -c "import xml.etree.ElementTree as ET; ET.parse(...)"`
+
+### [CEPR-ONTOLOGIA-IHF-REGRAS-TRIAGEM-2026-05-24] — 2026-05-24 — Triagem do `regras.pdf` e atualização da banda normativa
+
+#### ✨ Resumo
+
+Aplicação do protocolo ontológico completo para a fonte `docs/ontolgia/regras.pdf` (IHF 2026): extração de conceitos, classificação, deduplicação e atualização controlada dos artefatos antes da edição do Draw.io.
+
+#### 🚀 Added
+
+- `docs/ontolgia/triagem-regras-ihf-2026.md` com a tabela obrigatória de triagem (seção 11 do manual).
+- Conceitos normativos no modelo:
+  - `RefereeRole`
+  - `TimekeeperScorekeeperRole`
+  - `SubstitutionArea`
+  - `AthleteUniform`
+
+#### 🛠️ Changed
+
+- `docs/ontolgia/registro-fontes.md`
+  - enriquecimento da entrada `IHF-2026` com os novos conceitos sustentados.
+- `docs/ontolgia/glossario-ontologico-controlado.md`
+  - inclusão de quatro novas entradas canônicas normativas e respectivas relações.
+- `docs/ontolgia/matriz-relacoes.md`
+  - inclusão de seis novas relações (`#113` a `#118`) derivadas da fonte IHF-2026.
+- `docs/design/navegacao.drawio.svg`
+  - atualização no bloco `NORMATIVA` com os quatro novos nós e seis arestas, via script Python.
+
+#### 🛡️ Evidências
+
+- `source .venv/bin/activate && python3 scripts/pdf2md.py docs/ontolgia/regras.pdf --out docs/ontolgia`
+- `cat docs/ontolgia/manual-ontologia-handebol-de-praia.md`
+- `cat docs/ontolgia/regras.md`
+- `cat docs/ontolgia/glossario-ontologico-controlado.md`
+- `cat docs/ontolgia/matriz-relacoes.md`
+- `cat docs/ontolgia/registro-fontes.md`
+- `python3 /tmp/update_drawio_normativa_regras.py`
+- checklist técnico do SVG (`grep`, `wc`, validação de vértices e arestas)
+
+### [CEPR-ONTOLOGIA-HARMONIZACAO-SEC14-2026-05-24] — 2026-05-24 — Harmonização do §14 do manual ontológico
+
+#### ✨ Resumo
+
+Harmonização do `§14` em `manual-ontologia-handebol-de-praia.md` para refletir explicitamente a ampliação canônica normativa já incorporada no modelo.
+
+#### 🛠️ Changed
+
+- `docs/ontolgia/manual-ontologia-handebol-de-praia.md`
+  - inclusão de `RefereeRole`, `TimekeeperScorekeeperRole`, `SubstitutionArea` e `AthleteUniform` na tabela de vértices obrigatórios da banda `NORMATIVA` (`§14.2`);
+  - atualização de `§14.3` com as arestas obrigatórias `#15` a `#20` associadas aos novos conceitos;
+  - atualização do total de relações da matriz referenciado em `§14.3` (`108` → `118`);
+  - atualização da verificação de cobertura em `§14.4` (`81` → `85` conceitos);
+  - atualização do histórico de conceitos ausentes adicionados.
+
+#### 🛡️ Evidências
+
+- `rg -n "^## 14\.|14\.2|14\.3|81 conceitos|Banda NORMATIVA" docs/ontolgia/manual-ontologia-handebol-de-praia.md`
+- `sed -n '532,760p' docs/ontolgia/manual-ontologia-handebol-de-praia.md`
+- `rg -n "RefereeRole|TimekeeperScorekeeperRole|SubstitutionArea|AthleteUniform|118 relações|85 conceitos|\| 20 \|" docs/ontolgia/manual-ontologia-handebol-de-praia.md`
+
+### [CEPR-ONTOLOGIA-HARMONIZACAO-SEC14_4-AUDITORIA-2026-05-24] — 2026-05-24 — Separação auditável do §14.4
+
+#### ✨ Resumo
+
+Harmonização do `§14.4` para separar explicitamente o histórico `IHF-2026` da `expansão normativa por arbitragem/mesa`.
+
+#### 🛠️ Changed
+
+- `docs/ontolgia/manual-ontologia-handebol-de-praia.md`
+  - criação dos subtópicos:
+    - `14.4.1 Divergências de nomenclatura (histórico geral)`
+    - `14.4.2 Histórico IHF-2026 (base normativa e tático-estrutural)`
+    - `14.4.3 Expansão normativa por arbitragem/mesa (auditoria complementar)`
+  - redistribuição dos conceitos históricos entre os subtópicos para rastreabilidade futura.
+
+#### 🛡️ Evidências
+
+- `sed -n '685,735p' docs/ontolgia/manual-ontologia-handebol-de-praia.md`
+- `rg -n "14\.4\.1|14\.4\.2|14\.4\.3|Histórico IHF-2026|Expansão normativa por arbitragem/mesa" docs/ontolgia/manual-ontologia-handebol-de-praia.md`
+
+### [CEPR-ONTOLOGIA-ARTIGO-2PT-BLOQUEIO-OCR-2026-05-24] — 2026-05-24 — Bloqueio de triagem por PDF ilegível
+
+#### ✨ Resumo
+
+Aplicação do protocolo para a fonte `2-point goals (spin and in-flight shots)-min.pdf` interrompida no Passo 0 por ausência de texto legível e ausência de OCR no ambiente.
+
+#### 🚀 Added
+
+- `docs/ontolgia/triagem-2-point-goals-spin-in-flight-2026-05-24.md` com status `BLOQUEADO_NO_PASSO_0` e evidências objetivas.
+
+#### 🛠️ Changed
+
+- `docs/ontolgia/registro-fontes.md`
+  - inclusão da fonte provisória `ART-2PT-SPIN-INFLIGHT-UNK` em `Fontes em triagem`;
+  - registro formal do bloqueio e referência ao artefato de triagem.
+
+#### 🛡️ Evidências
+
+- `source .venv/bin/activate && python3 scripts/pdf2md.py "docs/ontolgia/artigos/2-point goals (spin and in-flight shots)-min.pdf" --out docs/ontolgia`
+- `pdftotext "docs/ontolgia/artigos/2-point goals (spin and in-flight shots)-min.pdf" "docs/ontolgia/2-point goals (spin and in-flight shots)-min-pdftotext.txt"`
+- `sed -n '1,220p' "docs/ontolgia/2-point goals (spin and in-flight shots)-min.md"`
+- `sed -n '1,220p' "docs/ontolgia/2-point goals (spin and in-flight shots)-min-pdftotext.txt"`
+
+### [CEPR-ONTOLOGIA-ARTIGO-2PT-TRIAGEM-E-UPDATE-2026-05-24] — 2026-05-24 — Triagem completa + atualização do bloco de pontuação no Draw.io
+
+#### ✨ Resumo
+
+Aplicação integral do protocolo ontológico ao artigo `2-point goals (spin and in-flight shots)-min`: extração de conceitos candidatos, classificação (classe/atributo/relação/evidência), deduplicação com ontologia atual, atualização dos artefatos e atualização do Draw.io no bloco de `ShootingAction`/`TwoPointGoal`.
+
+#### 🚀 Added
+
+- `docs/ontologia/triagens/triagem-2-point-goals-spin-in-flight-2026-05-24.md`
+  - triagem preenchida (Passos 2–5), tabela obrigatória e decisão ontológica por conceito.
+- `docs/design/navegacao.drawio.svg`
+  - inclusão das arestas:
+    - `TwoPointGoal enables AerialThrow`
+    - `TwoPointGoal enables GoalkeeperRole`
+    - `TwoPointGoal enables SpecialistRole`
+
+#### 🛠️ Changed
+
+- `docs/ontologia/manuais/glossario-ontologico-controlado.md`
+  - refinamento de atributos em `SpinThrow`, `AerialThrow`, `SixMetreThrow` e `TwoPointGoal`;
+  - inclusão de `SKOWRONEK-2023` nas fontes dos conceitos impactados.
+- `docs/ontologia/manuais/matriz-relacoes.md`
+  - reforço de evidência nas relações `#93` a `#96` e `#118` com `SKOWRONEK-2023`;
+  - inclusão da relação `#119`: `TwoPointGoal enables SpecialistRole`.
+- `docs/ontologia/manuais/registro-fontes.md`
+  - promoção de `ART-2PT-SPIN-INFLIGHT-UNK` para fonte ativa canônica `SKOWRONEK-2023`.
+
+#### 🛡️ Evidências
+
+- `wc -l "docs/ontologia/artigos/2-point goals (spin and in-flight shots)-min.md"`
+- `sed -n '220,520p' "docs/ontologia/artigos/2-point goals (spin and in-flight shots)-min.md"`
+- `sed -n '900,1280p' "docs/ontologia/artigos/2-point goals (spin and in-flight shots)-min.md"`
+- `python3` (script de atualização do `navegacao.drawio.svg` via `content=&lt;mxfile...&gt;`)
+- `grep -c 'host="app.diagrams.net"' docs/design/navegacao.drawio.svg`
+- `grep -c 'content="&lt;mxfile' docs/design/navegacao.drawio.svg`
+- `grep -c '\[draw\.io\]' docs/design/navegacao.drawio.svg`
+- `wc -c docs/design/navegacao.drawio.svg`
