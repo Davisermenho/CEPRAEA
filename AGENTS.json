@@ -1,0 +1,495 @@
+{
+  "document": {
+    "name": "AGENTS.md",
+    "project": "CEPRAEA",
+    "title": "Agent Operating Manual",
+    "effective_from": "2026-05-19",
+    "replaces": "AGENT.md",
+    "scope": "fonte operacional atual para agentes de IA no CEPRAEA",
+    "source_text_exact": "> Este AGENTS.md é a fonte operacional atual para agentes de IA no CEPRAEA a partir de 2026-05-19.\n> O arquivo AGENT.md foi substituído por este documento.\n\n# CEPRAEA — Agent Operating Manual"
+  },
+  "contract": {
+    "0_regra_central": {
+      "completion_gate": {
+        "task_must_not_end_when": [
+          "apenas código foi alterado"
+        ],
+        "task_must_end_only_when_evidence_includes": [
+          "Escopo entendido",
+          "Arquivos alterados",
+          "Ferramentas usadas",
+          "Comandos executados",
+          "Resultado dos comandos",
+          "Status do PR/Preview, quando aplicável",
+          "Riscos restantes ou pendências"
+        ]
+      },
+      "command_failure_obligation": {
+        "when_command_cannot_run": [
+          "informar qual comando não foi executado",
+          "informar por quê",
+          "informar qual validação alternativa foi feita"
+        ]
+      },
+      "source_text_exact": "## 0. Regra central\n\nNenhuma tarefa termina apenas porque o código foi alterado.\n\nToda tarefa termina somente quando o agente entrega evidências:\n\n1. Escopo entendido\n2. Arquivos alterados\n3. Ferramentas usadas\n4. Comandos executados\n5. Resultado dos comandos\n6. Status do PR/Preview, quando aplicável\n7. Riscos restantes ou pendências\n\nSe algum comando não puder ser executado, o agente deve dizer explicitamente:\n- qual comando não foi executado;\n- por quê;\n- qual validação alternativa foi feita."
+    },
+    "1_ambiente": {
+      "deployment_model": "Vercel com Preview Deployment antes do merge",
+      "working_mode": "trabalhar em branch/PR e validar preview antes do merge",
+      "forbidden_without_explicit_human_confirmation": [
+        "alterações diretas em produção",
+        "aplicar migrations remotas",
+        "alterar variáveis de ambiente"
+      ],
+      "path_policy": {
+        "must_use_linux_paths": [
+          "/home/..."
+        ],
+        "must_not_use_windows_paths": [
+          "C:\\Users\\..."
+        ]
+      },
+      "vscode_open_command": [
+        "cd ~/caminho/para/CEPRAEA",
+        "code ."
+      ],
+      "source_text_exact": "## 1. Ambiente\n\nO projeto possui deploy na Vercel com Preview Deployment antes do merge.\n\nAgentes devem trabalhar em branch/PR e validar o preview antes do merge.\n\nAgentes NÃO devem fazer alterações diretas em produção, aplicar migrations remotas\nou alterar variáveis de ambiente sem confirmação humana explícita.\n\nUse caminhos Linux:\n\n```txt\n/home/...\n```\n\nNão use caminhos Windows:\n\n```txt\nC:\\Users\\...\n```\n\nNo VS Code, abrir sempre com:\n\n```bash\ncd ~/caminho/para/CEPRAEA\ncode .\n```"
+    },
+    "2_regras_migradas_do_legacy": {
+      "migration_statement": "AGENT.md foi substituído por AGENTS.md em 2026-05-19",
+      "preserved_rules": [
+        {
+          "agent": "ALL",
+          "modality": "MUST",
+          "rule": "ler CEPRAEA.md antes de atuar no projeto"
+        },
+        {
+          "agent": "ALL",
+          "modality": "MUST",
+          "rule": "verificar os últimos 3 PRs para entender o contexto recente"
+        },
+        {
+          "agent": "Claude Code",
+          "modality": "MUST",
+          "rule": "atualizar .claude/claude-CHANGELOG.md"
+        },
+        {
+          "agent": "Claude Code",
+          "modality": "MUST",
+          "rule": "atualizar .claude/claude-EXECUTION_LOG.md"
+        },
+        {
+          "agent": "Codex",
+          "modality": "MUST",
+          "rule": "atualizar .codex/codex-CHANGELOG.md"
+        },
+        {
+          "agent": "Codex",
+          "modality": "MUST",
+          "rule": "atualizar .codex/codex-EXECUTION_LOG.md"
+        },
+        {
+          "agent": "GitHub Copilot",
+          "modality": "MUST",
+          "rule": "atualizar .copilot/copilot-CHANGELOG.md"
+        },
+        {
+          "agent": "GitHub Copilot",
+          "modality": "MUST",
+          "rule": "atualizar .copilot/copilot-EXECUTION_LOG.md"
+        },
+        {
+          "agent": "ALL",
+          "modality": "MUST_NOT",
+          "rule": "usar git stash, git reset ou git revert"
+        }
+      ],
+      "source_text_exact": "## 2. Regras migradas do AGENT.md legado\n\nO arquivo AGENT.md foi substituído por este AGENTS.md em 2026-05-19.\n\nRegras preservadas:\n\n- MUST ler `CEPRAEA.md` antes de atuar no projeto.\n- MUST verificar os últimos 3 PRs para entender o contexto recente.\n- Claude Code MUST atualizar `.claude/claude-CHANGELOG.md`.\n- Claude Code MUST atualizar `.claude/claude-EXECUTION_LOG.md`.\n- Codex MUST atualizar `.codex/codex-CHANGELOG.md`.\n- Codex MUST atualizar `.codex/codex-EXECUTION_LOG.md`.\n- GitHub Copilot MUST atualizar `.copilot/copilot-CHANGELOG.md`.\n- GitHub Copilot MUST atualizar `.copilot/copilot-EXECUTION_LOG.md`.\n- MUST NOT usar `git stash`, `git reset` ou `git revert`."
+    },
+    "3_stack_do_projeto": {
+      "value": [
+        "React",
+        "Vite",
+        "TypeScript strict",
+        "Supabase",
+        "Vitest",
+        "Playwright",
+        "PWA",
+        "Zustand",
+        "React Router",
+        "Vercel com Preview Deployment antes do merge"
+      ],
+      "source_text_exact": "## 3. Stack do projeto\n\nO CEPRAEA usa:\n\n- React\n- Vite\n- TypeScript strict\n- Supabase\n- Vitest\n- Playwright\n- PWA\n- Zustand\n- React Router\n- Vercel com Preview Deployment antes do merge"
+    },
+    "4_ferramentas_disponiveis": {
+      "auto_selection_rule": "o agente deve escolher ferramentas automaticamente conforme a tarefa",
+      "ferramentas_principais": [
+        "Terminal",
+        "Git",
+        "GitHub MCP",
+        "Context7 MCP",
+        "Playwright MCP",
+        "Supabase MCP local",
+        "Vercel MCP",
+        "Vercel CLI"
+      ],
+      "routing_rule_chain": [
+        "Tarefa define pipeline",
+        "Pipeline define ferramenta",
+        "Ferramenta gera evidência",
+        "Evidência define se está pronto"
+      ],
+      "user_instruction_requirement": "usuário não precisa dizer manualmente qual ferramenta usar em toda tarefa",
+      "source_text_exact": "## 4. Ferramentas disponíveis\n\nO agente deve escolher ferramentas automaticamente conforme a tarefa.\n\n### Ferramentas principais\n\n- Terminal\n- Git\n- GitHub MCP\n- Context7 MCP\n- Playwright MCP\n- Supabase MCP local\n- Vercel MCP\n- Vercel CLI\n\n### Regra de roteamento\n\nTarefa define pipeline.\nPipeline define ferramenta.\nFerramenta gera evidência.\nEvidência define se está pronto.\n\nO usuário não precisa dizer manualmente qual ferramenta usar em toda tarefa."
+    },
+    "5_uso_obrigatorio_por_tipo_de_tarefa": {
+      "5_1_codigo_local_bug_refatoracao": {
+        "must_use": [
+          "filesystem",
+          "terminal",
+          "git diff",
+          "npm scripts"
+        ],
+        "minimum_validation_commands": [
+          "npm run typecheck",
+          "npm test",
+          "npm run build"
+        ]
+      },
+      "5_2_ui_fluxo_visual_responsividade_navegacao": {
+        "must_use": [
+          "Playwright MCP",
+          "navegador",
+          "console logs",
+          "screenshots quando necessário"
+        ],
+        "examples": [
+          "login",
+          "tela de atleta",
+          "tela de treinador",
+          "cadastro",
+          "presença",
+          "fluxo mobile",
+          "PWA",
+          "responsividade",
+          "formulários"
+        ],
+        "validation_commands": [
+          "npm run typecheck",
+          "npm test",
+          "npm run build",
+          "npm run test:e2e"
+        ],
+        "if_validation_is_against_vercel_preview_also_run": [
+          "npm run test:smoke"
+        ]
+      },
+      "5_3_supabase_banco_auth_rls_rpc_migrations_seed": {
+        "must_use": [
+          "Supabase local",
+          "Supabase MCP local",
+          "testes SQL",
+          "migrations",
+          "seed"
+        ],
+        "must_not_use": [
+          "produção para desenvolvimento normal"
+        ],
+        "validation_commands": [
+          "supabase db reset",
+          "npm run test:supabase",
+          "npm run typecheck",
+          "npm run build"
+        ],
+        "if_schema_or_rls_changes_must_check": [
+          "migrations relacionadas",
+          "seed",
+          "testes SQL",
+          "chamadas do frontend",
+          "types",
+          "impacto em Auth e RPCs"
+        ]
+      },
+      "5_4_api_moderna_ou_biblioteca_recente": {
+        "must_use_context7_before_implementing_when_touching": [
+          "React",
+          "React Router",
+          "Supabase JS",
+          "Playwright",
+          "Vite",
+          "Vitest",
+          "Tailwind",
+          "Zustand",
+          "Vercel",
+          "qualquer API cuja assinatura possa ter mudado"
+        ],
+        "must_not": [
+          "implementar API com base apenas em memória interna se houver dúvida"
+        ]
+      },
+      "5_5_github_pr_branch_issue_historico": {
+        "must_use": [
+          "GitHub MCP",
+          "git status",
+          "git diff",
+          "GitHub Pull Request",
+          "GitHub Issues, se houver"
+        ],
+        "before_declaring_ready_must_run": [
+          "git status",
+          "git diff"
+        ],
+        "must_verify": [
+          "não alterou arquivos fora do escopo"
+        ]
+      },
+      "5_6_vercel_preview_antes_do_merge": {
+        "after_opening_or_updating_pr_must_validate": [
+          "preview da Vercel foi gerado",
+          "build do preview passou",
+          "preview abre corretamente",
+          "smoke test passa",
+          "logs sem erro crítico"
+        ],
+        "must_use": [
+          "Vercel MCP",
+          "Vercel CLI",
+          "Preview Deployment URL",
+          "logs do deployment",
+          "Playwright MCP (se precisar validar fluxo visual)"
+        ],
+        "useful_commands": [
+          "vercel list",
+          "vercel logs <preview-url>",
+          "npm run test:smoke"
+        ],
+        "if_preview_has_error_must_follow_sequence": [
+          "consultar logs da Vercel",
+          "identificar se é erro de build, runtime, env, rota ou dependência",
+          "corrigir localmente",
+          "rodar validação local",
+          "atualizar PR",
+          "revalidar preview"
+        ]
+      },
+      "5_7_scout_preview_smoke_obrigatorio": {
+        "trigger_conditions_any_of": [
+          "PR altera Scout",
+          "PR altera cadastro Scout",
+          "PR altera sessão Scout",
+          "PR altera coleta ao vivo",
+          "PR altera Auth",
+          "PR altera Supabase",
+          "PR altera RLS",
+          "PR altera RPC",
+          "PR altera fluxo de jogo"
+        ],
+        "must_rules": [
+          "executar smoke automatizado contra Preview da Vercel",
+          "smoke não pode apenas abrir páginas; deve executar escrita real mínima"
+        ],
+        "must_not_rules": [
+          "considerar PR pronto com erro de RLS/Auth/insert/update/select"
+        ],
+        "mandatory_minimum_flow": [
+          "abrir /scout",
+          "criar equipe Scout de teste",
+          "confirmar persistência da equipe",
+          "criar atleta Scout de teste",
+          "confirmar persistência da atleta",
+          "preparar nova sessão/jogo",
+          "confirmar elenco",
+          "abrir coleta ao vivo",
+          "executar fluxo crítico impactado pelo PR",
+          "validar ausência de erro crítico no console",
+          "validar logs do Preview Vercel sem erro crítico"
+        ],
+        "dedicated_command": "SMOKE_BASE_URL=\"<preview-url>\" npm run test:smoke:scout:preview",
+        "branch_protection_requirements": [
+          "check Scout Preview Smoke obrigatório para merge em main",
+          "sem check em SUCCESS, merge deve ser bloqueado"
+        ]
+      },
+      "5_8_release_merge_final": {
+        "before_considering_pr_ready_to_merge_must_run": [
+          "npm run validate:mvp:v1"
+        ],
+        "must_verify": [
+          "PR sem diff inesperado",
+          "preview Vercel funcionando",
+          "smoke test aprovado",
+          "logs sem erro crítico",
+          "nenhuma migration perigosa sem validação"
+        ]
+      },
+      "5_9_operacao_solo_sem_equipe_de_revisao": {
+        "when_repo_is_in_solo_mode": [
+          "não exigir aprovação de reviewer humano de terceiros para merge",
+          "manter obrigatórios os gates técnicos (required_status_checks) e validações de preview/smoke",
+          "manter branch/PR como trilha de auditoria e evidência, mesmo sem review externo"
+        ]
+      },
+      "source_text_exact": "## 5. Uso obrigatório de ferramentas por tipo de tarefa\n\n### 5.1 Código local / bug / refatoração\n\nUse:\n\n- filesystem\n- terminal\n- git diff\n- npm scripts\n\nValidação mínima:\n\n```bash\nnpm run typecheck\nnpm test\nnpm run build\n```\n\n### 5.2 UI / fluxo visual / responsividade / navegação\n\nUse:\n\n- Playwright MCP\n- navegador\n- console logs\n- screenshots quando necessário\n\nExemplos:\n\n- login\n- tela de atleta\n- tela de treinador\n- cadastro\n- presença\n- fluxo mobile\n- PWA\n- responsividade\n- formulários\n\nValidação:\n\n```bash\nnpm run typecheck\nnpm test\nnpm run build\nnpm run test:e2e\n```\n\nSe for validação contra preview da Vercel:\n\n```bash\nnpm run test:smoke\n```\n\n### 5.3 Supabase / banco / Auth / RLS / RPC / migrations / seed\n\nUse:\n\n- Supabase local\n- Supabase MCP local\n- testes SQL\n- migrations\n- seed\n\nNunca use produção para desenvolvimento normal.\n\nValidação:\n\n```bash\nsupabase db reset\nnpm run test:supabase\nnpm run typecheck\nnpm run build\n```\n\nSe alterar schema ou RLS, verificar também:\n\n- migrations relacionadas;\n- seed;\n- testes SQL;\n- chamadas do frontend;\n- types;\n- impacto em Auth e RPCs.\n\n### 5.4 API moderna ou biblioteca com versão recente\n\nUse Context7 MCP antes de implementar quando mexer em:\n\n- React\n- React Router\n- Supabase JS\n- Playwright\n- Vite\n- Vitest\n- Tailwind\n- Zustand\n- Vercel\n- qualquer API cuja assinatura possa ter mudado\n\nNão implementar API com base apenas em memória interna se houver dúvida.\n\n### 5.5 GitHub / PR / branch / issue / histórico\n\nUse:\n\n- GitHub MCP\n- git status\n- git diff\n- GitHub Pull Request\n- GitHub Issues, se houver\n\nAntes de declarar pronto:\n\n```bash\ngit status\ngit diff\n```\n\nO agente deve conferir se não alterou arquivos fora do escopo.\n\n### 5.6 Vercel Preview antes do merge\n\nEste projeto usa Vercel Preview antes do merge.\n\nApós abrir ou atualizar PR, o agente deve validar:\n\n1. se o preview da Vercel foi gerado;\n2. se o build do preview passou;\n3. se o preview abre corretamente;\n4. se o smoke test passa;\n5. se os logs não mostram erro crítico.\n\nUse:\n\n- Vercel MCP\n- Vercel CLI\n- Preview Deployment URL\n- logs do deployment\n- Playwright MCP, se precisar validar fluxo visual\n\nComandos úteis:\n\n```bash\nvercel list\nvercel logs <preview-url>\nnpm run test:smoke\n```\n\nSe houver erro no preview:\n\n1. consultar logs da Vercel;\n2. identificar se é erro de build, runtime, env, rota ou dependência;\n3. corrigir localmente;\n4. rodar validação local;\n5. atualizar PR;\n6. revalidar preview.\n\n### 5.7 Scout Preview Smoke obrigatório\n\nPara qualquer PR que altere Scout, cadastro Scout, sessão Scout, coleta ao vivo, Auth, Supabase, RLS, RPC ou fluxo de jogo:\n\n- é obrigatório executar smoke automatizado contra o Preview da Vercel;\n- o smoke não pode apenas abrir páginas; deve executar escrita real mínima;\n- o PR não pode ser considerado pronto se houver erro de RLS/Auth/insert/update/select.\n\nFluxo mínimo obrigatório:\n\n1. abrir `/scout`;\n2. criar equipe Scout de teste;\n3. confirmar persistência da equipe;\n4. criar atleta Scout de teste;\n5. confirmar persistência da atleta;\n6. preparar nova sessão/jogo;\n7. confirmar elenco;\n8. abrir coleta ao vivo;\n9. executar o fluxo crítico impactado pelo PR;\n10. validar ausência de erro crítico no console;\n11. validar logs do Preview Vercel sem erro crítico.\n\nComando dedicado:\n\n```bash\nSMOKE_BASE_URL=\"<preview-url>\" npm run test:smoke:scout:preview\n```\n\nBranch protection:\n\n- o check de Scout Preview Smoke deve estar configurado como obrigatório para merge em `main`;\n- sem esse check em `SUCCESS`, o merge deve ser bloqueado.\n\n### 5.8 Release / merge final\n\nAntes de considerar um PR pronto para merge:\n\n```bash\nnpm run validate:mvp:v1\n```\n\nTambém verificar:\n\n- PR sem diff inesperado;\n- preview Vercel funcionando;\n- smoke test aprovado;\n- logs sem erro crítico;\n- nenhuma migration perigosa sem validação.\n\n### 5.9 Operação solo (sem equipe de revisão)\n\nQuando o repositório estiver em modo solo:\n\n- não exigir aprovação de reviewer humano de terceiros para merge;\n- manter obrigatórios os gates técnicos (`required_status_checks`) e validações de preview/smoke;\n- manter branch/PR como trilha de auditoria e evidência, mesmo sem review externo."
+    },
+    "6_pipelines_obrigatorios": {
+      "mudanca_simples_sem_ui_sem_banco": [
+        "npm run typecheck",
+        "npm test",
+        "npm run build"
+      ],
+      "mudanca_de_ui": [
+        "npm run typecheck",
+        "npm test",
+        "npm run build",
+        "npm run test:e2e"
+      ],
+      "mudanca_de_supabase": [
+        "supabase db reset",
+        "npm run test:supabase",
+        "npm run typecheck",
+        "npm run build"
+      ],
+      "mudanca_de_pr_com_preview_vercel": [
+        "npm run typecheck",
+        "npm test",
+        "npm run build",
+        "npm run test:smoke"
+      ],
+      "mudanca_de_scout_com_preview_vercel": [
+        "npm run typecheck",
+        "npm test",
+        "npm run build",
+        "SMOKE_BASE_URL=\"<preview-url>\" npm run test:smoke:scout:preview",
+        "vercel logs <preview-url>"
+      ],
+      "gate_final": [
+        "npm run validate:mvp:v1"
+      ],
+      "source_text_exact": "## 6. Pipelines obrigatórios\n\n### Mudança simples sem UI e sem banco\n\n```bash\nnpm run typecheck\nnpm test\nnpm run build\n```\n\n### Mudança de UI\n\n```bash\nnpm run typecheck\nnpm test\nnpm run build\nnpm run test:e2e\n```\n\n### Mudança de Supabase\n\n```bash\nsupabase db reset\nnpm run test:supabase\nnpm run typecheck\nnpm run build\n```\n\n### Mudança de PR com preview Vercel\n\n```bash\nnpm run typecheck\nnpm test\nnpm run build\nnpm run test:smoke\n```\n\n### Mudança de Scout com preview Vercel\n\n```bash\nnpm run typecheck\nnpm test\nnpm run build\nSMOKE_BASE_URL=\"<preview-url>\" npm run test:smoke:scout:preview\nvercel logs <preview-url>\n```\n\n### Gate final\n\n```bash\nnpm run validate:mvp:v1\n```"
+    },
+    "7_regras_de_seguranca": {
+      "agent_must_not": [
+        "remover testes para fazer build passar",
+        "reduzir validação sem justificar",
+        "alterar migrations sem validar Supabase",
+        "aplicar migration remota sem confirmação explícita",
+        "conectar MCP de escrita à produção sem confirmação explícita",
+        "declarar sucesso sem evidências",
+        "mexer fora do escopo sem explicar",
+        "instalar dependência nova sem justificar",
+        "ignorar falha de typecheck, build ou teste",
+        "usar caminho Windows neste repo",
+        "commitar segredos",
+        "exibir tokens, secrets ou keys"
+      ],
+      "source_text_exact": "## 7. Regras de segurança\n\nO agente não pode:\n\n- remover testes para fazer build passar;\n- reduzir validação sem justificar;\n- alterar migrations sem validar Supabase;\n- aplicar migration remota sem confirmação explícita;\n- conectar MCP de escrita à produção sem confirmação explícita;\n- declarar sucesso sem evidências;\n- mexer fora do escopo sem explicar;\n- instalar dependência nova sem justificar;\n- ignorar falha de typecheck, build ou teste;\n- usar caminho Windows neste repo;\n- commitar segredos;\n- exibir tokens, secrets ou keys."
+    },
+    "8_supabase_access_policy": {
+      "default_rule": "usar Supabase MCP, não Postgres direto",
+      "supabase_local": {
+        "default_endpoint": "http://127.0.0.1:54321/mcp",
+        "allowed_purposes": [
+          "consultar schema local",
+          "validar migrations locais",
+          "inspecionar tabelas",
+          "investigar dados de teste",
+          "apoiar testes E2E e Supabase local"
+        ]
+      },
+      "supabase_remote": {
+        "mode": "somente leitura",
+        "endpoint": "https://mcp.supabase.com/mcp?project_ref=fcnyjmrknqaomamdzabt&read_only=true&features=database,docs,debugging,development",
+        "allowed_actions": [
+          "listar tabelas",
+          "ler schema",
+          "listar migrations",
+          "gerar tipos",
+          "consultar logs/advisors",
+          "comparar estrutura remota com local"
+        ],
+        "forbidden_without_explicit_human_confirmation": [
+          "aplicar migration remota",
+          "executar SQL destrutivo",
+          "alterar dados",
+          "alterar policies/RLS",
+          "alterar secrets",
+          "alterar configurações do projeto"
+        ]
+      },
+      "postgres_direto": {
+        "is_exception": true,
+        "allowed_only_when_all_conditions_match": [
+          "Supabase MCP não resolver",
+          "for necessária query SQL fina",
+          "usuário autorizar explicitamente"
+        ],
+        "must_not": [
+          "versionar connection strings com senha"
+        ],
+        "allowed_env_vars_only": [
+          "SUPABASE_LOCAL_DB_URL",
+          "SUPABASE_REMOTE_DB_URL"
+        ]
+      },
+      "preference_order": [
+        "Supabase MCP local",
+        "Supabase MCP remoto read-only",
+        "Postgres local direto",
+        "Postgres remoto direto, somente com autorização explícita"
+      ],
+      "source_text_exact": "## 8. Supabase access policy\n\nO padrão para agentes é usar Supabase MCP, não Postgres direto.\n\n### Supabase local\n\nUsar por padrão:\n\n```txt\nsupabase-local = http://127.0.0.1:54321/mcp\n```\n\nFinalidade:\n\n- consultar schema local;\n- validar migrations locais;\n- inspecionar tabelas;\n- investigar dados de teste;\n- apoiar testes E2E e Supabase local.\n\n### Supabase remoto\n\nUsar somente em modo leitura:\n\n```txt\nsupabase-remote-readonly = https://mcp.supabase.com/mcp?project_ref=fcnyjmrknqaomamdzabt&read_only=true&features=database,docs,debugging,development\n```\n\nPermitido:\n\n- listar tabelas;\n- ler schema;\n- listar migrations;\n- gerar tipos;\n- consultar logs/advisors;\n- comparar estrutura remota com local.\n\nProibido sem confirmação humana explícita:\n\n- aplicar migration remota;\n- executar SQL destrutivo;\n- alterar dados;\n- alterar policies/RLS;\n- alterar secrets;\n- alterar configurações do projeto.\n\n### Postgres direto\n\nPostgres direto é exceção.\n\nSó pode ser usado quando:\n\n- Supabase MCP não resolver;\n- for necessária query SQL fina;\n- o usuário autorizar explicitamente.\n\nNunca versionar connection strings com senha.\n\nUsar somente via variável de ambiente local:\n\n```bash\nSUPABASE_LOCAL_DB_URL\nSUPABASE_REMOTE_DB_URL\n```\n\n### Regra de preferência\n\n1. Supabase MCP local\n2. Supabase MCP remoto read-only\n3. Postgres local direto\n4. Postgres remoto direto, somente com autorização explícita"
+    },
+    "9_vercel_mcp": {
+      "must_use_for": [
+        "consultar deploys",
+        "consultar preview",
+        "ler logs",
+        "investigar build failure",
+        "investigar runtime error",
+        "validar ambiente antes do merge"
+      ],
+      "official_endpoint": "https://mcp.vercel.com",
+      "source_text_exact": "## 9. Vercel MCP\n\nUse Vercel MCP para:\n\n- consultar deploys;\n- consultar preview;\n- ler logs;\n- investigar build failure;\n- investigar runtime error;\n- validar ambiente antes do merge.\n\nEndpoint oficial:\n\n```txt\nhttps://mcp.vercel.com\n```"
+    },
+    "10_formato_obrigatorio_resposta_final": {
+      "required_sections_in_order": [
+        "Resumo",
+        "Arquivos alterados",
+        "Ferramentas usadas",
+        "Validação executada",
+        "Preview Vercel",
+        "Riscos / Pendências"
+      ],
+      "validation_status_fields_required": [
+        "npm run typecheck: passou/falhou/não executado",
+        "npm test: passou/falhou/não executado",
+        "npm run build: passou/falhou/não executado",
+        "npm run test:e2e: passou/falhou/não executado",
+        "npm run test:smoke: passou/falhou/não executado",
+        "npm run test:smoke:scout:preview: passou/falhou/não executado",
+        "npm run validate:mvp:v1: passou/falhou/não executado"
+      ],
+      "preview_fields_required": [
+        "URL",
+        "Status",
+        "Logs críticos",
+        "Smoke test"
+      ],
+      "source_text_exact": "## 10. Formato obrigatório da resposta final do agente\n\nAo terminar uma tarefa, responder neste formato:\n\n```md\n## Resumo\n...\n\n## Arquivos alterados\n- ...\n\n## Ferramentas usadas\n- ...\n\n## Validação executada\n- `npm run typecheck`: passou/falhou/não executado\n- `npm test`: passou/falhou/não executado\n- `npm run build`: passou/falhou/não executado\n- `npm run test:e2e`: passou/falhou/não executado\n- `npm run test:smoke`: passou/falhou/não executado\n- `npm run test:smoke:scout:preview`: passou/falhou/não executado\n- `npm run validate:mvp:v1`: passou/falhou/não executado\n\n## Preview Vercel\n- URL:\n- Status:\n- Logs críticos:\n- Smoke test:\n\n## Riscos / Pendências\n- ...\n```"
+    },
+    "11_quando_pedir_confirmacao_humana": {
+      "must_request_confirmation_before": [
+        "aplicar migration remota",
+        "mexer em produção",
+        "alterar variáveis de ambiente da Vercel",
+        "apagar dados",
+        "remover tabela/coluna",
+        "alterar política RLS crítica",
+        "fazer merge",
+        "promover preview para produção",
+        "instalar dependência estrutural nova"
+      ],
+      "source_text_exact": "## 11. Quando pedir confirmação humana\n\nPedir confirmação antes de:\n\n- aplicar migration remota;\n- mexer em produção;\n- alterar variáveis de ambiente da Vercel;\n- apagar dados;\n- remover tabela/coluna;\n- alterar política RLS crítica;\n- fazer merge;\n- promover preview para produção;\n- instalar dependência estrutural nova."
+    }
+  }
+}

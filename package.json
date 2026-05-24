@@ -22,6 +22,7 @@
     "test:smoke": "playwright test --config=playwright.smoke.config.ts --reporter=line",
     "test:smoke:scout:preview": "playwright test --config=playwright.scout-preview-smoke.config.ts --reporter=line",
     "deps:check": "npm ls --all",
+    "check:ontology:semantics": "node scripts/check-ontology-semantics.mjs",
     "check:runtime-legacy": "bash scripts/check-runtime-legacy.sh",
     "validate:mvp:v1": "bash scripts/validate-mvp-v1.sh"
   },
