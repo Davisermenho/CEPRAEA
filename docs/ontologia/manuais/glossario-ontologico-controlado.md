@@ -73,7 +73,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `SpecialistRole` influences `OffensiveSystem`
   - `SpecialistRole` influences `DefensiveSystem`
   - `SpecialistRole` influences `AttackModel`
-- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018; HINSON-SD
 - **Exemplo de uso**: equipe retira o goleiro e coloca o especialista para criar superioridade 4x3 no ataque.
 
 ---
@@ -93,7 +93,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `NumericalAsymmetry` structures `OffensiveDomain`
   - `NumericalAsymmetry` structures `DefensiveDomain`
   - `SpecialistRole` causes `NumericalAsymmetry`
-- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018; HINSON-SD
 - **Exemplo de uso**: com o especialista em campo, o ataque opera com 4 jogadores contra 3 defensores.
 
 ---
@@ -147,11 +147,13 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +formation = string (ex: "4x3 com especialista")
   - +commonArrangements = {3:1, 2:2, 4:0}
   - +equalNumberAlternatives = {3:0, 2:1}
+  - +formationEfficiencyProfile = desempenho por formacao orienta a escolha do plano de jogo
+  - +substitutionSideAdjustment = adaptacao conforme lado de substituicao (direita/esquerda)
 - **Relações**:
   - `OffensiveSystem` is-a `OffensiveDomain`
   - `NumericalAsymmetry` structures `OffensiveSystem`
   - `SpecialistRole` influences `OffensiveSystem`
-- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018; HINSON-SD
 - **Exemplo de uso**: sistema ofensivo 4x3 com especialista como quarto jogador.
 
 ---
@@ -225,12 +227,13 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Atributos**:
   - +ballVelocity = velocidade da bola em km/h
   - +pointValue = 1 (arremesso normal) | 2 (técnicas especiais)
+  - +shooterTendencyMap = mapeamento de local/tecnica preferencial de finalizacao
 - **Relações**:
   - `ShootingAction` part-of `OffensiveDomain`
   - `StandingThrow6m` is-a `ShootingAction`
   - `SpinThrow` is-a `ShootingAction`
   - `AerialThrow` is-a `ShootingAction`
-- **Fonte**: LEMOS-2023; SILVA-MENEZES-2018
+- **Fonte**: LEMOS-2023; SILVA-MENEZES-2018; HINSON-SD
 - **Exemplo de uso**: arremesso de 6m em apoio com velocidade de 80 km/h marcando 1 ponto.
 
 ---
@@ -905,11 +908,12 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +priorityGoalType = gol de duplo valor (especialista ou arremesso específico)
   - +specialistPosition = {central, pivô, ala direita, ala esquerda}
   - +fallbackPredeterminedActions = usadas quando a criatividade ofensiva falha
+  - +topThreeScoringOptions = prioriza as 3 opcoes ofensivas de maior efetividade no plano de jogo
 - **Relações**:
   - `AttackModel` part-of `OffensiveDomain`
   - `NumericalAsymmetry` enables `AttackModel`
   - `SpecialistRole` influences `AttackModel`
-- **Fonte**: MORILLO-2017; PARADZIK-SD; SILVA-MENEZES-2018
+- **Fonte**: MORILLO-2017; PARADZIK-SD; SILVA-MENEZES-2018; HINSON-SD
 - **Exemplo de uso**: Uma equipe com especialista de arremesso em giro usa AttackModel posicionando-o nas alas para maximizar os gols de 2 pontos.
 
 ---
@@ -927,7 +931,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `Blockage` is-a `OffensiveCollaborationMean`
   - `Crossing` is-a `OffensiveCollaborationMean`
   - `Screen` is-a `OffensiveCollaborationMean`
-- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018; HINSON-SD
 - **Exemplo de uso**: O PassAndGo e o Crossing são os meios mais usados em situações 4×3 para criar linhas de passe após a movimentação.
 
 ---
@@ -949,10 +953,10 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Definição**: meio de colaboração ofensiva com entradas sucessivas ao espaço, aproveitando a superioridade numérica para criar linhas de finalização sequenciais.
 - **Camada**: técnico-tática
 - **Tipo**: Classe
-- **Sinônimos**: entradas sucessivas, successive entrances, engajamento, penetracoes sucessivas
+- **Sinônimos**: entradas sucessivas, successive entrances, engajamento, penetrações sucessivas
 - **Relações**:
   - `SuccessiveEntrances` is-a `OffensiveCollaborationMean`
-- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018; HINSON-SD
 
 ---
 
@@ -978,7 +982,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Sinônimos**: cruzamento, crossing
 - **Relações**:
   - `Crossing` is-a `OffensiveCollaborationMean`
-- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018; HINSON-SD
 
 ---
 
@@ -1052,7 +1056,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +finalizationProbability = alta
 - **Relações**:
   - `PivotRole` enables `ShootingAction`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; HINSON-SD
 - **Exemplo de uso**: O especialista no PivotRole usa arremessos em giro e por cima do defensor para converter gols de 2 pontos.
 
 ---
@@ -1068,7 +1072,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +primaryShot = arremesso em giro (`SpinThrow`)
 - **Relações**:
   - `WingRole` enables `ShootingAction`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; HINSON-SD
 - **Exemplo de uso**: A ala executa o SpinThrow desde o flanco para converter o gol de 2 pontos que define o resultado do período.
 
 
@@ -1109,11 +1113,12 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +goalkeeperLeavingAreaAvoidingContact = play on
   - +goalkeeperCollisionOutsideArea = sixMetreThrow + possible disqualification
   - +goalkeeperInterceptionAttemptNoCollision = permitido
+  - +goalkeeperTendencyScouting = {comesOut, staysBack}
 - **Relações**:
   - `ShootOut` requires `GoalkeeperRole`
   - `ShootOut` causes `SixMetreThrow`
   - `GoldenGoal` precedes `ShootOut`
-- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD; ANDERSEN-SD
+- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD; ANDERSEN-SD; HINSON-SD
 - **Exemplo de uso**: Partida terminou 1-1 em períodos; no ShootOut, cada equipe designa 5 jogadores que alternam tentativas até que uma equipe marque mais que a outra nas 5 tentativas.
 
 ---

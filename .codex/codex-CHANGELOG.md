@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-25 - 00:54 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-25 - 01:01 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -2812,4 +2812,32 @@ Aplicação do protocolo ontológico ao artigo `O_jogo_ofensivo_do_handebol_de_a
 
 - `sed -n '1,1040p' "docs/ontologia/artigos/O_jogo_ofensivo_do_handebol_de_areia.md"`
 - `rg -n "SpecialistRole|AttackModel|OffensiveSystem|SuccessiveEntrances" docs/ontologia/manuais/glossario-ontologico-controlado.md`
+- `node scripts/check-ontology-semantics.mjs`
+
+
+### [CEPR-ONTOLOGIA-PREPARATION-NATIONAL-TEAM-TRIAGEM-2026-05-25] — 2026-05-25 — Triagem de preparação competitiva com foco em scout e gameplan
+
+#### ✨ Resumo
+
+Aplicação do protocolo ontológico ao artigo `Preparation of a national team on the way to a top event_0.md` com extração, classificação, deduplicação e atualização de atributos/evidências no bloco técnico-tático.
+
+#### 🚀 Added
+
+- `docs/ontologia/triagens/triagem-preparation-national-team-top-event-2026-05-25.md`
+  - triagem completa (Passos 1-5) com decisão por conceito.
+
+#### 🛠️ Changed
+
+- `docs/ontologia/manuais/registro-fontes.md`
+  - inclusão da fonte `HINSON-SD`.
+- `docs/ontologia/manuais/glossario-ontologico-controlado.md`
+  - enriquecimento de `OffensiveSystem`, `ShootingAction`, `AttackModel` e `ShootOut`;
+  - reforço de evidência em `SpecialistRole`, `NumericalAsymmetry`, `OffensiveCollaborationMean`, `SuccessiveEntrances`, `Crossing`, `PivotRole` e `WingRole`.
+- `docs/design/navegacao.drawio.svg`
+  - sem alteração estrutural (sem nova aresta/classe com evidência suficiente).
+
+#### 🛡️ Evidências
+
+- `sed -n '1,560p' "docs/ontologia/artigos/Preparation of a national team on the way to a top event_0.md"`
+- `rg -n "OffensiveSystem|AttackModel|ShootingAction|ShootOut" docs/ontologia/manuais/glossario-ontologico-controlado.md`
 - `node scripts/check-ontology-semantics.mjs`

@@ -219,6 +219,22 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 
 ---
 
+### HINSON-SD
+
+- **Tipo**: manual
+- **Título**: Preparation of a National Team
+- **Autores**: Hinson, Michael
+- **Ano**: nao informado
+- **Publicação**: material tecnico de coaching (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: preparacao de equipe nacional para evento-alvo com foco em scout tecnico-tatico, plano de jogo e pratica orientada por tendencias de finalizacao e formacoes.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `OffensiveSystem`, `AttackModel`, `ShootingAction`, `ShootOut`, `WingRole`, `PivotRole`, `SpecialistRole`
+- **Observação**: Fonte aplicada para refino operacional de analise de formacoes e opcoes prioritarias de finalizacao; nao usada para criar novas classes de processo de coaching.
+- **Status**: ativo
+
+---
+
 ## Fontes em triagem
 
 > Fontes identificadas mas ainda não processadas formalmente.
