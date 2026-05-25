@@ -19,10 +19,88 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-23 - 21:27 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-24 - 22:24 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+
+## Entrada Rápida — 2026-05-24 22:24 BRT — CEPR-ONTOLOGIA-LATEST-TRENDS-ATTACK-TRIAGEM-E-UPDATE-2026-05-24
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/Latest trends in attack_0.md` (extração -> classificação -> deduplicação -> atualização no bloco correto).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-latest-trends-attack-0-2026-05-24.md`;
+  - inclusão da fonte `PARADZIK-SD` no `registro-fontes`;
+  - enriquecimento de `AttackModel` e `CounterAttack`, além da formalização da relação `Interception enables CounterAttack` em glossário, matriz e Draw.io.
+- **Evidências objetivas:**
+  - `sed -n '1,480p' "docs/ontologia/artigos/Latest trends in attack_0.md"` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
+
+## Entrada Rápida — 2026-05-24 21:46 BRT — CEPR-ONTOLOGIA-GOALKEEPER-SPECIAL-SITUATIONS-TRIAGEM-2026-05-24
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/Goalkeeper behaviour Special Situations.md` (extração -> classificação -> deduplicação -> atualização no bloco correto).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-goalkeeper-behaviour-special-situations-2026-05-24.md`;
+  - inclusão da fonte `MEIMARIDIS-GOMER-GOMER-SD` no `registro-fontes`;
+  - reforço de evidência em conceitos normativos (`GoalkeeperRole`, `ShootOut`, `RefereeThrow`, `Punishment`) sem criação de nova classe/relação.
+- **Evidências objetivas:**
+  - `sed -n '1,1200p' docs/ontologia/artigos/Goalkeeper behaviour Special Situations.md` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
+
+## Entrada Rápida — 2026-05-24 21:32 BRT — CEPR-ONTOLOGIA-GOALKEEPER-BEHAVIOUR-TRIAGEM-E-UPDATE-2026-05-24
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/Goalkeeper behaviour inside and outside the goal area-1.md` (extração -> classificação -> deduplicação -> atualização de bloco no Draw.io).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-goalkeeper-behaviour-inside-outside-goal-area-2026-05-24.md`;
+  - inclusão da fonte `ROLLAND-DARE-FANACK-SD` no `registro-fontes`;
+  - refinamento de atributos em conceitos normativos do goleiro (`GoalkeeperRole`, `ShootOut`, `GoalkeeperThrow`, `Punishment`, `SubstitutionArea`, `AthleteUniform`);
+  - inclusão de relação normativa `SubstitutionArea causes PlayerSuspension` na matriz e no Draw.io.
+- **Evidências objetivas:**
+  - `sed -n '1,760p' docs/ontologia/artigos/Goalkeeper behaviour inside and outside the goal area-1.md` ✅
+  - `rg -n "^\\| 121 \\|" docs/ontologia/manuais/matriz-relacoes.md` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
+
+## Entrada Rápida — 2026-05-24 21:20 BRT — CEPR-ONTOLOGIA-COACHING-WINNING-TEAM-TRIAGEM-2026-05-24
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/Coaching a winning team.md` na ordem obrigatória (extração -> classificação -> deduplicação -> atualização de bloco no Draw.io).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-coaching-winning-team-2026-05-24.md`;
+  - inclusão da fonte `NOVAKOVIC-SD` no `registro-fontes`;
+  - enriquecimento de atributos em `LoadMonitoringDomain`, `InternalLoad` e `ExternalLoad`;
+  - decisão explícita de **não alterar** `docs/design/navegacao.drawio.svg`, pois não houve nova classe/aresta.
+- **Evidências objetivas:**
+  - `sed -n '1,680p' docs/ontologia/artigos/Coaching a winning team.md` ✅
+  - `rg -n "LoadMonitoringDomain|InternalLoad|ExternalLoad" docs/ontologia/manuais/glossario-ontologico-controlado.md` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
+
+## Entrada Rápida — 2026-05-24 21:12 BRT — CEPR-ONTOLOGIA-ARTIGO-2PT-LIDOS-TRIAGEM-DEDUP-2026-05-24
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/lidos/2-point goals (spin and in-flight shots)-min.md` na ordem obrigatória (extração → classificação → deduplicação → atualização de bloco no Draw.io).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-2-point-goals-spin-in-flight-lidos-2026-05-24.md` com Passos 1–5;
+  - avaliação de deduplicidade total com conceitos e relações já incorporados (`TwoPointGoal`, `SpinThrow`, `AerialThrow`, `SixMetreThrow`, `GoalkeeperRole`, `SpecialistRole`);
+  - decisão explícita de **não alterar** `docs/design/navegacao.drawio.svg`, por já conter o bloco atualizado.
+- **Evidências objetivas:**
+  - `sed -n '1,1360p' 'docs/ontologia/artigos/lidos/2-point goals (spin and in-flight shots)-min.md'` ✅
+  - `rg -n "^### (SpecialistRole|StandingThrow6m|SpinThrow|AerialThrow|GoalkeeperRole|SixMetreThrow|TwoPointGoal)" docs/ontologia/manuais/glossario-ontologico-controlado.md` ✅
+  - `rg -n "TwoPointGoal|SpinThrow|AerialThrow|SixMetreThrow|GoalkeeperRole|SpecialistRole" docs/ontologia/manuais/matriz-relacoes.md` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
+
+## Entrada Rápida — 2026-05-24 20:57 BRT — CEPR-ONTOLOGIA-ARTIGO-6M-PUNISHMENTS-TRIAGEM-E-UPDATE-2026-05-24
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `6-metre throw + punishments.md` com ordem obrigatória (extração → classificação → deduplicação → atualização do Draw.io).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-6-metre-throw-punishments-2026-05-24.md` com Passos 1–5 completos;
+  - inclusão da fonte `CALDAS-MONICO-MARTINEZ-SD` em `docs/ontologia/manuais/registro-fontes.md`;
+  - refinamento de atributos de `SixMetreThrow` e `Punishment` em `docs/ontologia/manuais/glossario-ontologico-controlado.md`;
+  - inclusão da relação `SixMetreThrow requires GoalkeeperRole` na `docs/ontologia/manuais/matriz-relacoes.md` (`#120`);
+  - atualização do bloco normativo em `docs/design/navegacao.drawio.svg` com aresta `smthrow -> gkr` (`requires`).
+- **Evidências objetivas:**
+  - `sed -n '1,260p' docs/ontologia/triagens/triagem-6-metre-throw-punishments-2026-05-24.md` ✅
+  - `git diff -- docs/ontologia/manuais/glossario-ontologico-controlado.md` ✅
+  - `git diff -- docs/ontologia/manuais/matriz-relacoes.md docs/ontologia/manuais/registro-fontes.md` ✅
+  - `git diff -- docs/design/navegacao.drawio.svg` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
 
 ## Entrada Rápida — 2026-05-21 23:38 BRT — CEPR-GOV-HARDENING-05
 

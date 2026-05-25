@@ -148,7 +148,7 @@ Esta matriz registra **todas as relações diretas** entre conceitos da ontologi
 | 90 | `PlayingCourt` | `part-of` | `SandSurface` | N | IHF-2026 | A quadra é delimitada sobre a superfície de areia |
 | 91 | `GoalArea` | `part-of` | `PlayingCourt` | N | IHF-2026 | A área do goleiro (6m) é componente da quadra |
 | 92 | `GoalArea` | `requires` | `GoalkeeperRole` | N | IHF-2026 | Apenas o goleiro pode estar dentro da GoalArea |
-| 93 | `SixMetreThrow` | `causes` | `TwoPointGoal` | N | IHF-2026; SKOWRONEK-2023 | Arremesso de 6m convertido vale 2 pontos |
+| 93 | `SixMetreThrow` | `causes` | `TwoPointGoal` | N | IHF-2026; SKOWRONEK-2023; CALDAS-MONICO-MARTINEZ-SD | Arremesso de 6m convertido vale 2 pontos |
 | 94 | `TwoPointGoal` | `enables` | `SpinThrow` | N | IHF-2026; SKOWRONEK-2023 | SpinThrow é uma das ações que gera gol de 2 pontos |
 | 95 | `TwoPointGoal` | `enables` | `AerialThrow` | N | IHF-2026; SKOWRONEK-2023 | AerialThrow é uma das ações que gera gol de 2 pontos |
 | 96 | `TwoPointGoal` | `enables` | `GoalkeeperRole` | N | IHF-2026; SKOWRONEK-2023 | Gol marcado pelo goleiro vale 2 pontos |
@@ -175,6 +175,9 @@ Esta matriz registra **todas as relações diretas** entre conceitos da ontologi
 | 117 | `SubstitutionArea` | `requires` | `GoalkeeperRole` | N | IHF-2026 | Entrada/saída do goleiro ocorre pelo lado regulamentar da área de substituição |
 | 118 | `GoalkeeperRole` | `requires` | `AthleteUniform` | N | IHF-2026; SKOWRONEK-2023 | Goleiro deve atuar com uniforme distinto dos jogadores de linha |
 | 119 | `TwoPointGoal` | `enables` | `SpecialistRole` | N | SKOWRONEK-2023 | Gol marcado por especialista também vale 2 pontos |
+| 120 | `SixMetreThrow` | `requires` | `GoalkeeperRole` | N | IHF-2026; CALDAS-MONICO-MARTINEZ-SD | Execução do 6m ocorre contra goleiro e depende do setup regulamentar do goleiro |
+| 121 | `SubstitutionArea` | `causes` | `PlayerSuspension` | N | IHF-2026; ROLLAND-DARE-FANACK-SD | Substituição irregular ou entrada ilegal no contexto da área de substituição pode gerar suspensão (Rule 16:2a) |
+| 122 | `Interception` | `enables` | `CounterAttack` | T | MORILLO-2017; PARADZIK-SD | Recuperação de passe por intercepção cria gatilho imediato para transição ofensiva rápida |
 
 ## Relações pendentes de validação
 

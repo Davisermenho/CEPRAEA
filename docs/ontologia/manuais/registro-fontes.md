@@ -107,6 +107,86 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 
 ---
 
+### CALDAS-MONICO-MARTINEZ-SD
+
+- **Tipo**: artigo
+- **Título**: 6-Metre Throw + Punishments
+- **Autores**: Caldas, Luiz Filipe; Monico, Luis; Martinez, Pablo
+- **Ano**: não informado
+- **Publicação**: material técnico de arbitragem (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: critérios de decisão, execução e punição associados ao arremesso de 6 metros no Handebol de Praia.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_RELACAO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `SixMetreThrow`, `Punishment`, `GoalkeeperRole`
+- **Observação**: Fonte aplicada com foco operacional (situações de jogo e execução prática), usada para refinar atributos de execução do 6m e critério de punição/não punição.
+- **Status**: ativo
+
+---
+
+### NOVAKOVIC-SD
+
+- **Tipo**: manual
+- **Título**: Coaching a winning team
+- **Autores**: Novakovic, Alexander
+- **Ano**: nao informado
+- **Publicação**: material tecnico de coaching (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: prevencao de lesoes e planejamento anual de carga no HP, com controle individual da carga em atletas que alternam beach e indoor.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `LoadMonitoringDomain`, `InternalLoad`, `ExternalLoad`, `PlayerPerformanceDomain`, `SandSurface`
+- **Observação**: Fonte usada para refinar atributos de planejamento de longo prazo, periodos de transicao entre superficies e orientacoes operacionais de regeneracao.
+- **Status**: ativo
+
+---
+
+### ROLLAND-DARE-FANACK-SD
+
+- **Tipo**: manual
+- **Título**: Goalkeeper behaviour inside and outside the Goal Area
+- **Autores**: Rolland, Jerome; Dare, Cedric; Fanack, Mathieu
+- **Ano**: nao informado
+- **Publicação**: material técnico de arbitragem (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: condutas permitidas/proibidas do goleiro dentro e fora da area de gol, com foco em shoot-out, substituicao e consequencias disciplinares.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_RELACAO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `GoalkeeperRole`, `ShootOut`, `GoalkeeperThrow`, `SubstitutionArea`, `AthleteUniform`, `Punishment`, `PlayerSuspension`, `PlayerDisqualification`
+- **Observação**: Fonte aplicada para detalhar criterios operacionais de arbitragem do goleiro e consolidar a consequencia disciplinar de substituicao irregular/entrada ilegal.
+- **Status**: ativo
+
+---
+
+### MEIMARIDIS-GOMER-GOMER-SD
+
+- **Tipo**: manual
+- **Título**: Goalkeeper behaviour Special Situations
+- **Autores**: Meimaridis, Ioannis; Gomer, Johan; Gomer, Martin
+- **Ano**: nao informado
+- **Publicação**: material técnico de arbitragem (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: casuistica arbitral de situacoes especiais envolvendo goleiro (offensive foul, shoot-out, referee throw, provocacao e punicoes).
+- **Conteúdo ontológico**: ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `GoalkeeperRole`, `ShootOut`, `RefereeThrow`, `Punishment`
+- **Observação**: OCR do material é majoritariamente composto por frames de jogo com baixa legibilidade textual; fonte usada como reforco de evidência sem criação de novos conceitos estruturais.
+- **Status**: ativo
+
+---
+
+### PARADZIK-SD
+
+- **Tipo**: manual
+- **Título**: Latest trends in attack
+- **Autores**: Paradzik, Mladen
+- **Ano**: nao informado
+- **Publicação**: material tecnico de coaching (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: tendencias recentes de ataque no handebol de praia com foco em contra-ataque, tomada de decisao e gatilhos de transicao ofensiva.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_RELACAO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `CounterAttack`, `Interception`, `AttackModel`, `PassivePlay`
+- **Observação**: Fonte aplicada com trechos textuais legiveis nas secoes de treino e transicao (p.15, p.18, p.19); partes com OCR ruidoso foram usadas apenas como contexto e nao como base para nova classe.
+- **Status**: ativo
+
+---
+
 ## Fontes em triagem
 
 > Fontes identificadas mas ainda não processadas formalmente.

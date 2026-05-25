@@ -174,11 +174,14 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Atributos**:
   - +internalLoad = medidas fisiológicas (FC, PSE)
   - +externalLoad = medidas externas (distância, acelerações, arremessos)
+  - +longTermAthleticPlan = planejamento individual anual integrando beach e indoor
+  - +surfaceTransitionPeriod = transição individual entre superfícies para adaptação de carga
+  - +crossStaffCommunication = comunicação operacional beach/indoor para decisão de carga, pausa e convocação
 - **Relações**:
   - `LoadMonitoringDomain` part-of `PlayerPerformanceDomain`
   - `InternalLoad` part-of `LoadMonitoringDomain`
   - `ExternalLoad` part-of `LoadMonitoringDomain`
-- **Fonte**: LEMOS-2023
+- **Fonte**: LEMOS-2023; NOVAKOVIC-SD
 - **Exemplo de uso**: monitoramento da carga interna durante um set via frequência cardíaca e PSE.
 
 ---
@@ -398,9 +401,11 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +heartRate = frequência cardíaca em bpm
   - +percentHRmax = percentual da FCmáx
   - +typicalRange = 71-80% FCmáx durante partidas oficiais
+  - +sleepRecoveryTarget = ~9h de sono/noite como referência de regeneração
+  - +dualSurfaceRecoveryPriority = maior prioridade de recuperação para atletas beach+indoor
 - **Relações**:
   - `InternalLoad` part-of `LoadMonitoringDomain`
-- **Fonte**: LEMOS-2023
+- **Fonte**: LEMOS-2023; NOVAKOVIC-SD
 - **Exemplo de uso**: atletas percorrem 1000-1200m por partida com resposta fisiológica de 71-80% FCmáx (Estudo 4, LEMOS-2023).
 
 ---
@@ -419,10 +424,12 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +HSR = corrida em alta velocidade
   - +measurementTool = IMU / WIMU
   - +nParams = 18
+  - +dualSurfaceOverlapRisk = sobrecarga ampliada em atletas com agenda simultânea beach/indoor
+  - +surfaceSpecificLoadProgression = progressão específica entre areia e indoor (rotação, saltos e contato corporal)
 - **Relações**:
   - `ExternalLoad` part-of `LoadMonitoringDomain`
   - `SandSurface` influences `ExternalLoad`
-- **Fonte**: LEMOS-2023
+- **Fonte**: LEMOS-2023; NOVAKOVIC-SD
 - **Exemplo de uso**: 18 parâmetros de carga externa avaliados em 124 atletas seniores em 21 partidas oficiais via WIMU (Estudo 4, LEMOS-2023).
 
 ---
@@ -638,11 +645,16 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Tipo**: Classe
 - **Sinônimos**: contra-ataque, counter-attack, transição ofensiva
 - **Não confundir com**: AttackPhase (fase estruturada); CounterAttack é a transição rápida
+- **Atributos**:
+  - +priority = finalizar rapido a transicao ofensiva
+  - +commonTriggers = {Interception, ThrowIn, offensive foul}
+  - +assistantSupport = goleiro e jogador de linha podem iniciar/assistir a transicao
 - **Relações**:
   - `CounterAttack` is-a `GamePhase`
   - `SpecialistRole` enables `CounterAttack`
   - `CounterAttack` requires `DefensiveReturn`
-- **Fonte**: MORILLO-2017
+  - `Interception` enables `CounterAttack`
+- **Fonte**: MORILLO-2017; PARADZIK-SD
 - **Exemplo de uso**: O especialista inicia o contra-ataque logo após a defesa do goleiro.
 
 ---
@@ -778,7 +790,8 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Sinônimos**: intercepção, interception, roubo de passe
 - **Relações**:
   - `Interception` is-a `DefensiveTechnicalTacticalAction`
-- **Fonte**: MORILLO-2017
+  - `Interception` enables `CounterAttack`
+- **Fonte**: MORILLO-2017; PARADZIK-SD
 - **Exemplo de uso**: Defensor antecipa trajetória do passe em voo para interceptar antes que o atacante o receba.
 
 ---
@@ -880,10 +893,11 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Atributos**:
   - +priorityGoalType = gol de duplo valor (especialista ou arremesso específico)
   - +specialistPosition = {central, pivô, ala direita, ala esquerda}
+  - +fallbackPredeterminedActions = usadas quando a criatividade ofensiva falha
 - **Relações**:
   - `AttackModel` part-of `OffensiveDomain`
   - `NumericalAsymmetry` enables `AttackModel`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; PARADZIK-SD
 - **Exemplo de uso**: Uma equipe com especialista de arremesso em giro usa AttackModel posicionando-o nas alas para maximizar os gols de 2 pontos.
 
 ---
@@ -1004,9 +1018,13 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Atributos**:
   - +doubleRole = {defende a baliza, joga no ataque como ala/pivô}
   - +substituição = sai quando a equipe está atacando (substituído pelo especialista)
+  - +insideGoalAreaBallContact = permitido com qualquer parte do corpo
+  - +outsideGoalAreaRule = regras de jogador de linha se aplicam
+  - +cannotLeaveGoalAreaWithControlledBall = true
+  - +contactResponsibilityWhenLeavingArea = goleiro responde por contato perigoso
 - **Relações**:
   - `GoalkeeperRole` enables `NumericalAsymmetry`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD
 - **Exemplo de uso**: O goleiro, ao sair para o ataque, gera a superioridade numérica 4×3 que é a base tática do HP.
 
 ---
@@ -1076,11 +1094,14 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +format = goleiro + jogador de campo, saindo do centro
   - +timeLimit = 3 segundos para arremessar
   - +coinToss = determina quem começa
+  - +goalkeeperLeavingAreaAvoidingContact = play on
+  - +goalkeeperCollisionOutsideArea = sixMetreThrow + possible disqualification
+  - +goalkeeperInterceptionAttemptNoCollision = permitido
 - **Relações**:
   - `ShootOut` requires `GoalkeeperRole`
   - `ShootOut` causes `SixMetreThrow`
   - `GoldenGoal` precedes `ShootOut`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD
 - **Exemplo de uso**: Partida terminou 1-1 em períodos; no ShootOut, cada equipe designa 5 jogadores que alternam tentativas até que uma equipe marque mais que a outra nas 5 tentativas.
 
 ---
@@ -1101,7 +1122,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Relações**:
   - `PlayingCourt` part-of `SandSurface`
   - `GoalArea` part-of `PlayingCourt`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; MEIMARIDIS-GOMER-GOMER-SD
 - **Exemplo de uso**: A quadra mede 27×12m com profundidade de areia de 40cm; a zona de segurança de 3m ao redor impede que jogadores sofram lesões ao sair dos limites.
 
 ---
@@ -1247,10 +1268,12 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +executor = goleiro
   - +position = qualquer ponto da área de gol
   - +ownGoalException = não é possível marcar gol contra em GoalkeeperThrow
+  - +maxExecutionTime = 3 segundos
+  - +wrongExecutionIfLeavingAreaWithControlledBall = true
 - **Relações**:
   - `GoalkeeperThrow` is-a `ThrowType`
   - `GoalkeeperThrow` requires `GoalkeeperRole`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD
 - **Exemplo de uso**: Após gol marcado pelo adversário, o goleiro pega a bola dentro da área e executa o GoalkeeperThrow para reiniciar o jogo rapidamente.
 
 ---
@@ -1283,16 +1306,23 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Não confundir com**: `StandingThrow6m` — que é a técnica de execução; `SixMetreThrow` é a regra normativa que define quando e por que é concedido
 - **Atributos**:
   - +trigger = chance clara de gol negada ilegalmente
+  - +clearChanceCriteria = controle de bola e corpo para finalizar ao gol
   - +triggerCaseA = intervenção irregular de jogador/oficial adversário
   - +triggerCaseB = apito indevido durante chance clara de gol
   - +triggerCaseC = interferência externa de não participante
   - +position = linha de 6m
   - +value = 2 pontos se convertido
   - +executor = qualquer jogador de campo do time beneficiado
+  - +executionTimeAfterWhistle = até 3 segundos
+  - +throwerCannotTouchOrCross6mLine = true
+  - +throwerCannotPlayBallAgainBeforeGoalOrOpponentTouch = true
+  - +goalkeeperCannotBeChangedWhenThrowerReady = true
+  - +opponentsMustKeepDistanceAndFairPlayDuringExecution = true
 - **Relações**:
   - `SixMetreThrow` is-a `ThrowType`
   - `SixMetreThrow` causes `TwoPointGoal`
-- **Fonte**: IHF-2026; SKOWRONEK-2023
+  - `SixMetreThrow` requires `GoalkeeperRole`
+- **Fonte**: IHF-2026; SKOWRONEK-2023; CALDAS-MONICO-MARTINEZ-SD
 - **Exemplo de uso**: Defensor segura atacante em situação de frente a frente com o goleiro; árbitro concede SixMetreThrow; se convertido, vale 2 pontos.
 
 ---
@@ -1311,7 +1341,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Relações**:
   - `PassivePlay` influences `AttackPhase`
   - `PassivePlay` causes `FreeThrow`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; PARADZIK-SD
 - **Exemplo de uso**: Com a equipe circulando a bola sem finalização, o árbitro levanta a mão sinalizando o jogo passivo; a equipe tem ainda 4 passes para finalizar ou perde a posse.
 
 ---
@@ -1345,11 +1375,17 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Tipo**: Classe (container)
 - **Sinônimos**: punição, punishment, disciplinary action
 - **Não confundir com**: infração (foul) — a infração é o ato; a punição é a resposta normativa
+- **Atributos**:
+  - +applyWhenDefenderAttacksBodyNotBall = true
+  - +noPunishmentWhenDefenderClearlyPlaysBall = true
+  - +lineViolationMustPunishCorrectPlayer = true
+  - +faultySubstitutionOrIllegalEntry = mayCausePlayerSuspension
+  - +goalkeeperShootOutCollision = mayCausePlayerDisqualification
 - **Relações**:
   - `Punishment` structures `PlayerWarning`
   - `Punishment` structures `PlayerSuspension`
   - `Punishment` structures `PlayerDisqualification`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; CALDAS-MONICO-MARTINEZ-SD; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD
 - **Exemplo de uso**: O árbitro aplica punições progressivas: primeira infração → PlayerWarning; reincidência → PlayerSuspension; conduta grave → PlayerDisqualification.
 
 ---
@@ -1465,7 +1501,8 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Relações**:
   - `SubstitutionArea` requires `GoalkeeperRole`
   - `TimekeeperScorekeeperRole` influences `SubstitutionArea`
-- **Fonte**: IHF-2026
+  - `SubstitutionArea` causes `PlayerSuspension`
+- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD
 - **Exemplo de uso**: O goleiro suplente aguarda na área de substituição e entra pela lateral regulamentar da própria equipe.
 
 ---
@@ -1481,9 +1518,10 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +teamConsistency = uniformidade visual dentro da equipe
   - +goalkeeperDifferentiation = cor distinta dos jogadores de linha
   - +compliance = conforme Athlete Uniform Regulations (IHF)
+  - +improperGoalkeeperShirtAtEntry = mayCauseFaultySubstitution
 - **Relações**:
   - `GoalkeeperRole` requires `AthleteUniform`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; SKOWRONEK-2023; ROLLAND-DARE-FANACK-SD
 - **Exemplo de uso**: Ao entrar como goleiro, a atleta usa uniforme com mesma identificação da equipe, porém cor diferenciada para cumprir a regra.
 
 ## Termos pendentes de definição completa
