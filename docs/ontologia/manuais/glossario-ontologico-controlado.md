@@ -1011,9 +1011,13 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Atributos**:
   - +doubleRole = {defende a baliza, joga no ataque como ala/pivô}
   - +substituição = sai quando a equipe está atacando (substituído pelo especialista)
+  - +insideGoalAreaBallContact = permitido com qualquer parte do corpo
+  - +outsideGoalAreaRule = regras de jogador de linha se aplicam
+  - +cannotLeaveGoalAreaWithControlledBall = true
+  - +contactResponsibilityWhenLeavingArea = goleiro responde por contato perigoso
 - **Relações**:
   - `GoalkeeperRole` enables `NumericalAsymmetry`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; ROLLAND-DARE-FANACK-SD
 - **Exemplo de uso**: O goleiro, ao sair para o ataque, gera a superioridade numérica 4×3 que é a base tática do HP.
 
 ---
@@ -1083,11 +1087,14 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +format = goleiro + jogador de campo, saindo do centro
   - +timeLimit = 3 segundos para arremessar
   - +coinToss = determina quem começa
+  - +goalkeeperLeavingAreaAvoidingContact = play on
+  - +goalkeeperCollisionOutsideArea = sixMetreThrow + possible disqualification
+  - +goalkeeperInterceptionAttemptNoCollision = permitido
 - **Relações**:
   - `ShootOut` requires `GoalkeeperRole`
   - `ShootOut` causes `SixMetreThrow`
   - `GoldenGoal` precedes `ShootOut`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD
 - **Exemplo de uso**: Partida terminou 1-1 em períodos; no ShootOut, cada equipe designa 5 jogadores que alternam tentativas até que uma equipe marque mais que a outra nas 5 tentativas.
 
 ---
@@ -1254,10 +1261,12 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +executor = goleiro
   - +position = qualquer ponto da área de gol
   - +ownGoalException = não é possível marcar gol contra em GoalkeeperThrow
+  - +maxExecutionTime = 3 segundos
+  - +wrongExecutionIfLeavingAreaWithControlledBall = true
 - **Relações**:
   - `GoalkeeperThrow` is-a `ThrowType`
   - `GoalkeeperThrow` requires `GoalkeeperRole`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD
 - **Exemplo de uso**: Após gol marcado pelo adversário, o goleiro pega a bola dentro da área e executa o GoalkeeperThrow para reiniciar o jogo rapidamente.
 
 ---
@@ -1363,11 +1372,13 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +applyWhenDefenderAttacksBodyNotBall = true
   - +noPunishmentWhenDefenderClearlyPlaysBall = true
   - +lineViolationMustPunishCorrectPlayer = true
+  - +faultySubstitutionOrIllegalEntry = mayCausePlayerSuspension
+  - +goalkeeperShootOutCollision = mayCausePlayerDisqualification
 - **Relações**:
   - `Punishment` structures `PlayerWarning`
   - `Punishment` structures `PlayerSuspension`
   - `Punishment` structures `PlayerDisqualification`
-- **Fonte**: IHF-2026; CALDAS-MONICO-MARTINEZ-SD
+- **Fonte**: IHF-2026; CALDAS-MONICO-MARTINEZ-SD; ROLLAND-DARE-FANACK-SD
 - **Exemplo de uso**: O árbitro aplica punições progressivas: primeira infração → PlayerWarning; reincidência → PlayerSuspension; conduta grave → PlayerDisqualification.
 
 ---
@@ -1483,7 +1494,8 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Relações**:
   - `SubstitutionArea` requires `GoalkeeperRole`
   - `TimekeeperScorekeeperRole` influences `SubstitutionArea`
-- **Fonte**: IHF-2026
+  - `SubstitutionArea` causes `PlayerSuspension`
+- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD
 - **Exemplo de uso**: O goleiro suplente aguarda na área de substituição e entra pela lateral regulamentar da própria equipe.
 
 ---
@@ -1499,9 +1511,10 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +teamConsistency = uniformidade visual dentro da equipe
   - +goalkeeperDifferentiation = cor distinta dos jogadores de linha
   - +compliance = conforme Athlete Uniform Regulations (IHF)
+  - +improperGoalkeeperShirtAtEntry = mayCauseFaultySubstitution
 - **Relações**:
   - `GoalkeeperRole` requires `AthleteUniform`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; SKOWRONEK-2023; ROLLAND-DARE-FANACK-SD
 - **Exemplo de uso**: Ao entrar como goleiro, a atleta usa uniforme com mesma identificação da equipe, porém cor diferenciada para cumprir a regra.
 
 ## Termos pendentes de definição completa

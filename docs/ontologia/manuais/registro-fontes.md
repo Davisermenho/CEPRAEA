@@ -139,6 +139,24 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 
 ---
 
+### ROLLAND-DARE-FANACK-SD
+
+- **Tipo**: manual
+- **Título**: Goalkeeper behaviour inside and outside the Goal Area
+- **Autores**: Rolland, Jerome; Dare, Cedric; Fanack, Mathieu
+- **Ano**: nao informado
+- **Publicação**: material técnico de arbitragem (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: condutas permitidas/proibidas do goleiro dentro e fora da area de gol, com foco em shoot-out, substituicao e consequencias disciplinares.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_RELACAO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `GoalkeeperRole`, `ShootOut`, `GoalkeeperThrow`, `SubstitutionArea`, `AthleteUniform`, `Punishment`, `PlayerSuspension`, `PlayerDisqualification`
+- **Observação**: Fonte aplicada para detalhar criterios operacionais de arbitragem do goleiro e consolidar a consequencia disciplinar de substituicao irregular/entrada ilegal.
+- **Status**: ativo
+
+---
+
+---
+
 ## Fontes em triagem
 
 > Fontes identificadas mas ainda não processadas formalmente.

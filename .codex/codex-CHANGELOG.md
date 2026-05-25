@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-24 - 21:20 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-24 - 21:32 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -2667,4 +2667,36 @@ Aplicacao do protocolo ontologico ao artigo `Coaching a winning team.md` com ext
 
 - `sed -n '1,680p' docs/ontologia/artigos/Coaching a winning team.md`
 - `rg -n "LoadMonitoringDomain|InternalLoad|ExternalLoad" docs/ontologia/manuais/glossario-ontologico-controlado.md`
+- `node scripts/check-ontology-semantics.mjs`
+
+### [CEPR-ONTOLOGIA-GOALKEEPER-BEHAVIOUR-TRIAGEM-E-UPDATE-2026-05-24] — 2026-05-24 — Triagem normativa do goleiro + atualização no Draw.io
+
+#### ✨ Resumo
+
+Aplicação do protocolo ontológico ao artigo `Goalkeeper behaviour inside and outside the goal area-1.md` com extração, classificação, deduplicação e atualização do bloco normativo no Draw.io.
+
+#### 🚀 Added
+
+- `docs/ontologia/triagens/triagem-goalkeeper-behaviour-inside-outside-goal-area-2026-05-24.md`
+  - triagem completa (Passos 1-5), incluindo decisão por conceito.
+
+#### 🛠️ Changed
+
+- `docs/ontologia/manuais/registro-fontes.md`
+  - inclusão da fonte `ROLLAND-DARE-FANACK-SD`.
+- `docs/ontologia/manuais/glossario-ontologico-controlado.md`
+  - refinamento de atributos em `GoalkeeperRole`, `ShootOut`, `GoalkeeperThrow`, `Punishment`, `SubstitutionArea` e `AthleteUniform`.
+- `docs/ontologia/manuais/matriz-relacoes.md`
+  - inclusão da relação `#121`: `SubstitutionArea causes PlayerSuspension`.
+- `docs/design/navegacao.drawio.svg`
+  - inclusão da aresta normativa `SubstitutionArea ->(causes)-> PlayerSuspension`.
+
+#### 🛡️ Evidências
+
+- `sed -n '1,760p' docs/ontologia/artigos/Goalkeeper behaviour inside and outside the goal area-1.md`
+- `rg -n "GoalkeeperRole|GoalArea|GoalkeeperThrow|ShootOut|Punishment|SubstitutionArea|AthleteUniform" docs/ontologia/manuais/glossario-ontologico-controlado.md`
+- `python3` (script inline para inserir aresta `subarea -> psusp` no SVG)
+- `grep -c 'host="app.diagrams.net"' docs/design/navegacao.drawio.svg`
+- `grep -c 'content="&lt;mxfile' docs/design/navegacao.drawio.svg`
+- `grep -c '\[draw\.io\]' docs/design/navegacao.drawio.svg`
 - `node scripts/check-ontology-semantics.mjs`
