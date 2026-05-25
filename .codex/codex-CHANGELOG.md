@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-24 - 20:57 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-24 - 21:20 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -2618,4 +2618,53 @@ Aplicação do protocolo ontológico ao artigo `6-metre throw + punishments.md`:
 - `grep -c 'host="app.diagrams.net"' docs/design/navegacao.drawio.svg`
 - `grep -c 'content="&lt;mxfile' docs/design/navegacao.drawio.svg`
 - `grep -c '\[draw\.io\]' docs/design/navegacao.drawio.svg`
+- `node scripts/check-ontology-semantics.mjs`
+
+### [CEPR-ONTOLOGIA-ARTIGO-2PT-LIDOS-TRIAGEM-DEDUP-2026-05-24] — 2026-05-24 — Triagem da fonte em `artigos/lidos` com deduplicação total
+
+#### ✨ Resumo
+
+Aplicação do protocolo ontológico ao arquivo `docs/ontologia/artigos/lidos/2-point goals (spin and in-flight shots)-min.md` com extração, classificação e checagem de duplicidade contra o modelo atual. Resultado: os conceitos já estavam incorporados; não houve necessidade de alterar o Draw.io.
+
+#### 🚀 Added
+
+- `docs/ontologia/triagens/triagem-2-point-goals-spin-in-flight-lidos-2026-05-24.md`
+  - triagem completa (Passos 1–5) para a fonte da pasta `lidos`.
+
+#### 🛠️ Changed
+
+- Sem mudanças em `glossario`, `matriz`, `registro-fontes` e `navegacao.drawio.svg` (estado já compatível com a fonte).
+
+#### 🛡️ Evidências
+
+- `sed -n '1,1360p' 'docs/ontologia/artigos/lidos/2-point goals (spin and in-flight shots)-min.md'`
+- `sed -n '1,560p' docs/ontologia/manuais/manual-ontologia-handebol-de-praia.md`
+- `rg -n "^### (SpecialistRole|StandingThrow6m|SpinThrow|AerialThrow|GoalkeeperRole|SixMetreThrow|TwoPointGoal)" docs/ontologia/manuais/glossario-ontologico-controlado.md`
+- `rg -n "TwoPointGoal|SpinThrow|AerialThrow|SixMetreThrow|GoalkeeperRole|SpecialistRole" docs/ontologia/manuais/matriz-relacoes.md`
+- `node scripts/check-ontology-semantics.mjs`
+
+### [CEPR-ONTOLOGIA-COACHING-WINNING-TEAM-TRIAGEM-2026-05-24] — 2026-05-24 — Triagem de carga/regeneracao com deduplicacao estrutural
+
+#### ✨ Resumo
+
+Aplicacao do protocolo ontologico ao artigo `Coaching a winning team.md` com extracao, classificacao e deduplicacao. Resultado: enriquecimento de atributos no bloco de desempenho (`LoadMonitoringDomain`, `InternalLoad`, `ExternalLoad`) sem criacao de classe/relacao nova.
+
+#### 🚀 Added
+
+- `docs/ontologia/triagens/triagem-coaching-winning-team-2026-05-24.md`
+  - triagem completa (Passos 1-5) com decisao por conceito.
+
+#### 🛠️ Changed
+
+- `docs/ontologia/manuais/registro-fontes.md`
+  - inclusao da fonte `NOVAKOVIC-SD`.
+- `docs/ontologia/manuais/glossario-ontologico-controlado.md`
+  - refinamento de atributos em `LoadMonitoringDomain`, `InternalLoad` e `ExternalLoad` com foco em planejamento anual, transicao de superficies e recuperacao.
+- `docs/design/navegacao.drawio.svg`
+  - sem alteracao estrutural (nao houve nova classe/aresta).
+
+#### 🛡️ Evidências
+
+- `sed -n '1,680p' docs/ontologia/artigos/Coaching a winning team.md`
+- `rg -n "LoadMonitoringDomain|InternalLoad|ExternalLoad" docs/ontologia/manuais/glossario-ontologico-controlado.md`
 - `node scripts/check-ontology-semantics.mjs`

@@ -19,10 +19,36 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-24 - 20:57 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-24 - 21:20 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-24 21:20 BRT — CEPR-ONTOLOGIA-COACHING-WINNING-TEAM-TRIAGEM-2026-05-24
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/Coaching a winning team.md` na ordem obrigatória (extração -> classificação -> deduplicação -> atualização de bloco no Draw.io).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-coaching-winning-team-2026-05-24.md`;
+  - inclusão da fonte `NOVAKOVIC-SD` no `registro-fontes`;
+  - enriquecimento de atributos em `LoadMonitoringDomain`, `InternalLoad` e `ExternalLoad`;
+  - decisão explícita de **não alterar** `docs/design/navegacao.drawio.svg`, pois não houve nova classe/aresta.
+- **Evidências objetivas:**
+  - `sed -n '1,680p' docs/ontologia/artigos/Coaching a winning team.md` ✅
+  - `rg -n "LoadMonitoringDomain|InternalLoad|ExternalLoad" docs/ontologia/manuais/glossario-ontologico-controlado.md` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
+
+## Entrada Rápida — 2026-05-24 21:12 BRT — CEPR-ONTOLOGIA-ARTIGO-2PT-LIDOS-TRIAGEM-DEDUP-2026-05-24
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/lidos/2-point goals (spin and in-flight shots)-min.md` na ordem obrigatória (extração → classificação → deduplicação → atualização de bloco no Draw.io).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-2-point-goals-spin-in-flight-lidos-2026-05-24.md` com Passos 1–5;
+  - avaliação de deduplicidade total com conceitos e relações já incorporados (`TwoPointGoal`, `SpinThrow`, `AerialThrow`, `SixMetreThrow`, `GoalkeeperRole`, `SpecialistRole`);
+  - decisão explícita de **não alterar** `docs/design/navegacao.drawio.svg`, por já conter o bloco atualizado.
+- **Evidências objetivas:**
+  - `sed -n '1,1360p' 'docs/ontologia/artigos/lidos/2-point goals (spin and in-flight shots)-min.md'` ✅
+  - `rg -n "^### (SpecialistRole|StandingThrow6m|SpinThrow|AerialThrow|GoalkeeperRole|SixMetreThrow|TwoPointGoal)" docs/ontologia/manuais/glossario-ontologico-controlado.md` ✅
+  - `rg -n "TwoPointGoal|SpinThrow|AerialThrow|SixMetreThrow|GoalkeeperRole|SpecialistRole" docs/ontologia/manuais/matriz-relacoes.md` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
 
 ## Entrada Rápida — 2026-05-24 20:57 BRT — CEPR-ONTOLOGIA-ARTIGO-6M-PUNISHMENTS-TRIAGEM-E-UPDATE-2026-05-24
 
