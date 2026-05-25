@@ -67,8 +67,8 @@ Esta matriz registra **todas as relações diretas** entre conceitos da ontologi
 | 16 | `SpinThrow` | enables | `EliteLevel` | D | LEMOS-2023 | Discrimina elite vs sub-elite (Estudo 2, p<0,001) |
 | 17 | `AerialThrow` | enables | `EliteLevel` | D | LEMOS-2023 | Discrimina elite vs sub-elite (Estudo 2, p<0,001) |
 | 18 | `HorizontalJump` | enables | `EliteLevel` | D | LEMOS-2023 | Discrimina elite vs sub-elite e categorias etárias (Estudos 1 e 2) |
-| 19 | `InternalLoad` | part-of | `LoadMonitoringDomain` | D | LEMOS-2023 | FC, %FCmax — resposta fisiológica durante partidas |
-| 20 | `ExternalLoad` | part-of | `LoadMonitoringDomain` | D | LEMOS-2023 | 18 parâmetros via IMU/WIMU |
+| 19 | `InternalLoad` | part-of | `LoadMonitoringDomain` | D | LEMOS-2023; VERGINELLI-2025 | FC, %FCmax — resposta fisiológica durante partidas |
+| 20 | `ExternalLoad` | part-of | `LoadMonitoringDomain` | D | LEMOS-2023; VERGINELLI-2025 | 18 parâmetros via IMU/WIMU |
 | 21 | `AnthropometricProfile` | part-of | `PlayerPerformanceDomain` | D | LEMOS-2023 | Perfil morfológico como parte do domínio de desempenho |
 | 22 | `PhysicalTestBattery` | part-of | `PlayerPerformanceDomain` | D | LEMOS-2023 | Bateria de testes físicos específicos do HP |
 | 23 | `TalentSelection` | part-of | `PlayerPerformanceDomain` | D | LEMOS-2023 | Processo de seleção de talentos |
@@ -140,8 +140,8 @@ Esta matriz registra **todas as relações diretas** entre conceitos da ontologi
 ---
 
 | 84 | `GoldenGoal` | `part-of` | `GamePeriod` | N | IHF-2026 | Golden Goal é mecanismo de desempate do período |
-| 85 | `GoldenGoal` | `precedes` | `ShootOut` | N | IHF-2026 | Se empate persiste após Golden Goal, segue o ShootOut |
-| 86 | `ShootOut` | `requires` | `GoalkeeperRole` | N | IHF-2026 | Cada tentativa exige goleiro + jogador de campo |
+| 85 | `GoldenGoal` | `precedes` | `ShootOut` | N | IHF-2026; VERGINELLI-2025 | Se empate persiste após Golden Goal, segue o ShootOut |
+| 86 | `ShootOut` | `requires` | `GoalkeeperRole` | N | IHF-2026; VERGINELLI-2025 | Cada tentativa exige goleiro + jogador de campo |
 | 87 | `ShootOut` | `causes` | `SixMetreThrow` | N | IHF-2026 | Infração do goleiro no ShootOut concede arremesso de 6m |
 | 88 | `GamePeriod` | `enables` | `GoldenGoal` | N | IHF-2026 | Período empatado ativa o mecanismo Golden Goal |
 | 89 | `GamePeriod` | `enables` | `TeamTimeout` | N | IHF-2026 | Cada meia-tempo de período permite 1 TeamTimeout |

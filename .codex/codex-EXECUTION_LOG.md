@@ -19,10 +19,24 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-25 - 01:01 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-25 - 01:08 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-25 01:08 BRT — CEPR-ONTOLOGIA-TEMAS-EMERGENTES-TRIAGEM-2026-05-25
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/Temas_emergentes_no_handebol_e_no_handebol_de_praia.md` (extração -> classificação -> deduplicação -> atualização no bloco correto).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-temas-emergentes-handebol-praia-2026-05-25.md`;
+  - inclusão da fonte `VERGINELLI-2025` no `registro-fontes`;
+  - enriquecimento de atributos/evidências em `LoadMonitoringDomain`, `PlayerPerformanceDomain`, `InternalLoad`, `ExternalLoad` e `ShootOut`;
+  - reforço de evidência na matriz em relações já existentes (`#19`, `#20`, `#85`, `#86`), sem criar nova classe/relação.
+- **Evidências objetivas:**
+  - `sed -n '760,1460p' docs/ontologia/artigos/Temas_emergentes_no_handebol_e_no_handebol_de_praia.md` ✅
+  - `sed -n '1910,2320p' docs/ontologia/artigos/Temas_emergentes_no_handebol_e_no_handebol_de_praia.md` ✅
+  - `sed -n '2400,2835p' docs/ontologia/artigos/Temas_emergentes_no_handebol_e_no_handebol_de_praia.md` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
 
 
 ## Entrada Rápida — 2026-05-25 01:01 BRT — CEPR-ONTOLOGIA-PREPARATION-NATIONAL-TEAM-TRIAGEM-2026-05-25

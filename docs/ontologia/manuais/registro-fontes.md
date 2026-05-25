@@ -233,6 +233,21 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 - **Observação**: Fonte aplicada para refino operacional de analise de formacoes e opcoes prioritarias de finalizacao; nao usada para criar novas classes de processo de coaching.
 - **Status**: ativo
 
+
+### VERGINELLI-2025
+
+- **Tipo**: tese
+- **Título**: Temas emergentes no handebol e no handebol de praia
+- **Autores**: Verginelli, Carla Abrahao
+- **Ano**: 2025
+- **Publicação**: Dissertacao de Mestrado, Escola de Educacao Fisica e Esporte de Ribeirao Preto, Universidade de Sao Paulo
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: panorama cientifico do handebol de praia (revisao de escopo), analise observacional de shoot-out em competicao nacional e analise documental de conteudos socioeducativos na iniciacao esportiva.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `LoadMonitoringDomain`, `InternalLoad`, `ExternalLoad`, `PlayerPerformanceDomain`, `ShootingAction`, `SpinThrow`, `ShootOut`, `GoldenGoal`, `GoalkeeperRole`
+- **Observação**: Fonte de sintese e aplicacao. No capitulo observacional de shoot-out (28 partidas, 280 cobrancas validas) reporta predominancia de giro (80,3%) e taxa de conversao de gol (68,9%), alem da frequencia de saida defensiva (67,8%) com eficiencia limitada (30,5%).
+- **Status**: ativo
+
 ---
 
 ## Fontes em triagem

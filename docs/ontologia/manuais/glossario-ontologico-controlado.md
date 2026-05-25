@@ -188,11 +188,12 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +longTermAthleticPlan = planejamento individual anual integrando beach e indoor
   - +surfaceTransitionPeriod = transição individual entre superfícies para adaptação de carga
   - +crossStaffCommunication = comunicação operacional beach/indoor para decisão de carga, pausa e convocação
+  - +integratedMatchLoadAnalysis = cruzamento de carga com indicadores tecnico-taticos por fase do jogo
 - **Relações**:
   - `LoadMonitoringDomain` part-of `PlayerPerformanceDomain`
   - `InternalLoad` part-of `LoadMonitoringDomain`
   - `ExternalLoad` part-of `LoadMonitoringDomain`
-- **Fonte**: LEMOS-2023; NOVAKOVIC-SD
+- **Fonte**: LEMOS-2023; NOVAKOVIC-SD; VERGINELLI-2025
 - **Exemplo de uso**: monitoramento da carga interna durante um set via frequência cardíaca e PSE.
 
 ---
@@ -203,14 +204,16 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Camada**: desempenho
 - **Tipo**: Classe (domínio)
 - **Sinônimos**: domínio de desempenho, performance domain
-- **Atributos**: *(a preencher conforme artigos)*
+- **Atributos**:
+  - +evidenceScope = revisao de escopo com 72 publicacoes sobre handebol de praia
+  - +priorityGaps = {psicologia do esporte, prevencao de lesoes, pedagogia da iniciacao, treinamento de jovens, arbitragem}
 - **Relações**:
   - `LoadMonitoringDomain` part-of `PlayerPerformanceDomain`
   - `AnthropometricProfile` part-of `PlayerPerformanceDomain`
   - `PhysicalTestBattery` part-of `PlayerPerformanceDomain`
   - `TalentSelection` part-of `PlayerPerformanceDomain`
   - `PerformanceLevel` part-of `PlayerPerformanceDomain`
-- **Fonte**: LEMOS-2023
+- **Fonte**: LEMOS-2023; VERGINELLI-2025
 - **Exemplo de uso**: análise do perfil antropométrico e físico de atletas para seleção de talentos.
 
 ---
@@ -413,11 +416,12 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +heartRate = frequência cardíaca em bpm
   - +percentHRmax = percentual da FCmáx
   - +typicalRange = 71-80% FCmáx durante partidas oficiais
+  - +commonMonitoringVariables = {frequencia cardiaca, SHRZ, PSE/CR10}
   - +sleepRecoveryTarget = ~9h de sono/noite como referência de regeneração
   - +dualSurfaceRecoveryPriority = maior prioridade de recuperação para atletas beach+indoor
 - **Relações**:
   - `InternalLoad` part-of `LoadMonitoringDomain`
-- **Fonte**: LEMOS-2023; NOVAKOVIC-SD
+- **Fonte**: LEMOS-2023; NOVAKOVIC-SD; VERGINELLI-2025
 - **Exemplo de uso**: atletas percorrem 1000-1200m por partida com resposta fisiológica de 71-80% FCmáx (Estudo 4, LEMOS-2023).
 
 ---
@@ -433,6 +437,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +maxSpeed = velocidade máxima atingida (km/h)
   - +acceleration = aceleração máxima (m/s²)
   - +deceleration = desaceleração máxima (m/s²)
+  - +commonMonitoringVariables = {distancia, velocidade, aceleracao, desaceleracao, mudancas de direcao, saltos}
   - +HSR = corrida em alta velocidade
   - +measurementTool = IMU / WIMU
   - +nParams = 18
@@ -441,7 +446,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Relações**:
   - `ExternalLoad` part-of `LoadMonitoringDomain`
   - `SandSurface` influences `ExternalLoad`
-- **Fonte**: LEMOS-2023; NOVAKOVIC-SD
+- **Fonte**: LEMOS-2023; NOVAKOVIC-SD; VERGINELLI-2025
 - **Exemplo de uso**: 18 parâmetros de carga externa avaliados em 124 atletas seniores em 21 partidas oficiais via WIMU (Estudo 4, LEMOS-2023).
 
 ---
@@ -1110,6 +1115,11 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +format = goleiro + jogador de campo, saindo do centro
   - +timeLimit = 3 segundos para arremessar
   - +coinToss = determina quem começa
+  - +decisiveMatchShareObserved = 24.6% das partidas (Circuito Brasileiro 2023, etapa final)
+  - +spinThrowUsageObserved = 80.3% das cobrancas
+  - +goalConversionObserved = 68.9% das cobrancas
+  - +defensiveExitFrequencyObserved = 67.8% das cobrancas
+  - +defensiveExitEfficiencyObserved = 30.5% das saidas
   - +goalkeeperLeavingAreaAvoidingContact = play on
   - +goalkeeperCollisionOutsideArea = sixMetreThrow + possible disqualification
   - +goalkeeperInterceptionAttemptNoCollision = permitido
@@ -1118,7 +1128,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `ShootOut` requires `GoalkeeperRole`
   - `ShootOut` causes `SixMetreThrow`
   - `GoldenGoal` precedes `ShootOut`
-- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD; ANDERSEN-SD; HINSON-SD
+- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD; ANDERSEN-SD; HINSON-SD; VERGINELLI-2025
 - **Exemplo de uso**: Partida terminou 1-1 em períodos; no ShootOut, cada equipe designa 5 jogadores que alternam tentativas até que uma equipe marque mais que a outra nas 5 tentativas.
 
 ---
