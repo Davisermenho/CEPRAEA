@@ -1283,16 +1283,23 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Não confundir com**: `StandingThrow6m` — que é a técnica de execução; `SixMetreThrow` é a regra normativa que define quando e por que é concedido
 - **Atributos**:
   - +trigger = chance clara de gol negada ilegalmente
+  - +clearChanceCriteria = controle de bola e corpo para finalizar ao gol
   - +triggerCaseA = intervenção irregular de jogador/oficial adversário
   - +triggerCaseB = apito indevido durante chance clara de gol
   - +triggerCaseC = interferência externa de não participante
   - +position = linha de 6m
   - +value = 2 pontos se convertido
   - +executor = qualquer jogador de campo do time beneficiado
+  - +executionTimeAfterWhistle = até 3 segundos
+  - +throwerCannotTouchOrCross6mLine = true
+  - +throwerCannotPlayBallAgainBeforeGoalOrOpponentTouch = true
+  - +goalkeeperCannotBeChangedWhenThrowerReady = true
+  - +opponentsMustKeepDistanceAndFairPlayDuringExecution = true
 - **Relações**:
   - `SixMetreThrow` is-a `ThrowType`
   - `SixMetreThrow` causes `TwoPointGoal`
-- **Fonte**: IHF-2026; SKOWRONEK-2023
+  - `SixMetreThrow` requires `GoalkeeperRole`
+- **Fonte**: IHF-2026; SKOWRONEK-2023; CALDAS-MONICO-MARTINEZ-SD
 - **Exemplo de uso**: Defensor segura atacante em situação de frente a frente com o goleiro; árbitro concede SixMetreThrow; se convertido, vale 2 pontos.
 
 ---
@@ -1345,11 +1352,15 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Tipo**: Classe (container)
 - **Sinônimos**: punição, punishment, disciplinary action
 - **Não confundir com**: infração (foul) — a infração é o ato; a punição é a resposta normativa
+- **Atributos**:
+  - +applyWhenDefenderAttacksBodyNotBall = true
+  - +noPunishmentWhenDefenderClearlyPlaysBall = true
+  - +lineViolationMustPunishCorrectPlayer = true
 - **Relações**:
   - `Punishment` structures `PlayerWarning`
   - `Punishment` structures `PlayerSuspension`
   - `Punishment` structures `PlayerDisqualification`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; CALDAS-MONICO-MARTINEZ-SD
 - **Exemplo de uso**: O árbitro aplica punições progressivas: primeira infração → PlayerWarning; reincidência → PlayerSuspension; conduta grave → PlayerDisqualification.
 
 ---

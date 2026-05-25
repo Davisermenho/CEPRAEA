@@ -107,6 +107,22 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 
 ---
 
+### CALDAS-MONICO-MARTINEZ-SD
+
+- **Tipo**: artigo
+- **Título**: 6-Metre Throw + Punishments
+- **Autores**: Caldas, Luiz Filipe; Monico, Luis; Martinez, Pablo
+- **Ano**: não informado
+- **Publicação**: material técnico de arbitragem (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: critérios de decisão, execução e punição associados ao arremesso de 6 metros no Handebol de Praia.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_RELACAO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `SixMetreThrow`, `Punishment`, `GoalkeeperRole`
+- **Observação**: Fonte aplicada com foco operacional (situações de jogo e execução prática), usada para refinar atributos de execução do 6m e critério de punição/não punição.
+- **Status**: ativo
+
+---
+
 ## Fontes em triagem
 
 > Fontes identificadas mas ainda não processadas formalmente.
