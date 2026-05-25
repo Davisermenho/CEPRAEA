@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-24 - 21:32 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-24 - 21:46 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -2699,4 +2699,30 @@ Aplicação do protocolo ontológico ao artigo `Goalkeeper behaviour inside and 
 - `grep -c 'host="app.diagrams.net"' docs/design/navegacao.drawio.svg`
 - `grep -c 'content="&lt;mxfile' docs/design/navegacao.drawio.svg`
 - `grep -c '\[draw\.io\]' docs/design/navegacao.drawio.svg`
+- `node scripts/check-ontology-semantics.mjs`
+
+### [CEPR-ONTOLOGIA-GOALKEEPER-SPECIAL-SITUATIONS-TRIAGEM-2026-05-24] — 2026-05-24 — Triagem com evidência limitada e sem alteração estrutural
+
+#### ✨ Resumo
+
+Aplicação do protocolo ontológico ao artigo `Goalkeeper behaviour Special Situations.md`. O material apresentou baixa legibilidade semântica (majoritariamente frames de vídeo), permitindo somente reforço de evidências para conceitos normativos já existentes.
+
+#### 🚀 Added
+
+- `docs/ontologia/triagens/triagem-goalkeeper-behaviour-special-situations-2026-05-24.md`
+  - triagem completa (Passos 1-5) com deduplicação e decisão por conceito.
+
+#### 🛠️ Changed
+
+- `docs/ontologia/manuais/registro-fontes.md`
+  - inclusão da fonte `MEIMARIDIS-GOMER-GOMER-SD`.
+- `docs/ontologia/manuais/glossario-ontologico-controlado.md`
+  - adição de `MEIMARIDIS-GOMER-GOMER-SD` como evidência em `GoalkeeperRole`, `ShootOut`, `RefereeThrow` e `Punishment`.
+- `docs/design/navegacao.drawio.svg`
+  - sem alteração estrutural (sem nova aresta/classe com confiança semântica suficiente).
+
+#### 🛡️ Evidências
+
+- `sed -n '1,1200p' docs/ontologia/artigos/Goalkeeper behaviour Special Situations.md`
+- `rg -n "Offensive Foul|Shoot-out|Referee throw|Provocation|Punishment" docs/ontologia/artigos/Goalkeeper behaviour Special Situations.md`
 - `node scripts/check-ontology-semantics.mjs`

@@ -1017,7 +1017,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +contactResponsibilityWhenLeavingArea = goleiro responde por contato perigoso
 - **Relações**:
   - `GoalkeeperRole` enables `NumericalAsymmetry`
-- **Fonte**: MORILLO-2017; ROLLAND-DARE-FANACK-SD
+- **Fonte**: MORILLO-2017; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD
 - **Exemplo de uso**: O goleiro, ao sair para o ataque, gera a superioridade numérica 4×3 que é a base tática do HP.
 
 ---
@@ -1094,7 +1094,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `ShootOut` requires `GoalkeeperRole`
   - `ShootOut` causes `SixMetreThrow`
   - `GoldenGoal` precedes `ShootOut`
-- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD
+- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD
 - **Exemplo de uso**: Partida terminou 1-1 em períodos; no ShootOut, cada equipe designa 5 jogadores que alternam tentativas até que uma equipe marque mais que a outra nas 5 tentativas.
 
 ---
@@ -1115,7 +1115,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Relações**:
   - `PlayingCourt` part-of `SandSurface`
   - `GoalArea` part-of `PlayingCourt`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; MEIMARIDIS-GOMER-GOMER-SD
 - **Exemplo de uso**: A quadra mede 27×12m com profundidade de areia de 40cm; a zona de segurança de 3m ao redor impede que jogadores sofram lesões ao sair dos limites.
 
 ---
@@ -1378,7 +1378,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `Punishment` structures `PlayerWarning`
   - `Punishment` structures `PlayerSuspension`
   - `Punishment` structures `PlayerDisqualification`
-- **Fonte**: IHF-2026; CALDAS-MONICO-MARTINEZ-SD; ROLLAND-DARE-FANACK-SD
+- **Fonte**: IHF-2026; CALDAS-MONICO-MARTINEZ-SD; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD
 - **Exemplo de uso**: O árbitro aplica punições progressivas: primeira infração → PlayerWarning; reincidência → PlayerSuspension; conduta grave → PlayerDisqualification.
 
 ---

@@ -19,10 +19,21 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-24 - 21:32 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-24 - 21:46 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-24 21:46 BRT — CEPR-ONTOLOGIA-GOALKEEPER-SPECIAL-SITUATIONS-TRIAGEM-2026-05-24
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/Goalkeeper behaviour Special Situations.md` (extração -> classificação -> deduplicação -> atualização no bloco correto).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-goalkeeper-behaviour-special-situations-2026-05-24.md`;
+  - inclusão da fonte `MEIMARIDIS-GOMER-GOMER-SD` no `registro-fontes`;
+  - reforço de evidência em conceitos normativos (`GoalkeeperRole`, `ShootOut`, `RefereeThrow`, `Punishment`) sem criação de nova classe/relação.
+- **Evidências objetivas:**
+  - `sed -n '1,1200p' docs/ontologia/artigos/Goalkeeper behaviour Special Situations.md` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
 
 ## Entrada Rápida — 2026-05-24 21:32 BRT — CEPR-ONTOLOGIA-GOALKEEPER-BEHAVIOUR-TRIAGEM-E-UPDATE-2026-05-24
 

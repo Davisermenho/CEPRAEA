@@ -155,6 +155,20 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 
 ---
 
+### MEIMARIDIS-GOMER-GOMER-SD
+
+- **Tipo**: manual
+- **Título**: Goalkeeper behaviour Special Situations
+- **Autores**: Meimaridis, Ioannis; Gomer, Johan; Gomer, Martin
+- **Ano**: nao informado
+- **Publicação**: material técnico de arbitragem (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: casuistica arbitral de situacoes especiais envolvendo goleiro (offensive foul, shoot-out, referee throw, provocacao e punicoes).
+- **Conteúdo ontológico**: ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `GoalkeeperRole`, `ShootOut`, `RefereeThrow`, `Punishment`
+- **Observação**: OCR do material é majoritariamente composto por frames de jogo com baixa legibilidade textual; fonte usada como reforco de evidência sem criação de novos conceitos estruturais.
+- **Status**: ativo
+
 ---
 
 ## Fontes em triagem
