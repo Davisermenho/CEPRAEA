@@ -53,8 +53,8 @@ Esta matriz registra **todas as relações diretas** entre conceitos da ontologi
 | 2 | `SpecialistRole` | `influences` | `OffensiveSystem` | T | MORILLO-2017 | Especialista redefine os papéis e circulação ofensiva |
 | 3 | `SpecialistRole` | `influences` | `DefensiveSystem` | T | MORILLO-2017 | Adversário precisa adaptar defesa ao especialista |
 | 4 | `NumericalAsymmetry` | `structures` | `OffensiveDomain` | T | MORILLO-2017 | Formato 4x3 define o sub-domínio ofensivo |
-| 5 | `NumericalAsymmetry` | `structures` | `DefensiveDomain` | T | MORILLO-2017 | Formato 3x4 define o sub-domínio defensivo |
-| 6 | `Defense3_0` | `is-a` | `DefensiveSystem` | T | MORILLO-2017 | Defense3_0 é um tipo específico de sistema defensivo |
+| 5 | `NumericalAsymmetry` | `structures` | `DefensiveDomain` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | Formato 3x4 define o sub-domínio defensivo |
+| 6 | `Defense3_0` | `is-a` | `DefensiveSystem` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | Defense3_0 é um tipo específico de sistema defensivo |
 | 7 | `DefensiveSystem` | `is-a` | `DefensiveDomain` | T | MORILLO-2017 | Sistema defensivo pertence ao domínio defensivo |
 | 8 | `OffensiveSystem` | `is-a` | `OffensiveDomain` | T | MORILLO-2017 | Sistema ofensivo pertence ao domínio ofensivo |
 | 9 | `DefensiveTechnicalTacticalAction` | `part-of` | `DefensiveDomain` | T | MORILLO-2017 | Ações defensivas são componentes do domínio defensivo |
@@ -94,18 +94,18 @@ Esta matriz registra **todas as relações diretas** entre conceitos da ontologi
 | 40 | `GamePhase` | `structures` | `AttackPhase` | T | MORILLO-2017 | Fase ofensiva como sub-fase do ciclo |
 | 41 | `CounterAttack` | `is-a` | `GamePhase` | T | MORILLO-2017; TORRES-2022 | Contra-ataque é sub-fase do jogo |
 | 42 | `DefensiveReturn` | `is-a` | `GamePhase` | T | MORILLO-2017 | Retorno defensivo é sub-fase do jogo |
-| 43 | `Defense2_1` | `is-a` | `DefensiveSystem` | T | MORILLO-2017 | — |
+| 43 | `Defense2_1` | `is-a` | `DefensiveSystem` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | — |
 | 44 | `Defense2Plus1` | `is-a` | `DefensiveSystem` | T | MORILLO-2017 | — |
 | 45 | `Defense1_2` | `is-a` | `DefensiveSystem` | T | MORILLO-2017 | — |
 | 46 | `Defense1_2Plus1` | `is-a` | `DefensiveSystem` | T | MORILLO-2017 | — |
 | 47 | `IndividualDefense` | `is-a` | `DefensiveSystem` | T | MORILLO-2017 | — |
-| 48 | `ControlFromDistance` | `is-a` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017 | — |
-| 49 | `Siege` | `is-a` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017 | — |
-| 50 | `Dissuasion` | `is-a` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017 | — |
-| 51 | `Interception` | `is-a` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017 | — |
-| 52 | `SecondDefender` | `is-a` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017 | — |
-| 53 | `DefensiveDomain` | `structures` | `DefensiveSystem` | T | MORILLO-2017 | — |
-| 54 | `DefensiveDomain` | `structures` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017 | — |
+| 48 | `ControlFromDistance` | `is-a` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | — |
+| 49 | `Siege` | `is-a` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | — |
+| 50 | `Dissuasion` | `is-a` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | — |
+| 51 | `Interception` | `is-a` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | — |
+| 52 | `SecondDefender` | `is-a` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | — |
+| 53 | `DefensiveDomain` | `structures` | `DefensiveSystem` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | — |
+| 54 | `DefensiveDomain` | `structures` | `DefensiveTechnicalTacticalAction` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | — |
 | 55 | `DefensiveDomain` | `structures` | `DefensiveCollaborationMean` | T | MORILLO-2017 | — |
 | 56 | `DefensiveCollaborationMean` | `part-of` | `DefensiveDomain` | T | MORILLO-2017 | — |
 | 57 | `ChangeOfOpponent` | `is-a` | `DefensiveCollaborationMean` | T | MORILLO-2017 | — |
@@ -124,7 +124,7 @@ Esta matriz registra **todas as relações diretas** entre conceitos da ontologi
 | 70 | `OffensiveSystem3_1` | `is-a` | `OffensiveSystem` | T | MORILLO-2017 | — |
 | 71 | `OffensiveSystem4_0` | `is-a` | `OffensiveSystem` | T | MORILLO-2017 | — |
 | 72 | `NumericalAsymmetry` | `enables` | `AttackModel` | T | MORILLO-2017 | Superioridade 4×3 condiciona o AttackModel |
-| 73 | `NumericalAsymmetry` | `influences` | `DefensiveSystem` | T | MORILLO-2017 | Inferioridade defensiva condiciona a escolha do sistema |
+| 73 | `NumericalAsymmetry` | `influences` | `DefensiveSystem` | T | MORILLO-2017; GILIO-SILVA-MENEZES-2021 | Inferioridade defensiva condiciona a escolha do sistema |
 | 74 | `GoalkeeperRole` | `enables` | `NumericalAsymmetry` | T | MORILLO-2017 | Goleiro sai → especialista entra → 4×3 |
 | 75 | `SpecialistRole` | `enables` | `CounterAttack` | T | MORILLO-2017 | Especialista inicia a transição ofensiva |
 | 76 | `CounterAttack` | `requires` | `DefensiveReturn` | T | MORILLO-2017 | Retorno defensivo é resposta ao contra-ataque |

@@ -262,6 +262,20 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 - **Observação**: Fonte aplicada para refino operacional das acoes do goleiro ao longo da sequencia percepcao-posicionamento-reacao-organizacao ofensiva, sem criacao de novas classes estruturais no modelo.
 - **Status**: ativo
 
+### GILIO-SILVA-MENEZES-2021
+
+- **Tipo**: artigo
+- **Título**: The structuring of the defensive phase of beach handball
+- **Autores**: Di Gilio, Joao Paulo Torres; Silva, Karen Pereira da; Menezes, Rafael Pombo
+- **Ano**: 2021
+- **Publicação**: Motriz, v. 27, e1021013120
+- **DOI / URL**: http://dx.doi.org/10.1590/S1980-65742021013120
+- **Tema principal**: organizacao hierarquica da fase defensiva no handebol de praia a partir do discurso de treinadores, com base em assimetria numerica, sistemas defensivos e acoes tecnico-taticas.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `NumericalAsymmetry`, `DefensiveDomain`, `DefensiveSystem`, `Defense3_0`, `Defense2_1`, `DefensiveTechnicalTacticalAction`, `ControlFromDistance`, `Siege`, `Dissuasion`, `Interception`, `SecondDefender`
+- **Observação**: Fonte qualitativa (entrevistas com treinadores) que reforca a hierarquia defensiva ja modelada e acrescenta evidencia para modos de marcacao (zonal, individual e combinado), sem demanda de nova classe ou relacao estrutural.
+- **Status**: ativo
+
 ---
 
 ## Fontes em triagem

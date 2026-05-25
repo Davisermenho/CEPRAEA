@@ -19,10 +19,23 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-25 - 01:15 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-25 - 01:55 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-25 01:55 BRT — CEPR-ONTOLOGIA-STRUCTURING-DEFENSIVE-PHASE-TRIAGEM-2026-05-25
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/The_structuring_of_the_defensive_phase_of_beach_handball.md` (extração -> classificação -> deduplicação -> atualização no bloco correto).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-structuring-defensive-phase-beach-handball-2026-05-25.md`;
+  - inclusão da fonte `GILIO-SILVA-MENEZES-2021` no `registro-fontes`;
+  - enriquecimento de atributos/evidências em `DefensiveSystem`, `Defense3_0`, `Defense2_1`, `DefensiveTechnicalTacticalAction`, `DefensiveDomain` e `NumericalAsymmetry`;
+  - reforço de evidência na matriz em relações defensivas já existentes (`#5`, `#6`, `#43`, `#48-#54`, `#73`), sem criação de nova classe/relação.
+- **Evidências objetivas:**
+  - `sed -n '1,420p' docs/ontologia/artigos/The_structuring_of_the_defensive_phase_of_beach_handball.md` ✅
+  - `rg -n "numerical asymmetry|defensive systems|technical-tactical" docs/ontologia/artigos/The_structuring_of_the_defensive_phase_of_beach_handball.md` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
 
 ## Entrada Rápida — 2026-05-25 01:15 BRT — CEPR-ONTOLOGIA-TEMPOS-DEFESA-GOLEIRO-TRIAGEM-2026-05-25
 

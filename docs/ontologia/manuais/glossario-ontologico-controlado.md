@@ -94,6 +94,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `NumericalAsymmetry` structures `DefensiveDomain`
   - `SpecialistRole` causes `NumericalAsymmetry`
 - **Fonte**: MORILLO-2017; SILVA-MENEZES-2018; HINSON-SD
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018; HINSON-SD; GILIO-SILVA-MENEZES-2021
 - **Exemplo de uso**: com o especialista em campo, o ataque opera com 4 jogadores contra 3 defensores.
 
 ---
@@ -107,12 +108,13 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Não confundir com**: `DefensiveTechnicalTacticalAction` (ação individual dentro do sistema)
 - **Atributos**:
   - +formation = string (ex: "3:0", "2:1")
+  - +markingModes = {zonal, man-to-man, combined}
   - +selectionProfile = {tall, fast, leader, catchingAbility, teamwork, experience}
   - +style = {reactive, proactive}
 - **Relações**:
   - `DefensiveSystem` is-a `DefensiveDomain`
   - `NumericalAsymmetry` structures `DefensiveSystem`
-- **Fonte**: MORILLO-2017; ANDERSEN-SD
+- **Fonte**: MORILLO-2017; ANDERSEN-SD; GILIO-SILVA-MENEZES-2021
 - **Exemplo de uso**: a equipe adota o sistema 3:0 no início da fase defensiva para proteger a zona central.
 
 ---
@@ -131,7 +133,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +inducesSideShot = true
 - **Relações**:
   - `Defense3_0` is-a `DefensiveSystem`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; GILIO-SILVA-MENEZES-2021
 - **Exemplo de uso**: defesa 3:0 usada no início da fase defensiva para organizar o bloco antes do adversário estabelecer o ataque posicionado.
 
 ---
@@ -169,9 +171,10 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +spaceControlPriority = ocupacao de espaco e bloqueio pelo corredor central
   - +pressureBlockDecision = pressao externa ou bloqueio conforme contexto da jogada
   - +fairPlaySafetyConstraint = execucao defensiva deve preservar fair play e seguranca
+  - +synchronyTimingCritical = acoes defensivas coordenadas no tempo aumentam dificuldade da finalizacao ofensiva
 - **Relações**:
   - `DefensiveTechnicalTacticalAction` part-of `DefensiveDomain`
-- **Fonte**: MORILLO-2017; ANDERSEN-SD
+- **Fonte**: MORILLO-2017; ANDERSEN-SD; GILIO-SILVA-MENEZES-2021
 - **Exemplo de uso**: cobertura lateral realizada pelo defensor esquerdo após o passe do especialista.
 
 ---
@@ -701,7 +704,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +advancedDefenderChannel = {middle, side}
 - **Relações**:
   - `Defense2_1` is-a `DefensiveSystem`
-- **Fonte**: MORILLO-2017; ANDERSEN-SD
+- **Fonte**: MORILLO-2017; ANDERSEN-SD; GILIO-SILVA-MENEZES-2021
 - **Exemplo de uso**: O sistema 2:1 é eficaz para pressionar o especialista que atua no centro; exige adaptação quando o especialista muda para as alas.
 
 ---
@@ -839,7 +842,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `DefensiveSystem` part-of `DefensiveDomain`
   - `DefensiveTechnicalTacticalAction` part-of `DefensiveDomain`
   - `DefensiveCollaborationMean` part-of `DefensiveDomain`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; GILIO-SILVA-MENEZES-2021
 - **Exemplo de uso**: Todos os sistemas defensivos (3:0, 2:1, etc.) são parte do DefensiveDomain.
 
 ---
