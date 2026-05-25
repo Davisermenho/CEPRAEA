@@ -123,6 +123,22 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 
 ---
 
+### NOVAKOVIC-SD
+
+- **Tipo**: manual
+- **Título**: Coaching a winning team
+- **Autores**: Novakovic, Alexander
+- **Ano**: nao informado
+- **Publicação**: material tecnico de coaching (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: prevencao de lesoes e planejamento anual de carga no HP, com controle individual da carga em atletas que alternam beach e indoor.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `LoadMonitoringDomain`, `InternalLoad`, `ExternalLoad`, `PlayerPerformanceDomain`, `SandSurface`
+- **Observação**: Fonte usada para refinar atributos de planejamento de longo prazo, periodos de transicao entre superficies e orientacoes operacionais de regeneracao.
+- **Status**: ativo
+
+---
+
 ## Fontes em triagem
 
 > Fontes identificadas mas ainda não processadas formalmente.

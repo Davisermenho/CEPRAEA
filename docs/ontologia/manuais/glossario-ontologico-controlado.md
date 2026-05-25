@@ -174,11 +174,14 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Atributos**:
   - +internalLoad = medidas fisiológicas (FC, PSE)
   - +externalLoad = medidas externas (distância, acelerações, arremessos)
+  - +longTermAthleticPlan = planejamento individual anual integrando beach e indoor
+  - +surfaceTransitionPeriod = transição individual entre superfícies para adaptação de carga
+  - +crossStaffCommunication = comunicação operacional beach/indoor para decisão de carga, pausa e convocação
 - **Relações**:
   - `LoadMonitoringDomain` part-of `PlayerPerformanceDomain`
   - `InternalLoad` part-of `LoadMonitoringDomain`
   - `ExternalLoad` part-of `LoadMonitoringDomain`
-- **Fonte**: LEMOS-2023
+- **Fonte**: LEMOS-2023; NOVAKOVIC-SD
 - **Exemplo de uso**: monitoramento da carga interna durante um set via frequência cardíaca e PSE.
 
 ---
@@ -398,9 +401,11 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +heartRate = frequência cardíaca em bpm
   - +percentHRmax = percentual da FCmáx
   - +typicalRange = 71-80% FCmáx durante partidas oficiais
+  - +sleepRecoveryTarget = ~9h de sono/noite como referência de regeneração
+  - +dualSurfaceRecoveryPriority = maior prioridade de recuperação para atletas beach+indoor
 - **Relações**:
   - `InternalLoad` part-of `LoadMonitoringDomain`
-- **Fonte**: LEMOS-2023
+- **Fonte**: LEMOS-2023; NOVAKOVIC-SD
 - **Exemplo de uso**: atletas percorrem 1000-1200m por partida com resposta fisiológica de 71-80% FCmáx (Estudo 4, LEMOS-2023).
 
 ---
@@ -419,10 +424,12 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +HSR = corrida em alta velocidade
   - +measurementTool = IMU / WIMU
   - +nParams = 18
+  - +dualSurfaceOverlapRisk = sobrecarga ampliada em atletas com agenda simultânea beach/indoor
+  - +surfaceSpecificLoadProgression = progressão específica entre areia e indoor (rotação, saltos e contato corporal)
 - **Relações**:
   - `ExternalLoad` part-of `LoadMonitoringDomain`
   - `SandSurface` influences `ExternalLoad`
-- **Fonte**: LEMOS-2023
+- **Fonte**: LEMOS-2023; NOVAKOVIC-SD
 - **Exemplo de uso**: 18 parâmetros de carga externa avaliados em 124 atletas seniores em 21 partidas oficiais via WIMU (Estudo 4, LEMOS-2023).
 
 ---
