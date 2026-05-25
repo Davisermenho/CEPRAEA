@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-24 - 21:46 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-24 - 22:24 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -2725,4 +2725,34 @@ Aplicação do protocolo ontológico ao artigo `Goalkeeper behaviour Special Sit
 
 - `sed -n '1,1200p' docs/ontologia/artigos/Goalkeeper behaviour Special Situations.md`
 - `rg -n "Offensive Foul|Shoot-out|Referee throw|Provocation|Punishment" docs/ontologia/artigos/Goalkeeper behaviour Special Situations.md`
+- `node scripts/check-ontology-semantics.mjs`
+
+
+### [CEPR-ONTOLOGIA-LATEST-TRENDS-ATTACK-TRIAGEM-E-UPDATE-2026-05-24] — 2026-05-24 — Triagem técnico-tática de tendências de ataque
+
+#### ✨ Resumo
+
+Aplicação do protocolo ontológico ao artigo `Latest trends in attack_0.md` com extração, classificação, deduplicação e atualização do bloco técnico-tático no Draw.io.
+
+#### 🚀 Added
+
+- `docs/ontologia/triagens/triagem-latest-trends-attack-0-2026-05-24.md`
+  - triagem completa (Passos 1-5) com decisão por conceito.
+
+#### 🛠️ Changed
+
+- `docs/ontologia/manuais/registro-fontes.md`
+  - inclusão da fonte `PARADZIK-SD`.
+- `docs/ontologia/manuais/glossario-ontologico-controlado.md`
+  - enriquecimento de `AttackModel`, `CounterAttack`, `Interception` e `PassivePlay` com atributos/relações/evidências.
+- `docs/ontologia/manuais/matriz-relacoes.md`
+  - inclusão da relação `#122`: `Interception enables CounterAttack`.
+- `docs/design/navegacao.drawio.svg`
+  - inclusão da aresta técnico-tática `Interception ->(enables)-> CounterAttack`.
+
+#### 🛡️ Evidências
+
+- `sed -n '1,480p' "docs/ontologia/artigos/Latest trends in attack_0.md"`
+- `nl -ba "docs/ontologia/artigos/Latest trends in attack_0.md" | sed -n '250,360p'`
+- `rg -n "CounterAttack|Interception|AttackModel|PassivePlay" docs/ontologia/manuais/glossario-ontologico-controlado.md`
 - `node scripts/check-ontology-semantics.mjs`

@@ -177,6 +177,7 @@ Esta matriz registra **todas as relações diretas** entre conceitos da ontologi
 | 119 | `TwoPointGoal` | `enables` | `SpecialistRole` | N | SKOWRONEK-2023 | Gol marcado por especialista também vale 2 pontos |
 | 120 | `SixMetreThrow` | `requires` | `GoalkeeperRole` | N | IHF-2026; CALDAS-MONICO-MARTINEZ-SD | Execução do 6m ocorre contra goleiro e depende do setup regulamentar do goleiro |
 | 121 | `SubstitutionArea` | `causes` | `PlayerSuspension` | N | IHF-2026; ROLLAND-DARE-FANACK-SD | Substituição irregular ou entrada ilegal no contexto da área de substituição pode gerar suspensão (Rule 16:2a) |
+| 122 | `Interception` | `enables` | `CounterAttack` | T | MORILLO-2017; PARADZIK-SD | Recuperação de passe por intercepção cria gatilho imediato para transição ofensiva rápida |
 
 ## Relações pendentes de validação
 

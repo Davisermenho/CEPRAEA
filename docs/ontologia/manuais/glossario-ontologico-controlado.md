@@ -645,11 +645,16 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Tipo**: Classe
 - **Sinônimos**: contra-ataque, counter-attack, transição ofensiva
 - **Não confundir com**: AttackPhase (fase estruturada); CounterAttack é a transição rápida
+- **Atributos**:
+  - +priority = finalizar rapido a transicao ofensiva
+  - +commonTriggers = {Interception, ThrowIn, offensive foul}
+  - +assistantSupport = goleiro e jogador de linha podem iniciar/assistir a transicao
 - **Relações**:
   - `CounterAttack` is-a `GamePhase`
   - `SpecialistRole` enables `CounterAttack`
   - `CounterAttack` requires `DefensiveReturn`
-- **Fonte**: MORILLO-2017
+  - `Interception` enables `CounterAttack`
+- **Fonte**: MORILLO-2017; PARADZIK-SD
 - **Exemplo de uso**: O especialista inicia o contra-ataque logo após a defesa do goleiro.
 
 ---
@@ -785,7 +790,8 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Sinônimos**: intercepção, interception, roubo de passe
 - **Relações**:
   - `Interception` is-a `DefensiveTechnicalTacticalAction`
-- **Fonte**: MORILLO-2017
+  - `Interception` enables `CounterAttack`
+- **Fonte**: MORILLO-2017; PARADZIK-SD
 - **Exemplo de uso**: Defensor antecipa trajetória do passe em voo para interceptar antes que o atacante o receba.
 
 ---
@@ -887,10 +893,11 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Atributos**:
   - +priorityGoalType = gol de duplo valor (especialista ou arremesso específico)
   - +specialistPosition = {central, pivô, ala direita, ala esquerda}
+  - +fallbackPredeterminedActions = usadas quando a criatividade ofensiva falha
 - **Relações**:
   - `AttackModel` part-of `OffensiveDomain`
   - `NumericalAsymmetry` enables `AttackModel`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; PARADZIK-SD
 - **Exemplo de uso**: Uma equipe com especialista de arremesso em giro usa AttackModel posicionando-o nas alas para maximizar os gols de 2 pontos.
 
 ---
@@ -1334,7 +1341,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Relações**:
   - `PassivePlay` influences `AttackPhase`
   - `PassivePlay` causes `FreeThrow`
-- **Fonte**: IHF-2026
+- **Fonte**: IHF-2026; PARADZIK-SD
 - **Exemplo de uso**: Com a equipe circulando a bola sem finalização, o árbitro levanta a mão sinalizando o jogo passivo; a equipe tem ainda 4 passes para finalizar ou perde a posse.
 
 ---

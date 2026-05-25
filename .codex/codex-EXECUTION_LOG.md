@@ -19,10 +19,22 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-24 - 21:46 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-24 - 22:24 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+
+## Entrada Rápida — 2026-05-24 22:24 BRT — CEPR-ONTOLOGIA-LATEST-TRENDS-ATTACK-TRIAGEM-E-UPDATE-2026-05-24
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/Latest trends in attack_0.md` (extração -> classificação -> deduplicação -> atualização no bloco correto).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-latest-trends-attack-0-2026-05-24.md`;
+  - inclusão da fonte `PARADZIK-SD` no `registro-fontes`;
+  - enriquecimento de `AttackModel` e `CounterAttack`, além da formalização da relação `Interception enables CounterAttack` em glossário, matriz e Draw.io.
+- **Evidências objetivas:**
+  - `sed -n '1,480p' "docs/ontologia/artigos/Latest trends in attack_0.md"` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
 
 ## Entrada Rápida — 2026-05-24 21:46 BRT — CEPR-ONTOLOGIA-GOALKEEPER-SPECIAL-SITUATIONS-TRIAGEM-2026-05-24
 

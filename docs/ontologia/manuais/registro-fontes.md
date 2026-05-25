@@ -171,6 +171,22 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 
 ---
 
+### PARADZIK-SD
+
+- **Tipo**: manual
+- **Título**: Latest trends in attack
+- **Autores**: Paradzik, Mladen
+- **Ano**: nao informado
+- **Publicação**: material tecnico de coaching (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: tendencias recentes de ataque no handebol de praia com foco em contra-ataque, tomada de decisao e gatilhos de transicao ofensiva.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_RELACAO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `CounterAttack`, `Interception`, `AttackModel`, `PassivePlay`
+- **Observação**: Fonte aplicada com trechos textuais legiveis nas secoes de treino e transicao (p.15, p.18, p.19); partes com OCR ruidoso foram usadas apenas como contexto e nao como base para nova classe.
+- **Status**: ativo
+
+---
+
 ## Fontes em triagem
 
 > Fontes identificadas mas ainda não processadas formalmente.
