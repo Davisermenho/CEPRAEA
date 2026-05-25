@@ -187,6 +187,22 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 
 ---
 
+### ANDERSEN-SD
+
+- **Tipo**: manual
+- **Título**: Latest Trends in Defence
+- **Autores**: Andersen, Gorm
+- **Ano**: nao informado
+- **Publicação**: material tecnico de coaching (slides)
+- **DOI / URL**: *(não informado)*
+- **Tema principal**: estilos defensivos e regras operacionais de defesa no handebol de praia, com foco em selecao do trio defensivo, variacao do sistema 2-1 e criterios de pressao/bloqueio.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `DefensiveSystem`, `Defense2_1`, `DefensiveTechnicalTacticalAction`, `ShootOut`, `GoalkeeperRole`
+- **Observação**: Fonte com partes OCR ruidosas, mas com trechos legiveis suficientes nas secoes de selecao do time e opcoes/regras defensivas (p.6, p.8, p.10-p.13).
+- **Status**: ativo
+
+---
+
 ## Fontes em triagem
 
 > Fontes identificadas mas ainda não processadas formalmente.

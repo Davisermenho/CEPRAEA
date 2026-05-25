@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-24 - 22:24 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-25 - 00:43 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -2755,4 +2755,32 @@ Aplicação do protocolo ontológico ao artigo `Latest trends in attack_0.md` co
 - `sed -n '1,480p' "docs/ontologia/artigos/Latest trends in attack_0.md"`
 - `nl -ba "docs/ontologia/artigos/Latest trends in attack_0.md" | sed -n '250,360p'`
 - `rg -n "CounterAttack|Interception|AttackModel|PassivePlay" docs/ontologia/manuais/glossario-ontologico-controlado.md`
+- `node scripts/check-ontology-semantics.mjs`
+
+
+### [CEPR-ONTOLOGIA-LATEST-TRENDS-DEFENCE-TRIAGEM-2026-05-25] — 2026-05-25 — Triagem técnico-tática de tendências defensivas
+
+#### ✨ Resumo
+
+Aplicação do protocolo ontológico ao artigo `Latest trends in defence.md` com extração, classificação, deduplicação e atualização dos artefatos textuais no bloco defensivo.
+
+#### 🚀 Added
+
+- `docs/ontologia/triagens/triagem-latest-trends-defence-2026-05-25.md`
+  - triagem completa (Passos 1-5), incluindo decisão por conceito.
+
+#### 🛠️ Changed
+
+- `docs/ontologia/manuais/registro-fontes.md`
+  - inclusão da fonte `ANDERSEN-SD`.
+- `docs/ontologia/manuais/glossario-ontologico-controlado.md`
+  - enriquecimento de `DefensiveSystem`, `Defense2_1` e `DefensiveTechnicalTacticalAction` com atributos operacionais;
+  - reforço de evidência em `ShootOut` e `GoalkeeperRole`.
+- `docs/design/navegacao.drawio.svg`
+  - sem alteração estrutural (sem nova aresta com evidência suficiente).
+
+#### 🛡️ Evidências
+
+- `sed -n '1,520p' "docs/ontologia/artigos/Latest trends in defence.md"`
+- `rg -n "Defense2_1|DefensiveSystem|DefensiveTechnicalTacticalAction|ShootOut|GoalkeeperRole" docs/ontologia/manuais/glossario-ontologico-controlado.md`
 - `node scripts/check-ontology-semantics.mjs`

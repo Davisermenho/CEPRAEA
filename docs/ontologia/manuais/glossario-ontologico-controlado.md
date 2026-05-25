@@ -105,10 +105,12 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Não confundir com**: `DefensiveTechnicalTacticalAction` (ação individual dentro do sistema)
 - **Atributos**:
   - +formation = string (ex: "3:0", "2:1")
+  - +selectionProfile = {tall, fast, leader, catchingAbility, teamwork, experience}
+  - +style = {reactive, proactive}
 - **Relações**:
   - `DefensiveSystem` is-a `DefensiveDomain`
   - `NumericalAsymmetry` structures `DefensiveSystem`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; ANDERSEN-SD
 - **Exemplo de uso**: a equipe adota o sistema 3:0 no início da fase defensiva para proteger a zona central.
 
 ---
@@ -157,10 +159,13 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Tipo**: Classe
 - **Sinônimos**: ação defensiva, defensive action, ação técnico-tática defensiva
 - **Não confundir com**: `DefensiveSystem` (estrutura) vs. ação (execução dentro da estrutura)
-- **Atributos**: *(a preencher conforme artigos)*
+- **Atributos**:
+  - +spaceControlPriority = ocupacao de espaco e bloqueio pelo corredor central
+  - +pressureBlockDecision = pressao externa ou bloqueio conforme contexto da jogada
+  - +fairPlaySafetyConstraint = execucao defensiva deve preservar fair play e seguranca
 - **Relações**:
   - `DefensiveTechnicalTacticalAction` part-of `DefensiveDomain`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; ANDERSEN-SD
 - **Exemplo de uso**: cobertura lateral realizada pelo defensor esquerdo após o passe do especialista.
 
 ---
@@ -679,9 +684,11 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Camada**: técnico-tática
 - **Tipo**: Classe
 - **Sinônimos**: defesa 2:1, sistema 2-1, defense 2:1
+- **Atributos**:
+  - +advancedDefenderChannel = {middle, side}
 - **Relações**:
   - `Defense2_1` is-a `DefensiveSystem`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; ANDERSEN-SD
 - **Exemplo de uso**: O sistema 2:1 é eficaz para pressionar o especialista que atua no centro; exige adaptação quando o especialista muda para as alas.
 
 ---
@@ -1024,7 +1031,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +contactResponsibilityWhenLeavingArea = goleiro responde por contato perigoso
 - **Relações**:
   - `GoalkeeperRole` enables `NumericalAsymmetry`
-- **Fonte**: MORILLO-2017; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD
+- **Fonte**: MORILLO-2017; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD; ANDERSEN-SD
 - **Exemplo de uso**: O goleiro, ao sair para o ataque, gera a superioridade numérica 4×3 que é a base tática do HP.
 
 ---
@@ -1101,7 +1108,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `ShootOut` requires `GoalkeeperRole`
   - `ShootOut` causes `SixMetreThrow`
   - `GoldenGoal` precedes `ShootOut`
-- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD
+- **Fonte**: IHF-2026; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD; ANDERSEN-SD
 - **Exemplo de uso**: Partida terminou 1-1 em períodos; no ShootOut, cada equipe designa 5 jogadores que alternam tentativas até que uma equipe marque mais que a outra nas 5 tentativas.
 
 ---
