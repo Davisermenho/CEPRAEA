@@ -19,10 +19,23 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-25 - 01:08 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-25 - 01:15 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+## Entrada Rápida — 2026-05-25 01:15 BRT — CEPR-ONTOLOGIA-TEMPOS-DEFESA-GOLEIRO-TRIAGEM-2026-05-25
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/Tempos_de_defesa_do_goleiro_de_handebol_de_praia.md` (extração -> classificação -> deduplicação -> atualização no bloco correto).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-tempos-defesa-goleiro-2026-05-25.md`;
+  - inclusão da fonte `TORRES-2022` no `registro-fontes`;
+  - enriquecimento de atributos/evidências em `GoalkeeperRole` e `CounterAttack`;
+  - reforço de evidência na matriz em relação já existente (`#41`), sem criar nova classe/relação.
+- **Evidências objetivas:**
+  - `sed -n '1,320p' docs/ontologia/artigos/Tempos_de_defesa_do_goleiro_de_handebol_de_praia.md` ✅
+  - `rg -n "Tempo de Observação|Tempo da Bola|Tempo de Reação|Tempo de Organização" docs/ontologia/artigos/Tempos_de_defesa_do_goleiro_de_handebol_de_praia.md` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
 
 ## Entrada Rápida — 2026-05-25 01:08 BRT — CEPR-ONTOLOGIA-TEMAS-EMERGENTES-TRIAGEM-2026-05-25
 

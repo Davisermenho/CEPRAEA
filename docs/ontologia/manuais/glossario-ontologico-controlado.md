@@ -666,12 +666,13 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +priority = finalizar rapido a transicao ofensiva
   - +commonTriggers = {Interception, ThrowIn, offensive foul}
   - +assistantSupport = goleiro e jogador de linha podem iniciar/assistir a transicao
+  - +goalkeeperPostDefenseDecisionSet = {directGoalThrow, counterattackThrow, sustainedExit, simpleResetPass}
 - **Relações**:
   - `CounterAttack` is-a `GamePhase`
   - `SpecialistRole` enables `CounterAttack`
   - `CounterAttack` requires `DefensiveReturn`
   - `Interception` enables `CounterAttack`
-- **Fonte**: MORILLO-2017; PARADZIK-SD
+- **Fonte**: MORILLO-2017; PARADZIK-SD; TORRES-2022
 - **Exemplo de uso**: O especialista inicia o contra-ataque logo após a defesa do goleiro.
 
 ---
@@ -1043,9 +1044,14 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - +outsideGoalAreaRule = regras de jogador de linha se aplicam
   - +cannotLeaveGoalAreaWithControlledBall = true
   - +contactResponsibilityWhenLeavingArea = goleiro responde por contato perigoso
+  - +defenseStagesModel = {T1 preShotObservation, T2 launchPositioning, T3 postLaunchReaction, T4 postDefenseOrGoalOrganization}
+  - +preShotObservationFocus = {attackerTrajectory, attackerPositioning, ballFlowContext}
+  - +positioningWindowConstraint = poucos segundos para ajuste na areia apos leitura de T1
+  - +reactionWindowConstraint = leitura de trajetoria de bola + possibilidade de bloqueio defensivo
+  - +trainingPrinciple = estimulos sensorio-motores e visuais devem simular demandas reais do jogo
 - **Relações**:
   - `GoalkeeperRole` enables `NumericalAsymmetry`
-- **Fonte**: MORILLO-2017; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD; ANDERSEN-SD
+- **Fonte**: MORILLO-2017; ROLLAND-DARE-FANACK-SD; MEIMARIDIS-GOMER-GOMER-SD; ANDERSEN-SD; TORRES-2022
 - **Exemplo de uso**: O goleiro, ao sair para o ataque, gera a superioridade numérica 4×3 que é a base tática do HP.
 
 ---

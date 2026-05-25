@@ -92,7 +92,7 @@ Esta matriz registra **todas as relações diretas** entre conceitos da ontologi
 
 | 39 | `GamePhase` | `structures` | `DefensePhase` | T | MORILLO-2017 | Fase defensiva como sub-fase do ciclo |
 | 40 | `GamePhase` | `structures` | `AttackPhase` | T | MORILLO-2017 | Fase ofensiva como sub-fase do ciclo |
-| 41 | `CounterAttack` | `is-a` | `GamePhase` | T | MORILLO-2017 | Contra-ataque é sub-fase do jogo |
+| 41 | `CounterAttack` | `is-a` | `GamePhase` | T | MORILLO-2017; TORRES-2022 | Contra-ataque é sub-fase do jogo |
 | 42 | `DefensiveReturn` | `is-a` | `GamePhase` | T | MORILLO-2017 | Retorno defensivo é sub-fase do jogo |
 | 43 | `Defense2_1` | `is-a` | `DefensiveSystem` | T | MORILLO-2017 | — |
 | 44 | `Defense2Plus1` | `is-a` | `DefensiveSystem` | T | MORILLO-2017 | — |

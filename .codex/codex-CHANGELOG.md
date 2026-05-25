@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-25 - 01:08 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-25 - 01:15 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,7 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-25 | 01:15 | CEPR-ONTOLOGIA-TEMPOS-DEFESA-GOLEIRO-TRIAGEM-2026-05-25 | Protocolo ontológico aplicado ao artigo “Tempos de defesa do goleiro de handebol de praia”: triagem documentada, nova fonte registrada (`TORRES-2022`) e enriquecimento técnico-tático em `GoalkeeperRole` e `CounterAttack` sem mudança estrutural no Draw.io | `docs/ontologia/triagens/triagem-tempos-defesa-goleiro-2026-05-25.md` criado · `docs/ontologia/manuais/{glossario-ontologico-controlado,registro-fontes,matriz-relacoes}.md` atualizados · `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s)) |
 | 2026-05-25 | 01:08 | CEPR-ONTOLOGIA-TEMAS-EMERGENTES-TRIAGEM-2026-05-25 | Protocolo ontológico aplicado ao artigo “Temas emergentes no handebol e no handebol de praia”: triagem documentada, nova fonte registrada (`VERGINELLI-2025`), enriquecimento de atributos/evidências no glossário e matriz sem mudança estrutural no Draw.io | `docs/ontologia/triagens/triagem-temas-emergentes-handebol-praia-2026-05-25.md` criado · `docs/ontologia/manuais/{glossario-ontologico-controlado,registro-fontes,matriz-relacoes}.md` atualizados · `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s)) |
 | 2026-05-21 | 23:38 | CEPR-GOV-HARDENING-05 | PR operacional formal de modo solo criada e ruído de CI reduzido: `npm ci` dos gates Scout passou a usar `--loglevel=error --no-audit --no-fund`; resolução da URL de preview endurecida com retry e fallback sem `teamId` para reduzir falhas 403 intermitentes na API da Vercel | `docs/auditorias/solo-mode-governance-2026-05-21.md` criado · `.github/workflows/scout-preview-smoke.yml` e `.github/workflows/scout-contract-cepr0098d.yml` atualizados · branch protection snapshot registrado |
 | 2026-05-21 | 17:48 | CEPR-GOV-HARDENING-04 | `AGENTS.md` alinhado explicitamente para operação solo (sem aprovação humana obrigatória de terceiros), mantendo obrigatoriedade de gates técnicos | `AGENTS.md` seção `5.9 Operação solo` criada · branch protection atual verificada com `required_reviews=0`, `require_last_push_approval=false` e checks obrigatórios ativos |

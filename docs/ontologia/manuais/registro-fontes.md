@@ -248,6 +248,20 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 - **Observação**: Fonte de sintese e aplicacao. No capitulo observacional de shoot-out (28 partidas, 280 cobrancas validas) reporta predominancia de giro (80,3%) e taxa de conversao de gol (68,9%), alem da frequencia de saida defensiva (67,8%) com eficiencia limitada (30,5%).
 - **Status**: ativo
 
+### TORRES-2022
+
+- **Tipo**: artigo
+- **Título**: Tempos de defesa do goleiro de handebol de praia
+- **Autores**: Torres, Jaime Souza; Caporal, Guilherme Cortoni; Nicolini, Daniela Cardoso; Uezu, Rudney
+- **Ano**: 2022
+- **Publicação**: Research, Society and Development, v.11, n.14, e555111436855
+- **DOI / URL**: http://dx.doi.org/10.33448/rsd-v11i14.36855
+- **Tema principal**: diretriz para treinamento do goleiro no handebol de praia com base em quatro tempos de defesa (T1-T4) e em estimulos sensorio-motores para tomada de decisao.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `GoalkeeperRole`, `CounterAttack`, `DefensiveTechnicalTacticalAction`
+- **Observação**: Fonte aplicada para refino operacional das acoes do goleiro ao longo da sequencia percepcao-posicionamento-reacao-organizacao ofensiva, sem criacao de novas classes estruturais no modelo.
+- **Status**: ativo
+
 ---
 
 ## Fontes em triagem
