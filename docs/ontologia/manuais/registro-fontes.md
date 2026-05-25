@@ -203,6 +203,22 @@ Usar os códigos definidos no manual (tabela de triagem, seção 11):
 
 ---
 
+### SILVA-MENEZES-2018
+
+- **Tipo**: artigo
+- **Título**: O jogo ofensivo do handebol de areia: estrutura e aspectos técnico-táticos do ataque posicionado
+- **Autores**: Silva, Karen Pereira da; Menezes, Rafael Pombo
+- **Ano**: 2018
+- **Publicação**: Cuadernos de Psicología del Deporte, 18(3), 209-221
+- **DOI / URL**: *(não informado no material extraído)*
+- **Tema principal**: estrutura hierarquica do ataque posicionado no handebol de areia a partir da percepcao de treinadores, com enfase na assimetria numerica, especialista, sistemas ofensivos e meios tecnico-taticos.
+- **Conteúdo ontológico**: ADICIONAR_ATRIBUTO, ADICIONAR_RELACAO, ADICIONAR_EVIDENCIA
+- **Conceitos sustentados**: `SpecialistRole`, `NumericalAsymmetry`, `OffensiveSystem`, `AttackModel`, `OffensiveCollaborationMean`, `SuccessiveEntrances`, `Crossing`, `ShootingAction`
+- **Observação**: artigo qualitativo (entrevistas) com forte aderencia aos blocos ofensivos ja modelados; utilizado para refino de atributos e formalizacao de relacao tatico-estrutural adicional.
+- **Status**: ativo
+
+---
+
 ## Fontes em triagem
 
 > Fontes identificadas mas ainda não processadas formalmente.

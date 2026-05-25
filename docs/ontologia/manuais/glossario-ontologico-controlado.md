@@ -67,11 +67,13 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Atributos**:
   - +position = field player acting as goalkeeper-line
   - +triggersNumericalAsymmetry = true
+  - +decisionCentrality = influencia a circulacao da bola e a escolha da finalizacao no ataque posicionado
 - **Relações**:
   - `SpecialistRole` causes `NumericalAsymmetry`
   - `SpecialistRole` influences `OffensiveSystem`
   - `SpecialistRole` influences `DefensiveSystem`
-- **Fonte**: MORILLO-2017
+  - `SpecialistRole` influences `AttackModel`
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
 - **Exemplo de uso**: equipe retira o goleiro e coloca o especialista para criar superioridade 4x3 no ataque.
 
 ---
@@ -91,7 +93,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `NumericalAsymmetry` structures `OffensiveDomain`
   - `NumericalAsymmetry` structures `DefensiveDomain`
   - `SpecialistRole` causes `NumericalAsymmetry`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
 - **Exemplo de uso**: com o especialista em campo, o ataque opera com 4 jogadores contra 3 defensores.
 
 ---
@@ -143,11 +145,13 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Não confundir com**: `OffensiveTechnicalTacticalAction` (ação individual dentro do sistema)
 - **Atributos**:
   - +formation = string (ex: "4x3 com especialista")
+  - +commonArrangements = {3:1, 2:2, 4:0}
+  - +equalNumberAlternatives = {3:0, 2:1}
 - **Relações**:
   - `OffensiveSystem` is-a `OffensiveDomain`
   - `NumericalAsymmetry` structures `OffensiveSystem`
   - `SpecialistRole` influences `OffensiveSystem`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
 - **Exemplo de uso**: sistema ofensivo 4x3 com especialista como quarto jogador.
 
 ---
@@ -226,7 +230,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `StandingThrow6m` is-a `ShootingAction`
   - `SpinThrow` is-a `ShootingAction`
   - `AerialThrow` is-a `ShootingAction`
-- **Fonte**: LEMOS-2023
+- **Fonte**: LEMOS-2023; SILVA-MENEZES-2018
 - **Exemplo de uso**: arremesso de 6m em apoio com velocidade de 80 km/h marcando 1 ponto.
 
 ---
@@ -904,7 +908,8 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Relações**:
   - `AttackModel` part-of `OffensiveDomain`
   - `NumericalAsymmetry` enables `AttackModel`
-- **Fonte**: MORILLO-2017; PARADZIK-SD
+  - `SpecialistRole` influences `AttackModel`
+- **Fonte**: MORILLO-2017; PARADZIK-SD; SILVA-MENEZES-2018
 - **Exemplo de uso**: Uma equipe com especialista de arremesso em giro usa AttackModel posicionando-o nas alas para maximizar os gols de 2 pontos.
 
 ---
@@ -922,7 +927,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
   - `Blockage` is-a `OffensiveCollaborationMean`
   - `Crossing` is-a `OffensiveCollaborationMean`
   - `Screen` is-a `OffensiveCollaborationMean`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
 - **Exemplo de uso**: O PassAndGo e o Crossing são os meios mais usados em situações 4×3 para criar linhas de passe após a movimentação.
 
 ---
@@ -944,10 +949,10 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Definição**: meio de colaboração ofensiva com entradas sucessivas ao espaço, aproveitando a superioridade numérica para criar linhas de finalização sequenciais.
 - **Camada**: técnico-tática
 - **Tipo**: Classe
-- **Sinônimos**: entradas sucessivas, successive entrances
+- **Sinônimos**: entradas sucessivas, successive entrances, engajamento, penetracoes sucessivas
 - **Relações**:
   - `SuccessiveEntrances` is-a `OffensiveCollaborationMean`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
 
 ---
 
@@ -973,7 +978,7 @@ Tipos de relação aceitos: `is-a` | `part-of` | `influences` | `causes` | `stru
 - **Sinônimos**: cruzamento, crossing
 - **Relações**:
   - `Crossing` is-a `OffensiveCollaborationMean`
-- **Fonte**: MORILLO-2017
+- **Fonte**: MORILLO-2017; SILVA-MENEZES-2018
 
 ---
 

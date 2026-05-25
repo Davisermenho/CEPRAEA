@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-25 - 00:43 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-25 - 00:54 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -2783,4 +2783,33 @@ Aplicação do protocolo ontológico ao artigo `Latest trends in defence.md` com
 
 - `sed -n '1,520p' "docs/ontologia/artigos/Latest trends in defence.md"`
 - `rg -n "Defense2_1|DefensiveSystem|DefensiveTechnicalTacticalAction|ShootOut|GoalkeeperRole" docs/ontologia/manuais/glossario-ontologico-controlado.md`
+- `node scripts/check-ontology-semantics.mjs`
+
+
+### [CEPR-ONTOLOGIA-O-JOGO-OFENSIVO-TRIAGEM-E-UPDATE-2026-05-25] — 2026-05-25 — Triagem do ataque posicionado e atualização técnico-tática
+
+#### ✨ Resumo
+
+Aplicação do protocolo ontológico ao artigo `O_jogo_ofensivo_do_handebol_de_areia.md` com extração, classificação, deduplicação e atualização no bloco ofensivo.
+
+#### 🚀 Added
+
+- `docs/ontologia/triagens/triagem-o-jogo-ofensivo-handebol-areia-2026-05-25.md`
+  - triagem completa (Passos 1-5) com decisão por conceito.
+
+#### 🛠️ Changed
+
+- `docs/ontologia/manuais/registro-fontes.md`
+  - inclusão da fonte `SILVA-MENEZES-2018`.
+- `docs/ontologia/manuais/glossario-ontologico-controlado.md`
+  - refinamentos em `SpecialistRole`, `NumericalAsymmetry`, `OffensiveSystem`, `ShootingAction`, `AttackModel`, `OffensiveCollaborationMean`, `SuccessiveEntrances` e `Crossing`.
+- `docs/ontologia/manuais/matriz-relacoes.md`
+  - inclusão da relação `#123`: `SpecialistRole influences AttackModel`.
+- `docs/design/navegacao.drawio.svg`
+  - inclusão da aresta técnico-tática `SpecialistRole ->(influences)-> AttackModel`.
+
+#### 🛡️ Evidências
+
+- `sed -n '1,1040p' "docs/ontologia/artigos/O_jogo_ofensivo_do_handebol_de_areia.md"`
+- `rg -n "SpecialistRole|AttackModel|OffensiveSystem|SuccessiveEntrances" docs/ontologia/manuais/glossario-ontologico-controlado.md`
 - `node scripts/check-ontology-semantics.mjs`

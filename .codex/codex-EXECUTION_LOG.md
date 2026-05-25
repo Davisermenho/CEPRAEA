@@ -19,10 +19,22 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-25 - 00:43 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-25 - 00:54 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
+
+
+## Entrada Rápida — 2026-05-25 00:54 BRT — CEPR-ONTOLOGIA-O-JOGO-OFENSIVO-TRIAGEM-E-UPDATE-2026-05-25
+
+- **Objetivo:** aplicar o protocolo da Ontologia do Handebol de Praia ao artigo `docs/ontologia/artigos/O_jogo_ofensivo_do_handebol_de_areia.md` (extração -> classificação -> deduplicação -> atualização no bloco correto).
+- **Mudanças de código/processo:**
+  - criação de `docs/ontologia/triagens/triagem-o-jogo-ofensivo-handebol-areia-2026-05-25.md`;
+  - inclusão da fonte `SILVA-MENEZES-2018` no `registro-fontes`;
+  - inclusão da relação técnico-tática `SpecialistRole influences AttackModel` em glossário, matriz e Draw.io.
+- **Evidências objetivas:**
+  - `sed -n '1,1040p' "docs/ontologia/artigos/O_jogo_ofensivo_do_handebol_de_areia.md"` ✅
+  - `node scripts/check-ontology-semantics.mjs` ✅ (0 aviso(s))
 
 
 ## Entrada Rápida — 2026-05-25 00:43 BRT — CEPR-ONTOLOGIA-LATEST-TRENDS-DEFENCE-TRIAGEM-2026-05-25
