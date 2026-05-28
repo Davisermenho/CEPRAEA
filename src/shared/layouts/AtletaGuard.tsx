@@ -51,7 +51,7 @@ export function AtletaGuard() {
       // First-login path: claim the athlete record via SECURITY DEFINER RPC.
       // The RPC exclusively sets user_id = auth.uid(), preventing a client from
       // modifying team_id or other columns in the same request.
-      const { data: linkedId, error: rpcError } = await supabase.rpc('link_athlete_user_id')
+      const { data: linkedId, error: rpcError } = await supabase.rpc('ensure_athlete_link')
       if (rpcError) { setCheck('error'); return }
       if (linkedId) {
         await loadAthleteAreaData()
