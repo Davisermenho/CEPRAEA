@@ -121,9 +121,17 @@ O backfill automático aplica as seguintes **guardas**:
    - `athletes.deleted_at IS NULL` (registro ativo),
    - O email bate exatamente **1** `auth.users` (sem ambiguidade),
    - Esse `auth.users.id` não está vinculado a outro atleta ativo.
-3. **Conflitos de unicidade** (`athletes_user_id_key`) são tratados via `ON CONFLICT DO NOTHING`.
+3. A combinação das 4 guardas torna qualquer conflito de unicidade em `athletes_user_id_key` impossível: só vincula quando o `user_id` é `NULL` e o `auth.users.id` não aparece em outro atleta ativo.
 
-Para produção: rodar `select_backfill_preview()` (view de diagnóstico) antes de aplicar a migração.
+Para inspecionar o estado antes de migrar em produção, consulte diretamente:
+```sql
+-- Preview do backfill (atletas sem user_id com match único por email)
+SELECT a.id, a.email, u.id AS would_link_to
+FROM athletes a
+JOIN auth.users u ON lower(u.email) = lower(a.email)
+WHERE a.user_id IS NULL AND a.deleted_at IS NULL
+GROUP BY a.id, a.email, u.id HAVING count(u.id) = 1;
+```
 
 ---
 

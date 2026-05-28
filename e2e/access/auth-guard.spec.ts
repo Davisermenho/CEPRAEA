@@ -33,7 +33,7 @@ test.describe('AppAccessGuard — athlete cannot access coach area', () => {
     // Try to navigate to coach area directly.
     await page.goto('/')
     // Should see "Sem acesso" page, NOT dashboard.
-    await expect(page.getByText(/sem acesso/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText(/área restrita/i)).toBeVisible({ timeout: 10_000 })
     await expect(page).not.toHaveURL(/\/login$/)
   })
 })
