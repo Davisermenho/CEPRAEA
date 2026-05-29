@@ -1,0 +1,22 @@
+PREFIX cepr: <https://cepraea.app/ontology#>
+
+SELECT ?entry ?flowRuntimeCode ?phaseRuntimeCode ?resultRuntimeCode
+WHERE {
+  ?entry a cepr:ScoutLiveEntry ;
+         cepr:hasScoutPhase ?phase ;
+         cepr:hasFactualResult ?result ;
+         cepr:hasFlowContract ?flow .
+  ?flow cepr:runtimeCode ?flowRuntimeCode .
+  ?phase cepr:runtimeCode ?phaseRuntimeCode .
+  ?result cepr:runtimeCode ?resultRuntimeCode .
+
+  FILTER(?entry IN (
+    cepr:audited_entry_at_pos_spin_goal,
+    cepr:audited_entry_at_pos_passivo,
+    cepr:audited_entry_6m_goal,
+    cepr:audited_entry_6m_defendido,
+    cepr:audited_entry_trans_of_aerial_goal,
+    cepr:audited_entry_trans_of_passivo
+  ))
+}
+ORDER BY ?entry

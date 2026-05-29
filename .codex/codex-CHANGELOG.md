@@ -2669,6 +2669,37 @@ Inclusão de fixtures golden para provar o pipeline formal em cenário realista 
 - `npm run check:ontology:semantics`
 - `git diff --check`
 
+### [CEPR-ONTOLOGIA-SCOUT-SHACL-AUDITED-FLOWS-2026-05-29] — 2026-05-29 — SHACL inicial dos 3 fluxos auditados do Scout
+
+#### ✨ Resumo
+
+Primeiro slice de SHACL orientado pela matriz runtime do Scout, limitado aos três fluxos auditados atuais, sem alterar runtime, Supabase, UI, `ontology/core.ttl` ou migrations.
+
+#### 🚀 Added
+
+- `examples/golden/scout-audited-flows-valid.ttl`
+  - fixtures válidos para `AT_POS.ARREMESSO.ARREMESSO`, `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV` e `TRANS_OF.ARREMESSO.ARREMESSO`.
+- `examples/golden/scout-audited-flows-invalid.ttl`
+  - fixtures inválidos que exercitam bloqueios reais dos três fluxos.
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+  - pergunta de competência do slice SHACL dos fluxos auditados.
+
+#### 🛠️ Changed
+
+- `shacl/core.shacl.ttl`
+  - regras de fase por fluxo, tipos de finalização permitidos, bloqueio de resultado inválido no 6m favorável e exigência de tipo de finalização para arremesso observado.
+- `queries/competency/tests.json`
+  - inclusão de `CEPR-CQ-05`.
+- `scripts/validate-ontology-formal.sh`
+  - validação do dataset válido e falha esperada do dataset inválido dos fluxos auditados.
+
+#### 🛡️ Evidências
+
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
 ### [CEPR-ONTOLOGIA-ARTIGO-2PT-LIDOS-TRIAGEM-DEDUP-2026-05-24] — 2026-05-24 — Triagem da fonte em `artigos/lidos` com deduplicação total
 
 #### ✨ Resumo

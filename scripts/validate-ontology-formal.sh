@@ -11,6 +11,8 @@ files = [
     "examples/invalid-data.ttl",
     "examples/golden/scout-live-real-valid.ttl",
     "examples/golden/scout-live-real-invalid.ttl",
+    "examples/golden/scout-audited-flows-valid.ttl",
+    "examples/golden/scout-audited-flows-invalid.ttl",
 ]
 
 for file_path in files:
@@ -21,6 +23,7 @@ PY
 
 pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/minimal-data.ttl
 pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/golden/scout-live-real-valid.ttl
+pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/golden/scout-audited-flows-valid.ttl
 
 set +e
 INVALID_OUTPUT="$(
@@ -51,6 +54,21 @@ if [ "$GOLDEN_INVALID_STATUS" -eq 0 ]; then
 fi
 printf '%s\n' "$GOLDEN_INVALID_OUTPUT" | grep -q "Conforms: False"
 echo "[OK] scout-live-real-invalid.ttl failed SHACL as expected"
+
+set +e
+AUDITED_FLOWS_INVALID_OUTPUT="$(
+  pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/golden/scout-audited-flows-invalid.ttl 2>&1
+)"
+AUDITED_FLOWS_INVALID_STATUS=$?
+set -e
+
+printf '%s\n' "$AUDITED_FLOWS_INVALID_OUTPUT"
+if [ "$AUDITED_FLOWS_INVALID_STATUS" -eq 0 ]; then
+  echo "Expected audited scout flow invalid dataset to fail SHACL validation."
+  exit 1
+fi
+printf '%s\n' "$AUDITED_FLOWS_INVALID_OUTPUT" | grep -q "Conforms: False"
+echo "[OK] scout-audited-flows-invalid.ttl failed SHACL as expected"
 
 python3 - <<'PY'
 import json
