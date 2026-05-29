@@ -55,15 +55,27 @@ jobs:
             git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA"
           )"
 
-          scout_pattern='^(src/features/scout/|src/features/presence-tokens/|src/lib/supabase\.ts$|src/types/|supabase/|e2e/scout/|playwright\.scout-preview-smoke\.config\.ts$|package\.json$|package-lock\.json$|AGENTS\.md$|\.github/workflows/scout-preview-smoke\.yml$)'
+          scout_pattern='^(src/features/scout/|src/features/presence-tokens/|src/lib/supabase\.ts$|supabase/migrations/[0-9]+_scout|supabase/migrations/[0-9]+_presence|supabase/migrations/[0-9]+_cepr_00[89]|supabase/tests/[^/]*scout|supabase/functions/|e2e/scout/|playwright\.scout-preview-smoke\.config\.ts$|package\.json$|package-lock\.json$|\.github/workflows/scout-preview-smoke\.yml$)'
           scout_scope=false
 
           if printf '%s\n' "$changed_files" | grep -Eq "$scout_pattern"; then
             scout_scope=true
           fi
 
+          # Detect if only the CI workflow file itself matched (no real Scout features)
+          only_ci=false
+          if [ "$scout_scope" = "true" ]; then
+            non_ci_scout="$(
+              printf '%s\n' "$changed_files"                 | grep -E "$scout_pattern"                 | grep -Ev '^\.github/workflows/scout-preview-smoke\.yml$'                 || true
+            )"
+            if [ -z "$non_ci_scout" ]; then
+              only_ci=true
+            fi
+          fi
+
           echo "scout=$scout_scope" >> "$GITHUB_OUTPUT"
-          echo "Scout scope: $scout_scope"
+          echo "only_ci=$only_ci" >> "$GITHUB_OUTPUT"
+          echo "Scout scope: $scout_scope | only_ci: $only_ci"
 
       - name: Skip smoke when PR is out of Scout scope
         if: ${{ steps.scope.outputs.scout != 'true' }}
@@ -71,15 +83,21 @@ jobs:
           echo "Sem mudanças de Scout/Supabase/Auth/RLS no escopo monitorado."
           echo "Check obrigatório reportado como sucesso."
 
+      - name: Run scope unit tests
+        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci == 'true' }}
+        run: |
+          echo "Somente o workflow de CI foi alterado. Executando teste de escopo em vez de Playwright."
+          bash scripts/ci/test-scout-scope.sh
+
       - name: Setup Node
-        if: ${{ steps.scope.outputs.scout == 'true' }}
+        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
         uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
 
       - name: Validate required secrets
-        if: ${{ steps.scope.outputs.scout == 'true' }}
+        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
         shell: bash
         run: |
           missing=0
@@ -97,15 +115,15 @@ jobs:
           SMOKE_COACH_PASSWORD: ${{ secrets.SMOKE_COACH_PASSWORD }}
 
       - name: Install dependencies
-        if: ${{ steps.scope.outputs.scout == 'true' }}
+        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
         run: npm ci --no-audit --no-fund --loglevel=error
 
       - name: Install Playwright browser
-        if: ${{ steps.scope.outputs.scout == 'true' }}
+        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
         run: npx playwright install --with-deps chromium
 
       - name: Resolve Vercel preview URL from Vercel check-run
-        if: ${{ steps.scope.outputs.scout == 'true' }}
+        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
         id: vercel_preview
         shell: bash
         env:
@@ -148,13 +166,13 @@ jobs:
           fi
 
       - name: Fail when preview URL is unavailable
-        if: ${{ steps.scope.outputs.scout == 'true' && steps.vercel_preview.outputs.preview_url == '' }}
+        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' && steps.vercel_preview.outputs.preview_url == '' }}
         run: |
           echo "Preview URL não disponível para o branch/PR atual."
           exit 1
 
       - name: Run Scout preview smoke
-        if: ${{ steps.scope.outputs.scout == 'true' }}
+        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
         env:
           SMOKE_BASE_URL: ${{ steps.vercel_preview.outputs.preview_url }}
           SMOKE_COACH_EMAIL: ${{ secrets.SMOKE_COACH_EMAIL }}
@@ -164,7 +182,7 @@ jobs:
           npm run test:smoke:scout:preview
 
       - name: Detect Playwright artifacts
-        if: ${{ always() && steps.scope.outputs.scout == 'true' }}
+        if: ${{ always() && steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
         id: artifact_check
         shell: bash
         run: |

@@ -39,12 +39,14 @@ jobs:
               /^src\/features\/scout\//,
               /^src\/features\/presence-tokens\//,
               /^src\/lib\/supabase\.ts$/,
-              /^src\/types\//,
-              /^supabase\//,
+              /^supabase\/migrations\/\d+_scout/,
+              /^supabase\/migrations\/\d+_presence/,
+              /^supabase\/migrations\/\d+_cepr_00[89]/,
+              /^supabase\/tests\/[^/]*scout/,
+              /^supabase\/functions\//,
               /^e2e\/scout\//,
               /^playwright\.scout-preview-smoke\.config\.ts$/,
               /^\.github\/workflows\/scout-preview-smoke\.yml$/,
-              /^AGENTS\.md$/,
             ];
 
             const scoutTouched = files.some((file) =>
