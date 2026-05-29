@@ -5416,6 +5416,55 @@ Criar a PR 4 da fusão ontológica: golden dataset realista para provar que a ca
 
 Golden dataset realista criado e incorporado ao pipeline formal. A próxima fatia pode ser SHACL de Scout completo por matriz, sem misturar Supabase/UI.
 
+# Execution Log: CEPR-ONTOLOGIA-FUSAO-VERSIONAR-PLANO-2026-05-29
+
+## 🎯 Objetivo
+
+Versionar `docs/ontologia/merge/FUSAO.md` em uma PR documental pequena e corrigir o trecho desatualizado sobre o workflow formal de ontologia.
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:**
+  - `docs/ontologia/merge/FUSAO.md`
+  - `.codex/codex-CHANGELOG.md`
+  - `.codex/codex-EXECUTION_LOG.md`
+- **Impacto em runtime:** nenhum.
+- **Impacto em Supabase/UI:** nenhum.
+- **Impacto em SHACL/ontologia executável:** nenhum.
+
+## ✅ Ações executadas
+
+1. Leitura de `AGENTS.json`.
+2. Consulta dos 3 últimos PRs.
+3. Criação de worktree separada em `origin/main` para não misturar com `feat/cepr-auth-02b`.
+4. Cópia do `FUSAO.md` local para a branch documental.
+5. Correção do trecho sobre workflow formal.
+6. Atualização dos logs operacionais Codex.
+
+## 🧪 Evidências objetivas (comandos)
+
+- `jq empty AGENTS.json`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `git worktree add -b chore/ontology-version-fusao-plan /tmp/cepraea-fusao-plan origin/main`
+- `rg -n "workflow dedicado|validate:mvp|runtime ↔ ontologia|PLANO V2|PRÓXIMA AÇÃO SEGURA" docs/ontologia/merge/FUSAO.md`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+## ✅ Resultado da validação
+
+- O plano agora reconhece que o workflow de ontologia já roda validação formal RDF/SHACL/SPARQL.
+- A lacuna atual ficou explicitada como falta de `check:ontology:runtime-alignment` no workflow e falta dos gates ontológicos no `validate:mvp:v1`.
+- Sem alteração de runtime, Supabase, UI, SHACL ou TTL.
+
+## ⚠️ Ocorrências durante execução
+
+- A branch principal de trabalho local estava em `feat/cepr-auth-02b`; por isso foi usada worktree separada baseada em `origin/main`.
+- `onthbpraia/` permanece untracked na árvore principal e fora desta PR.
+
+## ✅ Validação final
+
+Plano pronto para PR documental de versionamento do `FUSAO.md`.
+
 # Execution Log: CEPR-ONTOLOGIA-SCOUT-SHACL-AUDITED-FLOWS-2026-05-29
 
 ## 🎯 Objetivo
