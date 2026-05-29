@@ -1,0 +1,28 @@
+@prefix cepr: <https://cepraea.app/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cepr:AT_POS a cepr:ScoutPhase .
+cepr:result_gol a cepr:ScoutFactualResult .
+cepr:finish_giro a cepr:ScoutFinishType .
+cepr:zone_left a cepr:CourtZone .
+cepr:flow_at_pos_arremesso_arremesso a cepr:ScoutFlowContract .
+
+# Golden fixture: fluxo realista do PWA para AT_POS.ARREMESSO.ARREMESSO.
+# Runtime esperado: fase=AT_POS, categoria=ARREMESSO, acao=ARREMESSO,
+# tipo_finalizacao=GIRO, resultado_factual=GOL, motivo_pontuacao=GIRO,
+# pontos=2, flow=AT_POS.ARREMESSO.ARREMESSO.
+cepr:golden_period_set_1 a cepr:GamePeriod ;
+  cepr:durationMinutes 10 .
+
+cepr:golden_goal_spin_2pt a cepr:Goal ;
+  cepr:hasShootingAction cepr:golden_spin_throw_action ;
+  cepr:hasCourtZone cepr:zone_left ;
+  cepr:points 2 .
+
+cepr:golden_spin_throw_action a cepr:SpinThrow .
+
+cepr:golden_live_entry_at_pos_spin_goal a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:AT_POS ;
+  cepr:hasFactualResult cepr:result_gol ;
+  cepr:hasFinishType cepr:finish_giro ;
+  cepr:hasFlowContract cepr:flow_at_pos_arremesso_arremesso .

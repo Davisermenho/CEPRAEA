@@ -5353,3 +5353,65 @@ Restaurar e validar a PR 3 da fusão ontológica: gate estático de alinhamento 
 ## ✅ Validação final
 
 Gate mínimo restaurado e validado após a correção ontológica intermediária. A PR 3 pode ser aberta com escopo de verificação estática, sem alterações em runtime, Supabase ou UI.
+
+# Execution Log: CEPR-ONTOLOGIA-GOLDEN-SCOUT-DATASET-2026-05-29
+
+## 🎯 Objetivo
+
+Criar a PR 4 da fusão ontológica: golden dataset realista para provar que a camada formal valida um fluxo compatível com o PWA, não apenas exemplos sintéticos.
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:**
+  - `examples/golden/scout-live-real-valid.ttl`
+  - `examples/golden/scout-live-real-invalid.ttl`
+  - `queries/competency/q04_golden_scout_live_flow.rq`
+  - `queries/competency/tests.json`
+  - `scripts/validate-ontology-formal.sh`
+  - `.codex/codex-CHANGELOG.md`
+  - `.codex/codex-EXECUTION_LOG.md`
+- **Impacto em runtime:** nenhum.
+- **Impacto em Supabase/UI:** nenhum.
+- **Arquivos propositalmente não alterados:** `src/`, `supabase/`, `ontology/core.ttl`, `shacl/core.shacl.ttl`, `examples/minimal-data.ttl`, `examples/invalid-data.ttl`.
+
+## ✅ Ações executadas
+
+1. Leitura de `AGENTS.json`, `CEPRAEA.md` e consulta dos 3 últimos PRs.
+2. Criação do golden dataset válido para `AT_POS.ARREMESSO.ARREMESSO`.
+3. Criação do golden dataset inválido com `PASSIVO` carregando `tipo_finalizacao=GIRO`.
+4. Criação da consulta `CEPR-CQ-04`.
+5. Inclusão dos golden datasets no manifesto de competência.
+6. Atualização do script formal para parsear golden datasets, validar o golden válido e exigir falha do golden inválido.
+
+## 🧪 Evidências objetivas (comandos)
+
+- `jq empty AGENTS.json`
+- `sed -n '1,220p' AGENTS.json`
+- `sed -n '1,180p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `git checkout main`
+- `git pull origin main`
+- `git checkout -b chore/ontology-golden-scout-dataset`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+## ✅ Resultado da validação
+
+- `npm run validate:ontology:formal` passou:
+  - golden válido conforma em SHACL.
+  - golden inválido falha como esperado na regra `PASSIVO` sem tipo de finalização.
+  - `CEPR-CQ-04` retornou 1 linha esperada.
+- `npm run check:ontology:runtime-alignment` passou.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+## ⚠️ Ocorrências durante execução
+
+- A primeira execução mostrou que os fixtures golden precisavam declarar explicitamente os tipos dos indivíduos controlados usados, conforme padrão de `examples/minimal-data.ttl`. Os datasets foram ajustados sem alterar `ontology/core.ttl` ou SHACL.
+- `onthbpraia/` permanece untracked localmente e fora do escopo.
+
+## ✅ Validação final
+
+Golden dataset realista criado e incorporado ao pipeline formal. A próxima fatia pode ser SHACL de Scout completo por matriz, sem misturar Supabase/UI.

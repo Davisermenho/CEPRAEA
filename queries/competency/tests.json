@@ -4,7 +4,9 @@
   ],
   "datasets": {
     "minimal": "examples/minimal-data.ttl",
-    "invalid": "examples/invalid-data.ttl"
+    "invalid": "examples/invalid-data.ttl",
+    "golden_valid": "examples/golden/scout-live-real-valid.ttl",
+    "golden_invalid": "examples/golden/scout-live-real-invalid.ttl"
   },
   "tests": [
     {
@@ -73,6 +75,26 @@
           },
           {
             "goal": "https://cepraea.app/ontology#spin_goal_1",
+            "actionType": "https://cepraea.app/ontology#SpinThrow",
+            "points": "2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "CEPR-CQ-04",
+      "dataset": "golden_valid",
+      "extra_graphs": [],
+      "query": "queries/competency/q04_golden_scout_live_flow.rq",
+      "assert": {
+        "row_count_eq": 1,
+        "expected_rows": [
+          {
+            "entry": "https://cepraea.app/ontology#golden_live_entry_at_pos_spin_goal",
+            "flowRuntimeCode": "AT_POS.ARREMESSO.ARREMESSO",
+            "phaseRuntimeCode": "AT_POS",
+            "finishRuntimeCode": "GIRO",
+            "resultRuntimeCode": "GOL",
             "actionType": "https://cepraea.app/ontology#SpinThrow",
             "points": "2"
           }
