@@ -1,0 +1,115 @@
+@prefix cepr: <https://cepraea.app/ontology#> .
+@prefix bh: <https://hbtrack.org/onthbpraia#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cepr: a owl:Ontology ;
+  dcterms:title "CEPRAEA executable beach handball ontology - minimal formal layer"@en ;
+  dcterms:creator "CEPRAEA" ;
+  dcterms:issued "2026-05-29"^^xsd:date ;
+  dcterms:modified "2026-05-29"^^xsd:date ;
+  dcterms:source <https://www.ihf.info> ;
+  owl:versionInfo "0.1.0" .
+
+cepr:canonicalId a owl:AnnotationProperty .
+cepr:runtimeCode a owl:DatatypeProperty ; rdfs:range xsd:string .
+cepr:legacyEquivalentIri a owl:AnnotationProperty .
+
+cepr:Team a owl:Class ; cepr:canonicalId "CEPR-ONT-TEAM" .
+cepr:Player a owl:Class ; cepr:canonicalId "CEPR-ONT-PLAYER" .
+cepr:Goal a owl:Class ; cepr:canonicalId "CEPR-ONT-GOAL" .
+cepr:CourtZone a owl:Class ; cepr:canonicalId "CEPR-ONT-COURT-ZONE" .
+cepr:GamePeriod a owl:Class ; cepr:canonicalId "CEPR-ONT-GAME-PERIOD" ;
+  skos:altLabel "Period"@en ;
+  cepr:legacyEquivalentIri bh:Period .
+
+cepr:ShootingAction a owl:Class ; cepr:canonicalId "CEPR-ONT-SHOOTING-ACTION" ;
+  skos:prefLabel "Shooting action"@en ;
+  skos:altLabel "shot"@en, "finalizacao"@pt-BR .
+cepr:RegularShot a owl:Class ; rdfs:subClassOf cepr:ShootingAction ; cepr:canonicalId "CEPR-ONT-SHOT-REGULAR" .
+cepr:SpinThrow a owl:Class ; rdfs:subClassOf cepr:ShootingAction ; cepr:canonicalId "CEPR-ONT-SHOT-SPIN" ;
+  skos:altLabel "SpinShot"@en, "spin throw"@en, "arremesso em giro"@pt-BR ;
+  cepr:legacyEquivalentIri bh:SpinShot .
+cepr:AerialThrow a owl:Class ; rdfs:subClassOf cepr:ShootingAction ; cepr:canonicalId "CEPR-ONT-SHOT-AERIAL" ;
+  skos:altLabel "InFlightShot"@en, "in-flight shot"@en, "arremesso aereo"@pt-BR ;
+  cepr:legacyEquivalentIri bh:InFlightShot .
+cepr:StandingThrow6m a owl:Class ; rdfs:subClassOf cepr:ShootingAction ; cepr:canonicalId "CEPR-ONT-SHOT-STANDING-6M" .
+
+cepr:RestartThrowType a owl:Class ; cepr:canonicalId "CEPR-ONT-RESTART-THROW-TYPE" ;
+  skos:prefLabel "Restart throw type"@en ;
+  skos:altLabel "ThrowType"@en, "restart type"@en .
+cepr:RefereeThrow a owl:Class ; rdfs:subClassOf cepr:RestartThrowType ; cepr:canonicalId "CEPR-ONT-RESTART-REFEREE-THROW" .
+cepr:ThrowIn a owl:Class ; rdfs:subClassOf cepr:RestartThrowType ; cepr:canonicalId "CEPR-ONT-RESTART-THROW-IN" .
+cepr:GoalkeeperThrow a owl:Class ; rdfs:subClassOf cepr:RestartThrowType ; cepr:canonicalId "CEPR-ONT-RESTART-GOALKEEPER-THROW" .
+cepr:FreeThrow a owl:Class ; rdfs:subClassOf cepr:RestartThrowType ; cepr:canonicalId "CEPR-ONT-RESTART-FREE-THROW" .
+cepr:SixMetreThrow a owl:Class ; rdfs:subClassOf cepr:RestartThrowType ; cepr:canonicalId "CEPR-ONT-RESTART-SIX-METRE-THROW" .
+
+cepr:ScoutLiveEntry a owl:Class ; cepr:canonicalId "CEPR-ONT-SCOUT-LIVE-ENTRY" .
+cepr:ScoutPhase a owl:Class ; cepr:canonicalId "CEPR-ONT-SCOUT-PHASE" .
+cepr:ScoutFinishType a owl:Class ; cepr:canonicalId "CEPR-ONT-SCOUT-FINISH-TYPE" .
+cepr:ScoutFactualResult a owl:Class ; cepr:canonicalId "CEPR-ONT-SCOUT-FACTUAL-RESULT" .
+cepr:ScoutScoringReason a owl:Class ; cepr:canonicalId "CEPR-ONT-SCOUT-SCORING-REASON" .
+cepr:ScoutFlowContract a owl:Class ; cepr:canonicalId "CEPR-ONT-SCOUT-FLOW-CONTRACT" .
+
+cepr:hasShootingAction a owl:ObjectProperty ;
+  rdfs:domain cepr:Goal ;
+  rdfs:range cepr:ShootingAction .
+cepr:hasCourtZone a owl:ObjectProperty ;
+  rdfs:domain cepr:Goal ;
+  rdfs:range cepr:CourtZone .
+cepr:hasScoutPhase a owl:ObjectProperty ;
+  rdfs:domain cepr:ScoutLiveEntry ;
+  rdfs:range cepr:ScoutPhase .
+cepr:hasFinishType a owl:ObjectProperty ;
+  rdfs:domain cepr:ScoutLiveEntry ;
+  rdfs:range cepr:ScoutFinishType .
+cepr:hasFactualResult a owl:ObjectProperty ;
+  rdfs:domain cepr:ScoutLiveEntry ;
+  rdfs:range cepr:ScoutFactualResult .
+cepr:hasFlowContract a owl:ObjectProperty ;
+  rdfs:domain cepr:ScoutLiveEntry ;
+  rdfs:range cepr:ScoutFlowContract .
+cepr:durationMinutes a owl:DatatypeProperty ;
+  rdfs:domain cepr:GamePeriod ;
+  rdfs:range xsd:integer .
+cepr:points a owl:DatatypeProperty ;
+  rdfs:domain cepr:Goal ;
+  rdfs:range xsd:integer .
+
+cepr:AT_POS a cepr:ScoutPhase ; cepr:canonicalId "CEPR-ONT-PHASE-AT_POS" ; cepr:runtimeCode "AT_POS" .
+cepr:DEF_POS a cepr:ScoutPhase ; cepr:canonicalId "CEPR-ONT-PHASE-DEF_POS" ; cepr:runtimeCode "DEF_POS" .
+cepr:TRANS_OF a cepr:ScoutPhase ; cepr:canonicalId "CEPR-ONT-PHASE-TRANS_OF" ; cepr:runtimeCode "TRANS_OF" .
+cepr:TRANS_DEF a cepr:ScoutPhase ; cepr:canonicalId "CEPR-ONT-PHASE-TRANS_DEF" ; cepr:runtimeCode "TRANS_DEF" .
+
+cepr:finish_simples a cepr:ScoutFinishType ; cepr:runtimeCode "SIMPLES" .
+cepr:finish_giro a cepr:ScoutFinishType ; cepr:runtimeCode "GIRO" .
+cepr:finish_aerea a cepr:ScoutFinishType ; cepr:runtimeCode "AEREA" .
+cepr:finish_especialista a cepr:ScoutFinishType ; cepr:runtimeCode "ESPECIALISTA" .
+cepr:finish_goleira a cepr:ScoutFinishType ; cepr:runtimeCode "GOLEIRA" .
+cepr:finish_6m a cepr:ScoutFinishType ; cepr:runtimeCode "6M" .
+cepr:finish_shootout a cepr:ScoutFinishType ; cepr:runtimeCode "SHOOTOUT" .
+cepr:finish_nao_observado a cepr:ScoutFinishType ; cepr:runtimeCode "NAO_OBSERVADO" .
+
+cepr:result_gol a cepr:ScoutFactualResult ; cepr:runtimeCode "GOL" .
+cepr:result_defendido a cepr:ScoutFactualResult ; cepr:runtimeCode "DEFENDIDO" .
+cepr:result_bloqueado a cepr:ScoutFactualResult ; cepr:runtimeCode "BLOQUEADO" .
+cepr:result_fora a cepr:ScoutFactualResult ; cepr:runtimeCode "FORA" .
+cepr:result_trave a cepr:ScoutFactualResult ; cepr:runtimeCode "TRAVE" .
+cepr:result_violacao a cepr:ScoutFactualResult ; cepr:runtimeCode "VIOLACAO" .
+cepr:result_passivo a cepr:ScoutFactualResult ; cepr:runtimeCode "PASSIVO" .
+cepr:result_nao_observado a cepr:ScoutFactualResult ; cepr:runtimeCode "NAO_OBSERVADO" .
+
+cepr:zone_left a cepr:CourtZone ; cepr:runtimeCode "LEFT" .
+cepr:zone_center a cepr:CourtZone ; cepr:runtimeCode "CENTER" .
+cepr:zone_right a cepr:CourtZone ; cepr:runtimeCode "RIGHT" .
+
+cepr:flow_at_pos_arremesso_arremesso a cepr:ScoutFlowContract ;
+  cepr:runtimeCode "AT_POS.ARREMESSO.ARREMESSO" .
+cepr:flow_at_pos_arremesso_finalizacao_6m_fav a cepr:ScoutFlowContract ;
+  cepr:runtimeCode "AT_POS.ARREMESSO.FINALIZACAO_6M_FAV" .
+cepr:flow_trans_of_arremesso_arremesso a cepr:ScoutFlowContract ;
+  cepr:runtimeCode "TRANS_OF.ARREMESSO.ARREMESSO" .

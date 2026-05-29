@@ -1,0 +1,29 @@
+@prefix cepr: <https://cepraea.app/ontology#> .
+
+cepr:period_invalid a cepr:GamePeriod ;
+  cepr:durationMinutes 9 .
+
+cepr:spin_goal_invalid a cepr:Goal ;
+  cepr:hasShootingAction cepr:spin_action_invalid ;
+  cepr:hasCourtZone cepr:zone_left ;
+  cepr:points 1 .
+
+cepr:spin_action_invalid a cepr:SpinThrow .
+
+cepr:goal_missing_zone_invalid a cepr:Goal ;
+  cepr:hasShootingAction cepr:regular_action_invalid ;
+  cepr:points 3 .
+
+cepr:regular_action_invalid a cepr:RegularShot .
+
+cepr:live_entry_invalid_phase a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:unknown_phase ;
+  cepr:hasFactualResult cepr:result_gol .
+
+cepr:unknown_phase a cepr:ScoutPhase ;
+  cepr:runtimeCode "UNKNOWN" .
+
+cepr:live_entry_passivo_invalid_finish a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:AT_POS ;
+  cepr:hasFactualResult cepr:result_passivo ;
+  cepr:hasFinishType cepr:finish_giro .

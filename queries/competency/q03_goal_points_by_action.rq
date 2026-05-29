@@ -1,0 +1,11 @@
+PREFIX cepr: <https://cepraea.app/ontology#>
+
+SELECT ?goal ?actionType ?points
+WHERE {
+  ?goal a cepr:Goal ;
+        cepr:hasShootingAction ?action ;
+        cepr:points ?points .
+  ?action a ?actionType .
+  FILTER(?actionType IN (cepr:SpinThrow, cepr:AerialThrow, cepr:RegularShot))
+}
+ORDER BY ?goal

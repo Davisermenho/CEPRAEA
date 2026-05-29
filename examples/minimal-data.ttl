@@ -1,0 +1,48 @@
+@prefix cepr: <https://cepraea.app/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cepr:AT_POS a cepr:ScoutPhase .
+cepr:TRANS_OF a cepr:ScoutPhase .
+cepr:result_gol a cepr:ScoutFactualResult .
+cepr:result_passivo a cepr:ScoutFactualResult .
+cepr:finish_giro a cepr:ScoutFinishType .
+cepr:zone_left a cepr:CourtZone .
+cepr:zone_center a cepr:CourtZone .
+cepr:zone_right a cepr:CourtZone .
+cepr:flow_at_pos_arremesso_arremesso a cepr:ScoutFlowContract .
+cepr:flow_trans_of_arremesso_arremesso a cepr:ScoutFlowContract .
+
+cepr:period_1 a cepr:GamePeriod ;
+  cepr:durationMinutes 10 .
+
+cepr:spin_goal_1 a cepr:Goal ;
+  cepr:hasShootingAction cepr:spin_action_1 ;
+  cepr:hasCourtZone cepr:zone_left ;
+  cepr:points 2 .
+
+cepr:spin_action_1 a cepr:SpinThrow .
+
+cepr:aerial_goal_1 a cepr:Goal ;
+  cepr:hasShootingAction cepr:aerial_action_1 ;
+  cepr:hasCourtZone cepr:zone_right ;
+  cepr:points 2 .
+
+cepr:aerial_action_1 a cepr:AerialThrow .
+
+cepr:regular_goal_1 a cepr:Goal ;
+  cepr:hasShootingAction cepr:regular_action_1 ;
+  cepr:hasCourtZone cepr:zone_center ;
+  cepr:points 1 .
+
+cepr:regular_action_1 a cepr:RegularShot .
+
+cepr:live_entry_at_pos_goal a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:AT_POS ;
+  cepr:hasFactualResult cepr:result_gol ;
+  cepr:hasFinishType cepr:finish_giro ;
+  cepr:hasFlowContract cepr:flow_at_pos_arremesso_arremesso .
+
+cepr:live_entry_passivo a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:TRANS_OF ;
+  cepr:hasFactualResult cepr:result_passivo ;
+  cepr:hasFlowContract cepr:flow_trans_of_arremesso_arremesso .

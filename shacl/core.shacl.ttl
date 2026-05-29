@@ -1,0 +1,101 @@
+@prefix cepr: <https://cepraea.app/ontology#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cepr:GamePeriodDurationShape a sh:NodeShape ;
+  sh:targetClass cepr:GamePeriod ;
+  sh:property [
+    sh:path cepr:durationMinutes ;
+    sh:datatype xsd:integer ;
+    sh:hasValue 10 ;
+    sh:message "GamePeriod deve ter duracao de 10 minutos."@pt-BR ;
+  ] .
+
+cepr:GoalShape a sh:NodeShape ;
+  sh:targetClass cepr:Goal ;
+  sh:property [
+    sh:path cepr:hasShootingAction ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class cepr:ShootingAction ;
+    sh:message "Goal deve referenciar exatamente uma ShootingAction canonica."@pt-BR ;
+  ] ;
+  sh:property [
+    sh:path cepr:hasCourtZone ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class cepr:CourtZone ;
+    sh:message "Goal deve registrar exatamente uma zona de quadra."@pt-BR ;
+  ] ;
+  sh:property [
+    sh:path cepr:points ;
+    sh:datatype xsd:integer ;
+    sh:in ( 1 2 ) ;
+    sh:message "Goal deve ter 1 ou 2 pontos."@pt-BR ;
+  ] .
+
+cepr:SpinThrowTwoPointsShape a sh:NodeShape ;
+  sh:targetClass cepr:Goal ;
+  sh:sparql [
+    sh:message "Goal com SpinThrow deve ter exatamente 2 pontos."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasShootingAction ?action ;
+              cepr:points ?points .
+        ?action a cepr:SpinThrow .
+        FILTER(?points != 2)
+      }
+    """ ;
+  ] .
+
+cepr:AerialThrowTwoPointsShape a sh:NodeShape ;
+  sh:targetClass cepr:Goal ;
+  sh:sparql [
+    sh:message "Goal com AerialThrow deve ter exatamente 2 pontos."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasShootingAction ?action ;
+              cepr:points ?points .
+        ?action a cepr:AerialThrow .
+        FILTER(?points != 2)
+      }
+    """ ;
+  ] .
+
+cepr:ScoutLiveEntryShape a sh:NodeShape ;
+  sh:targetClass cepr:ScoutLiveEntry ;
+  sh:property [
+    sh:path cepr:hasScoutPhase ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:in ( cepr:AT_POS cepr:DEF_POS cepr:TRANS_OF cepr:TRANS_DEF ) ;
+    sh:message "ScoutLiveEntry deve usar um ScoutPhaseCode canonico do PWA."@pt-BR ;
+  ] ;
+  sh:property [
+    sh:path cepr:hasFactualResult ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class cepr:ScoutFactualResult ;
+    sh:message "ScoutLiveEntry deve registrar exatamente um resultado factual canonico."@pt-BR ;
+  ] ;
+  sh:property [
+    sh:path cepr:hasFlowContract ;
+    sh:maxCount 1 ;
+    sh:class cepr:ScoutFlowContract ;
+    sh:message "ScoutLiveEntry deve apontar para um contrato de fluxo quando auditado."@pt-BR ;
+  ] ;
+  sh:sparql [
+    sh:message "PASSIVO nao deve carregar tipo de finalizacao em ScoutLiveEntry."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFactualResult cepr:result_passivo ;
+              cepr:hasFinishType ?finishType .
+      }
+    """ ;
+  ] .
