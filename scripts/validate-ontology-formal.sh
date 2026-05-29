@@ -31,7 +31,7 @@ if [ "$INVALID_STATUS" -eq 0 ]; then
   echo "Expected invalid ontology dataset to fail SHACL validation."
   exit 1
 fi
-printf '%s\n' "$INVALID_OUTPUT" | rg -q "Conforms: False"
+printf '%s\n' "$INVALID_OUTPUT" | grep -q "Conforms: False"
 echo "[OK] invalid-data.ttl failed SHACL as expected"
 
 python3 - <<'PY'
