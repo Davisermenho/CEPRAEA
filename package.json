@@ -24,6 +24,7 @@
     "deps:check": "npm ls --all",
     "check:ontology:semantics": "node scripts/check-ontology-semantics.mjs",
     "validate:ontology:formal": "bash scripts/validate-ontology-formal.sh",
+    "check:ontology:runtime-alignment": "node scripts/check-ontology-runtime-alignment.mjs",
     "check:runtime-legacy": "bash scripts/check-runtime-legacy.sh",
     "validate:mvp:v1": "bash scripts/validate-mvp-v1.sh"
   },

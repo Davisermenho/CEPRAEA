@@ -5294,3 +5294,62 @@ Executar o protocolo completo da ontologia para o artigo `2-point goals (spin an
 ## ✅ Validação final
 
 Protocolo aplicado de ponta a ponta: extração → classificação → deduplicação → atualização de artefatos → atualização do Draw.io com rastreabilidade de fonte.
+
+# Execution Log: CEPR-ONTOLOGIA-RUNTIME-ALIGNMENT-GATE-2026-05-29
+
+## 🎯 Objetivo
+
+Restaurar e validar a PR 3 da fusão ontológica: gate estático de alinhamento entre runtime do Scout e `ontology/core.ttl`, após merge da PR #37 que completou os `ScoutFactualResultCode`.
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:**
+  - `scripts/check-ontology-runtime-alignment.mjs`
+  - `package.json`
+  - `.codex/codex-CHANGELOG.md`
+  - `.codex/codex-EXECUTION_LOG.md`
+- **Impacto em runtime:** nenhum. O script apenas lê contratos TypeScript e TTL; não altera comportamento do PWA.
+- **Impacto em Supabase/UI:** nenhum.
+
+## ✅ Ações executadas
+
+1. Merge autorizado da PR #37.
+2. Sincronização de `main`.
+3. Restauração do WIP da PR 3 salvo em `/tmp`.
+4. Execução do gate de alinhamento runtime ↔ ontologia.
+5. Execução da validação formal RDF/SHACL/SPARQL.
+6. Execução da checagem semântica documental.
+
+## 🧪 Evidências objetivas (comandos)
+
+- `gh pr merge 37 --squash --delete-branch`
+- `git checkout main`
+- `git pull origin main`
+- `git status --short`
+- `git checkout chore/ontology-runtime-alignment-gate`
+- `git merge --ff-only main`
+- `git apply /tmp/pr3-package.patch`
+- `cp /tmp/check-ontology-runtime-alignment.mjs scripts/check-ontology-runtime-alignment.mjs`
+- `npm run check:ontology:runtime-alignment`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:semantics`
+
+## ✅ Resultado da validação
+
+- `npm run check:ontology:runtime-alignment` passou com:
+  - `ScoutPhaseCode: 4`
+  - `ScoutFinishTypeCode: 8`
+  - `ScoutFactualResultCode: 19`
+  - `LiveCollectionFlowId: 3`
+  - `cepr:runtimeCode: 36`
+- `npm run validate:ontology:formal` passou.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+
+## ⚠️ Ocorrências durante execução
+
+- A branch local `chore/ontology-runtime-alignment-gate` já existia; foi reutilizada e avançada com `git merge --ff-only main`.
+- `onthbpraia/` permanece untracked localmente e fora do escopo.
+
+## ✅ Validação final
+
+Gate mínimo restaurado e validado após a correção ontológica intermediária. A PR 3 pode ser aberta com escopo de verificação estática, sem alterações em runtime, Supabase ou UI.
