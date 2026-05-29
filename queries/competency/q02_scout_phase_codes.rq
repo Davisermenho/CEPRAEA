@@ -1,0 +1,8 @@
+PREFIX cepr: <https://cepraea.app/ontology#>
+
+SELECT ?phase ?runtimeCode
+WHERE {
+  ?phase a cepr:ScoutPhase ;
+         cepr:runtimeCode ?runtimeCode .
+}
+ORDER BY ?runtimeCode

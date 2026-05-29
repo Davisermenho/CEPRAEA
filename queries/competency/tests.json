@@ -1,0 +1,83 @@
+{
+  "ontology": [
+    "ontology/core.ttl"
+  ],
+  "datasets": {
+    "minimal": "examples/minimal-data.ttl",
+    "invalid": "examples/invalid-data.ttl"
+  },
+  "tests": [
+    {
+      "id": "CEPR-CQ-01",
+      "dataset": "minimal",
+      "extra_graphs": [],
+      "query": "queries/competency/q01_canonical_shot_mapping.rq",
+      "assert": {
+        "row_count_eq": 2,
+        "expected_rows": [
+          {
+            "canonical": "https://cepraea.app/ontology#AerialThrow",
+            "legacyAlias": "InFlightShot"
+          },
+          {
+            "canonical": "https://cepraea.app/ontology#SpinThrow",
+            "legacyAlias": "SpinShot"
+          }
+        ]
+      }
+    },
+    {
+      "id": "CEPR-CQ-02",
+      "dataset": "minimal",
+      "extra_graphs": [],
+      "query": "queries/competency/q02_scout_phase_codes.rq",
+      "assert": {
+        "row_count_eq": 4,
+        "expected_rows": [
+          {
+            "phase": "https://cepraea.app/ontology#AT_POS",
+            "runtimeCode": "AT_POS"
+          },
+          {
+            "phase": "https://cepraea.app/ontology#DEF_POS",
+            "runtimeCode": "DEF_POS"
+          },
+          {
+            "phase": "https://cepraea.app/ontology#TRANS_DEF",
+            "runtimeCode": "TRANS_DEF"
+          },
+          {
+            "phase": "https://cepraea.app/ontology#TRANS_OF",
+            "runtimeCode": "TRANS_OF"
+          }
+        ]
+      }
+    },
+    {
+      "id": "CEPR-CQ-03",
+      "dataset": "minimal",
+      "extra_graphs": [],
+      "query": "queries/competency/q03_goal_points_by_action.rq",
+      "assert": {
+        "row_count_eq": 3,
+        "expected_rows": [
+          {
+            "goal": "https://cepraea.app/ontology#aerial_goal_1",
+            "actionType": "https://cepraea.app/ontology#AerialThrow",
+            "points": "2"
+          },
+          {
+            "goal": "https://cepraea.app/ontology#regular_goal_1",
+            "actionType": "https://cepraea.app/ontology#RegularShot",
+            "points": "1"
+          },
+          {
+            "goal": "https://cepraea.app/ontology#spin_goal_1",
+            "actionType": "https://cepraea.app/ontology#SpinThrow",
+            "points": "2"
+          }
+        ]
+      }
+    }
+  ]
+}

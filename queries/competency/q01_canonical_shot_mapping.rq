@@ -1,0 +1,10 @@
+PREFIX cepr: <https://cepraea.app/ontology#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?canonical ?legacyAlias
+WHERE {
+  VALUES ?canonical { cepr:SpinThrow cepr:AerialThrow }
+  ?canonical skos:altLabel ?legacyAlias .
+  FILTER(?legacyAlias IN ("SpinShot"@en, "InFlightShot"@en))
+}
+ORDER BY ?canonical
