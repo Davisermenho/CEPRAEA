@@ -2836,3 +2836,24 @@ Aplicação do protocolo ontológico ao artigo `Latest trends in attack_0.md` co
 - `nl -ba "docs/ontologia/artigos/Latest trends in attack_0.md" | sed -n '250,360p'`
 - `rg -n "CounterAttack|Interception|AttackModel|PassivePlay" docs/ontologia/manuais/glossario-ontologico-controlado.md`
 - `node scripts/check-ontology-semantics.mjs`
+
+### [CEPR-ONTOLOGIA-FUSAO-VERSIONAR-PLANO-2026-05-29] — 2026-05-29 — Versionamento do plano de fusão ontológica
+
+#### ✨ Resumo
+
+Versionamento de `FUSAO.md` como plano operacional da fusão CEPRAEA ↔ onthbpraia, com correção factual sobre o workflow formal existente.
+
+#### 🚀 Added
+
+- `docs/ontologia/merge/FUSAO.md`
+  - objetivo, diagnóstico, precedência, Plano V2, decisão arquitetural e próxima ação segura.
+
+#### 🛠️ Changed
+
+- Texto do plano reconhece que `ontology-quality-gate` já executa validação formal RDF/SHACL/SPARQL quando o escopo formal é alterado.
+- Lacuna atual corrigida para: ausência de `check:ontology:runtime-alignment` no workflow e ausência dos gates ontológicos no `validate:mvp:v1`.
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:semantics`
+- `git diff --check`
