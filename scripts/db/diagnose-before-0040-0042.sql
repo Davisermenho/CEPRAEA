@@ -19,7 +19,8 @@ order by u.created_at;
 
 -- ── D2: type public.team_membership_record já existe? ────────────────────────
 -- Migration 0040 executa CREATE TYPE (sem IF NOT EXISTS).
--- Se retornar linha, há risco de erro ao aplicar 0040 — exige DROP TYPE manual.
+-- Se retornar linha, há risco de erro ao aplicar 0040 — exige investigação antes de prosseguir.
+-- A ação correta depende do estado real: ajustar a migration, marcá-la como já aplicada ou remover o tipo.
 select typname, typtype
 from pg_type
 where typname = 'team_membership_record'
