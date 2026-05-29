@@ -55,7 +55,7 @@ jobs:
             git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA"
           )"
 
-          scout_pattern='^(src/features/scout/|src/features/presence-tokens/|src/lib/supabase\.ts$|src/types/|supabase/|e2e/scout/|playwright\.scout-preview-smoke\.config\.ts$|package\.json$|package-lock\.json$|AGENTS\.md$|\.github/workflows/scout-preview-smoke\.yml$)'
+          scout_pattern='^(src/features/scout/|src/features/presence-tokens/|src/lib/supabase\.ts$|supabase/migrations/[0-9]+_scout|supabase/migrations/[0-9]+_presence|supabase/migrations/[0-9]+_cepr_00[89]|supabase/tests/[^/]*scout|supabase/functions/|e2e/scout/|playwright\.scout-preview-smoke\.config\.ts$|package\.json$|package-lock\.json$|\.github/workflows/scout-preview-smoke\.yml$)'
           scout_scope=false
 
           if printf '%s\n' "$changed_files" | grep -Eq "$scout_pattern"; then
