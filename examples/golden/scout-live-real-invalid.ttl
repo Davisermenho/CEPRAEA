@@ -1,0 +1,14 @@
+@prefix cepr: <https://cepraea.app/ontology#> .
+
+cepr:AT_POS a cepr:ScoutPhase .
+cepr:result_passivo a cepr:ScoutFactualResult .
+cepr:finish_giro a cepr:ScoutFinishType .
+cepr:flow_at_pos_arremesso_arremesso a cepr:ScoutFlowContract .
+
+# Golden invalid fixture: erro real que o PWA deve bloquear.
+# PASSIVO nao deve carregar tipo_finalizacao=GIRO.
+cepr:golden_live_entry_passivo_with_finish_invalid a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:AT_POS ;
+  cepr:hasFactualResult cepr:result_passivo ;
+  cepr:hasFinishType cepr:finish_giro ;
+  cepr:hasFlowContract cepr:flow_at_pos_arremesso_arremesso .

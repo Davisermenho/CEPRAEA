@@ -1,0 +1,24 @@
+PREFIX cepr: <https://cepraea.app/ontology#>
+
+SELECT ?entry ?flowRuntimeCode ?phaseRuntimeCode ?finishRuntimeCode ?resultRuntimeCode ?actionType ?points
+WHERE {
+  ?entry a cepr:ScoutLiveEntry ;
+         cepr:hasScoutPhase ?phase ;
+         cepr:hasFinishType ?finishType ;
+         cepr:hasFactualResult ?result ;
+         cepr:hasFlowContract ?flow .
+  ?flow cepr:runtimeCode ?flowRuntimeCode .
+  ?phase cepr:runtimeCode ?phaseRuntimeCode .
+  ?finishType cepr:runtimeCode ?finishRuntimeCode .
+  ?result cepr:runtimeCode ?resultRuntimeCode .
+
+  ?goal a cepr:Goal ;
+        cepr:hasShootingAction ?action ;
+        cepr:points ?points .
+  ?action a ?actionType .
+
+  FILTER(?entry = cepr:golden_live_entry_at_pos_spin_goal)
+  FILTER(?goal = cepr:golden_goal_spin_2pt)
+  FILTER(?actionType = cepr:SpinThrow)
+}
+ORDER BY ?entry

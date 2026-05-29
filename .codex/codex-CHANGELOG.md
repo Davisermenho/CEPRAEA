@@ -2640,6 +2640,35 @@ Criação do gate mínimo que impede drift grosseiro entre os contratos TypeScri
 - `npm run validate:ontology:formal`
 - `npm run check:ontology:semantics`
 
+### [CEPR-ONTOLOGIA-GOLDEN-SCOUT-DATASET-2026-05-29] — 2026-05-29 — Golden dataset realista do Scout
+
+#### ✨ Resumo
+
+Inclusão de fixtures golden para provar o pipeline formal em cenário realista do PWA, sem alterar runtime, Supabase, UI, `ontology/core.ttl` ou SHACL.
+
+#### 🚀 Added
+
+- `examples/golden/scout-live-real-valid.ttl`
+  - fluxo realista `AT_POS.ARREMESSO.ARREMESSO` com `GIRO`, `GOL`, `SpinThrow` e 2 pontos.
+- `examples/golden/scout-live-real-invalid.ttl`
+  - caso inválido realista: `PASSIVO` com `tipo_finalizacao=GIRO`.
+- `queries/competency/q04_golden_scout_live_flow.rq`
+  - pergunta de competência do fluxo golden.
+
+#### 🛠️ Changed
+
+- `queries/competency/tests.json`
+  - inclusão dos datasets golden e do teste `CEPR-CQ-04`.
+- `scripts/validate-ontology-formal.sh`
+  - parse dos datasets golden, SHACL do golden válido e falha esperada do golden inválido.
+
+#### 🛡️ Evidências
+
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
 ### [CEPR-ONTOLOGIA-ARTIGO-2PT-LIDOS-TRIAGEM-DEDUP-2026-05-24] — 2026-05-24 — Triagem da fonte em `artigos/lidos` com deduplicação total
 
 #### ✨ Resumo

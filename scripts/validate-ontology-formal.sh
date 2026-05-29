@@ -9,6 +9,8 @@ files = [
     "shacl/core.shacl.ttl",
     "examples/minimal-data.ttl",
     "examples/invalid-data.ttl",
+    "examples/golden/scout-live-real-valid.ttl",
+    "examples/golden/scout-live-real-invalid.ttl",
 ]
 
 for file_path in files:
@@ -18,6 +20,7 @@ for file_path in files:
 PY
 
 pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/minimal-data.ttl
+pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/golden/scout-live-real-valid.ttl
 
 set +e
 INVALID_OUTPUT="$(
@@ -33,6 +36,21 @@ if [ "$INVALID_STATUS" -eq 0 ]; then
 fi
 printf '%s\n' "$INVALID_OUTPUT" | grep -q "Conforms: False"
 echo "[OK] invalid-data.ttl failed SHACL as expected"
+
+set +e
+GOLDEN_INVALID_OUTPUT="$(
+  pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/golden/scout-live-real-invalid.ttl 2>&1
+)"
+GOLDEN_INVALID_STATUS=$?
+set -e
+
+printf '%s\n' "$GOLDEN_INVALID_OUTPUT"
+if [ "$GOLDEN_INVALID_STATUS" -eq 0 ]; then
+  echo "Expected golden invalid scout dataset to fail SHACL validation."
+  exit 1
+fi
+printf '%s\n' "$GOLDEN_INVALID_OUTPUT" | grep -q "Conforms: False"
+echo "[OK] scout-live-real-invalid.ttl failed SHACL as expected"
 
 python3 - <<'PY'
 import json
