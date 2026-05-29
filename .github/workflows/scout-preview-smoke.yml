@@ -55,11 +55,32 @@ jobs:
             git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA"
           )"
 
-          scout_pattern='^(src/features/scout/|src/features/presence-tokens/|src/lib/supabase\.ts$|supabase/migrations/[0-9]+_scout|supabase/migrations/[0-9]+_presence|supabase/migrations/[0-9]+_cepr_00[89]|supabase/tests/[^/]*scout|supabase/functions/|e2e/scout/|playwright\.scout-preview-smoke\.config\.ts$|package\.json$|package-lock\.json$|\.github/workflows/scout-preview-smoke\.yml$)'
+          scout_pattern='^(src/features/scout/|src/features/presence-tokens/|src/lib/supabase\.ts$|supabase/migrations/[0-9]+_scout|supabase/migrations/[0-9]+_presence|supabase/migrations/[0-9]+_cepr_00[89]|supabase/tests/[^/]*scout|supabase/functions/|e2e/scout/|playwright\.scout-preview-smoke\.config\.ts$|package-lock\.json$|\.github/workflows/scout-preview-smoke\.yml$)'
           scout_scope=false
 
           if printf '%s\n' "$changed_files" | grep -Eq "$scout_pattern"; then
             scout_scope=true
+          fi
+
+          if printf '%s\n' "$changed_files" | grep -qx 'package.json'; then
+            package_diff="$(
+              git diff -U0 --no-ext-diff --no-color "$PR_BASE_SHA" "$PR_HEAD_SHA" -- package.json \
+                | grep -E '^[+-]' \
+                | grep -Ev '^(---|\+\+\+)' \
+                || true
+            )"
+            package_non_ontology="$(
+              printf '%s\n' "$package_diff" \
+                | grep -Ev '^[+]    "validate:ontology:formal": "bash scripts/validate-ontology-formal.sh",?$|^[-]    "validate:ontology:formal": "bash scripts/validate-ontology-formal.sh",?$|^$' \
+                || true
+            )"
+
+            if [ -n "$package_non_ontology" ]; then
+              scout_scope=true
+              echo "package.json contains Scout/runtime-relevant changes."
+            else
+              echo "package.json change is ontology-only; keeping Scout scope unchanged."
+            fi
           fi
 
           # Detect if only the CI workflow file itself matched (no real Scout features)

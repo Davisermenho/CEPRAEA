@@ -1,0 +1,125 @@
+name: Ontology Quality Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+  merge_group:
+    types:
+      - checks_requested
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  ontology-quality-gate:
+    name: ontology-quality-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect ontology scope
+        id: scope
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "merge_group" ] || [ "$EVENT_NAME" = "push" ]; then
+            echo "semantic=true" >> "$GITHUB_OUTPUT"
+            echo "formal=true" >> "$GITHUB_OUTPUT"
+            echo "Merge group or push detected: running full ontology gate."
+            exit 0
+          fi
+
+          if [ -z "$PR_BASE_SHA" ] || [ -z "$PR_HEAD_SHA" ]; then
+            echo "semantic=true" >> "$GITHUB_OUTPUT"
+            echo "formal=true" >> "$GITHUB_OUTPUT"
+            echo "Unable to resolve PR base/head SHA; running full ontology gate."
+            exit 0
+          fi
+
+          changed_files="$(
+            git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA"
+          )"
+
+          semantic_scope=false
+          formal_scope=false
+
+          semantic_pattern='^(docs/ontologia/|scripts/check-ontology-semantics\.mjs$|\.github/workflows/ontology-quality-gate\.yml$)'
+          formal_pattern='^(ontology/|shacl/|examples/|queries/competency/|scripts/validate-ontology-formal\.sh$|\.github/workflows/ontology-quality-gate\.yml$)'
+
+          if printf '%s\n' "$changed_files" | grep -Eq "$semantic_pattern"; then
+            semantic_scope=true
+          fi
+          if printf '%s\n' "$changed_files" | grep -Eq "$formal_pattern"; then
+            formal_scope=true
+            semantic_scope=true
+          fi
+
+          if printf '%s\n' "$changed_files" | grep -qx 'package.json'; then
+            package_diff="$(
+              git diff -U0 --no-ext-diff --no-color "$PR_BASE_SHA" "$PR_HEAD_SHA" -- package.json \
+                | grep -E '^[+-]' \
+                | grep -Ev '^(---|\+\+\+)' \
+                || true
+            )"
+            package_ontology="$(
+              printf '%s\n' "$package_diff" \
+                | grep -E '^[+-]    "(check:ontology:semantics|validate:ontology:formal)":' \
+                || true
+            )"
+
+            if [ -n "$package_ontology" ]; then
+              semantic_scope=true
+              formal_scope=true
+              echo "package.json contains ontology script changes."
+            fi
+          fi
+
+          echo "semantic=$semantic_scope" >> "$GITHUB_OUTPUT"
+          echo "formal=$formal_scope" >> "$GITHUB_OUTPUT"
+          echo "Ontology scope: semantic=$semantic_scope | formal=$formal_scope"
+
+      - name: Skip ontology gate when PR is out of scope
+        if: ${{ steps.scope.outputs.semantic != 'true' && steps.scope.outputs.formal != 'true' }}
+        run: |
+          echo "Sem mudanças de ontologia no escopo monitorado."
+          echo "Check obrigatório reportado como sucesso."
+
+      - name: Setup Node
+        if: ${{ steps.scope.outputs.semantic == 'true' || steps.scope.outputs.formal == 'true' }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Run ontology semantic checks
+        if: ${{ steps.scope.outputs.semantic == 'true' }}
+        run: npm run check:ontology:semantics
+
+      - name: Setup Python
+        if: ${{ steps.scope.outputs.formal == 'true' && hashFiles('scripts/validate-ontology-formal.sh') != '' }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install ontology validators
+        if: ${{ steps.scope.outputs.formal == 'true' && hashFiles('scripts/validate-ontology-formal.sh') != '' }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install rdflib pyshacl
+
+      - name: Run formal ontology checks
+        if: ${{ steps.scope.outputs.formal == 'true' && hashFiles('scripts/validate-ontology-formal.sh') != '' }}
+        run: npm run validate:ontology:formal

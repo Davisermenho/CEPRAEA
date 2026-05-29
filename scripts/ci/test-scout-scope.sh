@@ -3,7 +3,7 @@
 # Must be kept in sync with the scout_pattern defined in that workflow.
 set -euo pipefail
 
-SCOUT_PATTERN='^(src/features/scout/|src/features/presence-tokens/|src/lib/supabase\.ts$|supabase/migrations/[0-9]+_scout|supabase/migrations/[0-9]+_presence|supabase/migrations/[0-9]+_cepr_00[89]|supabase/tests/[^/]*scout|supabase/functions/|e2e/scout/|playwright\.scout-preview-smoke\.config\.ts$|package\.json$|package-lock\.json$|\.github/workflows/scout-preview-smoke\.yml$)'
+SCOUT_PATTERN='^(src/features/scout/|src/features/presence-tokens/|src/lib/supabase\.ts$|supabase/migrations/[0-9]+_scout|supabase/migrations/[0-9]+_presence|supabase/migrations/[0-9]+_cepr_00[89]|supabase/tests/[^/]*scout|supabase/functions/|e2e/scout/|playwright\.scout-preview-smoke\.config\.ts$|package-lock\.json$|\.github/workflows/scout-preview-smoke\.yml$)'
 
 pass=0
 fail=0
@@ -38,7 +38,6 @@ assert_match "supabase/tests/scout_contract.test.sql"                           
 assert_match "supabase/functions/process-events/index.ts"                       "true"
 assert_match "e2e/scout/scoutSession.spec.ts"                                   "true"
 assert_match "playwright.scout-preview-smoke.config.ts"                         "true"
-assert_match "package.json"                                                     "true"
 assert_match "package-lock.json"                                                "true"
 assert_match ".github/workflows/scout-preview-smoke.yml"                        "true"
 
@@ -52,10 +51,45 @@ assert_match "docs/auth/AUTH_ACCESS_CONTRACT.md"                                
 assert_match "src/features/auth/AccessContext.tsx"                              "false"
 assert_match "src/shared/layouts/AppAccessGuard.tsx"                            "false"
 assert_match "src/types/supabase.ts"                                            "false"
+assert_match "package.json"                                                     "false"
 assert_match "AGENTS.md"                                                        "false"
 assert_match "src/App.tsx"                                                      "false"
 assert_match "e2e/guards.spec.ts"                                               "false"
 assert_match "e2e/access/auth-guard.spec.ts"                                    "false"
+
+echo ""
+echo "=== package.json diff classifier ==="
+
+assert_package_diff() {
+  local label="$1"
+  local expected="$2"
+  local diff_text="$3"
+  local non_ontology
+
+  non_ontology="$(
+    printf '%s\n' "$diff_text" \
+      | grep -Ev '^[+]    "validate:ontology:formal": "bash scripts/validate-ontology-formal.sh",?$|^[-]    "validate:ontology:formal": "bash scripts/validate-ontology-formal.sh",?$|^$' \
+      || true
+  )"
+
+  if [ -n "$non_ontology" ]; then
+    actual="true"
+  else
+    actual="false"
+  fi
+
+  if [ "$actual" = "$expected" ]; then
+    echo "PASS [$actual]: $label"
+    ((pass++)) || true
+  else
+    echo "FAIL: $label => expected scout=$expected, got scout=$actual"
+    ((fail++)) || true
+  fi
+}
+
+assert_package_diff "ontology-only package script" "false" '+    "validate:ontology:formal": "bash scripts/validate-ontology-formal.sh",'
+assert_package_diff "scout smoke script" "true" '+    "test:smoke:scout:preview": "playwright test --config=playwright.scout-preview-smoke.config.ts --reporter=line",'
+assert_package_diff "dependency change" "true" '+    "@playwright/test": "^1.59.1",'
 
 echo ""
 echo "Results: $pass passed, $fail failed"
