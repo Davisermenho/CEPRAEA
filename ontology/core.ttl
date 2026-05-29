@@ -102,6 +102,17 @@ cepr:result_trave a cepr:ScoutFactualResult ; cepr:runtimeCode "TRAVE" .
 cepr:result_violacao a cepr:ScoutFactualResult ; cepr:runtimeCode "VIOLACAO" .
 cepr:result_passivo a cepr:ScoutFactualResult ; cepr:runtimeCode "PASSIVO" .
 cepr:result_nao_observado a cepr:ScoutFactualResult ; cepr:runtimeCode "NAO_OBSERVADO" .
+cepr:result_perda a cepr:ScoutFactualResult ; cepr:runtimeCode "PERDA" .
+cepr:result_recuperacao_posse a cepr:ScoutFactualResult ; cepr:runtimeCode "RECUPERACAO_POSSE" .
+cepr:result_falta_ataque a cepr:ScoutFactualResult ; cepr:runtimeCode "FALTA_ATAQUE" .
+cepr:result_erro_troca a cepr:ScoutFactualResult ; cepr:runtimeCode "ERRO_TROCA" .
+cepr:result_transicao_neutralizada a cepr:ScoutFactualResult ; cepr:runtimeCode "TRANSICAO_NEUTRALIZADA" .
+cepr:result_defesa_estabilizada a cepr:ScoutFactualResult ; cepr:runtimeCode "DEFESA_ESTABILIZADA" .
+cepr:result_vantagem_criada a cepr:ScoutFactualResult ; cepr:runtimeCode "VANTAGEM_CRIADA" .
+cepr:result_vantagem_perdida a cepr:ScoutFactualResult ; cepr:runtimeCode "VANTAGEM_PERDIDA" .
+cepr:result_erro_passe a cepr:ScoutFactualResult ; cepr:runtimeCode "ERRO_PASSE" .
+cepr:result_passe_interceptado a cepr:ScoutFactualResult ; cepr:runtimeCode "PASSE_INTERCEPTADO" .
+cepr:result_tiro_6m_concedido a cepr:ScoutFactualResult ; cepr:runtimeCode "TIRO_6M_CONCEDIDO" .
 
 cepr:zone_left a cepr:CourtZone ; cepr:runtimeCode "LEFT" .
 cepr:zone_center a cepr:CourtZone ; cepr:runtimeCode "CENTER" .
