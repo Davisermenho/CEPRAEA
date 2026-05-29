@@ -2620,6 +2620,26 @@ Aplicação do protocolo ontológico ao artigo `6-metre throw + punishments.md`:
 - `grep -c '\[draw\.io\]' docs/design/navegacao.drawio.svg`
 - `node scripts/check-ontology-semantics.mjs`
 
+### [CEPR-ONTOLOGIA-RUNTIME-ALIGNMENT-GATE-2026-05-29] — 2026-05-29 — Gate estático de alinhamento runtime ↔ ontologia
+
+#### ✨ Resumo
+
+Criação do gate mínimo que impede drift grosseiro entre os contratos TypeScript do Scout vivo e a camada formal `ontology/core.ttl`.
+
+#### 🚀 Added
+
+- `scripts/check-ontology-runtime-alignment.mjs`
+  - valida presença de `ScoutPhaseCode`, `ScoutFinishTypeCode`, `ScoutFactualResultCode` e `LiveCollectionFlowId` como `cepr:runtimeCode`.
+  - bloqueia reaparecimento de `cepr:SpinShot`, `cepr:InFlightShot` e `cepr:Throw` como classes canônicas.
+- `package.json`
+  - script `check:ontology:runtime-alignment`.
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:runtime-alignment`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:semantics`
+
 ### [CEPR-ONTOLOGIA-ARTIGO-2PT-LIDOS-TRIAGEM-DEDUP-2026-05-24] — 2026-05-24 — Triagem da fonte em `artigos/lidos` com deduplicação total
 
 #### ✨ Resumo
