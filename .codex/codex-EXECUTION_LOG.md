@@ -5415,3 +5415,73 @@ Criar a PR 4 da fusão ontológica: golden dataset realista para provar que a ca
 ## ✅ Validação final
 
 Golden dataset realista criado e incorporado ao pipeline formal. A próxima fatia pode ser SHACL de Scout completo por matriz, sem misturar Supabase/UI.
+
+# Execution Log: CEPR-ONTOLOGIA-SCOUT-SHACL-AUDITED-FLOWS-2026-05-29
+
+## 🎯 Objetivo
+
+Criar a PR 5 da fusão ontológica: primeiro slice de SHACL do Scout orientado pela matriz runtime, limitado aos três fluxos auditados atuais.
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:**
+  - `shacl/core.shacl.ttl`
+  - `examples/golden/scout-audited-flows-valid.ttl`
+  - `examples/golden/scout-audited-flows-invalid.ttl`
+  - `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+  - `queries/competency/tests.json`
+  - `scripts/validate-ontology-formal.sh`
+  - `.codex/codex-CHANGELOG.md`
+  - `.codex/codex-EXECUTION_LOG.md`
+- **Impacto em runtime:** nenhum.
+- **Impacto em Supabase/UI:** nenhum.
+- **Arquivos propositalmente não alterados:** `src/`, `supabase/`, `ontology/core.ttl`, migrations e UI.
+
+## ✅ Ações executadas
+
+1. Leitura de `AGENTS.json`, `CEPRAEA.md` e consulta dos 3 últimos PRs.
+2. Leitura dos contratos vivos `liveCollectionFlow.contract.ts` e `liveCollectionCompatibility.matrix.ts`.
+3. Adição de constraints SHACL para os 3 fluxos auditados:
+   - fase esperada por fluxo;
+   - tipos de finalização permitidos por fluxo;
+   - `FINALIZACAO_6M_FAV` não aceita `BLOQUEADO` nem `PASSIVO`;
+   - resultados observados de arremesso exigem tipo de finalização.
+4. Criação de dataset válido e inválido do slice auditado.
+5. Inclusão da pergunta de competência `CEPR-CQ-05`.
+6. Atualização do script formal para validar o dataset válido e exigir falha do inválido.
+
+## 🧪 Evidências objetivas (comandos)
+
+- `jq empty AGENTS.json`
+- `sed -n '1,220p' AGENTS.json`
+- `sed -n '1,180p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `git checkout main`
+- `git pull origin main`
+- `git checkout -b chore/ontology-scout-shacl-audited-flows`
+- `sed -n '1,260p' src/features/scout/domain/liveCollectionFlow.contract.ts`
+- `sed -n '1,320p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+## ✅ Resultado da validação
+
+- `npm run validate:ontology:formal` passou:
+  - dataset válido dos fluxos auditados conforma.
+  - dataset inválido dos fluxos auditados falha como esperado com 5 violações.
+  - `CEPR-CQ-05` retornou 6 linhas.
+- `npm run check:ontology:runtime-alignment` passou.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+## ⚠️ Ocorrências durante execução
+
+- A primeira versão das constraints usava `VALUES`, mas `pyshacl` rejeita `VALUES` em constraints SPARQL. As regras foram reescritas com `FILTER(... IN (...))`.
+- Categoria, ação básica, motivo de pontuação e pontos por entrada ainda não foram formalizados porque não há propriedades canônicas em `ontology/core.ttl`; criar esse vocabulário foi mantido fora deste slice.
+- `onthbpraia/` permanece untracked localmente e fora do escopo.
+
+## ✅ Validação final
+
+SHACL inicial dos 3 fluxos auditados criado e validado. A próxima fatia deve expandir vocabulário formal de Scout ou avançar incrementalmente regras de pontuação, sem misturar Supabase/UI.

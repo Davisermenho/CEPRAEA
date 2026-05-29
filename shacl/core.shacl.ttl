@@ -98,4 +98,104 @@ cepr:ScoutLiveEntryShape a sh:NodeShape ;
               cepr:hasFinishType ?finishType .
       }
     """ ;
+  ] ;
+  sh:sparql [
+    sh:message "Fluxo AT_POS.ARREMESSO.* deve usar fase AT_POS."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract ?flow ;
+              cepr:hasScoutPhase ?phase .
+        FILTER(?flow IN (
+          cepr:flow_at_pos_arremesso_arremesso,
+          cepr:flow_at_pos_arremesso_finalizacao_6m_fav
+        ))
+        FILTER(?phase != cepr:AT_POS)
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "Fluxo TRANS_OF.ARREMESSO.ARREMESSO deve usar fase TRANS_OF."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_trans_of_arremesso_arremesso ;
+              cepr:hasScoutPhase ?phase .
+        FILTER(?phase != cepr:TRANS_OF)
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "AT_POS.ARREMESSO.ARREMESSO aceita apenas SIMPLES, GIRO ou AEREA como tipo de finalizacao."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_at_pos_arremesso_arremesso ;
+              cepr:hasFinishType ?finishType .
+        FILTER(?finishType NOT IN (cepr:finish_simples, cepr:finish_giro, cepr:finish_aerea))
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "TRANS_OF.ARREMESSO.ARREMESSO aceita apenas SIMPLES, GIRO, AEREA ou NAO_OBSERVADO como tipo de finalizacao."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_trans_of_arremesso_arremesso ;
+              cepr:hasFinishType ?finishType .
+        FILTER(?finishType NOT IN (cepr:finish_simples, cepr:finish_giro, cepr:finish_aerea, cepr:finish_nao_observado))
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "AT_POS.ARREMESSO.FINALIZACAO_6M_FAV deve usar tipo de finalizacao 6M quando informado."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_at_pos_arremesso_finalizacao_6m_fav ;
+              cepr:hasFinishType ?finishType .
+        FILTER(?finishType != cepr:finish_6m)
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "AT_POS.ARREMESSO.FINALIZACAO_6M_FAV nao aceita BLOQUEADO nem PASSIVO como resultado factual."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_at_pos_arremesso_finalizacao_6m_fav ;
+              cepr:hasFactualResult ?result .
+        FILTER(?result IN (cepr:result_bloqueado, cepr:result_passivo))
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "Resultado de arremesso observado exige tipo de finalizacao nos fluxos auditados."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract ?flow ;
+              cepr:hasFactualResult ?result .
+        FILTER(?flow IN (
+          cepr:flow_at_pos_arremesso_arremesso,
+          cepr:flow_at_pos_arremesso_finalizacao_6m_fav,
+          cepr:flow_trans_of_arremesso_arremesso
+        ))
+        FILTER(?result IN (
+          cepr:result_gol,
+          cepr:result_defendido,
+          cepr:result_bloqueado,
+          cepr:result_fora,
+          cepr:result_trave
+        ))
+        FILTER NOT EXISTS { $this cepr:hasFinishType ?finishType }
+      }
+    """ ;
   ] .

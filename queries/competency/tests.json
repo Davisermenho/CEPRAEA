@@ -6,7 +6,9 @@
     "minimal": "examples/minimal-data.ttl",
     "invalid": "examples/invalid-data.ttl",
     "golden_valid": "examples/golden/scout-live-real-valid.ttl",
-    "golden_invalid": "examples/golden/scout-live-real-invalid.ttl"
+    "golden_invalid": "examples/golden/scout-live-real-invalid.ttl",
+    "audited_flows_valid": "examples/golden/scout-audited-flows-valid.ttl",
+    "audited_flows_invalid": "examples/golden/scout-audited-flows-invalid.ttl"
   },
   "tests": [
     {
@@ -97,6 +99,53 @@
             "resultRuntimeCode": "GOL",
             "actionType": "https://cepraea.app/ontology#SpinThrow",
             "points": "2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "CEPR-CQ-05",
+      "dataset": "audited_flows_valid",
+      "extra_graphs": [],
+      "query": "queries/competency/q05_audited_scout_flow_shacl_slice.rq",
+      "assert": {
+        "row_count_eq": 6,
+        "expected_rows": [
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_6m_defendido",
+            "flowRuntimeCode": "AT_POS.ARREMESSO.FINALIZACAO_6M_FAV",
+            "phaseRuntimeCode": "AT_POS",
+            "resultRuntimeCode": "DEFENDIDO"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_6m_goal",
+            "flowRuntimeCode": "AT_POS.ARREMESSO.FINALIZACAO_6M_FAV",
+            "phaseRuntimeCode": "AT_POS",
+            "resultRuntimeCode": "GOL"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_at_pos_passivo",
+            "flowRuntimeCode": "AT_POS.ARREMESSO.ARREMESSO",
+            "phaseRuntimeCode": "AT_POS",
+            "resultRuntimeCode": "PASSIVO"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_at_pos_spin_goal",
+            "flowRuntimeCode": "AT_POS.ARREMESSO.ARREMESSO",
+            "phaseRuntimeCode": "AT_POS",
+            "resultRuntimeCode": "GOL"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_trans_of_aerial_goal",
+            "flowRuntimeCode": "TRANS_OF.ARREMESSO.ARREMESSO",
+            "phaseRuntimeCode": "TRANS_OF",
+            "resultRuntimeCode": "GOL"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_trans_of_passivo",
+            "flowRuntimeCode": "TRANS_OF.ARREMESSO.ARREMESSO",
+            "phaseRuntimeCode": "TRANS_OF",
+            "resultRuntimeCode": "PASSIVO"
           }
         ]
       }
