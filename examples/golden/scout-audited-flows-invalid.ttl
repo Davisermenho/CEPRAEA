@@ -6,6 +6,9 @@ cepr:TRANS_OF a cepr:ScoutPhase .
 cepr:result_gol a cepr:ScoutFactualResult .
 cepr:result_bloqueado a cepr:ScoutFactualResult .
 cepr:result_passivo a cepr:ScoutFactualResult .
+cepr:result_erro_passe a cepr:ScoutFactualResult .
+cepr:result_passe_interceptado a cepr:ScoutFactualResult .
+cepr:result_recuperacao_posse a cepr:ScoutFactualResult .
 
 cepr:finish_giro a cepr:ScoutFinishType .
 cepr:finish_6m a cepr:ScoutFinishType .
@@ -42,3 +45,33 @@ cepr:audited_entry_at_pos_goal_missing_finish_invalid a cepr:ScoutLiveEntry ;
   cepr:hasScoutPhase cepr:AT_POS ;
   cepr:hasFactualResult cepr:result_gol ;
   cepr:hasFlowContract cepr:flow_at_pos_arremesso_arremesso .
+
+cepr:audited_entry_at_pos_erro_passe_result_invalid a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:AT_POS ;
+  cepr:hasFactualResult cepr:result_erro_passe ;
+  cepr:hasFlowContract cepr:flow_at_pos_arremesso_arremesso .
+
+cepr:audited_entry_at_pos_passe_interceptado_result_invalid a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:AT_POS ;
+  cepr:hasFactualResult cepr:result_passe_interceptado ;
+  cepr:hasFlowContract cepr:flow_at_pos_arremesso_arremesso .
+
+cepr:audited_entry_at_pos_recuperacao_posse_result_invalid a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:AT_POS ;
+  cepr:hasFactualResult cepr:result_recuperacao_posse ;
+  cepr:hasFlowContract cepr:flow_at_pos_arremesso_arremesso .
+
+cepr:audited_entry_6m_erro_passe_result_invalid a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:AT_POS ;
+  cepr:hasFactualResult cepr:result_erro_passe ;
+  cepr:hasFlowContract cepr:flow_at_pos_arremesso_finalizacao_6m_fav .
+
+cepr:audited_entry_6m_passe_interceptado_result_invalid a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:AT_POS ;
+  cepr:hasFactualResult cepr:result_passe_interceptado ;
+  cepr:hasFlowContract cepr:flow_at_pos_arremesso_finalizacao_6m_fav .
+
+cepr:audited_entry_6m_recuperacao_posse_result_invalid a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:AT_POS ;
+  cepr:hasFactualResult cepr:result_recuperacao_posse ;
+  cepr:hasFlowContract cepr:flow_at_pos_arremesso_finalizacao_6m_fav .

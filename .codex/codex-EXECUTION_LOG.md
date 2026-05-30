@@ -5682,3 +5682,50 @@ O script reporta 6 pendências não bloqueantes de cobertura formal: `ERRO_PASSE
 
 - Esta PR não altera SHACL nem datasets; as pendências de `forbiddenResults` devem ser resolvidas em fatia formal posterior.
 - O parser do gate é estático e intencionalmente restrito ao formato atual dos contratos TypeScript.
+
+## CEPR-ONTOLOGIA-FORBIDDEN-RESULTS-COVERAGE-2026-05-30 — Cobertura formal de forbiddenResults
+
+### Escopo entendido
+
+Resolver as 6 pendências não bloqueantes reportadas pelo gate runtime ↔ SHACL para `forbiddenResults`, alterando apenas SHACL, dataset inválido e logs Codex, sem mexer em runtime funcional, Supabase, UI, migrations, `ontology/`, `src/` ou `queries/`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+
+### Comandos executados
+
+- `jq empty AGENTS.json`
+- `sed -n '1,160p' AGENTS.json`
+- `sed -n '1,100p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `git worktree list`
+- `npm run check:ontology:runtime-alignment`
+- `sed -n '80,230p' shacl/core.shacl.ttl`
+- `cat examples/golden/scout-audited-flows-invalid.ttl`
+- `rg -n "result_erro_passe|result_passe_interceptado|result_recuperacao_posse|runtimeCode \"ERRO_PASSE\"|runtimeCode \"PASSE_INTERCEPTADO\"|runtimeCode \"RECUPERACAO_POSSE\"" ontology/core.ttl`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0`.
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 11 violações.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre somente os `forbiddenResults` dos dois fluxos ofensivos auditados que já estavam reportados pelo gate.
+- Não converte a matriz TypeScript inteira em SHACL.
