@@ -10,7 +10,9 @@ cepr:result_gol a cepr:ScoutFactualResult .
 cepr:result_defendido a cepr:ScoutFactualResult .
 cepr:result_passivo a cepr:ScoutFactualResult .
 cepr:result_tiro_6m_concedido a cepr:ScoutFactualResult .
+cepr:result_defesa_estabilizada a cepr:ScoutFactualResult .
 
+cepr:finish_simples a cepr:ScoutFinishType .
 cepr:finish_giro a cepr:ScoutFinishType .
 cepr:finish_aerea a cepr:ScoutFinishType .
 cepr:finish_6m a cepr:ScoutFinishType .
@@ -23,6 +25,8 @@ cepr:flow_def_pos_acao_defensiva_cobertura a cepr:ScoutFlowContract ;
   cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.COBERTURA" .
 cepr:flow_def_pos_acao_defensiva_marcacao_pressao a cepr:ScoutFlowContract ;
   cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO" .
+cepr:flow_def_pos_acao_defensiva_recomposicao a cepr:ScoutFlowContract ;
+  cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.RECOMPOSICAO" .
 cepr:flow_trans_of_arremesso_arremesso a cepr:ScoutFlowContract .
 
 cepr:audited_entry_at_pos_spin_goal a cepr:ScoutLiveEntry ;
@@ -90,3 +94,14 @@ cepr:audited_entry_def_pos_marcacao_pressao_tiro_6m_concedido a cepr:ScoutLiveEn
   cepr:hasScoutPhase cepr:DEF_POS ;
   cepr:hasFactualResult cepr:result_tiro_6m_concedido ;
   cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_marcacao_pressao .
+
+cepr:audited_entry_def_pos_recomposicao_gol_simples a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:DEF_POS ;
+  cepr:hasFactualResult cepr:result_gol ;
+  cepr:hasFinishType cepr:finish_simples ;
+  cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_recomposicao .
+
+cepr:audited_entry_def_pos_recomposicao_defesa_estabilizada a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:DEF_POS ;
+  cepr:hasFactualResult cepr:result_defesa_estabilizada ;
+  cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_recomposicao .

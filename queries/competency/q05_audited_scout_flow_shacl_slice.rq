@@ -22,7 +22,9 @@ WHERE {
     cepr:audited_entry_def_pos_cobertura_gol_aerea,
     cepr:audited_entry_def_pos_cobertura_recuperacao_posse,
     cepr:audited_entry_def_pos_marcacao_pressao_gol_giro,
-    cepr:audited_entry_def_pos_marcacao_pressao_tiro_6m_concedido
+    cepr:audited_entry_def_pos_marcacao_pressao_tiro_6m_concedido,
+    cepr:audited_entry_def_pos_recomposicao_gol_simples,
+    cepr:audited_entry_def_pos_recomposicao_defesa_estabilizada
   ))
 }
 ORDER BY ?entry
