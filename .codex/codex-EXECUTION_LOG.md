@@ -5416,11 +5416,11 @@ Criar a PR 4 da fusão ontológica: golden dataset realista para provar que a ca
 
 Golden dataset realista criado e incorporado ao pipeline formal. A próxima fatia pode ser SHACL de Scout completo por matriz, sem misturar Supabase/UI.
 
-# Execution Log: CEPR-ONTOLOGIA-FUSAO-VERSIONAR-PLANO-2026-05-29
+# Execution Log: CEPR-ONTOLOGIA-FUSAO-PLANO-V2-2026-05-29
 
 ## 🎯 Objetivo
 
-Versionar `docs/ontologia/merge/FUSAO.md` em uma PR documental pequena e corrigir o trecho desatualizado sobre o workflow formal de ontologia.
+Ler `docs/ontologia/merge/FUSAO.md` e ajustar o plano de fusão ontológica conforme a correção de auditoria fornecida: política formal de ontologia executável antes de importação/expansão RDF/SHACL e distinção entre workflow documental existente e gate formal executável completo.
 
 ## 📌 Análise de Impacto
 
@@ -5430,74 +5430,19 @@ Versionar `docs/ontologia/merge/FUSAO.md` em uma PR documental pequena e corrigi
   - `.codex/codex-EXECUTION_LOG.md`
 - **Impacto em runtime:** nenhum.
 - **Impacto em Supabase/UI:** nenhum.
-- **Impacto em SHACL/ontologia executável:** nenhum.
+- **Observação:** `FUSAO.md` já estava untracked antes da edição.
 
 ## ✅ Ações executadas
 
 1. Leitura de `AGENTS.json`.
-2. Consulta dos 3 últimos PRs.
-3. Criação de worktree separada em `origin/main` para não misturar com `feat/cepr-auth-02b`.
-4. Cópia do `FUSAO.md` local para a branch documental.
-5. Correção do trecho sobre workflow formal.
-6. Atualização dos logs operacionais Codex.
-
-## 🧪 Evidências objetivas (comandos)
-
-- `jq empty AGENTS.json`
-- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
-- `git worktree add -b chore/ontology-version-fusao-plan /tmp/cepraea-fusao-plan origin/main`
-- `rg -n "workflow dedicado|validate:mvp|runtime ↔ ontologia|PLANO V2|PRÓXIMA AÇÃO SEGURA" docs/ontologia/merge/FUSAO.md`
-- `npm run check:ontology:semantics`
-- `git diff --check`
-
-## ✅ Resultado da validação
-
-- O plano agora reconhece que o workflow de ontologia já roda validação formal RDF/SHACL/SPARQL.
-- A lacuna atual ficou explicitada como falta de `check:ontology:runtime-alignment` no workflow e falta dos gates ontológicos no `validate:mvp:v1`.
-- Sem alteração de runtime, Supabase, UI, SHACL ou TTL.
-
-## ⚠️ Ocorrências durante execução
-
-- A branch principal de trabalho local estava em `feat/cepr-auth-02b`; por isso foi usada worktree separada baseada em `origin/main`.
-- `onthbpraia/` permanece untracked na árvore principal e fora desta PR.
-
-## ✅ Validação final
-
-Plano pronto para PR documental de versionamento do `FUSAO.md`.
-
-# Execution Log: CEPR-ONTOLOGIA-SCOUT-SHACL-AUDITED-FLOWS-2026-05-29
-
-## 🎯 Objetivo
-
-Criar a PR 5 da fusão ontológica: primeiro slice de SHACL do Scout orientado pela matriz runtime, limitado aos três fluxos auditados atuais.
-
-## 📌 Análise de Impacto
-
-- **Arquivos alterados:**
-  - `shacl/core.shacl.ttl`
-  - `examples/golden/scout-audited-flows-valid.ttl`
-  - `examples/golden/scout-audited-flows-invalid.ttl`
-  - `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
-  - `queries/competency/tests.json`
-  - `scripts/validate-ontology-formal.sh`
-  - `.codex/codex-CHANGELOG.md`
-  - `.codex/codex-EXECUTION_LOG.md`
-- **Impacto em runtime:** nenhum.
-- **Impacto em Supabase/UI:** nenhum.
-- **Arquivos propositalmente não alterados:** `src/`, `supabase/`, `ontology/core.ttl`, migrations e UI.
-
-## ✅ Ações executadas
-
-1. Leitura de `AGENTS.json`, `CEPRAEA.md` e consulta dos 3 últimos PRs.
-2. Leitura dos contratos vivos `liveCollectionFlow.contract.ts` e `liveCollectionCompatibility.matrix.ts`.
-3. Adição de constraints SHACL para os 3 fluxos auditados:
-   - fase esperada por fluxo;
-   - tipos de finalização permitidos por fluxo;
-   - `FINALIZACAO_6M_FAV` não aceita `BLOQUEADO` nem `PASSIVO`;
-   - resultados observados de arremesso exigem tipo de finalização.
-4. Criação de dataset válido e inválido do slice auditado.
-5. Inclusão da pergunta de competência `CEPR-CQ-05`.
-6. Atualização do script formal para validar o dataset válido e exigir falha do inválido.
+2. Leitura de `CEPRAEA.md`.
+3. Consulta dos 3 últimos PRs.
+4. Leitura de `docs/ontologia/merge/FUSAO.md`.
+5. Inclusão da seção `CORREÇÃO DO ANTERIOR`.
+6. Correção do gap sobre workflow ontológico existente.
+7. Substituição do plano antigo por `PLANO V2 — AJUSTADO`.
+8. Inclusão da decisão arquitetural final e da cadeia mínima de robustez ontológica.
+9. Atualização da próxima ação segura para política de dados históricos.
 
 ## 🧪 Evidências objetivas (comandos)
 
@@ -5505,32 +5450,21 @@ Criar a PR 5 da fusão ontológica: primeiro slice de SHACL do Scout orientado p
 - `sed -n '1,220p' AGENTS.json`
 - `sed -n '1,180p' CEPRAEA.md`
 - `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
-- `git checkout main`
-- `git pull origin main`
-- `git checkout -b chore/ontology-scout-shacl-audited-flows`
-- `sed -n '1,260p' src/features/scout/domain/liveCollectionFlow.contract.ts`
-- `sed -n '1,320p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
-- `npm run validate:ontology:formal`
-- `npm run check:ontology:runtime-alignment`
-- `npm run check:ontology:semantics`
-- `git diff --check`
+- `sed -n '1,260p' docs/ontologia/merge/FUSAO.md`
+- `sed -n '261,620p' docs/ontologia/merge/FUSAO.md`
 
 ## ✅ Resultado da validação
 
-- `npm run validate:ontology:formal` passou:
-  - dataset válido dos fluxos auditados conforma.
-  - dataset inválido dos fluxos auditados falha como esperado com 5 violações.
-  - `CEPR-CQ-05` retornou 6 linhas.
-- `npm run check:ontology:runtime-alignment` passou.
-- `npm run check:ontology:semantics` passou sem erros e sem avisos.
-- `git diff --check` passou.
+- O plano agora diferencia checagem documental/semântica de gate formal RDF/SHACL/SPARQL.
+- O plano V2 contém PR 1 a PR 6 com política de namespace/versionamento, camada formal, alinhamento runtime, golden dataset, política histórica e gate final MVP.
+- A decisão arquitetural final foi explicitada: CEPRAEA manda no produto, `onthbpraia` no padrão executável, SHACL na validação fechada e OWL não é validador fechado.
 
 ## ⚠️ Ocorrências durante execução
 
-- A primeira versão das constraints usava `VALUES`, mas `pyshacl` rejeita `VALUES` em constraints SPARQL. As regras foram reescritas com `FILTER(... IN (...))`.
-- Categoria, ação básica, motivo de pontuação e pontos por entrada ainda não foram formalizados porque não há propriedades canônicas em `ontology/core.ttl`; criar esse vocabulário foi mantido fora deste slice.
-- `onthbpraia/` permanece untracked localmente e fora do escopo.
+- A branch atual é `feat/cepr-auth-02b`, atrás de `main` por 2 commits.
+- `docs/ontologia/merge/FUSAO.md` já estava untracked antes da edição.
+- `onthbpraia/` permanece untracked localmente.
 
 ## ✅ Validação final
 
-SHACL inicial dos 3 fluxos auditados criado e validado. A próxima fatia deve expandir vocabulário formal de Scout ou avançar incrementalmente regras de pontuação, sem misturar Supabase/UI.
+Plano de fusão atualizado para V2 sem alterações em runtime, Supabase, UI, migrations, ontologia formal ou SHACL.

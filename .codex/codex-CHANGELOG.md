@@ -2837,23 +2837,25 @@ Aplicação do protocolo ontológico ao artigo `Latest trends in attack_0.md` co
 - `rg -n "CounterAttack|Interception|AttackModel|PassivePlay" docs/ontologia/manuais/glossario-ontologico-controlado.md`
 - `node scripts/check-ontology-semantics.mjs`
 
-### [CEPR-ONTOLOGIA-FUSAO-VERSIONAR-PLANO-2026-05-29] — 2026-05-29 — Versionamento do plano de fusão ontológica
+### [CEPR-ONTOLOGIA-FUSAO-PLANO-V2-2026-05-29] — 2026-05-29 — Ajuste do plano de fusão ontológica para V2
 
 #### ✨ Resumo
 
-Versionamento de `FUSAO.md` como plano operacional da fusão CEPRAEA ↔ onthbpraia, com correção factual sobre o workflow formal existente.
-
-#### 🚀 Added
-
-- `docs/ontologia/merge/FUSAO.md`
-  - objetivo, diagnóstico, precedência, Plano V2, decisão arquitetural e próxima ação segura.
+Atualização do plano `FUSAO.md` para incorporar a correção de auditoria: antes de importar RDF/SHACL, o CEPRAEA precisa de política formal de ontologia executável e gate formal completo.
 
 #### 🛠️ Changed
 
-- Texto do plano reconhece que `ontology-quality-gate` já executa validação formal RDF/SHACL/SPARQL quando o escopo formal é alterado.
-- Lacuna atual corrigida para: ausência de `check:ontology:runtime-alignment` no workflow e ausência dos gates ontológicos no `validate:mvp:v1`.
+- `docs/ontologia/merge/FUSAO.md`
+  - inclusão da correção factual sobre workflow ontológico existente.
+  - substituição do plano antigo pelo Plano V2.
+  - inclusão da decisão arquitetural final.
+  - inclusão da cadeia mínima para a ontologia deixar de ser apenas conceitual.
+  - atualização da próxima ação segura para política de dados históricos.
 
 #### 🛡️ Evidências
 
-- `npm run check:ontology:semantics`
-- `git diff --check`
+- `jq empty AGENTS.json`
+- `sed -n '1,220p' AGENTS.json`
+- `sed -n '1,180p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `sed -n '1,760p' docs/ontologia/merge/FUSAO.md`

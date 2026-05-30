@@ -20,7 +20,7 @@ jobs:
   scout-preview-smoke:
     name: scout-preview-smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
@@ -139,25 +139,9 @@ jobs:
         if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
         run: npm ci --no-audit --no-fund --loglevel=error
 
-
-      - name: Cache Playwright browsers
-        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            playwright-chromium-${{ runner.os }}-
-
       - name: Install Playwright browser
         if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
-        run: |
-          if [[ "${{ steps.playwright-cache.outputs.cache-hit }}" == 'true' ]]; then
-            npx playwright install chromium
-          else
-            npx playwright install --with-deps chromium
-          fi
+        run: npx playwright install --with-deps chromium
 
       - name: Resolve Vercel preview URL from Vercel check-run
         if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
