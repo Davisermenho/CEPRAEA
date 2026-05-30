@@ -47,7 +47,12 @@ function isCriticalResponse(url: string, status: number, body: string) {
 }
 
 function isIgnorableConsoleError(message: string) {
-  const ignorablePatterns = [/Failed to load resource: the server responded with a status of (400|401|403|404)/i]
+  const ignorablePatterns = [
+    /Failed to load resource: the server responded with a status of (400|401|403|404)/i,
+    // Vercel Preview Comments injeta iframe vercel.live; viola CSP report-only mas nao bloqueia.
+    /vercel\.live/i,
+    /report-only Content Security Policy/i,
+  ]
   return ignorablePatterns.some((pattern) => pattern.test(message))
 }
 
