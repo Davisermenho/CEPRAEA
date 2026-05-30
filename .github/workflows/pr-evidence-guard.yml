@@ -10,6 +10,12 @@ on:
       - synchronize
       - reopened
       - ready_for_review
+  workflow_dispatch:
+    inputs:
+      pull_number:
+        description: 'PR number to validate (required for workflow_dispatch)'
+        required: true
+        type: number
 
 permissions:
   contents: read
@@ -25,7 +31,18 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const pr = context.payload.pull_request;
+            let pr;
+            if (context.eventName === 'workflow_dispatch') {
+              const pullNumber = parseInt(context.payload.inputs.pull_number);
+              const prResponse = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pullNumber,
+              });
+              pr = prResponse.data;
+            } else {
+              pr = context.payload.pull_request;
+            }
             const body = pr.body || '';
 
             const files = await github.paginate(github.rest.pulls.listFiles, {
