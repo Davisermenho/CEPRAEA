@@ -7,7 +7,9 @@ values
   ('00000000-0000-0000-0000-000000000002', 'coach@cepraea.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000', '', '', '', '', ''),
   ('00000000-0000-0000-0000-000000000003', 'viewer@cepraea.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000', '', '', '', '', ''),
   ('00000000-0000-0000-0000-000000000004', 'noteam@cepraea.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000', '', '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000005', 'owner@other.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000', '', '', '', '', '')
+  ('00000000-0000-0000-0000-000000000005', 'owner@other.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000', '', '', '', '', ''),
+  -- CEPR-AUTH-02E: usuario espelhado de producao para smoke E2E em preview branch.
+  ('5e56bc3a-a76c-47d3-9f90-d8b087d1aa9c', 'treinador@cepraea.com', crypt('98701665', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000', '', '', '', '', '')
 on conflict (id) do nothing;
 
 insert into auth.identities (provider_id, user_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
@@ -16,7 +18,8 @@ values
   ('coach@cepraea.test',  '00000000-0000-0000-0000-000000000002', 'email', '{"sub":"00000000-0000-0000-0000-000000000002","email":"coach@cepraea.test","email_verified":true}',  now(), now(), now()),
   ('viewer@cepraea.test', '00000000-0000-0000-0000-000000000003', 'email', '{"sub":"00000000-0000-0000-0000-000000000003","email":"viewer@cepraea.test","email_verified":true}', now(), now(), now()),
   ('noteam@cepraea.test', '00000000-0000-0000-0000-000000000004', 'email', '{"sub":"00000000-0000-0000-0000-000000000004","email":"noteam@cepraea.test","email_verified":true}', now(), now(), now()),
-  ('owner@other.test',    '00000000-0000-0000-0000-000000000005', 'email', '{"sub":"00000000-0000-0000-0000-000000000005","email":"owner@other.test","email_verified":true}',    now(), now(), now())
+  ('owner@other.test',    '00000000-0000-0000-0000-000000000005', 'email', '{"sub":"00000000-0000-0000-0000-000000000005","email":"owner@other.test","email_verified":true}',    now(), now(), now()),
+  ('treinador@cepraea.com', '5e56bc3a-a76c-47d3-9f90-d8b087d1aa9c', 'email', '{"sub":"5e56bc3a-a76c-47d3-9f90-d8b087d1aa9c","email":"treinador@cepraea.com","email_verified":true}', now(), now(), now())
 on conflict (provider_id, provider) do nothing;
 
 insert into public.profiles (id, name, email)
@@ -25,13 +28,15 @@ values
   ('00000000-0000-0000-0000-000000000002', 'Coach CEPRAEA', 'coach@cepraea.test'),
   ('00000000-0000-0000-0000-000000000003', 'Viewer CEPRAEA', 'viewer@cepraea.test'),
   ('00000000-0000-0000-0000-000000000004', 'Sem equipe', 'noteam@cepraea.test'),
-  ('00000000-0000-0000-0000-000000000005', 'Owner Outra Equipe', 'owner@other.test')
+  ('00000000-0000-0000-0000-000000000005', 'Owner Outra Equipe', 'owner@other.test'),
+  ('5e56bc3a-a76c-47d3-9f90-d8b087d1aa9c', 'Treinador CEPRAEA', 'treinador@cepraea.com')
 on conflict (id) do nothing;
 
 insert into public.teams (id, name, slug, created_by)
 values
   ('10000000-0000-0000-0000-000000000001', 'CEPRAEA', 'cepraea', '00000000-0000-0000-0000-000000000001'),
-  ('10000000-0000-0000-0000-000000000002', 'Outra Equipe', 'outra-equipe', '00000000-0000-0000-0000-000000000005')
+  ('10000000-0000-0000-0000-000000000002', 'Outra Equipe', 'outra-equipe', '00000000-0000-0000-0000-000000000005'),
+  ('866ba974-3ebe-4f73-881c-f5c754350b50', 'CEPRAEA Prod', 'cepraea-prod', '5e56bc3a-a76c-47d3-9f90-d8b087d1aa9c')
 on conflict (id) do nothing;
 
 insert into public.team_members (team_id, user_id, role)
@@ -39,7 +44,8 @@ values
   ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'owner'),
   ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'coach'),
   ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000003', 'viewer'),
-  ('10000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000005', 'owner')
+  ('10000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000005', 'owner'),
+  ('866ba974-3ebe-4f73-881c-f5c754350b50', '5e56bc3a-a76c-47d3-9f90-d8b087d1aa9c', 'owner')
 on conflict (team_id, user_id) do nothing;
 
 insert into public.athletes (id, team_id, name, phone, status)

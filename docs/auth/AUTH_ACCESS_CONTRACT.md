@@ -552,9 +552,9 @@ O contrato delega o threat model STRIDE × controles ao documento [THREAT_MODEL.
 
 | # | Gap | Severidade | Status (2026-05-29) | Sub-PR alvo | Cláusula |
 |---|---|---|---|---|---|
-| G1 | Política de senha (≥ 10 chars + composição + HIBP) | CRÍTICO | **Pendente** | CEPR-AUTH-02E | §10 |
+| G1 | Política de senha (≥ 10 chars + composição + HIBP) | CRÍTICO | **Implementado** | CEPR-AUTH-02E | §10 |
 | G2 | MFA (TOTP/WebAuthn) | ALTO | **Roadmap** | CEPR-AUTH-03 | §25 (roadmap) |
-| G3 | Rate limiting/lockout explícito | ALTO | **Pendente** | CEPR-AUTH-02E | §11 |
+| G3 | Rate limiting/lockout explícito | ALTO | **Parcial** | CEPR-AUTH-02E | §11 |
 | G4 | CAPTCHA (Turnstile) | ALTO | **Pendente** | CEPR-AUTH-02E | §12 |
 | G5 | Vocabulário anti-enumeração | ALTO | **Implementado** | CEPR-AUTH-02C | §13 |
 | G6 | localStorage sem CSP compensatório | ALTO | **Parcial** (decisão documentada §14; CSP Report-Only em 02D, enforcement em 02F+) | CEPR-AUTH-02D + 02F+ | §14, §15 |
@@ -565,7 +565,7 @@ O contrato delega o threat model STRIDE × controles ao documento [THREAT_MODEL.
 | G11 | Open redirect / redirect guard | MÉDIO | **Implementado** | CEPR-AUTH-02C | §18 |
 | G12 | Audit log canônico de auth | MÉDIO | **Parcial** (`audit_logs` existe em `0003`; sem schema auth) | CEPR-AUTH-02F+ | §19 |
 | G13 | Contrato UI/UX (DDR/WCAG) | MÉDIO | **Pendente** | CEPR-AUTH-02F+ | (roadmap UX) |
-| G14 | `supabase/config.toml` hardening | MÉDIO | **Pendente** | CEPR-AUTH-02E | §20 |
+| G14 | `supabase/config.toml` hardening | MÉDIO | **Parcial** | CEPR-AUTH-02E | §20 |
 | G15 | Threat model STRIDE | MÉDIO | **Implementado** (este sub-PR) | CEPR-AUTH-02A | §21, [THREAT_MODEL.md](./THREAT_MODEL.md) |
 | G16 | Matriz de testes + SLO de auth | MÉDIO | **Parcial** (matriz documentada nesta v2.0; SLO em 02F+) | CEPR-AUTH-02A + 02F+ | §22.1 |
 | G17 | Hardening de convites (revoked_at, expiração) | BAIXO-MÉDIO | **Parcial** (contrato em §17 v1; cron/RPC pendentes) | CEPR-AUTH-02F+ | (Edge Function `expire-invites`) |
@@ -578,13 +578,13 @@ O contrato delega o threat model STRIDE × controles ao documento [THREAT_MODEL.
 | Unit | Fail-fast de `supabase.ts` sem env | 02B | Pendente |
 | Unit | `normalizeEmail()` (RFC, edge cases) | 02C | Pendente |
 | Unit | `redirectGuard()` (whitelist, javascript:, evil.com) | 02C | Pendente |
-| Unit | `hibpCheck()` (mock fetch, sufixo match/no-match) | 02E | Pendente |
+| Unit | `hibpCheck()` (mock fetch, sufixo match/no-match) | 02E | Implementado |
 | E2E | Anti-enumeração (login/signup/reset com paridade ±200 ms) | 02C | Pendente |
 | E2E | Redirect guard | 02C | Pendente |
 | E2E | Password policy (< 10 chars rejeitada; HIBP-leaked rejeitada) | 02E | Pendente |
 | E2E (manual) | Headers presentes em Preview (`scripts/check-headers.sh`) | 02D | Pendente |
 | E2E (manual) | CAPTCHA Turnstile dispara após N falhas | 02E | Pendente |
-| Script | `scripts/verify-supabase-config.ts` valida `config.toml` | 02E | Pendente |
+| Script | `scripts/verify-supabase-config.ts` valida `config.toml` | 02E | Implementado |
 | Script | `scripts/test-rate-limit.ts` recebe ≥ 1 status 429 | 02E | Pendente |
 
 SLOs de latência/disponibilidade ficam para CEPR-AUTH-02F+ (k6).

@@ -42,3 +42,30 @@ export function mapSupabaseLoginError(supabaseMessage?: string): string {
   // para não vazar se o email existe.
   return AUTH_MESSAGES['AUTH-LOGIN-001']
 }
+
+
+/**
+ * CEPR-AUTH-02E §11.2/§10.3 — interpretação estruturada de erros do Supabase.
+ * Retorna o código canônico para que a UI possa decidir comportamento (lock 30s, redirect).
+ */
+export type AuthErrorCode =
+  | 'LOGIN-001'
+  | 'LOGIN-002'
+  | 'LOGIN-003'
+  | 'WEAK-PASSWORD'
+
+export function interpretSupabaseAuthError(supabaseMessage?: string, status?: number): {
+  code: AuthErrorCode
+  message: string
+} {
+  if (status === 429 || (supabaseMessage && /rate limit|too many requests/i.test(supabaseMessage))) {
+    return { code: 'LOGIN-003', message: AUTH_MESSAGES['AUTH-LOGIN-003'] }
+  }
+  if (supabaseMessage && /weak[_ ]?password/i.test(supabaseMessage)) {
+    return { code: 'WEAK-PASSWORD', message: AUTH_MESSAGES['AUTH-RESET-002'] }
+  }
+  if (supabaseMessage && /email not confirmed/i.test(supabaseMessage)) {
+    return { code: 'LOGIN-002', message: AUTH_MESSAGES['AUTH-LOGIN-002'] }
+  }
+  return { code: 'LOGIN-001', message: AUTH_MESSAGES['AUTH-LOGIN-001'] }
+}

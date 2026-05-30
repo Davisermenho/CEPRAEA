@@ -6,6 +6,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 type SupabaseAuthResult = {
   ok: boolean
   error?: string
+  status?: number
 }
 
 type SupabaseAuthContextValue = {
@@ -14,7 +15,7 @@ type SupabaseAuthContextValue = {
   loading: boolean
   configured: boolean
   authenticated: boolean
-  signInWithPassword: (email: string, password: string) => Promise<SupabaseAuthResult>
+  signInWithPassword: (email: string, password: string, captchaToken?: string | null) => Promise<SupabaseAuthResult>
   signOut: () => Promise<void>
 }
 
@@ -56,10 +57,14 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     loading,
     configured,
     authenticated: Boolean(session?.user),
-    signInWithPassword: async (email: string, password: string) => {
+    signInWithPassword: async (email: string, password: string, captchaToken?: string | null) => {
       if (!configured) return { ok: false, error: 'Supabase não configurado.' }
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) return { ok: false, error: error.message }
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: captchaToken ? { captchaToken } : undefined,
+      })
+      if (error) return { ok: false, error: error.message, status: (error as { status?: number }).status }
       setSession(data.session)
       return { ok: true }
     },

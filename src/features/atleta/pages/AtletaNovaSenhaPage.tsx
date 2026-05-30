@@ -4,7 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
 import { CepraeaLogomarca } from '@/shared/components/CepraeaLogomarca'
-import { supabase } from '@/lib/supabase'
+import { supabase } from "@/lib/supabase"
+import { validatePasswordPolicy, PASSWORD_MIN_LENGTH } from "@/features/auth/lib/passwordPolicy"
+import { hibpCheck } from "@/features/auth/lib/hibpCheck"
+import { AUTH_MESSAGES } from "@/features/auth/lib/authVocabulary"
 
 export default function AtletaNovaSenhaPage() {
   const navigate = useNavigate()
@@ -30,10 +33,13 @@ export default function AtletaNovaSenhaPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (password.length < 6) { setError('Senha deve ter pelo menos 6 caracteres.'); return }
-    if (password !== confirm) { setError('As senhas não coincidem.'); return }
+    if (password !== confirm) { setError("As senhas não coincidem."); return }
+    const policy = validatePasswordPolicy(password)
+    if (!policy.valid) { setError(AUTH_MESSAGES["AUTH-RESET-002"]); return }
     setSubmitting(true)
-    setError('')
+    setError("")
+    const hibp = await hibpCheck(password)
+    if (hibp.pwned) { setSubmitting(false); setError(AUTH_MESSAGES["AUTH-RESET-003"]); return }
     const { error: err } = await supabase.auth.updateUser({ password })
     setSubmitting(false)
     if (err) {
@@ -82,7 +88,7 @@ export default function AtletaNovaSenhaPage() {
                   {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
                 </button>
               </div>
-              <p className="text-xs text-cep-muted/60 mt-1">Mínimo 6 caracteres.</p>
+              <p className="text-xs text-cep-muted/60 mt-1">Mínimo {PASSWORD_MIN_LENGTH} caracteres, com letra minúscula, maiúscula e número.</p>
             </div>
 
             <div>
