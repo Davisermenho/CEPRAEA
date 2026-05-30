@@ -4,6 +4,62 @@ Histórico do contrato de autenticação e documentos companheiros. Datas em UTC
 
 ---
 
+## v2.1 — 2026-05-30 (CEPR-AUTH-02B/02C/02D/02E)
+
+**Tipo:** implementação de hardening de autenticação (sem migrations).
+**Escopo:** fail-fast de boot, vocabulário canônico, normalização de email, redirect guard, headers HTTP, HIBP k-anonymity, CAPTCHA Turnstile (atleta), rate-limit/lockout 429, redirect WEAK-PASSWORD, scripts de verificação e E2E.
+**PRs:** #47 (02B) · #58 (02C) · #59 (02D) · #61 (02E)
+
+### Adicionado
+
+- **`src/lib/supabase.ts`** — fail-fast: lança `Error` se `VITE_SUPABASE_URL` ou `VITE_SUPABASE_ANON_KEY` ausentes na inicialização (§20, PR #47).
+- **`.env.example`** — todas as variáveis obrigatórias documentadas com comentário normativo (PR #47).
+- **`scripts/verify-supabase-config.ts`** — verifica configuração Supabase via `CONDITIONAL_RULES` + hard rule `jwt_expiry`; `exit 1` se violação detectada (PR #47).
+- **`src/lib/authVocabulary.ts`** — vocabulário canônico pt-BR exportado (`atleta`, `treinador`, `equipe`, `especialista`, `goleiro`) (§3-bis, PR #58).
+- **`src/lib/normalizeEmail.ts`** — função única `normalizeEmail()`; implementações inline duplicadas removidas (§17, PR #58).
+- **`src/lib/redirectGuard.ts`** — `redirectGuard()` com whitelist same-origin; bloqueia redirects externos pós-login (§18, PR #58).
+- **`scripts/check-headers.sh`** — verifica os 6 headers obrigatórios em URL Vercel; `exit 1` se header ausente (PR #59).
+- **`src/lib/validatePasswordPolicy.ts`** — valida ≥10 chars + lower+upper+dígito; retorna erros canônicos (§10, PR #61).
+- **HIBP k-anonymity** — `src/lib/hibpCheck.ts`: verifica senha contra Have I Been Pwned API via k-anonymity (5-char SHA-1 prefix); nunca transmite senha completa (§10, PR #61).
+- **Cloudflare Turnstile (atleta)** — `TurnstileWidget` integrado no fluxo de cadastro/login de atleta; token validado antes do `signUp`/`signIn` (§12, PR #61).
+- **`supabase/seed.sql`** — mirror de `treinador@cepraea.com` com UUID de produção + `team_member` owner para preview branches (PR #61).
+- **E2E anti-enumeração** — testes de timing paridade ±200 ms cobrindo login inválido × válido (§13, PR #58).
+- **`e2e/scout/scout-preview-smoke.spec.ts`** — `isIgnorableConsoleError()` filtra padrões `vercel.live` e `report-only Content Security Policy` (PR #61).
+
+### Alterado
+
+- **`vercel.json`** — 6 headers de segurança adicionados: `Strict-Transport-Security` (max-age=300), `Content-Security-Policy-Report-Only`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(),microphone=(),geolocation=()` (§15, PR #59).
+- **SW denylist** — rotas de autenticação adicionadas ao denylist do service worker para evitar cache de respostas de auth (PR #59).
+- **`AUTH_ACCESS_CONTRACT.md`** — status dos gaps §22 atualizados para refletir estado pós-02B–02E (PR #62):
+  - §10 política de senha: Pendente → **Implementado**
+  - §11 rate limiting: Pendente → **Parcial** (lockout 30s atleta; `config.toml` deferido)
+  - §12 CAPTCHA: Pendente → **Parcial** (Turnstile atleta; coach deferido)
+  - §15 headers: Pendente → **Implementado**
+  - §20 `supabase/config.toml`: Pendente → **Parcial** (verify-script ok; valores toml deferidos)
+  - §21 threat model: Pendente → **Implementado**
+  - §22 tabela FAIL-FAST → Implementado; G7 → Implementado; G3/G4 → Parcial
+
+### Deferido (02E fase 2)
+
+- **`supabase/config.toml`** — `[auth.captcha]`, `minimum_password_length = 10`, `password_requirements`, `[auth.rate_limit]`: aguarda rotação de senha de `treinador@cepraea.com` (senha atual `98701665` não passa a política).
+- **Turnstile gate (coach)** — `LoginPage.tsx`: aguarda provisionamento de `VITE_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` em Vercel Production & Preview.
+
+### Validação em produção
+
+- `bash scripts/check-headers.sh https://cepraea.vercel.app` → 6/6 headers OK (2026-05-30, registrado em [#40 comentário](https://github.com/Davisermenho/CEPRAEA/issues/40#issuecomment-4584924170)).
+
+### Critérios de aceitação 02B–02E (verificação)
+
+1. ✅ `npm run typecheck` — 0 erros.
+2. ✅ `git diff --stat -- ':!docs/'` após 02A — zero arquivos `.md`-only no diff de produção.
+3. ✅ PR Evidence Guard verde em todos os PRs (#47, #58, #59, #61).
+4. ✅ `scripts/check-headers.sh https://cepraea.vercel.app` — todos os 6 headers presentes.
+5. ✅ Zero migration nova em 02B–02E.
+6. ⏳ `supabase/config.toml` hardening — deferido para 02E fase 2.
+7. ⏳ Turnstile coach — deferido para 02E fase 2.
+
+---
+
 ## v2.0 — 2026-05-29 (CEPR-AUTH-02A)
 
 **Tipo:** somente documentação (sem código de produção alterado).
@@ -67,9 +123,9 @@ Histórico do contrato de autenticação e documentos companheiros. Datas em UTC
 3. ✅ `docs/auth/CHANGELOG.md` criado.
 4. ✅ Gaps G1–G17 + FAIL-FAST classificados em §22 com status (Implementado/Parcial/Pendente/Roadmap) e sub-PR alvo.
 5. ✅ Seção ontológica (§3-bis) presente com separação `AccessRole ≠ SportRole` e vocabulário pt-BR.
-6. ⏳ `git diff --stat -- ':!docs/'` vazio — validar antes do merge.
-7. ⏳ Zero migration nova — validar antes do merge.
-8. ⏳ PR Evidence Guard verde — validar no CI.
+6. ✅ `git diff --stat -- ':!docs/'` vazio — validado.
+7. ✅ Zero migration nova — validado.
+8. ✅ PR Evidence Guard verde — CI OK (PR #54).
 
 ---
 
