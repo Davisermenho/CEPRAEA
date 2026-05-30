@@ -5780,3 +5780,49 @@ Atualizar o workflow obrigatório `ontology-quality-gate` para executar automati
 
 - `actionlint .github/workflows/ontology-quality-gate.yml` passou.
 - `python3` com PyYAML carregou `.github/workflows/ontology-quality-gate.yml` com sucesso.
+
+## CEPR-ONTOLOGIA-FUSAO-ROADMAP-2026-05-30 — Atualização do roadmap FUSAO
+
+### Escopo entendido
+
+Atualizar o plano `docs/ontologia/merge/FUSAO.md` para remover instruções obsoletas, registrar o estado real dos merges recentes e identificar a próxima fatia segura da fusão ontológica.
+
+### Arquivos alterados
+
+- `docs/ontologia/merge/FUSAO.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr list --state all --limit 5 --json number,title,state,mergedAt,headRefName,baseRefName`
+- `git status --short --branch`
+- `sed -n '1,260p' docs/ontologia/merge/FUSAO.md`
+- `sed -n '260,620p' docs/ontologia/merge/FUSAO.md`
+- `rg "check:ontology:semantics|validate:ontology:formal|check:ontology:runtime-alignment" package.json scripts/validate-mvp-v1.sh .github/workflows/ontology-quality-gate.yml`
+- `npm run check:ontology:runtime-alignment`
+- `npm run validate:ontology:formal`
+- `git diff --check`
+
+### Resultado da validação
+
+- `gh pr list` confirmou as PRs recentes: #50, #49 e #48 mergeadas, e #47 aberta em escopo de auth.
+- `rg` confirmou que `package.json`, `scripts/validate-mvp-v1.sh` e `.github/workflows/ontology-quality-gate.yml` expõem/executam os três gates ontológicos.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` no escopo auditado.
+- `npm run validate:ontology:formal` passou; datasets inválidos falharam como esperado.
+- `git diff --check` passou sem whitespace errors.
+
+### Riscos restantes
+
+- Esta PR é documental e não expande SHACL.
+- A próxima fatia técnica recomendada é formalizar incrementalmente `DEF_POS.ACAO_DEFENSIVA.BLOQUEIO` sem tocar runtime, Supabase, UI ou migrations.

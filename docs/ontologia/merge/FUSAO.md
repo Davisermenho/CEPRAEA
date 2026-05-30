@@ -23,7 +23,23 @@ A auditoria anterior está correta, mas incompleta. O ajuste mais importante é 
 **não basta criar crosswalk + importar RDF/SHACL.**
 Antes disso, o CEPRAEA precisa de uma **política formal de ontologia executável**, cobrindo namespace, identidade canônica, versionamento, breaking changes, consumo pela IA, dados históricos e performance.
 
-Também há uma correção factual: existe workflow dedicado de ontologia no CEPRAEA e ele já executa a checagem documental/semântica e a validação formal RDF/SHACL/SPARQL quando o escopo formal é alterado. Logo, a lacuna não é “não existe workflow” nem “não existe validação formal no workflow”; a lacuna atual é “o gate formal completo ainda não está integrado ao `validate:mvp:v1` e o workflow ainda não executa o alinhamento runtime ↔ ontologia”.
+Também há uma correção factual: existe workflow dedicado de ontologia no CEPRAEA e ele já executa a checagem documental/semântica, a validação formal RDF/SHACL/SPARQL e o alinhamento runtime ↔ ontologia quando o escopo exige. Logo, a lacuna não é “não existe workflow”, “não existe validação formal no workflow” nem “o alinhamento runtime não roda no workflow”; essas lacunas já foram fechadas. A lacuna atual é expandir progressivamente a cobertura SHACL da matriz TypeScript além do recorte auditado atual.
+
+# STATUS ATUAL DO PLANO
+
+Este arquivo registra o plano de fusão e o estado validado após as PRs de governança e camada formal.
+
+| Frente | Status |
+|---|---|
+| Governança, crosswalk, namespace, breaking changes e contrato de IA | Concluído |
+| Camada formal mínima RDF/SHACL/SPARQL | Concluído |
+| Complemento de `ScoutFactualResultCode` na ontologia | Concluído |
+| Golden dataset realista de Scout | Concluído |
+| Política de dados históricos | Concluído |
+| Gates ontológicos no `validate:mvp:v1` | Concluído |
+| Gate runtime ↔ ontologia expandido para matriz, SHACL, exemplos e SPARQL | Concluído no escopo auditado |
+| Cobertura dos `forbiddenResults` auditados | Concluído, com `Pendências de cobertura formal: 0` |
+| Conversão completa da matriz TypeScript em SHACL | Em andamento, por fatias incrementais |
 
 # VEREDITO SOBRE A FUSÃO
 
@@ -72,9 +88,9 @@ Portanto, se a fusão ignorar esses contratos, ela vai piorar o sistema.
 
 # GAPS IDENTIFICADOS
 
-1. **O CEPRAEA tem ontologia ampla, mas ainda não formalizada em RDF/OWL/SHACL.**
+1. **O CEPRAEA tem ontologia ampla, e agora possui uma formalização RDF/OWL/SHACL inicial.**
 
-O manual do CEPRAEA já define camadas normativa, técnico-tática e desempenho, com conceitos como fases, sistemas, ações, carga, perfil, testes e desempenho.  Mas isso está em Markdown/matriz/Draw.io, não em OWL/SHACL executável.
+O manual do CEPRAEA já define camadas normativa, técnico-tática e desempenho, com conceitos como fases, sistemas, ações, carga, perfil, testes e desempenho. A camada formal mínima já existe e está validada por parse TTL, SHACL, datasets válidos/inválidos e SPARQL. O gap remanescente é ampliar essa formalização por fatias da matriz TypeScript, não criar a camada formal do zero.
 
 2. **O `onthbpraia` tem formalização executável, mas é menor que a necessidade real do PWA.**
 
@@ -96,11 +112,11 @@ Exemplos críticos:
 
 O próprio manual do CEPRAEA já alerta que nomes diferentes para o mesmo conceito não devem virar classes diferentes; devem ser resolvidos em conceito controlado.
 
-4. **O CEPRAEA tem workflow dedicado de ontologia e validação formal, mas ainda não tem gate formal completo no MVP.**
+4. **O CEPRAEA tem workflow dedicado de ontologia, validação formal e gate formal completo no MVP.**
 
 O `package.json` tem `check:ontology:semantics`, `validate:ontology:formal` e `check:ontology:runtime-alignment`. O workflow `ontology-quality-gate` já executa a checagem documental/semântica e a validação formal RDF/SHACL/SPARQL quando o escopo exige.
 
-A lacuna correta é dupla: o workflow ainda não executa `check:ontology:runtime-alignment`, e o gate final `validate-mvp-v1.sh` ainda não bloqueia regressão ontológica executável com os três comandos de ontologia.
+A lacuna anterior foi fechada: o workflow executa `check:ontology:runtime-alignment` quando o escopo exige, e `validate-mvp-v1.sh` bloqueia regressão ontológica executável com os três comandos de ontologia.
 
 5. **O script semântico do CEPRAEA valida consistência documental/visual, não executabilidade ontológica.**
 
@@ -108,7 +124,7 @@ O script confere manual, glossário, fontes, matriz e SVG; valida relações ace
 
 6. **O PWA já tem regras de Scout mais específicas que a ontologia formal.**
 
-O contrato de coleta ao vivo tem apenas três fluxos auditados no slice atual: `AT_POS.ARREMESSO.ARREMESSO`, `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV` e `TRANS_OF.ARREMESSO.ARREMESSO`.  Ele também define campos principais, opcionais, derivados, proibidos, resultados permitidos e regras de pontuação.
+O contrato de coleta ao vivo tem três fluxos auditados no slice formal atual: `AT_POS.ARREMESSO.ARREMESSO`, `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV` e `TRANS_OF.ARREMESSO.ARREMESSO`.  Ele também define campos principais, opcionais, derivados, proibidos, resultados permitidos e regras de pontuação.
 
 O `onthbpraia` tem consultas de competência para equipe, shoot-out, especialista/playmaker, gols por zona e classificação técnica de arremesso, mas não cobre todos os fluxos vivos do CEPRAEA.
 
@@ -254,7 +270,7 @@ Critérios mínimos:
 
 **Ação 7 — Integrar ontologia ao gate final do MVP.**
 
-O script `validate-mvp-v1.sh` precisa incluir:
+Status: concluído. O script `validate-mvp-v1.sh` inclui:
 
 ```bash
 npm run check:ontology:semantics
@@ -262,11 +278,9 @@ npm run validate:ontology:formal
 npm run check:ontology:runtime-alignment
 ```
 
-Hoje isso não acontece.
-
 **Ação 8 — Criar validação formal inspirada no `onthbpraia`.**
 
-Adicionar ao `package.json`:
+Status: concluído. O `package.json` expõe:
 
 ```json
 {
@@ -283,7 +297,7 @@ E criar:
 scripts/validate-ontology-formal.sh
 ```
 
-Com lógica equivalente ao `Makefile` do `onthbpraia`: parse TTL, SHACL com dataset válido, SHACL com dataset inválido e SPARQL.
+Com lógica equivalente ao `Makefile` do `onthbpraia`: parse TTL, SHACL com dataset válido, SHACL com dataset inválido e SPARQL. A expansão futura deve aumentar a cobertura de exemplos e constraints, não recriar esse mecanismo.
 
 **Ação 9 — Não mexer em Supabase na primeira PR da fusão.**
 
@@ -298,6 +312,8 @@ O CEPRAEA já testa fluxo completo `COLETA_AO_VIVO → revisão vídeo → COLET
 # PLANO V2 — AJUSTADO
 
 **PR 1 — Política de fusão ontológica e crosswalk**
+
+Status: concluída e mergeada.
 
 Escopo permitido:
 
@@ -326,6 +342,8 @@ Critérios obrigatórios:
 
 **PR 2 — Importar camada formal mínima**
 
+Status: concluída e mergeada.
+
 Escopo:
 
 ```text
@@ -347,6 +365,8 @@ Throw não pode misturar finalização ofensiva com reinício normativo.
 ```
 
 **PR 3 — Gate de alinhamento runtime ↔ ontologia**
+
+Status: concluída e mergeada no escopo auditado. O gate compara runtime, matriz TypeScript, SHACL, exemplos e SPARQL, e reporta `Pendências de cobertura formal: 0` para os fluxos auditados.
 
 Criar:
 
@@ -377,6 +397,8 @@ Nenhuma regra SHACL contradiz a matriz TypeScript.
 
 **PR 4 — Golden dataset real do Scout**
 
+Status: concluída e mergeada.
+
 Este item é crítico e faltou na auditoria anterior.
 
 Não basta validar exemplos sintéticos. Criar:
@@ -399,6 +421,8 @@ Critério:
 
 **PR 5 — Política de dados históricos**
 
+Status: concluída e mergeada.
+
 Antes de endurecer SHACL, definir:
 
 ```text
@@ -417,6 +441,8 @@ Como evitar quebrar produção?
 ```
 
 **PR 6 — Gate final do MVP**
+
+Status: concluída e mergeada.
 
 Atualizar `validate:mvp:v1` para incluir:
 
@@ -491,25 +517,36 @@ Não é porque o `onthbpraia` está mais formal que ele deve mandar nos códigos
 
 # PRÓXIMA AÇÃO SEGURA
 
-A próxima ação segura do Plano V2 é fechar a **política de dados históricos** antes de endurecer SHACL adicional, expandir o gate de alinhamento runtime ↔ ontologia ou promover os gates para o MVP final.
+A próxima ação segura do Plano V2 é expandir a cobertura SHACL da matriz TypeScript por uma fatia pequena, auditável e sem alterar runtime, Supabase, UI ou migrations.
 
 Escopo recomendado:
 
 ```text
-docs/ontologia/merge/politica-migracao-historica.md
+shacl/
+examples/
+queries/competency/
+scripts/validate-ontology-formal.sh, somente se necessário para incluir novos datasets/consultas
 ```
 
 Critério de aceite:
 
 ```text
-- Definir o tratamento de scout_live_entries antigas fora do novo SHACL.
-- Definir se dados históricos serão migrados, marcados como legacy ou aceitos por profile separado.
-- Definir o profile para dado novo.
-- Definir o profile para dado histórico.
-- Confirmar que relatórios usam apenas dados VALIDADO quando aplicável.
-- Documentar como evitar quebra de produção.
-- Não alterar Supabase, runtime, UI ou migrations nessa PR.
+- Escolher um único recorte da matriz TypeScript ainda não formalizado.
+- Criar ou ampliar constraint SHACL correspondente.
+- Criar pelo menos um exemplo válido e um inválido para o recorte.
+- Criar ou ampliar pergunta de competência SPARQL quando o recorte exigir consulta.
+- Manter `npm run check:ontology:runtime-alignment` com `Pendências de cobertura formal: 0`.
+- Manter `npm run validate:ontology:formal` e `npm run check:ontology:semantics` passando.
+- Não alterar `src/`, Supabase, UI ou migrations nessa PR.
 ```
+
+Fatia técnica inicial recomendada:
+
+```text
+DEF_POS.ACAO_DEFENSIVA.BLOQUEIO
+```
+
+Motivo: os três fluxos auditados atuais já estão cobertos. O avanço real agora é ampliar a validação formal para novos recortes da matriz runtime, preservando a regra de que CEPRAEA manda no produto e SHACL valida a semântica fechada.
 
 # CONCLUSÃO
 
