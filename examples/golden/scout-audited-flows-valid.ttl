@@ -23,6 +23,8 @@ cepr:flow_def_pos_acao_defensiva_bloqueio a cepr:ScoutFlowContract ;
   cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.BLOQUEIO" .
 cepr:flow_def_pos_acao_defensiva_interceptacao a cepr:ScoutFlowContract ;
   cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO" .
+cepr:flow_def_pos_acao_defensiva_roubo a cepr:ScoutFlowContract ;
+  cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.ROUBO" .
 cepr:flow_def_pos_acao_defensiva_cobertura a cepr:ScoutFlowContract ;
   cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.COBERTURA" .
 cepr:flow_def_pos_acao_defensiva_marcacao_pressao a cepr:ScoutFlowContract ;
@@ -85,6 +87,16 @@ cepr:audited_entry_def_pos_interceptacao_malsucedida_gol a cepr:ScoutLiveEntry ;
   cepr:classificationCode "INTERCEPTACAO_MALSUCEDIDA" ;
   cepr:hasFactualResult cepr:result_gol ;
   cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_interceptacao .
+
+cepr:audited_entry_def_pos_roubo_recuperacao_posse a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:DEF_POS ;
+  cepr:hasFactualResult cepr:result_recuperacao_posse ;
+  cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_roubo .
+
+cepr:audited_entry_def_pos_roubo_defesa_estabilizada a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:DEF_POS ;
+  cepr:hasFactualResult cepr:result_defesa_estabilizada ;
+  cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_roubo .
 
 cepr:audited_entry_def_pos_cobertura_gol_aerea a cepr:ScoutLiveEntry ;
   cepr:hasScoutPhase cepr:DEF_POS ;

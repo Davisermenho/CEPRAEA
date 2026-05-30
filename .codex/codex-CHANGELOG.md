@@ -3111,3 +3111,29 @@ Expansão incremental da cobertura formal da matriz TypeScript para o recorte `D
 - `npm run check:ontology:runtime-alignment`
 - `npm run check:ontology:semantics`
 - `git diff --check`
+
+### [CEPR-ONTOLOGIA-DEF-POS-ROUBO-SHACL-2026-05-30] — 2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.ROUBO
+
+#### ✨ Resumo
+
+Expansão incremental da cobertura formal da matriz TypeScript para o recorte `DEF_POS.ACAO_DEFENSIVA.ROUBO`.
+
+#### 🛠️ Changed
+
+- `shacl/core.shacl.ttl`
+  - adiciona constraints para fase `DEF_POS`, bloqueio de `hasFinishType` e conjunto fechado de resultados permitidos para roubo.
+- `examples/golden/scout-audited-flows-valid.ttl`
+  - adiciona exemplos válidos de roubo com `RECUPERACAO_POSSE` e `DEFESA_ESTABILIZADA`.
+- `examples/golden/scout-audited-flows-invalid.ttl`
+  - adiciona exemplos inválidos para `GOL` e `hasFinishType` manual em roubo.
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+  - inclui os exemplos válidos de roubo na consulta de competência do slice auditado.
+- `queries/competency/tests.json`
+  - atualiza o manifesto CEPR-CQ-05 para 18 linhas esperadas.
+
+#### 🛡️ Evidências
+
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`

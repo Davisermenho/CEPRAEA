@@ -540,4 +540,45 @@ cepr:ScoutLiveEntryShape a sh:NodeShape ;
         ))
       }
     """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.ROUBO deve usar fase DEF_POS."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_roubo ;
+              cepr:hasScoutPhase ?phase .
+        FILTER(?phase != cepr:DEF_POS)
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.ROUBO nao deve carregar tipo de finalizacao."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_roubo ;
+              cepr:hasFinishType ?finishType .
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.ROUBO aceita apenas RECUPERACAO_POSSE, FALTA_ATAQUE, DEFESA_ESTABILIZADA, VIOLACAO ou NAO_OBSERVADO como resultado factual."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_roubo ;
+              cepr:hasFactualResult ?result .
+        FILTER(?result NOT IN (
+          cepr:result_recuperacao_posse,
+          cepr:result_falta_ataque,
+          cepr:result_defesa_estabilizada,
+          cepr:result_violacao,
+          cepr:result_nao_observado
+        ))
+      }
+    """ ;
   ] .
