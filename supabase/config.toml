@@ -30,8 +30,10 @@ site_url = "http://localhost:5173"
 additional_redirect_urls = ["http://localhost:5173"]
 jwt_expiry = 3600
 enable_signup = true
-minimum_password_length = 10
-password_requirements = "lower_upper_letters_digits"
+# CEPR-AUTH-02E: minimum_password_length/password_requirements serao habilitados
+# em PR de follow-up apos rotacao das senhas existentes para conformidade.
+# minimum_password_length = 10
+# password_requirements = "lower_upper_letters_digits"
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
 

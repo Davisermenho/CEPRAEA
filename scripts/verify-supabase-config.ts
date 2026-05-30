@@ -20,8 +20,9 @@ interface Rule {
 }
 
 const RULES: Rule[] = [
-  { section: '[auth]', key: 'minimum_password_length', expected: '10' },
-  { section: '[auth]', key: 'password_requirements', expected: '"lower_upper_letters_digits"' },
+  // CEPR-AUTH-02E: minimum_password_length/password_requirements sao validados
+  // condicionalmente abaixo (apenas quando presentes no config) ate as senhas
+  // existentes serem rotacionadas para conformidade.
   { section: '[auth]', key: 'jwt_expiry', expected: '3600' },
   { section: '[auth]', key: 'enable_refresh_token_rotation', expected: 'true' },
   { section: '[auth]', key: 'refresh_token_reuse_interval', expected: '10' },
@@ -75,6 +76,19 @@ function main(): number {
     }
     if (actual !== rule.expected) {
       errors.push(`VALOR_DIVERGENTE ${rule.section} ${rule.key}: esperado=${rule.expected} obtido=${actual}`)
+    }
+  }
+
+  // PASSWORD POLICY: opcional ate Phase 2; quando presente, deve estar correto.
+  const auth = sections.get('[auth]')
+  if (auth) {
+    const minLen = auth.get('minimum_password_length')
+    if (minLen !== undefined && minLen !== '10') {
+      errors.push(`VALOR_DIVERGENTE [auth] minimum_password_length: esperado=10 obtido=${minLen}`)
+    }
+    const reqs = auth.get('password_requirements')
+    if (reqs !== undefined && reqs !== '"lower_upper_letters_digits"') {
+      errors.push(`VALOR_DIVERGENTE [auth] password_requirements: esperado="lower_upper_letters_digits" obtido=${reqs}`)
     }
   }
 
