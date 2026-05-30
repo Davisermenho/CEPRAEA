@@ -1,3 +1,16 @@
+## [2026-05-30] CEPR-AUTH-02D — Headers de segurança + Service Worker denylist
+
+### O que foi feito
+
+- `vercel.json` (MODIFICADO): Array `headers` com 6 entradas — HSTS (max-age=300), CSP-Report-Only, X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy: camera=(), microphone=(), geolocation=()
+- `vite.config.ts` (MODIFICADO): Workbox `navigateFallbackDenylist` com 5 rotas de auth (/login, /atleta/login, /atleta/nova-senha, /aceitar-convite, /onboarding)
+- `scripts/check-headers.sh` (NOVO): Script de validação dos 6 headers via `curl -I`; exit 1 se algum ausente
+
+### Validação
+- `npm run typecheck`: ✅ 0 erros
+- `npm run build`: ✅ built in 14.09s
+
+
 ## [2026-05-30] CEPR-AUTH-02C — Vocabulário de erros, normalização de email e redirect guard
 
 ### O que foi feito
