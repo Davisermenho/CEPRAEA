@@ -3137,3 +3137,22 @@ Expansão incremental da cobertura formal da matriz TypeScript para o recorte `D
 - `npm run check:ontology:runtime-alignment`
 - `npm run check:ontology:semantics`
 - `git diff --check`
+
+### [CEPR-ONTOLOGIA-DEF-POS-ROUBO-SHACL-PR57-UPDATE-2026-05-30] — 2026-05-30 — Atualização da PR #57 com main
+
+#### ✨ Resumo
+
+Atualização operacional da branch `chore/ontology-def-pos-roubo-shacl` com `origin/main` após os merges das PRs #58 e #59, mantendo a fatia ontológica `DEF_POS.ACAO_DEFENSIVA.ROUBO` sem alterações de runtime/Supabase/UI feitas por esta tarefa.
+
+#### 🛠️ Changed
+
+- Branch da PR #57 atualizada por merge de `origin/main`.
+- Logs Codex atualizados com a evidência da sincronização e validação.
+
+#### 🛡️ Evidências
+
+- `git merge origin/main`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`

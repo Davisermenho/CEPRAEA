@@ -6116,3 +6116,46 @@ Formalizar a próxima fatia da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA.ROUBO`,
 
 - Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.ROUBO`.
 - Ainda não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-DEF-POS-ROUBO-SHACL-PR57-UPDATE-2026-05-30 — Atualização da PR #57 com main
+
+### Escopo entendido
+
+Resolver as pendências operacionais da PR #57: retirar o estado `BEHIND`, preservar a cobertura SHACL de `DEF_POS.ACAO_DEFENSIVA.ROUBO`, revalidar os gates ontológicos e preparar a PR para sair de draft, sem mergear sem autorização explícita.
+
+### Arquivos alterados
+
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr list --state all --limit 5 --json number,title,state,mergedAt,headRefName,baseRefName,isDraft`
+- `git status --short --branch`
+- `git fetch origin main`
+- `git merge origin/main`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+- `gh pr ready 57`
+- `gh pr checks 57 --watch`
+
+### Resultado da validação
+
+- A branch da PR #57 foi atualizada com `origin/main` sem conflitos.
+- Validações locais executadas após a sincronização com `main`.
+- Checks remotos serão reavaliados após push da branch atualizada.
+
+### Riscos restantes
+
+- Merge da PR #57 continua dependendo de autorização explícita após os checks remotos passarem.
