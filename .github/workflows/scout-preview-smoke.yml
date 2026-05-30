@@ -21,7 +21,8 @@ jobs:
   scout-preview-smoke:
     name: scout-preview-smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    container: mcr.microsoft.com/playwright:v1.59.1-noble
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -111,12 +112,6 @@ jobs:
           echo "Somente o workflow de CI foi alterado. Executando teste de escopo em vez de Playwright."
           bash scripts/ci/test-scout-scope.sh
 
-      - name: Setup Node
-        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: npm
 
       - name: Validate required secrets
         if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
@@ -140,9 +135,6 @@ jobs:
         if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
         run: npm ci --no-audit --no-fund --loglevel=error
 
-      - name: Install Playwright browser
-        if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
-        run: npx playwright install --with-deps chromium
 
       - name: Resolve Vercel preview URL from Vercel check-run
         if: ${{ steps.scope.outputs.scout == 'true' && steps.scope.outputs.only_ci != 'true' }}
