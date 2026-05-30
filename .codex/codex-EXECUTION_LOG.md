@@ -5826,3 +5826,51 @@ Atualizar o plano `docs/ontologia/merge/FUSAO.md` para remover instruções obso
 
 - Esta PR é documental e não expande SHACL.
 - A próxima fatia técnica recomendada é formalizar incrementalmente `DEF_POS.ACAO_DEFENSIVA.BLOQUEIO` sem tocar runtime, Supabase, UI ou migrations.
+
+## CEPR-ONTOLOGIA-DEF-POS-BLOQUEIO-SHACL-2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.BLOQUEIO
+
+### Escopo entendido
+
+Formalizar a próxima fatia recomendada em `FUSAO.md`: `DEF_POS.ACAO_DEFENSIVA.BLOQUEIO`, usando SHACL, exemplos válidos/inválidos e consulta de competência, sem alterar runtime, Supabase, UI, migrations ou `ontology/core.ttl`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-valid.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `queries/competency/tests.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr list --state all --limit 5 --json number,title,state,mergedAt,headRefName,baseRefName`
+- `rg -n "DEF_POS|BLOQUEIO|ACAO_DEFENSIVA|forbiddenResults|allowedResults|allowedFinishTypes" src/features/scout/domain src/types/index.ts shacl examples queries ontology scripts/validate-ontology-formal.sh`
+- `sed -n '270,330p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 13 violações, incluindo os 2 novos casos de bloqueio defensivo.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` e 14 constraints SPARQL.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.BLOQUEIO`.
+- Ainda não converte a matriz TypeScript inteira em SHACL.

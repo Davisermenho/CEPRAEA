@@ -109,7 +109,7 @@
       "extra_graphs": [],
       "query": "queries/competency/q05_audited_scout_flow_shacl_slice.rq",
       "assert": {
-        "row_count_eq": 6,
+        "row_count_eq": 8,
         "expected_rows": [
           {
             "entry": "https://cepraea.app/ontology#audited_entry_6m_defendido",
@@ -122,6 +122,18 @@
             "flowRuntimeCode": "AT_POS.ARREMESSO.FINALIZACAO_6M_FAV",
             "phaseRuntimeCode": "AT_POS",
             "resultRuntimeCode": "GOL"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_def_pos_bloqueio_bloqueado",
+            "flowRuntimeCode": "DEF_POS.ACAO_DEFENSIVA.BLOQUEIO",
+            "phaseRuntimeCode": "DEF_POS",
+            "resultRuntimeCode": "BLOQUEADO"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_def_pos_bloqueio_recuperacao_posse",
+            "flowRuntimeCode": "DEF_POS.ACAO_DEFENSIVA.BLOQUEIO",
+            "phaseRuntimeCode": "DEF_POS",
+            "resultRuntimeCode": "RECUPERACAO_POSSE"
           },
           {
             "entry": "https://cepraea.app/ontology#audited_entry_at_pos_passivo",
