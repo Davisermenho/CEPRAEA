@@ -176,6 +176,26 @@ cepr:ScoutLiveEntryShape a sh:NodeShape ;
     """ ;
   ] ;
   sh:sparql [
+    sh:message "Fluxos ofensivos de arremesso auditados nao aceitam resultados factuais de passe ou recuperacao de posse."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract ?flow ;
+              cepr:hasFactualResult ?result .
+        FILTER(?flow IN (
+          cepr:flow_at_pos_arremesso_arremesso,
+          cepr:flow_at_pos_arremesso_finalizacao_6m_fav
+        ))
+        FILTER(?result IN (
+          cepr:result_erro_passe,
+          cepr:result_passe_interceptado,
+          cepr:result_recuperacao_posse
+        ))
+      }
+    """ ;
+  ] ;
+  sh:sparql [
     sh:message "Resultado de arremesso observado exige tipo de finalizacao nos fluxos auditados."@pt-BR ;
     sh:select """
       PREFIX cepr: <https://cepraea.app/ontology#>

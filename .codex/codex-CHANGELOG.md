@@ -2918,3 +2918,23 @@ Ampliação do gate `check:ontology:runtime-alignment` para validar cobertura do
 - `npm run validate:ontology:formal`
 - `npm run check:ontology:semantics`
 - `git diff --check`
+
+### [CEPR-ONTOLOGIA-FORBIDDEN-RESULTS-COVERAGE-2026-05-30] — 2026-05-30 — Cobertura formal dos forbiddenResults auditados
+
+#### ✨ Resumo
+
+Cobertura SHACL/dataset inválido para os seis `forbiddenResults` pendentes nos fluxos ofensivos auditados.
+
+#### 🛠️ Changed
+
+- `shacl/core.shacl.ttl`
+  - adiciona constraint SPARQL bloqueando `ERRO_PASSE`, `PASSE_INTERCEPTADO` e `RECUPERACAO_POSSE` nos fluxos `AT_POS.ARREMESSO.ARREMESSO` e `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV`.
+- `examples/golden/scout-audited-flows-invalid.ttl`
+  - adiciona seis exemplos inválidos correspondentes aos `forbiddenResults` pendentes.
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:runtime-alignment`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:semantics`
+- `git diff --check`
