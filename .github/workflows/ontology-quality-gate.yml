@@ -39,6 +39,7 @@ jobs:
           if [ "$EVENT_NAME" = "merge_group" ] || [ "$EVENT_NAME" = "push" ]; then
             echo "semantic=true" >> "$GITHUB_OUTPUT"
             echo "formal=true" >> "$GITHUB_OUTPUT"
+            echo "runtime_alignment=true" >> "$GITHUB_OUTPUT"
             echo "Merge group or push detected: running full ontology gate."
             exit 0
           fi
@@ -46,6 +47,7 @@ jobs:
           if [ -z "$PR_BASE_SHA" ] || [ -z "$PR_HEAD_SHA" ]; then
             echo "semantic=true" >> "$GITHUB_OUTPUT"
             echo "formal=true" >> "$GITHUB_OUTPUT"
+            echo "runtime_alignment=true" >> "$GITHUB_OUTPUT"
             echo "Unable to resolve PR base/head SHA; running full ontology gate."
             exit 0
           fi
@@ -56,9 +58,11 @@ jobs:
 
           semantic_scope=false
           formal_scope=false
+          runtime_alignment_scope=false
 
           semantic_pattern='^(docs/ontologia/|scripts/check-ontology-semantics\.mjs$|\.github/workflows/ontology-quality-gate\.yml$)'
           formal_pattern='^(ontology/|shacl/|examples/|queries/competency/|scripts/validate-ontology-formal\.sh$|\.github/workflows/ontology-quality-gate\.yml$)'
+          runtime_alignment_pattern='^(src/types/index\.ts$|src/features/scout/domain/liveCollectionCompatibility\.matrix\.ts$|src/features/scout/domain/liveCollectionFlow\.contract\.ts$|ontology/|shacl/|examples/|queries/competency/|scripts/check-ontology-runtime-alignment\.mjs$|\.github/workflows/ontology-quality-gate\.yml$)'
 
           if printf '%s\n' "$changed_files" | grep -Eq "$semantic_pattern"; then
             semantic_scope=true
@@ -66,6 +70,9 @@ jobs:
           if printf '%s\n' "$changed_files" | grep -Eq "$formal_pattern"; then
             formal_scope=true
             semantic_scope=true
+          fi
+          if printf '%s\n' "$changed_files" | grep -Eq "$runtime_alignment_pattern"; then
+            runtime_alignment_scope=true
           fi
 
           if printf '%s\n' "$changed_files" | grep -qx 'package.json'; then
@@ -77,29 +84,31 @@ jobs:
             )"
             package_ontology="$(
               printf '%s\n' "$package_diff" \
-                | grep -E '^[+-]    "(check:ontology:semantics|validate:ontology:formal)":' \
+                | grep -E '^[+-]    "(check:ontology:semantics|validate:ontology:formal|check:ontology:runtime-alignment)":' \
                 || true
             )"
 
             if [ -n "$package_ontology" ]; then
               semantic_scope=true
               formal_scope=true
+              runtime_alignment_scope=true
               echo "package.json contains ontology script changes."
             fi
           fi
 
           echo "semantic=$semantic_scope" >> "$GITHUB_OUTPUT"
           echo "formal=$formal_scope" >> "$GITHUB_OUTPUT"
-          echo "Ontology scope: semantic=$semantic_scope | formal=$formal_scope"
+          echo "runtime_alignment=$runtime_alignment_scope" >> "$GITHUB_OUTPUT"
+          echo "Ontology scope: semantic=$semantic_scope | formal=$formal_scope | runtime_alignment=$runtime_alignment_scope"
 
       - name: Skip ontology gate when PR is out of scope
-        if: ${{ steps.scope.outputs.semantic != 'true' && steps.scope.outputs.formal != 'true' }}
+        if: ${{ steps.scope.outputs.semantic != 'true' && steps.scope.outputs.formal != 'true' && steps.scope.outputs.runtime_alignment != 'true' }}
         run: |
           echo "Sem mudanças de ontologia no escopo monitorado."
           echo "Check obrigatório reportado como sucesso."
 
       - name: Setup Node
-        if: ${{ steps.scope.outputs.semantic == 'true' || steps.scope.outputs.formal == 'true' }}
+        if: ${{ steps.scope.outputs.semantic == 'true' || steps.scope.outputs.formal == 'true' || steps.scope.outputs.runtime_alignment == 'true' }}
         uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -123,3 +132,7 @@ jobs:
       - name: Run formal ontology checks
         if: ${{ steps.scope.outputs.formal == 'true' && hashFiles('scripts/validate-ontology-formal.sh') != '' }}
         run: npm run validate:ontology:formal
+
+      - name: Run ontology runtime alignment checks
+        if: ${{ steps.scope.outputs.runtime_alignment == 'true' && hashFiles('scripts/check-ontology-runtime-alignment.mjs') != '' }}
+        run: npm run check:ontology:runtime-alignment

@@ -2938,3 +2938,25 @@ Cobertura SHACL/dataset inválido para os seis `forbiddenResults` pendentes nos 
 - `npm run validate:ontology:formal`
 - `npm run check:ontology:semantics`
 - `git diff --check`
+
+### [CEPR-ONTOLOGIA-CI-RUNTIME-ALIGNMENT-2026-05-30] — 2026-05-30 — Runtime alignment no ontology-quality-gate
+
+#### ✨ Resumo
+
+Integração do `check:ontology:runtime-alignment` ao workflow obrigatório `ontology-quality-gate`.
+
+#### 🛠️ Changed
+
+- `.github/workflows/ontology-quality-gate.yml`
+  - adiciona o escopo `runtime_alignment`.
+  - aciona o alinhamento em mudanças de contratos Scout, matriz TypeScript, ontologia formal, SHACL, exemplos, consultas, script de alinhamento, `package.json` ontológico ou workflow.
+  - executa `npm run check:ontology:runtime-alignment` quando o escopo exige.
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `git diff --check`
+- `actionlint .github/workflows/ontology-quality-gate.yml`
+- `python3`/PyYAML parse de `.github/workflows/ontology-quality-gate.yml`
