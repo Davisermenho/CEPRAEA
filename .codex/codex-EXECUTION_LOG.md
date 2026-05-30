@@ -5729,3 +5729,54 @@ Resolver as 6 pendências não bloqueantes reportadas pelo gate runtime ↔ SHAC
 
 - Esta PR cobre somente os `forbiddenResults` dos dois fluxos ofensivos auditados que já estavam reportados pelo gate.
 - Não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-CI-RUNTIME-ALIGNMENT-2026-05-30 — Runtime alignment no ontology-quality-gate
+
+### Escopo entendido
+
+Atualizar o workflow obrigatório `ontology-quality-gate` para executar automaticamente `npm run check:ontology:runtime-alignment` quando houver mudança em contratos Scout, matriz TypeScript, camada formal ontológica, exemplos, consultas, script de alinhamento, script ontológico no `package.json` ou no próprio workflow.
+
+### Arquivos alterados
+
+- `.github/workflows/ontology-quality-gate.yml`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- Python
+
+### Comandos executados
+
+- `jq empty AGENTS.json`
+- `sed -n '1,160p' AGENTS.json`
+- `sed -n '1,100p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `git worktree list`
+- `sed -n '1,220p' .github/workflows/ontology-quality-gate.yml`
+- `jq -r '.scripts | to_entries[] | select(.key|test("ontology|validate:mvp")) | "\\(.key)=\\(.value)"' package.json`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `python3 - <<'PY' ... PY` para conferir tokens obrigatórios do workflow
+- `npm run validate:ontology:formal`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0`.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `npm run validate:ontology:formal` passou; datasets inválidos falharam como esperado.
+- `git diff --check` passou.
+- A checagem por Python confirmou os tokens do novo escopo `runtime_alignment` e o passo `npm run check:ontology:runtime-alignment` no workflow.
+
+### Comando não executado
+
+- `ruby -e 'require "yaml"; YAML.load_file(...)'` não executou porque `ruby` não está instalado no ambiente. A validação alternativa foi a checagem de tokens do workflow com `python3`, execução local dos três gates ontológicos e `git diff --check`.
+
+### Validação adicional do workflow
+
+- `actionlint .github/workflows/ontology-quality-gate.yml` passou.
+- `python3` com PyYAML carregou `.github/workflows/ontology-quality-gate.yml` com sucesso.
