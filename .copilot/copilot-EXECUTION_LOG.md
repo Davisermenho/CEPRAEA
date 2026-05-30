@@ -1,3 +1,20 @@
+## Execução [2026-05-30] — CEPR-AUTH-02D headers de segurança + SW denylist
+
+### Arquivos alterados
+- `vercel.json` (MODIFICADO) — headers array com 6 entradas de segurança
+- `vite.config.ts` (MODIFICADO) — workbox.navigateFallbackDenylist 5 rotas
+- `scripts/check-headers.sh` (NOVO) — valida 6 headers via curl -I
+
+### Comandos executados
+- `npm run typecheck` → exit 0
+- `npm run build` → built in 14.09s
+
+### Notas
+- CSP em modo Report-Only (não enforcement)
+- HSTS max-age=300 (baixo, fase inicial — sem preload)
+- SW não cacheará rotas de auth (navigateFallbackDenylist)
+
+
 ## Execução [2026-05-30] — CEPR-AUTH-02C vocabulário, normalização e redirect guard
 
 ### Arquivos alterados
