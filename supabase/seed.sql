@@ -9,7 +9,7 @@ values
   ('00000000-0000-0000-0000-000000000004', 'noteam@cepraea.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000', '', '', '', '', ''),
   ('00000000-0000-0000-0000-000000000005', 'owner@other.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000', '', '', '', '', ''),
   -- CEPR-AUTH-02E: usuario espelhado de producao para smoke E2E em preview branch.
-  ('5e56bc3a-a76c-47d3-9f90-d8b087d1aa9c', 'treinador@cepraea.com', crypt('98701665', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000', '', '', '', '', '')
+  ('5e56bc3a-a76c-47d3-9f90-d8b087d1aa9c', 'treinador@cepraea.com', crypt('eTyNcK65tzCi', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', 'authenticated', 'authenticated', '00000000-0000-0000-0000-000000000000', '', '', '', '', '')
 on conflict (id) do nothing;
 
 insert into auth.identities (provider_id, user_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
