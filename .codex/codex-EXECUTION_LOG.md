@@ -5534,3 +5534,49 @@ Criar a PR 5 da fusão ontológica: primeiro slice de SHACL do Scout orientado p
 ## ✅ Validação final
 
 SHACL inicial dos 3 fluxos auditados criado e validado. A próxima fatia deve expandir vocabulário formal de Scout ou avançar incrementalmente regras de pontuação, sem misturar Supabase/UI.
+
+## CEPR-ONTOLOGIA-HISTORICAL-DATA-POLICY-2026-05-29 — Política de migração histórica
+
+### Escopo entendido
+
+Criar a próxima fatia documental da fusão ontológica: `docs/ontologia/merge/politica-migracao-historica.md`, sem alterar runtime, Supabase, UI, migrations, `ontology/`, `shacl/`, `examples/` ou `queries/`.
+
+### Arquivos alterados
+
+- `docs/ontologia/merge/politica-migracao-historica.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+
+### Comandos executados
+
+- `jq empty AGENTS.json`
+- `sed -n '1,220p' AGENTS.json`
+- `sed -n '1,160p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `sed -n '390,540p' docs/ontologia/merge/FUSAO.md`
+- `sed -n '1,220p' docs/ontologia/merge/politica-breaking-changes.md`
+- `sed -n '1,220p' docs/ontologia/merge/contrato-consumo-ia.md`
+- `rg -n "VALIDADO|PENDENTE|scout_live_entries|validation_status|status_validacao|COLETA_AO_VIVO|COLETA_SCOUT" supabase src docs -g '!node_modules'`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `npm run validate:ontology:formal` passou; datasets invalidos falharam como esperado.
+- `npm run check:ontology:runtime-alignment` passou no escopo minimo.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR e documental. Ela nao implementa migracao, profile SHACL historico ou alteracao de runtime.
+- Migrations historicas futuras continuam bloqueadas ate haver dry-run, contagem de impacto e aprovacao humana explicita.

@@ -2667,6 +2667,8 @@ Inclusão de fixtures golden para provar o pipeline formal em cenário realista 
 - `npm run validate:ontology:formal`
 - `npm run check:ontology:runtime-alignment`
 - `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
 - `git diff --check`
 
 ### [CEPR-ONTOLOGIA-SCOUT-SHACL-AUDITED-FLOWS-2026-05-29] — 2026-05-29 — SHACL inicial dos 3 fluxos auditados do Scout
@@ -2852,6 +2854,22 @@ Versionamento de `FUSAO.md` como plano operacional da fusão CEPRAEA ↔ onthbpr
 
 - Texto do plano reconhece que `ontology-quality-gate` já executa validação formal RDF/SHACL/SPARQL quando o escopo formal é alterado.
 - Lacuna atual corrigida para: ausência de `check:ontology:runtime-alignment` no workflow e ausência dos gates ontológicos no `validate:mvp:v1`.
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### [CEPR-ONTOLOGIA-HISTORICAL-DATA-POLICY-2026-05-29] — 2026-05-29 — Política de migração histórica da ontologia
+
+#### ✨ Resumo
+
+Criação da política normativa para coexistência entre dados históricos de Scout e a ontologia executável.
+
+#### 🚀 Added
+
+- `docs/ontologia/merge/politica-migracao-historica.md`
+  - define `profile_new_data`, `profile_historical_data`, tratamento de dados `legacy`, critérios para migração futura e bloqueios para evitar quebra de produção.
 
 #### 🛡️ Evidências
 
