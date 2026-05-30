@@ -65,6 +65,9 @@ export interface TurnstileWidgetProps {
 
 const TEST_TOKEN = (import.meta.env.VITE_TURNSTILE_TEST_TOKEN ?? '') as string
 const SITE_KEY = (import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '') as string
+// CEPR-AUTH-02E §12.4: bypass implícito quando site key não está configurada (dev/preview).
+// Em produção (import.meta.env.PROD), exige site key configurada; caso contrário o widget reporta erro.
+const BYPASS_TOKEN = TEST_TOKEN || (!SITE_KEY && !import.meta.env.PROD ? 'NO-CAPTCHA-CONFIGURED' : '')
 
 export const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidgetProps>(
   function TurnstileWidget({ onToken, onExpired, onError, theme = 'auto', className }, ref) {
@@ -82,8 +85,8 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidget
 
     useImperativeHandle(ref, () => ({
       reset: () => {
-        if (TEST_TOKEN) {
-          onTokenRef.current(TEST_TOKEN)
+        if (BYPASS_TOKEN) {
+          onTokenRef.current(BYPASS_TOKEN)
           return
         }
         if (window.turnstile && widgetIdRef.current) {
@@ -94,8 +97,8 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidget
 
     useEffect(() => {
       // E2E bypass: emite token de teste e não carrega o widget.
-      if (TEST_TOKEN) {
-        onTokenRef.current(TEST_TOKEN)
+      if (BYPASS_TOKEN) {
+        onTokenRef.current(BYPASS_TOKEN)
         return
       }
 
@@ -135,7 +138,7 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidget
     }, [theme])
 
     // No bypass mode, não renderiza container (widget é invisível mas o callback dispara síncrono).
-    if (TEST_TOKEN) return null
+    if (BYPASS_TOKEN) return null
 
     return <div ref={containerRef} className={className} data-testid="turnstile-widget" />
   },
