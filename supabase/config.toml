@@ -44,7 +44,7 @@ secret = "1x0000000000000000000000000000000AA"
 [auth.rate_limit]
 email_sent = 2
 token_refresh = 150
-verify = 30
+token_verifications = 30
 
 [edge_runtime]
 enabled = false
