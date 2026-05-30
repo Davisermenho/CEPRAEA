@@ -109,7 +109,7 @@
       "extra_graphs": [],
       "query": "queries/competency/q05_audited_scout_flow_shacl_slice.rq",
       "assert": {
-        "row_count_eq": 10,
+        "row_count_eq": 12,
         "expected_rows": [
           {
             "entry": "https://cepraea.app/ontology#audited_entry_6m_defendido",
@@ -146,6 +146,18 @@
             "flowRuntimeCode": "DEF_POS.ACAO_DEFENSIVA.COBERTURA",
             "phaseRuntimeCode": "DEF_POS",
             "resultRuntimeCode": "RECUPERACAO_POSSE"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_def_pos_marcacao_pressao_gol_giro",
+            "flowRuntimeCode": "DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO",
+            "phaseRuntimeCode": "DEF_POS",
+            "resultRuntimeCode": "GOL"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_def_pos_marcacao_pressao_tiro_6m_concedido",
+            "flowRuntimeCode": "DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO",
+            "phaseRuntimeCode": "DEF_POS",
+            "resultRuntimeCode": "TIRO_6M_CONCEDIDO"
           },
           {
             "entry": "https://cepraea.app/ontology#audited_entry_at_pos_passivo",

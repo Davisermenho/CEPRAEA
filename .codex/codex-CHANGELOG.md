@@ -3033,3 +3033,29 @@ Expansão incremental da cobertura formal da matriz TypeScript para o recorte `D
 - `npm run check:ontology:runtime-alignment`
 - `npm run check:ontology:semantics`
 - `git diff --check`
+
+### [CEPR-ONTOLOGIA-DEF-POS-MARCACAO-PRESSAO-SHACL-2026-05-30] — 2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO
+
+#### ✨ Resumo
+
+Expansão incremental da cobertura formal da matriz TypeScript para o recorte `DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO`.
+
+#### 🛠️ Changed
+
+- `shacl/core.shacl.ttl`
+  - adiciona constraints para fase `DEF_POS`, resultados permitidos, tipos de finalização adversária permitidos, exigência de finalização quando resultado é `GOL` e bloqueio de finalização em resultados sem arremesso.
+- `examples/golden/scout-audited-flows-valid.ttl`
+  - adiciona exemplos válidos de marcação pressão com `GOL + GIRO` e `TIRO_6M_CONCEDIDO`.
+- `examples/golden/scout-audited-flows-invalid.ttl`
+  - adiciona exemplos inválidos para `GOL` sem finalização e `PASSIVO` como resultado.
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+  - inclui os exemplos válidos de marcação pressão na consulta de competência do slice auditado.
+- `queries/competency/tests.json`
+  - atualiza o manifesto CEPR-CQ-05 para 12 linhas esperadas.
+
+#### 🛡️ Evidências
+
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
