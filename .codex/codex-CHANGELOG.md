@@ -2896,3 +2896,25 @@ Integração dos gates ontológicos ao gate final do MVP v1.0.
 - `npm run validate:ontology:formal`
 - `npm run check:ontology:runtime-alignment`
 - `git diff --check`
+
+### [CEPR-ONTOLOGIA-RUNTIME-SHACL-GATE-2026-05-30] — 2026-05-30 — Gate runtime ↔ SHACL ampliado
+
+#### ✨ Resumo
+
+Ampliação do gate `check:ontology:runtime-alignment` para validar cobertura dos fluxos auditados contra matriz TypeScript, SHACL, datasets golden e pergunta SPARQL.
+
+#### 🛠️ Changed
+
+- `scripts/check-ontology-runtime-alignment.mjs`
+  - passa a ler `liveCollectionCompatibility.matrix.ts`, `shacl/core.shacl.ttl`, datasets audited valid/invalid e `queries/competency/tests.json`.
+  - valida que cada `LiveCollectionFlowId` auditado tem indivíduo ontológico, constraint SHACL, exemplo válido, exemplo inválido e cobertura no CEPR-CQ-05.
+  - compara `allowedFinishTypes` e `allowedResults` entre contrato vivo e matriz TypeScript.
+  - compara `allowedFinishTypes` do contrato vivo com IRIs usados na constraint SHACL do fluxo.
+  - reporta pendências não bloqueantes de `forbiddenResults` ainda sem cobertura formal.
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:runtime-alignment`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:semantics`
+- `git diff --check`
