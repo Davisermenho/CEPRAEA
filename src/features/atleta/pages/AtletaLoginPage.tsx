@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { AuthLoginScreen } from '@/features/auth/components/AuthLoginScreen'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
+import { AUTH_MESSAGES, mapSupabaseLoginError } from '@/features/auth/lib/authVocabulary'
+import { normalizeEmail, InvalidEmailError } from '@/features/auth/lib/emailNormalization'
+import { redirectGuard } from '@/features/auth/lib/redirectGuard'
 
 type Mode = 'login' | 'register' | 'reset'
 
 export default function AtletaLoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { authenticated } = useSupabaseAuth()
   const configured = isSupabaseConfigured()
 
@@ -22,8 +26,11 @@ export default function AtletaLoginPage() {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (authenticated) navigate('/atleta/treinos', { replace: true })
-  }, [authenticated, navigate])
+    if (authenticated) {
+      const target = redirectGuard(searchParams.get('returnUrl'), undefined)
+      navigate(target === '/' ? '/atleta/treinos' : target, { replace: true })
+    }
+  }, [authenticated, navigate, searchParams])
 
   const reset = () => { setError(''); setInfo('') }
 
@@ -36,27 +43,26 @@ export default function AtletaLoginPage() {
     e.preventDefault()
     reset()
     if (!configured) {
-      setError('Sistema não configurado. Avise o treinador.')
+      setError(AUTH_MESSAGES['AUTH-BOOT-001'])
       return
     }
 
-    const normalizedEmail = email.trim().toLowerCase()
-    if (!normalizedEmail || !normalizedEmail.includes('@')) {
-      setError('Informe um email válido.')
+    let normalizedEmail: string
+    try {
+      normalizedEmail = normalizeEmail(email)
+    } catch (err) {
+      setError(err instanceof InvalidEmailError ? err.message : AUTH_MESSAGES['AUTH-LOGIN-001'])
       return
     }
 
     if (mode === 'reset') {
       setSubmitting(true)
-      const { error: err } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      await supabase.auth.resetPasswordForEmail(normalizedEmail, {
         redirectTo: `${window.location.origin}/atleta/nova-senha`,
       })
       setSubmitting(false)
-      if (err) {
-        setError('Não foi possível enviar o email. Tente novamente.')
-      } else {
-        setInfo('Email de redefinição enviado! Verifique sua caixa de entrada.')
-      }
+      // Anti-enumeração §13: sempre AUTH-RESET-001, independente de sucesso/falha
+      setInfo(AUTH_MESSAGES['AUTH-RESET-001'])
       return
     }
 
@@ -65,20 +71,15 @@ export default function AtletaLoginPage() {
     setSubmitting(true)
 
     if (mode === 'register') {
-      const { error: err } = await supabase.auth.signUp({
+      await supabase.auth.signUp({
         email: normalizedEmail,
         password,
         options: { data: { role: 'athlete' } },
       })
       setSubmitting(false)
-      if (err) {
-        setError(err.message === 'User already registered'
-          ? 'Este email já está cadastrado. Faça login.'
-          : 'Não foi possível criar a conta. Verifique os dados.')
-      } else {
-        setInfo('Conta criada! Verifique seu email para confirmar o cadastro e depois faça login.')
-        setMode('login')
-      }
+      // Anti-enumeração §13: sempre AUTH-SIGNUP-001, independente de sucesso/falha
+      setInfo(AUTH_MESSAGES['AUTH-SIGNUP-001'])
+      setMode('login')
       return
     }
 
@@ -88,7 +89,7 @@ export default function AtletaLoginPage() {
     })
     setSubmitting(false)
     if (err) {
-      setError('Email ou senha incorretos.')
+      setError(mapSupabaseLoginError(err.message))
     }
   }
 
@@ -175,7 +176,7 @@ export default function AtletaLoginPage() {
 
         {!configured && (
           <div className="auth-login-status auth-login-status-error">
-            Sistema não configurado. Avise o treinador.
+            {AUTH_MESSAGES['AUTH-BOOT-001']}
           </div>
         )}
         {error && (

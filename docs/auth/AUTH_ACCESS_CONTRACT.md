@@ -291,7 +291,7 @@ E2E **SHALL** stubbar o token Turnstile via env override em `playwright.config.t
 
 ## §13. Vocabulário oficial de erros (anti-enumeração)
 
-> Status: PENDENTE (CEPR-AUTH-02C)
+> Status: IMPLEMENTADO (CEPR-AUTH-02C — `src/features/auth/lib/authVocabulary.ts`)
 
 ### §13.1 Princípio normativo
 
@@ -413,7 +413,7 @@ Reauth **SHOULD** ser considerada válida por 15 minutos para a mesma sessão an
 
 ## §17. Validação e normalização de email
 
-> Status: PENDENTE (CEPR-AUTH-02C)
+> Status: IMPLEMENTADO (CEPR-AUTH-02C — `src/features/auth/lib/emailNormalization.ts`)
 
 ### §17.1 Normalização canônica
 
@@ -434,7 +434,7 @@ validar formato com regex conservador `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
 
 ## §18. Redirect pós-login seguro
 
-> Status: PENDENTE (CEPR-AUTH-02C)
+> Status: IMPLEMENTADO (CEPR-AUTH-02C — `src/features/auth/lib/redirectGuard.ts`)
 
 ### §18.1 Princípio
 
@@ -556,13 +556,13 @@ O contrato delega o threat model STRIDE × controles ao documento [THREAT_MODEL.
 | G2 | MFA (TOTP/WebAuthn) | ALTO | **Roadmap** | CEPR-AUTH-03 | §25 (roadmap) |
 | G3 | Rate limiting/lockout explícito | ALTO | **Pendente** | CEPR-AUTH-02E | §11 |
 | G4 | CAPTCHA (Turnstile) | ALTO | **Pendente** | CEPR-AUTH-02E | §12 |
-| G5 | Vocabulário anti-enumeração | ALTO | **Pendente** | CEPR-AUTH-02C | §13 |
+| G5 | Vocabulário anti-enumeração | ALTO | **Implementado** | CEPR-AUTH-02C | §13 |
 | G6 | localStorage sem CSP compensatório | ALTO | **Parcial** (decisão documentada §14; CSP Report-Only em 02D, enforcement em 02F+) | CEPR-AUTH-02D + 02F+ | §14, §15 |
 | G7 | Headers de segurança HTTP | ALTO | **Pendente** | CEPR-AUTH-02D | §15 |
 | G8 | Lifecycle de sessão (idle/absolute timeout) | MÉDIO | **Pendente** | CEPR-AUTH-02F+ | §14.4 |
 | G9 | Reauth para ação sensível | ALTO | **Pendente** | CEPR-AUTH-02F+ | §16 |
-| G10 | Normalização de email centralizada | MÉDIO | **Pendente** | CEPR-AUTH-02C | §17 |
-| G11 | Open redirect / redirect guard | MÉDIO | **Pendente** | CEPR-AUTH-02C | §18 |
+| G10 | Normalização de email centralizada | MÉDIO | **Implementado** | CEPR-AUTH-02C | §17 |
+| G11 | Open redirect / redirect guard | MÉDIO | **Implementado** | CEPR-AUTH-02C | §18 |
 | G12 | Audit log canônico de auth | MÉDIO | **Parcial** (`audit_logs` existe em `0003`; sem schema auth) | CEPR-AUTH-02F+ | §19 |
 | G13 | Contrato UI/UX (DDR/WCAG) | MÉDIO | **Pendente** | CEPR-AUTH-02F+ | (roadmap UX) |
 | G14 | `supabase/config.toml` hardening | MÉDIO | **Pendente** | CEPR-AUTH-02E | §20 |

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { FormEvent } from 'react'
 import type { Athlete } from '@/types'
+import { normalizeEmail, InvalidEmailError } from '@/features/auth/lib/emailNormalization'
 import {
   ModalForm,
   SelectInput,
@@ -73,14 +74,15 @@ export function AthleteForm({ open, onClose, onSave, initial }: AthleteFormProps
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!nome.trim()) { setError('Nome é obrigatório.'); return }
-    if (!email.trim() || !email.includes('@')) { setError('Email válido é obrigatório.'); return }
+    let normalizedEmailAtleta: string
+    try { normalizedEmailAtleta = normalizeEmail(email) } catch (err) { setError(err instanceof InvalidEmailError ? err.message : 'Email válido é obrigatório.'); return }
     if (telefone.length > 0 && telefone.length < 10) { setError('Telefone inválido (mínimo 10 dígitos).'); return }
     setLoading(true)
     setError('')
     try {
       await onSave({
         nome: nome.trim(),
-        email: email.trim().toLowerCase(),
+        email: normalizedEmailAtleta,
         telefone,
         categoria: categoria || undefined,
         nivel: nivel || undefined,
