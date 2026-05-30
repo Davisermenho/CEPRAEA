@@ -5416,11 +5416,11 @@ Criar a PR 4 da fusão ontológica: golden dataset realista para provar que a ca
 
 Golden dataset realista criado e incorporado ao pipeline formal. A próxima fatia pode ser SHACL de Scout completo por matriz, sem misturar Supabase/UI.
 
-# Execution Log: CEPR-ONTOLOGIA-FUSAO-PLANO-V2-2026-05-29
+# Execution Log: CEPR-ONTOLOGIA-FUSAO-VERSIONAR-PLANO-2026-05-29
 
 ## 🎯 Objetivo
 
-Ler `docs/ontologia/merge/FUSAO.md` e ajustar o plano de fusão ontológica conforme a correção de auditoria fornecida: política formal de ontologia executável antes de importação/expansão RDF/SHACL e distinção entre workflow documental existente e gate formal executável completo.
+Versionar `docs/ontologia/merge/FUSAO.md` em uma PR documental pequena e corrigir o trecho desatualizado sobre o workflow formal de ontologia.
 
 ## 📌 Análise de Impacto
 
@@ -5430,19 +5430,74 @@ Ler `docs/ontologia/merge/FUSAO.md` e ajustar o plano de fusão ontológica conf
   - `.codex/codex-EXECUTION_LOG.md`
 - **Impacto em runtime:** nenhum.
 - **Impacto em Supabase/UI:** nenhum.
-- **Observação:** `FUSAO.md` já estava untracked antes da edição.
+- **Impacto em SHACL/ontologia executável:** nenhum.
 
 ## ✅ Ações executadas
 
 1. Leitura de `AGENTS.json`.
-2. Leitura de `CEPRAEA.md`.
-3. Consulta dos 3 últimos PRs.
-4. Leitura de `docs/ontologia/merge/FUSAO.md`.
-5. Inclusão da seção `CORREÇÃO DO ANTERIOR`.
-6. Correção do gap sobre workflow ontológico existente.
-7. Substituição do plano antigo por `PLANO V2 — AJUSTADO`.
-8. Inclusão da decisão arquitetural final e da cadeia mínima de robustez ontológica.
-9. Atualização da próxima ação segura para política de dados históricos.
+2. Consulta dos 3 últimos PRs.
+3. Criação de worktree separada em `origin/main` para não misturar com `feat/cepr-auth-02b`.
+4. Cópia do `FUSAO.md` local para a branch documental.
+5. Correção do trecho sobre workflow formal.
+6. Atualização dos logs operacionais Codex.
+
+## 🧪 Evidências objetivas (comandos)
+
+- `jq empty AGENTS.json`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `git worktree add -b chore/ontology-version-fusao-plan /tmp/cepraea-fusao-plan origin/main`
+- `rg -n "workflow dedicado|validate:mvp|runtime ↔ ontologia|PLANO V2|PRÓXIMA AÇÃO SEGURA" docs/ontologia/merge/FUSAO.md`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+## ✅ Resultado da validação
+
+- O plano agora reconhece que o workflow de ontologia já roda validação formal RDF/SHACL/SPARQL.
+- A lacuna atual ficou explicitada como falta de `check:ontology:runtime-alignment` no workflow e falta dos gates ontológicos no `validate:mvp:v1`.
+- Sem alteração de runtime, Supabase, UI, SHACL ou TTL.
+
+## ⚠️ Ocorrências durante execução
+
+- A branch principal de trabalho local estava em `feat/cepr-auth-02b`; por isso foi usada worktree separada baseada em `origin/main`.
+- `onthbpraia/` permanece untracked na árvore principal e fora desta PR.
+
+## ✅ Validação final
+
+Plano pronto para PR documental de versionamento do `FUSAO.md`.
+
+# Execution Log: CEPR-ONTOLOGIA-SCOUT-SHACL-AUDITED-FLOWS-2026-05-29
+
+## 🎯 Objetivo
+
+Criar a PR 5 da fusão ontológica: primeiro slice de SHACL do Scout orientado pela matriz runtime, limitado aos três fluxos auditados atuais.
+
+## 📌 Análise de Impacto
+
+- **Arquivos alterados:**
+  - `shacl/core.shacl.ttl`
+  - `examples/golden/scout-audited-flows-valid.ttl`
+  - `examples/golden/scout-audited-flows-invalid.ttl`
+  - `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+  - `queries/competency/tests.json`
+  - `scripts/validate-ontology-formal.sh`
+  - `.codex/codex-CHANGELOG.md`
+  - `.codex/codex-EXECUTION_LOG.md`
+- **Impacto em runtime:** nenhum.
+- **Impacto em Supabase/UI:** nenhum.
+- **Arquivos propositalmente não alterados:** `src/`, `supabase/`, `ontology/core.ttl`, migrations e UI.
+
+## ✅ Ações executadas
+
+1. Leitura de `AGENTS.json`, `CEPRAEA.md` e consulta dos 3 últimos PRs.
+2. Leitura dos contratos vivos `liveCollectionFlow.contract.ts` e `liveCollectionCompatibility.matrix.ts`.
+3. Adição de constraints SHACL para os 3 fluxos auditados:
+   - fase esperada por fluxo;
+   - tipos de finalização permitidos por fluxo;
+   - `FINALIZACAO_6M_FAV` não aceita `BLOQUEADO` nem `PASSIVO`;
+   - resultados observados de arremesso exigem tipo de finalização.
+4. Criação de dataset válido e inválido do slice auditado.
+5. Inclusão da pergunta de competência `CEPR-CQ-05`.
+6. Atualização do script formal para validar o dataset válido e exigir falha do inválido.
 
 ## 🧪 Evidências objetivas (comandos)
 
@@ -5450,21 +5505,566 @@ Ler `docs/ontologia/merge/FUSAO.md` e ajustar o plano de fusão ontológica conf
 - `sed -n '1,220p' AGENTS.json`
 - `sed -n '1,180p' CEPRAEA.md`
 - `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
-- `sed -n '1,260p' docs/ontologia/merge/FUSAO.md`
-- `sed -n '261,620p' docs/ontologia/merge/FUSAO.md`
+- `git checkout main`
+- `git pull origin main`
+- `git checkout -b chore/ontology-scout-shacl-audited-flows`
+- `sed -n '1,260p' src/features/scout/domain/liveCollectionFlow.contract.ts`
+- `sed -n '1,320p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
 
 ## ✅ Resultado da validação
 
-- O plano agora diferencia checagem documental/semântica de gate formal RDF/SHACL/SPARQL.
-- O plano V2 contém PR 1 a PR 6 com política de namespace/versionamento, camada formal, alinhamento runtime, golden dataset, política histórica e gate final MVP.
-- A decisão arquitetural final foi explicitada: CEPRAEA manda no produto, `onthbpraia` no padrão executável, SHACL na validação fechada e OWL não é validador fechado.
+- `npm run validate:ontology:formal` passou:
+  - dataset válido dos fluxos auditados conforma.
+  - dataset inválido dos fluxos auditados falha como esperado com 5 violações.
+  - `CEPR-CQ-05` retornou 6 linhas.
+- `npm run check:ontology:runtime-alignment` passou.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
 
 ## ⚠️ Ocorrências durante execução
 
-- A branch atual é `feat/cepr-auth-02b`, atrás de `main` por 2 commits.
-- `docs/ontologia/merge/FUSAO.md` já estava untracked antes da edição.
-- `onthbpraia/` permanece untracked localmente.
+- A primeira versão das constraints usava `VALUES`, mas `pyshacl` rejeita `VALUES` em constraints SPARQL. As regras foram reescritas com `FILTER(... IN (...))`.
+- Categoria, ação básica, motivo de pontuação e pontos por entrada ainda não foram formalizados porque não há propriedades canônicas em `ontology/core.ttl`; criar esse vocabulário foi mantido fora deste slice.
+- `onthbpraia/` permanece untracked localmente e fora do escopo.
 
 ## ✅ Validação final
 
-Plano de fusão atualizado para V2 sem alterações em runtime, Supabase, UI, migrations, ontologia formal ou SHACL.
+SHACL inicial dos 3 fluxos auditados criado e validado. A próxima fatia deve expandir vocabulário formal de Scout ou avançar incrementalmente regras de pontuação, sem misturar Supabase/UI.
+
+## CEPR-ONTOLOGIA-HISTORICAL-DATA-POLICY-2026-05-29 — Política de migração histórica
+
+### Escopo entendido
+
+Criar a próxima fatia documental da fusão ontológica: `docs/ontologia/merge/politica-migracao-historica.md`, sem alterar runtime, Supabase, UI, migrations, `ontology/`, `shacl/`, `examples/` ou `queries/`.
+
+### Arquivos alterados
+
+- `docs/ontologia/merge/politica-migracao-historica.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+
+### Comandos executados
+
+- `jq empty AGENTS.json`
+- `sed -n '1,220p' AGENTS.json`
+- `sed -n '1,160p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `sed -n '390,540p' docs/ontologia/merge/FUSAO.md`
+- `sed -n '1,220p' docs/ontologia/merge/politica-breaking-changes.md`
+- `sed -n '1,220p' docs/ontologia/merge/contrato-consumo-ia.md`
+- `rg -n "VALIDADO|PENDENTE|scout_live_entries|validation_status|status_validacao|COLETA_AO_VIVO|COLETA_SCOUT" supabase src docs -g '!node_modules'`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `npm run validate:ontology:formal` passou; datasets invalidos falharam como esperado.
+- `npm run check:ontology:runtime-alignment` passou no escopo minimo.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR e documental. Ela nao implementa migracao, profile SHACL historico ou alteracao de runtime.
+- Migrations historicas futuras continuam bloqueadas ate haver dry-run, contagem de impacto e aprovacao humana explicita.
+
+## CEPR-ONTOLOGIA-MVP-GATES-2026-05-29 — Gates ontologicos no validate:mvp:v1
+
+### Escopo entendido
+
+Integrar os gates ontologicos ao `validate:mvp:v1`, mantendo escopo restrito a script/package e sem alterar Supabase, UI, runtime funcional, migrations, `ontology/`, `shacl/`, `examples/` ou `queries/`.
+
+### Arquivos alterados
+
+- `scripts/validate-mvp-v1.sh`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+
+### Comandos executados
+
+- `jq empty AGENTS.json`
+- `sed -n '1,180p' AGENTS.json`
+- `sed -n '1,120p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `rg -n "validate:mvp|validate-mvp|ontology|check:ontology|validate:ontology" package.json scripts .github -g '!node_modules'`
+- `sed -n '1,260p' scripts/validate-mvp-v1.sh`
+- `bash -n scripts/validate-mvp-v1.sh`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `git diff --check`
+
+### Resultado da validação
+
+- `package.json` ja expunha `check:ontology:semantics`, `validate:ontology:formal` e `check:ontology:runtime-alignment`; nao precisou ser alterado.
+- `scripts/validate-mvp-v1.sh` agora executa os tres gates ontologicos no gate final do MVP.
+- `bash -n scripts/validate-mvp-v1.sh` passou.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `npm run validate:ontology:formal` passou; datasets invalidos falharam como esperado.
+- `npm run check:ontology:runtime-alignment` passou no escopo minimo.
+- `git diff --check` passou.
+
+### Comando nao executado
+
+- `npm run validate:mvp:v1` nao foi executado nesta etapa porque inclui `supabase db reset`, testes E2E e suite completa. A validacao desta fatia cobriu a sintaxe do script e os gates ontologicos adicionados individualmente.
+
+## CEPR-ONTOLOGIA-RUNTIME-SHACL-GATE-2026-05-30 — Gate runtime SHACL ampliado
+
+### Escopo entendido
+
+Expandir `scripts/check-ontology-runtime-alignment.mjs` para validar o alinhamento entre contratos vivos do Scout, matriz TypeScript, SHACL, exemplos e SPARQL no escopo auditado, sem alterar runtime funcional, Supabase, UI, migrations, `ontology/`, `shacl/`, `examples/` ou `queries/`.
+
+### Arquivos alterados
+
+- `scripts/check-ontology-runtime-alignment.mjs`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+
+### Comandos executados
+
+- `jq empty AGENTS.json`
+- `sed -n '1,180p' AGENTS.json`
+- `sed -n '1,120p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `git show origin/main:docs/ontologia/merge/FUSAO.md | rg -n "Ação 6|PR 3|matriz TypeScript|forbiddenResult|SHACL \\+ exemplo|runtime ↔ ontologia|Nenhuma regra SHACL" -C 3`
+- `sed -n '1,260p' scripts/check-ontology-runtime-alignment.mjs`
+- `sed -n '1,720p' src/features/scout/domain/liveCollectionFlow.contract.ts`
+- `sed -n '1,340p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `sed -n '1,260p' shacl/core.shacl.ttl`
+- `cat queries/competency/tests.json`
+- `cat examples/golden/scout-audited-flows-valid.ttl`
+- `cat examples/golden/scout-audited-flows-invalid.ttl`
+- `cat queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `npm run check:ontology:runtime-alignment`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run check:ontology:runtime-alignment` passou e agora verifica 3 fluxos auditados contra matriz TypeScript, SHACL, datasets audited e CEPR-CQ-05.
+- `npm run validate:ontology:formal` passou; datasets invalidos falharam como esperado.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Pendências identificadas pelo novo gate
+
+O script reporta 6 pendências não bloqueantes de cobertura formal: `ERRO_PASSE`, `PASSE_INTERCEPTADO` e `RECUPERACAO_POSSE` ainda não possuem cobertura SHACL/dataset inválido nos fluxos auditados `AT_POS.ARREMESSO.ARREMESSO` e `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV`.
+
+### Riscos restantes
+
+- Esta PR não altera SHACL nem datasets; as pendências de `forbiddenResults` devem ser resolvidas em fatia formal posterior.
+- O parser do gate é estático e intencionalmente restrito ao formato atual dos contratos TypeScript.
+
+## CEPR-ONTOLOGIA-FORBIDDEN-RESULTS-COVERAGE-2026-05-30 — Cobertura formal de forbiddenResults
+
+### Escopo entendido
+
+Resolver as 6 pendências não bloqueantes reportadas pelo gate runtime ↔ SHACL para `forbiddenResults`, alterando apenas SHACL, dataset inválido e logs Codex, sem mexer em runtime funcional, Supabase, UI, migrations, `ontology/`, `src/` ou `queries/`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+
+### Comandos executados
+
+- `jq empty AGENTS.json`
+- `sed -n '1,160p' AGENTS.json`
+- `sed -n '1,100p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `git worktree list`
+- `npm run check:ontology:runtime-alignment`
+- `sed -n '80,230p' shacl/core.shacl.ttl`
+- `cat examples/golden/scout-audited-flows-invalid.ttl`
+- `rg -n "result_erro_passe|result_passe_interceptado|result_recuperacao_posse|runtimeCode \"ERRO_PASSE\"|runtimeCode \"PASSE_INTERCEPTADO\"|runtimeCode \"RECUPERACAO_POSSE\"" ontology/core.ttl`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0`.
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 11 violações.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre somente os `forbiddenResults` dos dois fluxos ofensivos auditados que já estavam reportados pelo gate.
+- Não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-CI-RUNTIME-ALIGNMENT-2026-05-30 — Runtime alignment no ontology-quality-gate
+
+### Escopo entendido
+
+Atualizar o workflow obrigatório `ontology-quality-gate` para executar automaticamente `npm run check:ontology:runtime-alignment` quando houver mudança em contratos Scout, matriz TypeScript, camada formal ontológica, exemplos, consultas, script de alinhamento, script ontológico no `package.json` ou no próprio workflow.
+
+### Arquivos alterados
+
+- `.github/workflows/ontology-quality-gate.yml`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- Python
+
+### Comandos executados
+
+- `jq empty AGENTS.json`
+- `sed -n '1,160p' AGENTS.json`
+- `sed -n '1,100p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `git worktree list`
+- `sed -n '1,220p' .github/workflows/ontology-quality-gate.yml`
+- `jq -r '.scripts | to_entries[] | select(.key|test("ontology|validate:mvp")) | "\\(.key)=\\(.value)"' package.json`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `python3 - <<'PY' ... PY` para conferir tokens obrigatórios do workflow
+- `npm run validate:ontology:formal`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0`.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `npm run validate:ontology:formal` passou; datasets inválidos falharam como esperado.
+- `git diff --check` passou.
+- A checagem por Python confirmou os tokens do novo escopo `runtime_alignment` e o passo `npm run check:ontology:runtime-alignment` no workflow.
+
+### Comando não executado
+
+- `ruby -e 'require "yaml"; YAML.load_file(...)'` não executou porque `ruby` não está instalado no ambiente. A validação alternativa foi a checagem de tokens do workflow com `python3`, execução local dos três gates ontológicos e `git diff --check`.
+
+### Validação adicional do workflow
+
+- `actionlint .github/workflows/ontology-quality-gate.yml` passou.
+- `python3` com PyYAML carregou `.github/workflows/ontology-quality-gate.yml` com sucesso.
+
+## CEPR-ONTOLOGIA-FUSAO-ROADMAP-2026-05-30 — Atualização do roadmap FUSAO
+
+### Escopo entendido
+
+Atualizar o plano `docs/ontologia/merge/FUSAO.md` para remover instruções obsoletas, registrar o estado real dos merges recentes e identificar a próxima fatia segura da fusão ontológica.
+
+### Arquivos alterados
+
+- `docs/ontologia/merge/FUSAO.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr list --state all --limit 5 --json number,title,state,mergedAt,headRefName,baseRefName`
+- `git status --short --branch`
+- `sed -n '1,260p' docs/ontologia/merge/FUSAO.md`
+- `sed -n '260,620p' docs/ontologia/merge/FUSAO.md`
+- `rg "check:ontology:semantics|validate:ontology:formal|check:ontology:runtime-alignment" package.json scripts/validate-mvp-v1.sh .github/workflows/ontology-quality-gate.yml`
+- `npm run check:ontology:runtime-alignment`
+- `npm run validate:ontology:formal`
+- `git diff --check`
+
+### Resultado da validação
+
+- `gh pr list` confirmou as PRs recentes: #50, #49 e #48 mergeadas, e #47 aberta em escopo de auth.
+- `rg` confirmou que `package.json`, `scripts/validate-mvp-v1.sh` e `.github/workflows/ontology-quality-gate.yml` expõem/executam os três gates ontológicos.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` no escopo auditado.
+- `npm run validate:ontology:formal` passou; datasets inválidos falharam como esperado.
+- `git diff --check` passou sem whitespace errors.
+
+### Riscos restantes
+
+- Esta PR é documental e não expande SHACL.
+- A próxima fatia técnica recomendada é formalizar incrementalmente `DEF_POS.ACAO_DEFENSIVA.BLOQUEIO` sem tocar runtime, Supabase, UI ou migrations.
+
+## CEPR-ONTOLOGIA-DEF-POS-BLOQUEIO-SHACL-2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.BLOQUEIO
+
+### Escopo entendido
+
+Formalizar a próxima fatia recomendada em `FUSAO.md`: `DEF_POS.ACAO_DEFENSIVA.BLOQUEIO`, usando SHACL, exemplos válidos/inválidos e consulta de competência, sem alterar runtime, Supabase, UI, migrations ou `ontology/core.ttl`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-valid.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `queries/competency/tests.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr list --state all --limit 5 --json number,title,state,mergedAt,headRefName,baseRefName`
+- `rg -n "DEF_POS|BLOQUEIO|ACAO_DEFENSIVA|forbiddenResults|allowedResults|allowedFinishTypes" src/features/scout/domain src/types/index.ts shacl examples queries ontology scripts/validate-ontology-formal.sh`
+- `sed -n '270,330p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 13 violações, incluindo os 2 novos casos de bloqueio defensivo.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` e 14 constraints SPARQL.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.BLOQUEIO`.
+- Ainda não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-DEF-POS-COBERTURA-SHACL-2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.COBERTURA
+
+### Escopo entendido
+
+Formalizar a próxima fatia pequena da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA.COBERTURA`, usando SHACL, exemplos válidos/inválidos e consulta de competência, sem alterar runtime, Supabase, UI, migrations ou `ontology/core.ttl`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-valid.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `queries/competency/tests.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr view 52 --json number,state,mergedAt,mergeCommit,url`
+- `sed -n '320,380p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `sed -n '147,177p' src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- PR #52 foi mergeada em `main` com merge commit `0bbd1924063c0609cf127071e32ef7d7f0c35f07`.
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 15 violações, incluindo os 2 novos casos de cobertura defensiva.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` e 19 constraints SPARQL.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.COBERTURA`.
+- Ainda não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-DEF-POS-MARCACAO-PRESSAO-SHACL-2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO
+
+### Escopo entendido
+
+Formalizar a próxima fatia pequena da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO`, usando SHACL, exemplos válidos/inválidos e consulta de competência, sem alterar runtime, Supabase, UI, migrations ou `ontology/core.ttl`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-valid.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `queries/competency/tests.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr view 53 --json number,state,mergedAt,mergeCommit,url`
+- `sed -n '360,418p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `sed -n '335,345p' src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- PR #53 foi mergeada em `main` com merge commit `1207d324e18173eb07adafbe1739d5c7abd22035`.
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 17 violações, incluindo os 2 novos casos de marcação pressão.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` e 24 constraints SPARQL.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO`.
+- Ainda não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-DEF-POS-RECOMPOSICAO-SHACL-2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.RECOMPOSICAO
+
+### Escopo entendido
+
+Formalizar a próxima fatia pequena da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA.RECOMPOSICAO`, usando SHACL, exemplos válidos/inválidos e consulta de competência, sem alterar runtime, Supabase, UI, migrations ou `ontology/core.ttl`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-valid.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `queries/competency/tests.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr view 54 --json number,state,mergedAt,mergeCommit,url`
+- `sed -n '386,418p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `rg -n "RECOMPOSICAO" src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- PR #54 foi mergeada em `main` com merge commit `ee42b160903eda6885b70cac1190508e69750001`.
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 19 violações, incluindo os 2 novos casos de recomposição.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` e 29 constraints SPARQL.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.RECOMPOSICAO`.
+- Ainda não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-DEF-POS-INTERCEPTACAO-SHACL-2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO
+
+### Escopo entendido
+
+Formalizar a próxima fatia da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO`, incluindo a exceção `INTERCEPTACAO_MALSUCEDIDA`, sem alterar runtime, Supabase, UI, migrations ou `ontology/core.ttl`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-valid.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `queries/competency/tests.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr view 55 --json number,state,mergedAt,mergeCommit,url`
+- `sed -n '320,350p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `sed -n '135,146p' src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+- `sed -n '279,291p' src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- PR #55 foi mergeada em `main` com merge commit `f3fda0a8c7b765e5041c739f0a8e89980cd4a2fd`.
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 22 violações, incluindo os novos casos de interceptação.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` e 34 constraints SPARQL.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO`.
+- Usa `cepr:classificationCode` literal nos exemplos/SHACL para representar a exceção `INTERCEPTACAO_MALSUCEDIDA`; a formalização canônica desse predicado pode ser refinada em uma PR futura de vocabulário.
+- Ainda não converte a matriz TypeScript inteira em SHACL.
