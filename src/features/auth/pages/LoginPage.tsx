@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { AuthLoginScreen } from '@/features/auth/components/AuthLoginScreen'
 import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
-import { AUTH_MESSAGES, mapSupabaseLoginError } from '@/features/auth/lib/authVocabulary'
+import { AUTH_MESSAGES, interpretSupabaseAuthError } from '@/features/auth/lib/authVocabulary'
+import { TurnstileWidget, type TurnstileWidgetHandle } from '@/features/auth/components/TurnstileWidget'
 import { normalizeEmail, InvalidEmailError } from '@/features/auth/lib/emailNormalization'
 import { redirectGuard } from '@/features/auth/lib/redirectGuard'
 
@@ -17,6 +18,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [lockUntil, setLockUntil] = useState<number>(0)
+  const captchaRef = useRef<TurnstileWidgetHandle>(null)
 
   useEffect(() => {
     if (authenticated) {
@@ -45,11 +49,26 @@ export default function LoginPage() {
       return
     }
 
+    if (!captchaToken) {
+      setError(AUTH_MESSAGES['AUTH-CAPTCHA-001'])
+      return
+    }
+
     setSubmitting(true)
     setError('')
-    const result = await signInWithPassword(normalizedEmail, password)
+    const result = await signInWithPassword(normalizedEmail, password, captchaToken)
     if (!result.ok) {
-      setError(mapSupabaseLoginError(result.error))
+      const interpreted = interpretSupabaseAuthError(result.error, result.status)
+      if (interpreted.code === 'WEAK-PASSWORD') {
+        navigate('/atleta/nova-senha', { replace: true })
+        return
+      }
+      if (interpreted.code === 'LOGIN-003') {
+        setLockUntil(Date.now() + 30_000)
+      }
+      setError(interpreted.message)
+      setCaptchaToken(null)
+      captchaRef.current?.reset()
       setSubmitting(false)
       return
     }
@@ -111,7 +130,15 @@ export default function LoginPage() {
           </div>
         )}
 
-        <button type="submit" className="auth-login-primary" disabled={disabled}>
+        <TurnstileWidget
+          ref={captchaRef}
+          onToken={setCaptchaToken}
+          onExpired={() => setCaptchaToken(null)}
+          onError={() => setCaptchaToken(null)}
+          className="auth-login-captcha"
+        />
+
+        <button type="submit" className="auth-login-primary" disabled={disabled || !captchaToken || Date.now() < lockUntil}>
           {submitting ? 'Entrando...' : 'Entrar →'}
         </button>
       </form>

@@ -17,7 +17,7 @@ test.describe('AtletaLoginPage', () => {
     await page.getByRole('button', { name: /criar conta/i }).click()
     await expect(page.getByText(/primeiro acesso/i)).toBeVisible()
     await expect(page.getByRole('button', { name: /^criar conta$/i })).toBeVisible()
-    await expect(page.getByText(/mínimo 6 caracteres/i)).toBeVisible()
+    await expect(page.getByText(/mínimo 10 caracteres/i)).toBeVisible()
     await expect(page.getByRole('button', { name: /já tenho conta/i })).toBeVisible()
   })
 

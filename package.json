@@ -26,7 +26,8 @@
     "validate:ontology:formal": "bash scripts/validate-ontology-formal.sh",
     "check:ontology:runtime-alignment": "node scripts/check-ontology-runtime-alignment.mjs",
     "check:runtime-legacy": "bash scripts/check-runtime-legacy.sh",
-    "validate:mvp:v1": "bash scripts/validate-mvp-v1.sh"
+    "validate:mvp:v1": "bash scripts/validate-mvp-v1.sh",
+    "verify:supabase-config": "tsx scripts/verify-supabase-config.ts"
   },
   "dependencies": {
     "@e965/xlsx": "^0.20.3",

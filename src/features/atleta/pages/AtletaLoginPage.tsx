@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from "react"
 import type { FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { AuthLoginScreen } from '@/features/auth/components/AuthLoginScreen'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
-import { AUTH_MESSAGES, mapSupabaseLoginError } from '@/features/auth/lib/authVocabulary'
+import { AUTH_MESSAGES, interpretSupabaseAuthError } from '@/features/auth/lib/authVocabulary'
 import { normalizeEmail, InvalidEmailError } from '@/features/auth/lib/emailNormalization'
-import { redirectGuard } from '@/features/auth/lib/redirectGuard'
+import { redirectGuard } from "@/features/auth/lib/redirectGuard"
+import { validatePasswordPolicy } from "@/features/auth/lib/passwordPolicy"
+import { hibpCheck } from "@/features/auth/lib/hibpCheck"
+import { PASSWORD_MIN_LENGTH } from "@/features/auth/lib/passwordPolicy"
+import { TurnstileWidget, type TurnstileWidgetHandle } from "@/features/auth/components/TurnstileWidget"
 
 type Mode = 'login' | 'register' | 'reset'
 
@@ -24,6 +28,9 @@ export default function AtletaLoginPage() {
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [lockUntil, setLockUntil] = useState<number>(0)
+  const captchaRef = useRef<TurnstileWidgetHandle>(null)
 
   useEffect(() => {
     if (authenticated) {
@@ -55,14 +62,18 @@ export default function AtletaLoginPage() {
       return
     }
 
-    if (mode === 'reset') {
+    if (!captchaToken) { setError(AUTH_MESSAGES["AUTH-CAPTCHA-001"]); return }
+
+    if (mode === "reset") {
       setSubmitting(true)
       await supabase.auth.resetPasswordForEmail(normalizedEmail, {
         redirectTo: `${window.location.origin}/atleta/nova-senha`,
+        captchaToken,
       })
       setSubmitting(false)
       // Anti-enumeração §13: sempre AUTH-RESET-001, independente de sucesso/falha
       setInfo(AUTH_MESSAGES['AUTH-RESET-001'])
+      setCaptchaToken(null); captchaRef.current?.reset()
       return
     }
 
@@ -70,15 +81,20 @@ export default function AtletaLoginPage() {
 
     setSubmitting(true)
 
-    if (mode === 'register') {
+    if (mode === "register") {
+      const policy = validatePasswordPolicy(password)
+      if (!policy.valid) { setSubmitting(false); setError(AUTH_MESSAGES["AUTH-RESET-002"]); return }
+      const hibp = await hibpCheck(password)
+      if (hibp.pwned) { setSubmitting(false); setError(AUTH_MESSAGES["AUTH-RESET-003"]); return }
       await supabase.auth.signUp({
         email: normalizedEmail,
         password,
-        options: { data: { role: 'athlete' } },
+        options: { data: { role: "athlete" }, captchaToken },
       })
       setSubmitting(false)
       // Anti-enumeração §13: sempre AUTH-SIGNUP-001, independente de sucesso/falha
       setInfo(AUTH_MESSAGES['AUTH-SIGNUP-001'])
+      setCaptchaToken(null); captchaRef.current?.reset()
       setMode('login')
       return
     }
@@ -86,10 +102,21 @@ export default function AtletaLoginPage() {
     const { error: err } = await supabase.auth.signInWithPassword({
       email: normalizedEmail,
       password,
+      options: { captchaToken },
     })
     setSubmitting(false)
     if (err) {
-      setError(mapSupabaseLoginError(err.message))
+      const status = (err as { status?: number }).status
+      const interpreted = interpretSupabaseAuthError(err.message, status)
+      if (interpreted.code === 'WEAK-PASSWORD') {
+        navigate('/atleta/nova-senha', { replace: true })
+        return
+      }
+      if (interpreted.code === 'LOGIN-003') {
+        setLockUntil(Date.now() + 30_000)
+      }
+      setError(interpreted.message)
+      setCaptchaToken(null); captchaRef.current?.reset()
     }
   }
 
@@ -160,7 +187,7 @@ export default function AtletaLoginPage() {
               </button>
             </div>
             {mode === 'register' && (
-              <p className="auth-login-hint">Mínimo 6 caracteres.</p>
+              <p className="auth-login-hint">Mínimo {PASSWORD_MIN_LENGTH} caracteres, com letra minúscula, maiúscula e número.</p>
             )}
             {mode === 'login' && (
               <button
@@ -190,7 +217,15 @@ export default function AtletaLoginPage() {
           </div>
         )}
 
-        <button type="submit" className="auth-login-primary" disabled={disabled}>
+        <TurnstileWidget
+          ref={captchaRef}
+          onToken={setCaptchaToken}
+          onExpired={() => setCaptchaToken(null)}
+          onError={() => setCaptchaToken(null)}
+          className="auth-login-captcha"
+        />
+
+        <button type="submit" className="auth-login-primary" disabled={disabled || !captchaToken || Date.now() < lockUntil}>
           {submitting && 'Entrando...'}
           {!submitting && mode === 'login' && 'Entrar →'}
           {!submitting && mode === 'register' && 'Criar conta'}
