@@ -109,7 +109,7 @@
       "extra_graphs": [],
       "query": "queries/competency/q05_audited_scout_flow_shacl_slice.rq",
       "assert": {
-        "row_count_eq": 12,
+        "row_count_eq": 14,
         "expected_rows": [
           {
             "entry": "https://cepraea.app/ontology#audited_entry_6m_defendido",
@@ -158,6 +158,18 @@
             "flowRuntimeCode": "DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO",
             "phaseRuntimeCode": "DEF_POS",
             "resultRuntimeCode": "TIRO_6M_CONCEDIDO"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_def_pos_recomposicao_defesa_estabilizada",
+            "flowRuntimeCode": "DEF_POS.ACAO_DEFENSIVA.RECOMPOSICAO",
+            "phaseRuntimeCode": "DEF_POS",
+            "resultRuntimeCode": "DEFESA_ESTABILIZADA"
+          },
+          {
+            "entry": "https://cepraea.app/ontology#audited_entry_def_pos_recomposicao_gol_simples",
+            "flowRuntimeCode": "DEF_POS.ACAO_DEFENSIVA.RECOMPOSICAO",
+            "phaseRuntimeCode": "DEF_POS",
+            "resultRuntimeCode": "GOL"
           },
           {
             "entry": "https://cepraea.app/ontology#audited_entry_at_pos_passivo",

@@ -5970,3 +5970,51 @@ Formalizar a próxima fatia pequena da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA
 
 - Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO`.
 - Ainda não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-DEF-POS-RECOMPOSICAO-SHACL-2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.RECOMPOSICAO
+
+### Escopo entendido
+
+Formalizar a próxima fatia pequena da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA.RECOMPOSICAO`, usando SHACL, exemplos válidos/inválidos e consulta de competência, sem alterar runtime, Supabase, UI, migrations ou `ontology/core.ttl`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-valid.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `queries/competency/tests.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr view 54 --json number,state,mergedAt,mergeCommit,url`
+- `sed -n '386,418p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `rg -n "RECOMPOSICAO" src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- PR #54 foi mergeada em `main` com merge commit `ee42b160903eda6885b70cac1190508e69750001`.
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 19 violações, incluindo os 2 novos casos de recomposição.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` e 29 constraints SPARQL.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.RECOMPOSICAO`.
+- Ainda não converte a matriz TypeScript inteira em SHACL.
