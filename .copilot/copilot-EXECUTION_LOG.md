@@ -1,3 +1,50 @@
+## Execução [2026-05-30] — CEPR-AUTH-02D headers de segurança + SW denylist
+
+### Arquivos alterados
+- `vercel.json` (MODIFICADO) — headers array com 6 entradas de segurança
+- `vite.config.ts` (MODIFICADO) — workbox.navigateFallbackDenylist 5 rotas
+- `scripts/check-headers.sh` (NOVO) — valida 6 headers via curl -I
+
+### Comandos executados
+- `npm run typecheck` → exit 0
+- `npm run build` → built in 14.09s
+
+### Notas
+- CSP em modo Report-Only (não enforcement)
+- HSTS max-age=300 (baixo, fase inicial — sem preload)
+- SW não cacheará rotas de auth (navigateFallbackDenylist)
+
+
+## Execução [2026-05-30] — CEPR-AUTH-02C vocabulário, normalização e redirect guard
+
+### Arquivos alterados
+- `src/features/auth/lib/authVocabulary.ts` (NOVO)
+- `src/features/auth/lib/emailNormalization.ts` (NOVO)
+- `src/features/auth/lib/redirectGuard.ts` (NOVO)
+- `src/features/auth/lib/__tests__/emailNormalization.test.ts` (NOVO)
+- `src/features/auth/lib/__tests__/redirectGuard.test.ts` (NOVO)
+- `src/features/auth/pages/LoginPage.tsx` (MODIFICADO)
+- `src/features/atleta/pages/AtletaLoginPage.tsx` (MODIFICADO)
+- `src/features/settings/pages/CoachInvitesPage.tsx` (MODIFICADO)
+- `src/features/athletes/components/AthleteForm.tsx` (MODIFICADO)
+- `e2e/auth/anti-enumeration.spec.ts` (NOVO)
+- `e2e/auth/redirect-guard.spec.ts` (NOVO)
+- `docs/auth/AUTH_ACCESS_CONTRACT.md` (MODIFICADO)
+
+### Ferramentas usadas
+- Terminal (cat heredoc, python3 scripts para writes WSL)
+- read_file, grep_search, run_in_terminal
+
+### Validação
+- `npm run typecheck`: ✅ exit 0
+- `npm test`: ✅ 89/89 (6 test files)
+- `npm run build`: ✅ built in 8.27s
+
+### Riscos / Pendências
+- Testes E2E (Playwright) requerem ambiente com credenciais E2E_COACH_EMAIL/E2E_COACH_PASSWORD
+- Próximo ticket: CEPR-AUTH-02D (CSP headers) ou CEPR-AUTH-02E (RLS policies)
+
+---
 
 ---
 

@@ -5,6 +5,7 @@ import type { FormEvent } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getSupabaseTeamId } from '@/features/presence-tokens/presenceTokenConfig'
+import { normalizeEmail, InvalidEmailError } from '@/features/auth/lib/emailNormalization'
 
 interface Invite {
   id: string
@@ -41,8 +42,9 @@ export default function CoachInvitesPage() {
 
   async function handleInvite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const normalized = email.trim().toLowerCase()
-    if (!normalized || !teamId) return
+    let normalized: string
+    try { normalized = normalizeEmail(email) } catch { setError('Informe um email válido.'); return }
+    if (!teamId) return
     setSubmitting(true)
     setError('')
     setSuccess('')

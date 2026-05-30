@@ -1,3 +1,39 @@
+## [2026-05-30] CEPR-AUTH-02D — Headers de segurança + Service Worker denylist
+
+### O que foi feito
+
+- `vercel.json` (MODIFICADO): Array `headers` com 6 entradas — HSTS (max-age=300), CSP-Report-Only, X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy: camera=(), microphone=(), geolocation=()
+- `vite.config.ts` (MODIFICADO): Workbox `navigateFallbackDenylist` com 5 rotas de auth (/login, /atleta/login, /atleta/nova-senha, /aceitar-convite, /onboarding)
+- `scripts/check-headers.sh` (NOVO): Script de validação dos 6 headers via `curl -I`; exit 1 se algum ausente
+
+### Validação
+- `npm run typecheck`: ✅ 0 erros
+- `npm run build`: ✅ built in 14.09s
+
+
+## [2026-05-30] CEPR-AUTH-02C — Vocabulário de erros, normalização de email e redirect guard
+
+### O que foi feito
+
+- `src/features/auth/lib/authVocabulary.ts` (NOVO): Vocabulário canônico de erros §13 — `AUTH_CODES`, `AUTH_MESSAGES`, `mapSupabaseLoginError()`
+- `src/features/auth/lib/emailNormalization.ts` (NOVO): Normalização canônica de email §17 — `normalizeEmail()`, `InvalidEmailError`
+- `src/features/auth/lib/redirectGuard.ts` (NOVO): Proteção contra open redirect §18 — `redirectGuard()`
+- `src/features/auth/lib/__tests__/emailNormalization.test.ts` (NOVO): 11 testes Vitest para emailNormalization
+- `src/features/auth/lib/__tests__/redirectGuard.test.ts` (NOVO): 19 testes Vitest para redirectGuard (incl. protocol-relative URLs)
+- `src/features/auth/pages/LoginPage.tsx` (MODIFICADO): Integrado normalizeEmail, mapSupabaseLoginError, redirectGuard
+- `src/features/atleta/pages/AtletaLoginPage.tsx` (MODIFICADO): Integrado normalizeEmail, mapSupabaseLoginError, redirectGuard + anti-enumeração em reset/signup
+- `src/features/settings/pages/CoachInvitesPage.tsx` (MODIFICADO): Substituído inline trim().toLowerCase() por normalizeEmail
+- `src/features/athletes/components/AthleteForm.tsx` (MODIFICADO): Substituído inline trim().toLowerCase() por normalizeEmail
+- `e2e/auth/anti-enumeration.spec.ts` (NOVO): 5 testes E2E §13 (mensagens canônicas, anti-enumeração, timing parity)
+- `e2e/auth/redirect-guard.spec.ts` (NOVO): 4 testes E2E §18 (open redirect protection)
+- `docs/auth/AUTH_ACCESS_CONTRACT.md` (MODIFICADO): §13, §17, §18 → IMPLEMENTADO; G5, G10, G11 → Implementado
+
+### Validação
+- `npm run typecheck`: ✅ 0 erros
+- `npm test`: ✅ 89/89 testes passando
+- `npm run build`: ✅ build OK em 8.27s
+
+---
 
 ## [2026-05-21] Configuração MCP Supabase em 3 camadas
 
