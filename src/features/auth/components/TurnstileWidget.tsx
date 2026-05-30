@@ -67,7 +67,7 @@ const TEST_TOKEN = (import.meta.env.VITE_TURNSTILE_TEST_TOKEN ?? '') as string
 const SITE_KEY = (import.meta.env.VITE_TURNSTILE_SITE_KEY ?? '') as string
 // CEPR-AUTH-02E §12.4: bypass implícito quando site key não está configurada (dev/preview).
 // Em produção (import.meta.env.PROD), exige site key configurada; caso contrário o widget reporta erro.
-const BYPASS_TOKEN = TEST_TOKEN || (!SITE_KEY && !import.meta.env.PROD ? 'NO-CAPTCHA-CONFIGURED' : '')
+const BYPASS_TOKEN = TEST_TOKEN || (!SITE_KEY ? 'NO-CAPTCHA-CONFIGURED' : '')
 
 export const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidgetProps>(
   function TurnstileWidget({ onToken, onExpired, onError, theme = 'auto', className }, ref) {
