@@ -5922,3 +5922,51 @@ Formalizar a próxima fatia pequena da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA
 
 - Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.COBERTURA`.
 - Ainda não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-DEF-POS-MARCACAO-PRESSAO-SHACL-2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO
+
+### Escopo entendido
+
+Formalizar a próxima fatia pequena da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO`, usando SHACL, exemplos válidos/inválidos e consulta de competência, sem alterar runtime, Supabase, UI, migrations ou `ontology/core.ttl`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-valid.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `queries/competency/tests.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr view 53 --json number,state,mergedAt,mergeCommit,url`
+- `sed -n '360,418p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `sed -n '335,345p' src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- PR #53 foi mergeada em `main` com merge commit `1207d324e18173eb07adafbe1739d5c7abd22035`.
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 17 violações, incluindo os 2 novos casos de marcação pressão.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` e 24 constraints SPARQL.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.MARCACAO_PRESSAO`.
+- Ainda não converte a matriz TypeScript inteira em SHACL.
