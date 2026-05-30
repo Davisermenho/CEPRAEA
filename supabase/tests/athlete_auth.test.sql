@@ -17,7 +17,8 @@ insert into auth.users (
 );
 
 insert into public.profiles (id, name, email)
-values ('00000000-0000-0000-0000-000000000011', 'Athlete Auth Test', 'athlete1@cepraea.test');
+values ('00000000-0000-0000-0000-000000000011', 'Athlete Auth Test', 'athlete1@cepraea.test')
+on conflict (id) do update set name = excluded.name, email = excluded.email;
 
 insert into public.athletes (
   id, team_id, user_id, name, email, status
@@ -148,7 +149,8 @@ insert into auth.users (
 );
 
 insert into public.profiles (id, name, email)
-values ('00000000-0000-0000-0000-000000000022', 'Teammate Linking Test', 'teammate@cepraea.test');
+values ('00000000-0000-0000-0000-000000000022', 'Teammate Linking Test', 'teammate@cepraea.test')
+on conflict (id) do update set name = excluded.name, email = excluded.email;
 
 set local role authenticated;
 set local request.jwt.claim.sub   = '00000000-0000-0000-0000-000000000022';

@@ -28,7 +28,8 @@ values (
   '00000000-0000-0000-0000-000000000071',
   'AW Atleta',
   'aw_atleta@cepraea.test'
-);
+)
+on conflict (id) do update set name = excluded.name, email = excluded.email;
 
 insert into public.athletes (
   id, team_id, user_id, name, email, status
