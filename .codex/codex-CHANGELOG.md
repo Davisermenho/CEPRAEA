@@ -2875,3 +2875,24 @@ Criação da política normativa para coexistência entre dados históricos de S
 
 - `npm run check:ontology:semantics`
 - `git diff --check`
+
+### [CEPR-ONTOLOGIA-MVP-GATES-2026-05-29] — 2026-05-29 — Gates ontológicos no validate:mvp:v1
+
+#### ✨ Resumo
+
+Integração dos gates ontológicos ao gate final do MVP v1.0.
+
+#### 🛠️ Changed
+
+- `scripts/validate-mvp-v1.sh`
+  - adiciona `npm run check:ontology:semantics`.
+  - adiciona `npm run validate:ontology:formal`.
+  - adiciona `npm run check:ontology:runtime-alignment`.
+
+#### 🛡️ Evidências
+
+- `bash -n scripts/validate-mvp-v1.sh`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `git diff --check`

@@ -5580,3 +5580,50 @@ Criar a próxima fatia documental da fusão ontológica: `docs/ontologia/merge/p
 
 - Esta PR e documental. Ela nao implementa migracao, profile SHACL historico ou alteracao de runtime.
 - Migrations historicas futuras continuam bloqueadas ate haver dry-run, contagem de impacto e aprovacao humana explicita.
+
+## CEPR-ONTOLOGIA-MVP-GATES-2026-05-29 — Gates ontologicos no validate:mvp:v1
+
+### Escopo entendido
+
+Integrar os gates ontologicos ao `validate:mvp:v1`, mantendo escopo restrito a script/package e sem alterar Supabase, UI, runtime funcional, migrations, `ontology/`, `shacl/`, `examples/` ou `queries/`.
+
+### Arquivos alterados
+
+- `scripts/validate-mvp-v1.sh`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+
+### Comandos executados
+
+- `jq empty AGENTS.json`
+- `sed -n '1,180p' AGENTS.json`
+- `sed -n '1,120p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `rg -n "validate:mvp|validate-mvp|ontology|check:ontology|validate:ontology" package.json scripts .github -g '!node_modules'`
+- `sed -n '1,260p' scripts/validate-mvp-v1.sh`
+- `bash -n scripts/validate-mvp-v1.sh`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `git diff --check`
+
+### Resultado da validação
+
+- `package.json` ja expunha `check:ontology:semantics`, `validate:ontology:formal` e `check:ontology:runtime-alignment`; nao precisou ser alterado.
+- `scripts/validate-mvp-v1.sh` agora executa os tres gates ontologicos no gate final do MVP.
+- `bash -n scripts/validate-mvp-v1.sh` passou.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `npm run validate:ontology:formal` passou; datasets invalidos falharam como esperado.
+- `npm run check:ontology:runtime-alignment` passou no escopo minimo.
+- `git diff --check` passou.
+
+### Comando nao executado
+
+- `npm run validate:mvp:v1` nao foi executado nesta etapa porque inclui `supabase db reset`, testes E2E e suite completa. A validacao desta fatia cobriu a sintaxe do script e os gates ontologicos adicionados individualmente.
