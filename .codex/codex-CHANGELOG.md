@@ -2960,3 +2960,24 @@ Integração do `check:ontology:runtime-alignment` ao workflow obrigatório `ont
 - `git diff --check`
 - `actionlint .github/workflows/ontology-quality-gate.yml`
 - `python3`/PyYAML parse de `.github/workflows/ontology-quality-gate.yml`
+
+### [CEPR-ONTOLOGIA-FUSAO-ROADMAP-2026-05-30] — 2026-05-30 — Atualização do roadmap FUSAO
+
+#### ✨ Resumo
+
+Atualização do plano `FUSAO.md` para refletir o estado real após os merges dos gates ontológicos, política histórica e cobertura dos `forbiddenResults` auditados.
+
+#### 🛠️ Changed
+
+- `docs/ontologia/merge/FUSAO.md`
+  - registra status concluído das frentes já mergeadas.
+  - corrige o texto sobre o workflow formal e `validate:mvp:v1`.
+  - substitui a próxima ação obsoleta de política histórica por expansão incremental de SHACL contra a matriz TypeScript.
+  - define `DEF_POS.ACAO_DEFENSIVA.BLOQUEIO` como fatia técnica inicial recomendada.
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:runtime-alignment`
+- `rg "check:ontology:semantics|validate:ontology:formal|check:ontology:runtime-alignment" package.json scripts/validate-mvp-v1.sh .github/workflows/ontology-quality-gate.yml`
+- `npm run validate:ontology:formal`
+- `git diff --check`
