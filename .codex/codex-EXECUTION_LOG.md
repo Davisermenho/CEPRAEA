@@ -5627,3 +5627,58 @@ Integrar os gates ontologicos ao `validate:mvp:v1`, mantendo escopo restrito a s
 ### Comando nao executado
 
 - `npm run validate:mvp:v1` nao foi executado nesta etapa porque inclui `supabase db reset`, testes E2E e suite completa. A validacao desta fatia cobriu a sintaxe do script e os gates ontologicos adicionados individualmente.
+
+## CEPR-ONTOLOGIA-RUNTIME-SHACL-GATE-2026-05-30 — Gate runtime SHACL ampliado
+
+### Escopo entendido
+
+Expandir `scripts/check-ontology-runtime-alignment.mjs` para validar o alinhamento entre contratos vivos do Scout, matriz TypeScript, SHACL, exemplos e SPARQL no escopo auditado, sem alterar runtime funcional, Supabase, UI, migrations, `ontology/`, `shacl/`, `examples/` ou `queries/`.
+
+### Arquivos alterados
+
+- `scripts/check-ontology-runtime-alignment.mjs`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- ripgrep
+
+### Comandos executados
+
+- `jq empty AGENTS.json`
+- `sed -n '1,180p' AGENTS.json`
+- `sed -n '1,120p' CEPRAEA.md`
+- `gh pr list --state all --limit 3 --json number,title,state,mergedAt,headRefName,baseRefName,url`
+- `git show origin/main:docs/ontologia/merge/FUSAO.md | rg -n "Ação 6|PR 3|matriz TypeScript|forbiddenResult|SHACL \\+ exemplo|runtime ↔ ontologia|Nenhuma regra SHACL" -C 3`
+- `sed -n '1,260p' scripts/check-ontology-runtime-alignment.mjs`
+- `sed -n '1,720p' src/features/scout/domain/liveCollectionFlow.contract.ts`
+- `sed -n '1,340p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `sed -n '1,260p' shacl/core.shacl.ttl`
+- `cat queries/competency/tests.json`
+- `cat examples/golden/scout-audited-flows-valid.ttl`
+- `cat examples/golden/scout-audited-flows-invalid.ttl`
+- `cat queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `npm run check:ontology:runtime-alignment`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run check:ontology:runtime-alignment` passou e agora verifica 3 fluxos auditados contra matriz TypeScript, SHACL, datasets audited e CEPR-CQ-05.
+- `npm run validate:ontology:formal` passou; datasets invalidos falharam como esperado.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Pendências identificadas pelo novo gate
+
+O script reporta 6 pendências não bloqueantes de cobertura formal: `ERRO_PASSE`, `PASSE_INTERCEPTADO` e `RECUPERACAO_POSSE` ainda não possuem cobertura SHACL/dataset inválido nos fluxos auditados `AT_POS.ARREMESSO.ARREMESSO` e `AT_POS.ARREMESSO.FINALIZACAO_6M_FAV`.
+
+### Riscos restantes
+
+- Esta PR não altera SHACL nem datasets; as pendências de `forbiddenResults` devem ser resolvidas em fatia formal posterior.
+- O parser do gate é estático e intencionalmente restrito ao formato atual dos contratos TypeScript.
