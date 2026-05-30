@@ -3085,3 +3085,29 @@ Expansão incremental da cobertura formal da matriz TypeScript para o recorte `D
 - `npm run check:ontology:runtime-alignment`
 - `npm run check:ontology:semantics`
 - `git diff --check`
+
+### [CEPR-ONTOLOGIA-DEF-POS-INTERCEPTACAO-SHACL-2026-05-30] — 2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO
+
+#### ✨ Resumo
+
+Expansão incremental da cobertura formal da matriz TypeScript para o recorte `DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO`, incluindo a exceção `INTERCEPTACAO_MALSUCEDIDA`.
+
+#### 🛠️ Changed
+
+- `shacl/core.shacl.ttl`
+  - adiciona constraints para fase `DEF_POS`, bloqueio de `hasFinishType`, resultados base de interceptação e exceção `INTERCEPTACAO_MALSUCEDIDA` que permite `GOL`, `DEFENDIDO` e `NAO_OBSERVADO`.
+- `examples/golden/scout-audited-flows-valid.ttl`
+  - adiciona exemplos válidos de interceptação com `RECUPERACAO_POSSE` e `INTERCEPTACAO_MALSUCEDIDA + GOL`.
+- `examples/golden/scout-audited-flows-invalid.ttl`
+  - adiciona exemplos inválidos para `GOL` sem classificação malsucedida e `INTERCEPTACAO_MALSUCEDIDA + RECUPERACAO_POSSE`.
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+  - inclui os exemplos válidos de interceptação na consulta de competência do slice auditado.
+- `queries/competency/tests.json`
+  - atualiza o manifesto CEPR-CQ-05 para 16 linhas esperadas.
+
+#### 🛡️ Evidências
+
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
