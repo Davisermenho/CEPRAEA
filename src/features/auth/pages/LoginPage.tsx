@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { AuthLoginScreen } from '@/features/auth/components/AuthLoginScreen'
 import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
-
-function normalizeLoginError(message?: string) {
-  if (!message) return 'Não foi possível entrar. Verifique os dados informados.'
-  if (/invalid login credentials/i.test(message)) return 'Não foi possível entrar. Verifique os dados informados.'
-  return message
-}
+import { AUTH_MESSAGES, mapSupabaseLoginError } from '@/features/auth/lib/authVocabulary'
+import { normalizeEmail, InvalidEmailError } from '@/features/auth/lib/emailNormalization'
+import { redirectGuard } from '@/features/auth/lib/redirectGuard'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { authenticated, configured, loading: authLoading, signInWithPassword } = useSupabaseAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,18 +19,29 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (authenticated) navigate('/', { replace: true })
-  }, [authenticated, navigate])
+    if (authenticated) {
+      const target = redirectGuard(searchParams.get('returnUrl'))
+      navigate(target, { replace: true })
+    }
+  }, [authenticated, navigate, searchParams])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const normalizedEmail = email.trim().toLowerCase()
-    if (!normalizedEmail || !password) {
-      setError('Informe email e senha.')
+
+    let normalizedEmail: string
+    try {
+      normalizedEmail = normalizeEmail(email)
+    } catch (err) {
+      setError(err instanceof InvalidEmailError ? err.message : AUTH_MESSAGES['AUTH-LOGIN-001'])
+      return
+    }
+
+    if (!password) {
+      setError('Informe a senha.')
       return
     }
     if (!configured) {
-      setError('Supabase não está configurado neste ambiente.')
+      setError(AUTH_MESSAGES['AUTH-BOOT-001'])
       return
     }
 
@@ -40,11 +49,12 @@ export default function LoginPage() {
     setError('')
     const result = await signInWithPassword(normalizedEmail, password)
     if (!result.ok) {
-      setError(normalizeLoginError(result.error))
+      setError(mapSupabaseLoginError(result.error))
       setSubmitting(false)
       return
     }
-    navigate('/', { replace: true })
+    const target = redirectGuard(searchParams.get('returnUrl'))
+    navigate(target, { replace: true })
   }
 
   const disabled = submitting || authLoading || !configured
@@ -91,7 +101,7 @@ export default function LoginPage() {
 
         {!configured && (
           <div className="auth-login-status auth-login-status-error">
-            Supabase não está configurado neste ambiente.
+            {AUTH_MESSAGES['AUTH-BOOT-001']}
           </div>
         )}
 
