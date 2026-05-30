@@ -210,7 +210,7 @@ GROUP BY a.id, a.email, u.id HAVING count(u.id) = 1;
 
 ## §10. Política de senha
 
-> Status: PENDENTE (CEPR-AUTH-02E)
+> Status: IMPLEMENTADO (CEPR-AUTH-02E — `validatePasswordPolicy` + `hibpCheck` em `src/features/auth/lib/`; aplicados em `AtletaLoginPage` e `AtletaNovaSenhaPage`; `WeakPasswordError` redireciona para `/atleta/nova-senha?reason=WEAK-PASSWORD`)
 
 ### §10.1 Requisitos normativos
 
@@ -241,7 +241,7 @@ Se Supabase emitir `WeakPasswordError` ao logar usuário com senha < 10 chars (l
 
 ## §11. Rate limiting e lockout
 
-> Status: PENDENTE (CEPR-AUTH-02E)
+> Status: PARCIAL (CEPR-AUTH-02E — lockout 30s e mensagem 429 implementados em `AtletaLoginPage`; `supabase/config.toml` `[auth.rate_limit]` deferido para follow-up junto com rotação de senhas)
 
 ### §11.1 Valores normativos
 
@@ -268,7 +268,7 @@ Lockout por conta **NÃO** será implementado em v2.0 (decisão: rate limit por 
 
 ## §12. CAPTCHA / bot defense
 
-> Status: PENDENTE (CEPR-AUTH-02E)
+> Status: PARCIAL (CEPR-AUTH-02E — `TurnstileWidget` implementado em `AtletaLoginPage`; captcha gate em `LoginPage` coach e bloco `[auth.captcha]` em `supabase/config.toml` deferidos para follow-up — aguardam `VITE_TURNSTILE_SITE_KEY` no Vercel)
 
 ### §12.1 Provider
 
@@ -351,7 +351,7 @@ Cookie HttpOnly via BFF é roadmap §25 (não bloqueia v2.0).
 
 ## §15. Headers de segurança HTTP
 
-> Status: PENDENTE (CEPR-AUTH-02D)
+> Status: IMPLEMENTADO (CEPR-AUTH-02D — 6 headers em `vercel.json`; `navigateFallbackDenylist` em `vite.config.ts`; `scripts/check-headers.sh` criado)
 
 ### §15.1 Headers obrigatórios
 
@@ -493,7 +493,7 @@ Tabela `auth_events`:
 
 ## §20. Configuração obrigatória `supabase/config.toml`
 
-> Status: PENDENTE (CEPR-AUTH-02E)
+> Status: PARCIAL (CEPR-AUTH-02E — `scripts/verify-supabase-config.ts` criado e verde; `jwt_expiry` e refresh tokens aplicados; `[auth] minimum_password_length`, `password_requirements`, `[auth.email]`, `[auth.rate_limit]`, `[auth.captcha]` deferidos para follow-up — aguardam rotação de senhas e provisionamento Turnstile)
 
 ### §20.1 Checklist mínimo
 
@@ -534,7 +534,7 @@ Script `scripts/verify-supabase-config.ts` **SHALL** validar valores acima e fal
 
 ## §21. Threat model
 
-> Status: PENDENTE (CEPR-AUTH-02A — este sub-PR)
+> Status: IMPLEMENTADO (CEPR-AUTH-02A — [THREAT_MODEL.md](./THREAT_MODEL.md) publicado)
 
 O contrato delega o threat model STRIDE × controles ao documento [THREAT_MODEL.md](./THREAT_MODEL.md). Toda ameaça catalogada **SHALL** ter ≥ 1 controle mapeado nesta versão 2.0 ou em sub-PR rastreável.
 
@@ -550,15 +550,15 @@ O contrato delega o threat model STRIDE × controles ao documento [THREAT_MODEL.
 - **Pendente** — escopado para sub-PR específico, ainda não iniciado.
 - **Roadmap** — fora de CEPR-AUTH-02; vai para CEPR-AUTH-03 ou backlog.
 
-| # | Gap | Severidade | Status (2026-05-29) | Sub-PR alvo | Cláusula |
+| # | Gap | Severidade | Status (2026-05-30) | Sub-PR alvo | Cláusula |
 |---|---|---|---|---|---|
 | G1 | Política de senha (≥ 10 chars + composição + HIBP) | CRÍTICO | **Implementado** | CEPR-AUTH-02E | §10 |
 | G2 | MFA (TOTP/WebAuthn) | ALTO | **Roadmap** | CEPR-AUTH-03 | §25 (roadmap) |
-| G3 | Rate limiting/lockout explícito | ALTO | **Parcial** | CEPR-AUTH-02E | §11 |
-| G4 | CAPTCHA (Turnstile) | ALTO | **Pendente** | CEPR-AUTH-02E | §12 |
+| G3 | Rate limiting/lockout explícito | ALTO | **Parcial** (CEPR-AUTH-02E — lockout 30s + msg 429 em `AtletaLoginPage`; `config.toml` `[auth.rate_limit]` deferido) | CEPR-AUTH-02E+ | §11 |
+| G4 | CAPTCHA (Turnstile) | ALTO | **Parcial** (CEPR-AUTH-02E — `TurnstileWidget` em `AtletaLoginPage`; coach login e `config.toml` `[auth.captcha]` deferidos) | CEPR-AUTH-02E+ | §12 |
 | G5 | Vocabulário anti-enumeração | ALTO | **Implementado** | CEPR-AUTH-02C | §13 |
 | G6 | localStorage sem CSP compensatório | ALTO | **Parcial** (decisão documentada §14; CSP Report-Only em 02D, enforcement em 02F+) | CEPR-AUTH-02D + 02F+ | §14, §15 |
-| G7 | Headers de segurança HTTP | ALTO | **Pendente** | CEPR-AUTH-02D | §15 |
+| G7 | Headers de segurança HTTP | ALTO | **Implementado** (CEPR-AUTH-02D — 6 headers em `vercel.json`) | CEPR-AUTH-02D | §15 |
 | G8 | Lifecycle de sessão (idle/absolute timeout) | MÉDIO | **Pendente** | CEPR-AUTH-02F+ | §14.4 |
 | G9 | Reauth para ação sensível | ALTO | **Pendente** | CEPR-AUTH-02F+ | §16 |
 | G10 | Normalização de email centralizada | MÉDIO | **Implementado** | CEPR-AUTH-02C | §17 |
@@ -569,21 +569,21 @@ O contrato delega o threat model STRIDE × controles ao documento [THREAT_MODEL.
 | G15 | Threat model STRIDE | MÉDIO | **Implementado** (este sub-PR) | CEPR-AUTH-02A | §21, [THREAT_MODEL.md](./THREAT_MODEL.md) |
 | G16 | Matriz de testes + SLO de auth | MÉDIO | **Parcial** (matriz documentada nesta v2.0; SLO em 02F+) | CEPR-AUTH-02A + 02F+ | §22.1 |
 | G17 | Hardening de convites (revoked_at, expiração) | BAIXO-MÉDIO | **Parcial** (contrato em §17 v1; cron/RPC pendentes) | CEPR-AUTH-02F+ | (Edge Function `expire-invites`) |
-| FAIL-FAST | `src/lib/supabase.ts` aceita env ausente com `?? ''` | CRÍTICO | **Pendente** | CEPR-AUTH-02B | §13 (`AUTH-BOOT-001`) |
+| FAIL-FAST | `src/lib/supabase.ts` aceita env ausente com `?? ''` | CRÍTICO | **Implementado** (CEPR-AUTH-02B — Proxy + lazy init lança `AUTH-BOOT-001`) | CEPR-AUTH-02B | §13 (`AUTH-BOOT-001`) |
 
 ### §22.1 Matriz de testes (mínima v2.0)
 
 | Camada | Teste | Sub-PR | Estado |
 |---|---|---|---|
-| Unit | Fail-fast de `supabase.ts` sem env | 02B | Pendente |
-| Unit | `normalizeEmail()` (RFC, edge cases) | 02C | Pendente |
-| Unit | `redirectGuard()` (whitelist, javascript:, evil.com) | 02C | Pendente |
+| Unit | Fail-fast de `supabase.ts` sem env | 02B | **Implementado** |
+| Unit | `normalizeEmail()` (RFC, edge cases) | 02C | **Implementado** |
+| Unit | `redirectGuard()` (whitelist, javascript:, evil.com) | 02C | **Implementado** |
 | Unit | `hibpCheck()` (mock fetch, sufixo match/no-match) | 02E | Implementado |
-| E2E | Anti-enumeração (login/signup/reset com paridade ±200 ms) | 02C | Pendente |
-| E2E | Redirect guard | 02C | Pendente |
-| E2E | Password policy (< 10 chars rejeitada; HIBP-leaked rejeitada) | 02E | Pendente |
-| E2E (manual) | Headers presentes em Preview (`scripts/check-headers.sh`) | 02D | Pendente |
-| E2E (manual) | CAPTCHA Turnstile dispara após N falhas | 02E | Pendente |
+| E2E | Anti-enumeração (login/signup/reset com paridade ±200 ms) | 02C | **Implementado** (`e2e/auth/anti-enumeration.spec.ts`) |
+| E2E | Redirect guard | 02C | **Implementado** (`e2e/auth/redirect-guard.spec.ts`) |
+| E2E | Password policy (< 10 chars rejeitada; HIBP-leaked rejeitada) | 02E | **Implementado** (`e2e/athlete/auth-hardening.spec.ts`) |
+| E2E (manual) | Headers presentes em Preview (`scripts/check-headers.sh`) | 02D | **Parcial** (headers aplicados em `vercel.json`; `scripts/check-headers.sh` criado; execução manual em URL de produção pendente) |
+| E2E (manual) | CAPTCHA Turnstile dispara após N falhas | 02E | **Parcial** (`TurnstileWidget` na área atleta; coach login deferido) |
 | Script | `scripts/verify-supabase-config.ts` valida `config.toml` | 02E | Implementado |
 | Script | `scripts/test-rate-limit.ts` recebe ≥ 1 status 429 | 02E | Pendente |
 
