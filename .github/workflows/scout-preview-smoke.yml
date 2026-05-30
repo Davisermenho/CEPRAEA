@@ -151,9 +151,10 @@ jobs:
           preview_url=""
           for attempt in $(seq 1 20); do
             summary="$(
-              gh api "repos/$GITHUB_REPOSITORY/commits/$PR_HEAD_SHA/check-runs" \
-                | jq -r '.check_runs[] | select(.name == "Vercel Preview Comments") | (.output.summary // "")' \
-                | head -n 1
+              curl -s -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$PR_HEAD_SHA/check-runs" \
+                | python3 -c "import sys,json;runs=json.load(sys.stdin).get('check_runs',[]); r=next((x for x in runs if x.get('name')=='Vercel Preview Comments'),None); print(((r or {}).get('output') or {}).get('summary') or '')"
             )"
 
             preview_host="$(
