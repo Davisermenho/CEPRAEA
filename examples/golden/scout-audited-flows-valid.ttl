@@ -1,8 +1,11 @@
 @prefix cepr: <https://cepraea.app/ontology#> .
 
 cepr:AT_POS a cepr:ScoutPhase .
+cepr:DEF_POS a cepr:ScoutPhase .
 cepr:TRANS_OF a cepr:ScoutPhase .
 
+cepr:result_bloqueado a cepr:ScoutFactualResult .
+cepr:result_recuperacao_posse a cepr:ScoutFactualResult .
 cepr:result_gol a cepr:ScoutFactualResult .
 cepr:result_defendido a cepr:ScoutFactualResult .
 cepr:result_passivo a cepr:ScoutFactualResult .
@@ -13,6 +16,8 @@ cepr:finish_6m a cepr:ScoutFinishType .
 
 cepr:flow_at_pos_arremesso_arremesso a cepr:ScoutFlowContract .
 cepr:flow_at_pos_arremesso_finalizacao_6m_fav a cepr:ScoutFlowContract .
+cepr:flow_def_pos_acao_defensiva_bloqueio a cepr:ScoutFlowContract ;
+  cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.BLOQUEIO" .
 cepr:flow_trans_of_arremesso_arremesso a cepr:ScoutFlowContract .
 
 cepr:audited_entry_at_pos_spin_goal a cepr:ScoutLiveEntry ;
@@ -48,3 +53,13 @@ cepr:audited_entry_trans_of_passivo a cepr:ScoutLiveEntry ;
   cepr:hasScoutPhase cepr:TRANS_OF ;
   cepr:hasFactualResult cepr:result_passivo ;
   cepr:hasFlowContract cepr:flow_trans_of_arremesso_arremesso .
+
+cepr:audited_entry_def_pos_bloqueio_bloqueado a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:DEF_POS ;
+  cepr:hasFactualResult cepr:result_bloqueado ;
+  cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_bloqueio .
+
+cepr:audited_entry_def_pos_bloqueio_recuperacao_posse a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:DEF_POS ;
+  cepr:hasFactualResult cepr:result_recuperacao_posse ;
+  cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_bloqueio .

@@ -2981,3 +2981,29 @@ Atualização do plano `FUSAO.md` para refletir o estado real após os merges do
 - `rg "check:ontology:semantics|validate:ontology:formal|check:ontology:runtime-alignment" package.json scripts/validate-mvp-v1.sh .github/workflows/ontology-quality-gate.yml`
 - `npm run validate:ontology:formal`
 - `git diff --check`
+
+### [CEPR-ONTOLOGIA-DEF-POS-BLOQUEIO-SHACL-2026-05-30] — 2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.BLOQUEIO
+
+#### ✨ Resumo
+
+Expansão incremental da cobertura formal da matriz TypeScript para o recorte `DEF_POS.ACAO_DEFENSIVA.BLOQUEIO`.
+
+#### 🛠️ Changed
+
+- `shacl/core.shacl.ttl`
+  - adiciona constraints para fase `DEF_POS`, ausência de `hasFinishType` manual e conjunto fechado de resultados permitidos no fluxo de bloqueio defensivo.
+- `examples/golden/scout-audited-flows-valid.ttl`
+  - adiciona exemplos válidos de bloqueio com `BLOQUEADO` e `RECUPERACAO_POSSE`.
+- `examples/golden/scout-audited-flows-invalid.ttl`
+  - adiciona exemplos inválidos para tipo de finalização manual e resultado `DEFENDIDO` no bloqueio defensivo.
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+  - inclui os exemplos válidos de bloqueio defensivo na consulta de competência do slice auditado.
+- `queries/competency/tests.json`
+  - atualiza o manifesto CEPR-CQ-05 para 8 linhas esperadas.
+
+#### 🛡️ Evidências
+
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`

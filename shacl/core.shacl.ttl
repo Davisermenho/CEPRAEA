@@ -218,4 +218,47 @@ cepr:ScoutLiveEntryShape a sh:NodeShape ;
         FILTER NOT EXISTS { $this cepr:hasFinishType ?finishType }
       }
     """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.BLOQUEIO deve usar fase DEF_POS."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_bloqueio ;
+              cepr:hasScoutPhase ?phase .
+        FILTER(?phase != cepr:DEF_POS)
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.BLOQUEIO nao deve carregar tipo de finalizacao manual; o tipo adversario e derivado da classificacao."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_bloqueio ;
+              cepr:hasFinishType ?finishType .
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.BLOQUEIO aceita apenas BLOQUEADO, RECUPERACAO_POSSE, FALTA_ATAQUE, GOL, VIOLACAO, TIRO_6M_CONCEDIDO ou NAO_OBSERVADO como resultado factual."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_bloqueio ;
+              cepr:hasFactualResult ?result .
+        FILTER(?result NOT IN (
+          cepr:result_bloqueado,
+          cepr:result_recuperacao_posse,
+          cepr:result_falta_ataque,
+          cepr:result_gol,
+          cepr:result_violacao,
+          cepr:result_tiro_6m_concedido,
+          cepr:result_nao_observado
+        ))
+      }
+    """ ;
   ] .
