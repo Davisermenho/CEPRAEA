@@ -30,6 +30,21 @@ site_url = "http://localhost:5173"
 additional_redirect_urls = ["http://localhost:5173"]
 jwt_expiry = 3600
 enable_signup = true
+minimum_password_length = 10
+password_requirements = "lower_upper_letters_digits"
+
+[auth.captcha]
+# CEPR-AUTH-02E: Cloudflare Turnstile (managed mode).
+# Secret abaixo é a chave de teste pública da Cloudflare — sempre válida em dev/preview.
+# Em produção, configurar no dashboard Supabase: Auth > Settings > Captcha.
+enabled = true
+provider = "turnstile"
+secret = "1x0000000000000000000000000000000AA"
+
+[auth.rate_limit]
+email_sent = 2
+token_refresh = 150
+verify = 30
 
 [edge_runtime]
 enabled = false

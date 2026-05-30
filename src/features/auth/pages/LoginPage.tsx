@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { AuthLoginScreen } from '@/features/auth/components/AuthLoginScreen'
+import { TurnstileWidget } from '@/features/auth/components/TurnstileWidget'
+import type { TurnstileWidgetHandle } from '@/features/auth/components/TurnstileWidget'
 import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
 import { AUTH_MESSAGES, mapSupabaseLoginError } from '@/features/auth/lib/authVocabulary'
 import { normalizeEmail, InvalidEmailError } from '@/features/auth/lib/emailNormalization'
@@ -17,6 +19,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null)
 
   useEffect(() => {
     if (authenticated) {
@@ -47,8 +51,10 @@ export default function LoginPage() {
 
     setSubmitting(true)
     setError('')
-    const result = await signInWithPassword(normalizedEmail, password)
+    const result = await signInWithPassword(normalizedEmail, password, captchaToken)
     if (!result.ok) {
+      turnstileRef.current?.reset()
+      setCaptchaToken(null)
       setError(mapSupabaseLoginError(result.error))
       setSubmitting(false)
       return
@@ -57,7 +63,7 @@ export default function LoginPage() {
     navigate(target, { replace: true })
   }
 
-  const disabled = submitting || authLoading || !configured
+  const disabled = submitting || authLoading || !configured || !captchaToken
 
   return (
     <AuthLoginScreen
@@ -98,6 +104,14 @@ export default function LoginPage() {
             </button>
           </div>
         </div>
+
+        <TurnstileWidget
+          ref={turnstileRef}
+          onToken={setCaptchaToken}
+          onExpired={() => setCaptchaToken(null)}
+          onError={() => setCaptchaToken(null)}
+          className="auth-login-captcha"
+        />
 
         {!configured && (
           <div className="auth-login-status auth-login-status-error">
