@@ -49,11 +49,8 @@ sign_in_sign_ups = 30
 token_refresh = 150
 token_verifications = 30
 
-# [auth.captcha] — habilitar server-side enforcement em PR de follow-up
+# CEPR-AUTH-02E §12: bloco [auth.captcha] será adicionado em PR de follow-up
 # após configurar TURNSTILE_SECRET_KEY como env do projeto Supabase.
-# enabled = true
-# provider = "turnstile"
-# secret = "env(TURNSTILE_SECRET_KEY)"
 
 [edge_runtime]
 enabled = false
