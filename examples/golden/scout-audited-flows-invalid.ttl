@@ -20,6 +20,8 @@ cepr:flow_at_pos_arremesso_arremesso a cepr:ScoutFlowContract .
 cepr:flow_at_pos_arremesso_finalizacao_6m_fav a cepr:ScoutFlowContract .
 cepr:flow_def_pos_acao_defensiva_bloqueio a cepr:ScoutFlowContract ;
   cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.BLOQUEIO" .
+cepr:flow_def_pos_acao_defensiva_interceptacao a cepr:ScoutFlowContract ;
+  cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO" .
 cepr:flow_def_pos_acao_defensiva_cobertura a cepr:ScoutFlowContract ;
   cepr:runtimeCode "DEF_POS.ACAO_DEFENSIVA.COBERTURA" .
 cepr:flow_def_pos_acao_defensiva_marcacao_pressao a cepr:ScoutFlowContract ;
@@ -97,6 +99,17 @@ cepr:audited_entry_def_pos_bloqueio_defendido_result_invalid a cepr:ScoutLiveEnt
   cepr:hasScoutPhase cepr:DEF_POS ;
   cepr:hasFactualResult cepr:result_defendido ;
   cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_bloqueio .
+
+cepr:audited_entry_def_pos_interceptacao_gol_without_malsucedida_invalid a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:DEF_POS ;
+  cepr:hasFactualResult cepr:result_gol ;
+  cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_interceptacao .
+
+cepr:audited_entry_def_pos_interceptacao_malsucedida_recuperacao_invalid a cepr:ScoutLiveEntry ;
+  cepr:hasScoutPhase cepr:DEF_POS ;
+  cepr:classificationCode "INTERCEPTACAO_MALSUCEDIDA" ;
+  cepr:hasFactualResult cepr:result_recuperacao_posse ;
+  cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_interceptacao .
 
 cepr:audited_entry_def_pos_cobertura_goal_missing_finish_invalid a cepr:ScoutLiveEntry ;
   cepr:hasScoutPhase cepr:DEF_POS ;

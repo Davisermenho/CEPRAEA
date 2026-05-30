@@ -19,6 +19,8 @@ WHERE {
     cepr:audited_entry_trans_of_passivo,
     cepr:audited_entry_def_pos_bloqueio_bloqueado,
     cepr:audited_entry_def_pos_bloqueio_recuperacao_posse,
+    cepr:audited_entry_def_pos_interceptacao_recuperacao_posse,
+    cepr:audited_entry_def_pos_interceptacao_malsucedida_gol,
     cepr:audited_entry_def_pos_cobertura_gol_aerea,
     cepr:audited_entry_def_pos_cobertura_recuperacao_posse,
     cepr:audited_entry_def_pos_marcacao_pressao_gol_giro,

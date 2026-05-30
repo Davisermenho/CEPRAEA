@@ -6018,3 +6018,53 @@ Formalizar a próxima fatia pequena da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA
 
 - Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.RECOMPOSICAO`.
 - Ainda não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-DEF-POS-INTERCEPTACAO-SHACL-2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO
+
+### Escopo entendido
+
+Formalizar a próxima fatia da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO`, incluindo a exceção `INTERCEPTACAO_MALSUCEDIDA`, sem alterar runtime, Supabase, UI, migrations ou `ontology/core.ttl`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-valid.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `queries/competency/tests.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr view 55 --json number,state,mergedAt,mergeCommit,url`
+- `sed -n '320,350p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `sed -n '135,146p' src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+- `sed -n '279,291p' src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- PR #55 foi mergeada em `main` com merge commit `f3fda0a8c7b765e5041c739f0a8e89980cd4a2fd`.
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 22 violações, incluindo os novos casos de interceptação.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` e 34 constraints SPARQL.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO`.
+- Usa `cepr:classificationCode` literal nos exemplos/SHACL para representar a exceção `INTERCEPTACAO_MALSUCEDIDA`; a formalização canônica desse predicado pode ser refinada em uma PR futura de vocabulário.
+- Ainda não converte a matriz TypeScript inteira em SHACL.

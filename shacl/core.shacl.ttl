@@ -468,4 +468,76 @@ cepr:ScoutLiveEntryShape a sh:NodeShape ;
         FILTER(?result != cepr:result_gol)
       }
     """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO deve usar fase DEF_POS."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_interceptacao ;
+              cepr:hasScoutPhase ?phase .
+        FILTER(?phase != cepr:DEF_POS)
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO nao deve carregar tipo de finalizacao."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_interceptacao ;
+              cepr:hasFinishType ?finishType .
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO aceita GOL ou DEFENDIDO apenas com classificacao INTERCEPTACAO_MALSUCEDIDA."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_interceptacao ;
+              cepr:hasFactualResult ?result .
+        FILTER(?result IN (cepr:result_gol, cepr:result_defendido))
+        FILTER NOT EXISTS { $this cepr:classificationCode "INTERCEPTACAO_MALSUCEDIDA" }
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO sem classificacao malsucedida aceita apenas RECUPERACAO_POSSE, FALTA_ATAQUE, DEFESA_ESTABILIZADA, VIOLACAO ou NAO_OBSERVADO."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_interceptacao ;
+              cepr:hasFactualResult ?result .
+        FILTER NOT EXISTS { $this cepr:classificationCode "INTERCEPTACAO_MALSUCEDIDA" }
+        FILTER(?result NOT IN (
+          cepr:result_recuperacao_posse,
+          cepr:result_falta_ataque,
+          cepr:result_defesa_estabilizada,
+          cepr:result_violacao,
+          cepr:result_nao_observado
+        ))
+      }
+    """ ;
+  ] ;
+  sh:sparql [
+    sh:message "DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO malsucedida aceita apenas GOL, DEFENDIDO ou NAO_OBSERVADO."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasFlowContract cepr:flow_def_pos_acao_defensiva_interceptacao ;
+              cepr:classificationCode "INTERCEPTACAO_MALSUCEDIDA" ;
+              cepr:hasFactualResult ?result .
+        FILTER(?result NOT IN (
+          cepr:result_gol,
+          cepr:result_defendido,
+          cepr:result_nao_observado
+        ))
+      }
+    """ ;
   ] .
