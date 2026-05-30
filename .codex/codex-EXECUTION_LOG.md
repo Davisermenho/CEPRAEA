@@ -6068,3 +6068,94 @@ Formalizar a próxima fatia da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA.INTERCE
 - Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.INTERCEPTACAO`.
 - Usa `cepr:classificationCode` literal nos exemplos/SHACL para representar a exceção `INTERCEPTACAO_MALSUCEDIDA`; a formalização canônica desse predicado pode ser refinada em uma PR futura de vocabulário.
 - Ainda não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-DEF-POS-ROUBO-SHACL-2026-05-30 — SHACL para DEF_POS.ACAO_DEFENSIVA.ROUBO
+
+### Escopo entendido
+
+Formalizar a próxima fatia da matriz defensiva: `DEF_POS.ACAO_DEFENSIVA.ROUBO`, sem alterar runtime, Supabase, UI, migrations ou `ontology/core.ttl`.
+
+### Arquivos alterados
+
+- `shacl/core.shacl.ttl`
+- `examples/golden/scout-audited-flows-valid.ttl`
+- `examples/golden/scout-audited-flows-invalid.ttl`
+- `queries/competency/q05_audited_scout_flow_shacl_slice.rq`
+- `queries/competency/tests.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr view 56 --json number,state,mergedAt,mergeCommit,url`
+- `sed -n '340,365p' src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `sed -n '135,146p' src/features/scout/domain/liveCollectionCompatibility.matrix.test.ts`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+
+### Resultado da validação
+
+- PR #56 foi mergeada em `main` com merge commit `8e04b1a7201b54b3f4743adc8a1cca060e43aa6f`.
+- `npm run validate:ontology:formal` passou; `scout-audited-flows-invalid.ttl` falhou como esperado com 24 violações, incluindo os novos casos de roubo.
+- `npm run check:ontology:runtime-alignment` passou com `Pendências de cobertura formal: 0` e 37 constraints SPARQL.
+- `npm run check:ontology:semantics` passou sem erros e sem avisos.
+- `git diff --check` passou.
+
+### Riscos restantes
+
+- Esta PR cobre apenas `DEF_POS.ACAO_DEFENSIVA.ROUBO`.
+- Ainda não converte a matriz TypeScript inteira em SHACL.
+
+## CEPR-ONTOLOGIA-DEF-POS-ROUBO-SHACL-PR57-UPDATE-2026-05-30 — Atualização da PR #57 com main
+
+### Escopo entendido
+
+Resolver as pendências operacionais da PR #57: retirar o estado `BEHIND`, preservar a cobertura SHACL de `DEF_POS.ACAO_DEFENSIVA.ROUBO`, revalidar os gates ontológicos e preparar a PR para sair de draft, sem mergear sem autorização explícita.
+
+### Arquivos alterados
+
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr list --state all --limit 5 --json number,title,state,mergedAt,headRefName,baseRefName,isDraft`
+- `git status --short --branch`
+- `git fetch origin main`
+- `git merge origin/main`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:semantics`
+- `git diff --check`
+- `gh pr ready 57`
+- `gh pr checks 57 --watch`
+
+### Resultado da validação
+
+- A branch da PR #57 foi atualizada com `origin/main` sem conflitos.
+- Validações locais executadas após a sincronização com `main`.
+- Checks remotos serão reavaliados após push da branch atualizada.
+
+### Riscos restantes
+
+- Merge da PR #57 continua dependendo de autorização explícita após os checks remotos passarem.

@@ -21,6 +21,8 @@ WHERE {
     cepr:audited_entry_def_pos_bloqueio_recuperacao_posse,
     cepr:audited_entry_def_pos_interceptacao_recuperacao_posse,
     cepr:audited_entry_def_pos_interceptacao_malsucedida_gol,
+    cepr:audited_entry_def_pos_roubo_recuperacao_posse,
+    cepr:audited_entry_def_pos_roubo_defesa_estabilizada,
     cepr:audited_entry_def_pos_cobertura_gol_aerea,
     cepr:audited_entry_def_pos_cobertura_recuperacao_posse,
     cepr:audited_entry_def_pos_marcacao_pressao_gol_giro,
