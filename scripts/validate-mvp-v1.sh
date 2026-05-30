@@ -23,6 +23,9 @@ echo "  CEPRAEA — Validação Final MVP v1.0"
 echo "========================================"
 
 run "typecheck"              npm run typecheck
+run "check:ontology:semantics" npm run check:ontology:semantics
+run "validate:ontology:formal" npm run validate:ontology:formal
+run "check:ontology:runtime-alignment" npm run check:ontology:runtime-alignment
 run "unit tests"             npm test
 run "build"                  npm run build
 run "deps:check"             npm run deps:check
