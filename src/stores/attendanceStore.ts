@@ -87,7 +87,6 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
   },
 
   loadForTraining: async (treinoId) => {
-    const teamId = assertSupabaseTeamId()
     const { data, error } = await supabase
       .from('attendance_records')
       .select('id, training_id, athlete_id, status, justification, confirmed_by_athlete, created_at, updated_at')

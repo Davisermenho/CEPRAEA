@@ -19,11 +19,24 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-24 - 22:24 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-31 - 16:23 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
 
+
+## Entrada Rápida — 2026-05-31 16:23 BRT — CEPR-DEADCODE-RESILVER-01
+
+- **Objetivo:** separar a trilha técnica `deadcode` em PR dedicada para revisão/merge controlado, isolando somente remoções de código não utilizado.
+- **Mudanças de código/processo:**
+  - remoção de tipo não utilizado no smoke de preview do Scout (`e2e/scout/scout-preview-smoke.spec.ts`);
+  - remoção de variável/import/tipo não utilizados em Scout (`EventFormV2.tsx`, `ScoutFeedbackPage.tsx`, `scoutApi.ts`);
+  - limpeza de imports não usados em Settings/Training (`CoachInvitesPage.tsx`, `TrainingDetailPage.tsx`);
+  - remoção de variável morta no store de presença (`attendanceStore.ts`).
+- **Evidências objetivas:**
+  - `git diff --stat -- <arquivos deadcode>` → `7 files changed, 2 insertions(+), 41 deletions(-)`;
+  - `npm run typecheck` ✅;
+  - `npm run build` ✅.
 
 ## Entrada Rápida — 2026-05-24 22:24 BRT — CEPR-ONTOLOGIA-LATEST-TRENDS-ATTACK-TRIAGEM-E-UPDATE-2026-05-24
 

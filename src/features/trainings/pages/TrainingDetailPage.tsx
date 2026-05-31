@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronLeft, CheckCircle2, MessageCircle, Copy,
-  UserCheck, Wifi, Shield, Link2, Ban,
+  UserCheck, Wifi, Link2, Ban,
 } from 'lucide-react'
 import { useTrainingStore } from '@/stores/trainingStore'
 import { useAthleteStore } from '@/stores/athleteStore'
