@@ -34,9 +34,12 @@
 | ✅ | ✅ | ausente | ausente | `/onboarding/equipe` | Criar time próprio (vira `owner`) |
 | ✅ | ✅ | ausente | ausente | `/aceitar-convite/:id` | Aceitar convite de coach/viewer |
 | ✅ | ✅ | ausente | ✅ | `/atleta/*` | Acesso à área de atleta |
-| ✅ | ✅ | ausente | ausente | qualquer rota do guard | → redirect `/onboarding/equipe` |
+| ✅ | ✅ | ausente | ausente | qualquer rota do guard | → redirect `/onboarding/equipe` (sem `user_metadata.role=athlete`) |
+| ✅ | ✅ | ausente | ausente ¹ | qualquer rota do guard | → redirect `/atleta/treinos` (`user_metadata.role=athlete`) |
 | ✅ | ✅ | ausente | ausente | qualquer rota do guard (sem env TEAM_ID) | Tela "Sem acesso" |
 | ❌ | — | — | — | qualquer rota do guard | → redirect `/login` |
+
+> ¹ `AthleteRecord` pode estar `ausente` no momento do redirect: `ensure_athlete_link()` cria o vínculo na chegada em `/atleta/treinos` via `AtletaGuard`.
 
 ---
 
@@ -102,9 +105,12 @@ A persistência e RPCs de papel esportivo (ex.: tabela `athlete_sport_roles`, RP
 ```
 Registro → Profile criado (trigger) → Login →
   get_my_access() retorna memberships=[] e athleteLink=null →
-  AppAccessGuard redireciona → /onboarding/equipe
+  AppAccessGuard verifica user_metadata.role:
+    SE role === 'athlete' → /atleta/treinos (AtletaGuard resolve ensure_athlete_link())
+    SENÃO               → /onboarding/equipe
 ```
 
+> **Nota (PR #69):** A verificação de metadata foi adicionada ao `AppAccessGuard` para evitar que atletas recém-confirmadas sejam redirecionadas para onboarding de equipe. O caminho `/onboarding/equipe` aplica-se apenas a usuários sem metadata de atleta.
 ### 4.2 Owner (cria time)
 ```
 /onboarding/equipe → bootstrap_owner(name, slug) →
@@ -122,12 +128,15 @@ Link /aceitar-convite/:id → accept_coach_invite(id) →
 
 ### 4.4 Atleta pré-cadastrado
 ```
-Registro com mesmo email → handle_new_user cria Profile →
-  ensure_athlete_link() vincula athletes.user_id →
+Registro com emailRedirectTo=${origin}/atleta/treinos →
+  handle_new_user cria Profile →
+  Atleta confirma email → link redireciona para /atleta/treinos →
+  AtletaGuard chama ensure_athlete_link() → vincula athletes.user_id →
   athleteLink disponível em get_my_access() →
   /atleta/* acessível via AtletaGuard
 ```
 
+> **Nota (PR #69):** O `signUp()` agora inclui `emailRedirectTo` apontando para `/atleta/treinos`. Caso a atleta acesse a área técnica antes de clicar no link (ou ao fazer login diretamente), o `AppAccessGuard` detecta `user_metadata.role === 'athlete'` e redireciona para `/atleta/treinos` em vez de `/onboarding/equipe`.
 ---
 
 ## 5. Decisão explícita sobre `viewer` no MVP
