@@ -1,13 +1,50 @@
 # GitHub Copilot Instructions — CEPRAEA
 
-Follow the root AGENTS.md as the source of truth.
+Fonte de verdade operacional: `AGENTS.md` (loader) + `AGENTS.json` (contrato).
 
-Critical rules:
+## Regras obrigatórias
 
-- Work from WSL/Linux paths only.
-- Do not use Windows paths.
-- Use terminal commands from the repository root.
-- Choose tools automatically according to AGENTS.md.
-- Always report validation commands and results.
-- Do not declare a task done without validation.
-- For PR work, validate the Vercel Preview before saying the PR is ready.
+- Ler `AGENTS.json` antes de executar qualquer ação.
+- Ler `CEPRAEA.md` antes de atuar no projeto.
+- Verificar os 3 PRs mais recentes para contexto.
+- Usar apenas caminhos Linux (`/home/...`).
+- Nunca usar caminhos Windows (`C:\\Users\\...`).
+- Não declarar conclusão apenas por alteração de código.
+
+## Evidência mínima obrigatória
+
+Toda entrega deve conter:
+
+1. escopo entendido;
+2. arquivos alterados;
+3. ferramentas usadas;
+4. comandos executados;
+5. resultado dos comandos;
+6. status de PR/Preview (quando aplicável);
+7. riscos pendentes.
+
+## Gates técnicos mínimos
+
+Conforme escopo da mudança:
+
+- Código local: `npm run typecheck`, `npm test`, `npm run build`.
+- UI/fluxo visual: adicionar `npm run test:e2e`.
+- Supabase/schema/RLS: `supabase db reset`, `npm run test:supabase`, `npm run typecheck`, `npm run build`.
+- PR com Preview: validar preview e executar smoke.
+- Scout/Auth/Supabase/RLS/fluxo de jogo: executar `SMOKE_BASE_URL="<preview-url>" npm run test:smoke:scout:preview`.
+
+## Restrições críticas
+
+- Proibido alterar produção, migrations remotas ou env vars sem confirmação humana explícita.
+- Proibido ocultar falha de typecheck/test/build.
+- Proibido reportar sucesso sem evidência verificável.
+- Proibido usar `git stash`, `git reset` ou `git revert`.
+
+## Instruções por domínio
+
+- `.github/instructions/frontend.instructions.md`
+- `.github/instructions/supabase.instructions.md`
+- `.github/instructions/scout.instructions.md`
+- `.github/instructions/agent-evidence.instructions.md`
+- `.github/instructions/pr-validation.instructions.md`
+- `.github/instructions/visual-ui.instructions.md`

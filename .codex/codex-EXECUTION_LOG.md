@@ -6159,3 +6159,135 @@ Resolver as pendências operacionais da PR #57: retirar o estado `BEHIND`, prese
 ### Riscos restantes
 
 - Merge da PR #57 continua dependendo de autorização explícita após os checks remotos passarem.
+
+## CEPR-AGENT-GOVERNANCE-HARDENING-2026-05-31 — Hardening de governança do agente
+
+### Escopo entendido
+
+Ler o resultado da auditoria, validar cada recomendação contra o estado real do repositório e implementar as configurações com evidência técnica, sem tratar a auditoria como verdade absoluta.
+
+### Arquivos alterados
+
+- `.github/copilot-instructions.md`
+- `.github/instructions/frontend.instructions.md`
+- `.github/instructions/supabase.instructions.md`
+- `.github/instructions/scout.instructions.md`
+- `.github/instructions/agent-evidence.instructions.md`
+- `.github/instructions/pr-validation.instructions.md`
+- `.github/instructions/visual-ui.instructions.md`
+- `.github/workflows/ci.yml`
+- `.github/workflows/pr-evidence-guard.yml`
+- `.github/workflows/copilot-intructions.md`
+- `scripts/agent-check.sh`
+- `scripts/verify-agent-evidence.sh`
+- `scripts/agent-final-report-check.sh`
+- `scripts/validate-execution-log.mjs`
+- `docs/agent/EXECUTION_LOG_SCHEMA.json`
+- `docs/agent/EXECUTION_LOG_TEMPLATE.md`
+- `docs/agent/RUBRICA_DE_VALIDACAO_DO_AGENTE.md`
+- `docs/agent/TRAJETORIAS_ESPERADAS.md`
+- `docs/agent/EVALS_AGENT.md`
+- `docs/agent/evals/agent-instruction-following.json`
+- `docs/agent/evals/agent-evidence-compliance.json`
+- `docs/agent/PROMPT_IMPLEMENTADOR.md`
+- `docs/agent/PROMPT_CONTESTADOR.md`
+- `docs/agent/ADVERSARIAL_REVIEW_CHECKLIST.md`
+- `package.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr list --limit 3 --state all --json number,title,state,updatedAt,headRefName,baseRefName,url`
+- `cat /home/davis/.codex/attachments/.../pasted-text.txt`
+- `rg --files .github`
+- `sed -n '1,280p' .github/workflows/pr-evidence-guard.yml`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `bash scripts/agent-final-report-check.sh`
+- `bash scripts/verify-agent-evidence.sh`
+- `node scripts/validate-execution-log.mjs /tmp/execution-log-sample.json`
+- `git diff --check`
+- `gh api repos/Davisermenho/CEPRAEA/branches/main/protection`
+- `gh api --method PUT repos/Davisermenho/CEPRAEA/branches/main/protection/required_status_checks/contexts ...`
+
+### Resultado da validação
+
+- `npm run typecheck`: passou.
+- `npm test`: passou (`9` arquivos de teste, `107` testes).
+- `npm run build`: passou (com warnings não bloqueantes de chunk-size/import dinâmico já existentes).
+- `scripts/agent-final-report-check.sh`: passou com artefato de exemplo.
+- `scripts/verify-agent-evidence.sh`: passou após incluir seção de escopo no artefato de exemplo.
+- `scripts/validate-execution-log.mjs`: passou com JSON de exemplo.
+- `git diff --check`: passou.
+
+### Preview/PR remoto
+
+- Branch protection da `main` foi validada e atualizada para incluir os checks de CI base:
+  - `CI / typecheck`
+  - `CI / test`
+  - `CI / build`
+  - `CI / deps-check`
+  - `CI / runtime-legacy`
+  - `CI / validate-mvp-v1`
+
+### Riscos restantes
+
+- O workflow adversarial dedicado (`adversarial-review-required.yml`) não foi criado neste ciclo para evitar bloqueio prematuro sem calibragem de falsos positivos.
+- O novo CI/check ainda precisa rodar em PR real para confirmar os nomes finais dos contexts no branch protection.
+
+## CEPR-ADVERSARIAL-REVIEW-ADVISORY-2026-05-31 — Fase 1 do resilver
+
+### Escopo entendido
+
+Implementar a pendência de resilver para IA contestadora de forma não bloqueante, criando o workflow `adversarial-review-required.yml` em modo `advisory` e publicando plano de calibração antes de promover para gate obrigatório.
+
+### Arquivos alterados
+
+- `.github/workflows/adversarial-review-required.yml`
+- `docs/agent/ADVERSARIAL_CALIBRATION_PLAN.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr list --limit 3 --state all --json number,title,state,updatedAt,headRefName,baseRefName,url`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run typecheck`: passou.
+- `npm test`: passou (`9` arquivos, `107` testes).
+- `npm run build`: passou (com warnings não bloqueantes de chunk-size/import dinâmico já existentes).
+- `git diff --check`: passou.
+
+### Preview/PR remoto
+
+- Não aplicável nesta etapa: workflow criado localmente para entrar em operação no próximo PR real.
+
+### Riscos restantes
+
+- O workflow está em `advisory` e ainda não bloqueia merge; precisa de 3-5 PRs piloto para calibrar falso positivo/negativo.
+- A promoção para `enforced` depende de validação humana com base no plano em `docs/agent/ADVERSARIAL_CALIBRATION_PLAN.md`.

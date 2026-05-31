@@ -3156,3 +3156,65 @@ Atualização operacional da branch `chore/ontology-def-pos-roubo-shacl` com `or
 - `npm run check:ontology:runtime-alignment`
 - `npm run check:ontology:semantics`
 - `git diff --check`
+
+### [CEPR-AGENT-GOVERNANCE-HARDENING-2026-05-31] — 2026-05-31 — Hardening de governança do agente
+
+#### ✨ Resumo
+
+Implementação dos gates e artefatos de governança derivados da auditoria, com validação crítica das recomendações antes da aplicação.
+
+#### 🛠️ Changed
+
+- `.github/copilot-instructions.md`
+  - expande regras de evidência, gates mínimos e restrições operacionais.
+- `.github/instructions/*.instructions.md`
+  - adiciona instruções por domínio (frontend, supabase, scout, evidência, PR e UI visual).
+- `.github/workflows/ci.yml`
+  - cria CI base com jobs de `typecheck`, `test`, `build`, `deps-check`, `runtime-legacy` e `validate-mvp-v1`.
+- `.github/workflows/pr-evidence-guard.yml`
+  - fortalece o guard para validar checks reais, modo estrito e consistência de run Scout.
+- `scripts/agent-check.sh`
+- `scripts/verify-agent-evidence.sh`
+- `scripts/agent-final-report-check.sh`
+- `scripts/validate-execution-log.mjs`
+  - adiciona camada de validação automatizada de evidência e log.
+- `docs/agent/*`
+  - adiciona schema, template, rubrica, trajetórias, evals e checklist adversarial.
+- `package.json`
+  - adiciona scripts `agent:*` para uso em CI/local.
+- `.github/workflows/copilot-intructions.md`
+  - corrige referência legada `AGENT.md` para `AGENTS.md`.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `bash scripts/agent-final-report-check.sh`
+- `bash scripts/verify-agent-evidence.sh`
+- `node scripts/validate-execution-log.mjs`
+- `git diff --check`
+- `gh api repos/Davisermenho/CEPRAEA/branches/main/protection`
+- `gh api --method PUT repos/Davisermenho/CEPRAEA/branches/main/protection/required_status_checks/contexts`
+
+### [CEPR-ADVERSARIAL-REVIEW-ADVISORY-2026-05-31] — 2026-05-31 — Fase 1 do resilver
+
+#### ✨ Resumo
+
+Criação do workflow `adversarial-review-required` em modo `advisory`, com relatório por execução e plano formal de calibração para promoção segura a `enforced`.
+
+#### 🛠️ Changed
+
+- `.github/workflows/adversarial-review-required.yml`
+  - adiciona revisão contestadora automatizada com modo `advisory|enforced`.
+  - gera relatório markdown com findings críticos/altos.
+  - publica artefato `adversarial-review-report`.
+- `docs/agent/ADVERSARIAL_CALIBRATION_PLAN.md`
+  - define janela de calibração (3-5 PRs), critérios de promoção e log de resultados.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `git diff --check`

@@ -18,6 +18,8 @@ on:
         type: number
 
 permissions:
+  actions: read
+  checks: read
   contents: read
   pull-requests: read
 
@@ -44,6 +46,10 @@ jobs:
               pr = context.payload.pull_request;
             }
             const body = pr.body || '';
+            const strictMode =
+              context.eventName === 'workflow_dispatch' ||
+              (context.eventName === 'pull_request' &&
+                context.payload.action === 'ready_for_review');
 
             const files = await github.paginate(github.rest.pulls.listFiles, {
               owner: context.repo.owner,
@@ -54,8 +60,12 @@ jobs:
 
             const scoutRegexes = [
               /^src\/features\/scout\//,
+              /^src\/features\/auth\//,
+              /^src\/features\/atleta\//,
               /^src\/features\/presence-tokens\//,
               /^src\/lib\/supabase\.ts$/,
+              /^supabase\/migrations\//,
+              /^supabase\/tests\//,
               /^supabase\/migrations\/\d+_scout/,
               /^supabase\/migrations\/\d+_presence/,
               /^supabase\/migrations\/\d+_cepr_00[89]/,
@@ -82,6 +92,18 @@ jobs:
               'Link do run `scout-preview-smoke`',
               'Logs críticos do preview',
             ];
+
+            const requiredChecks = [
+              'CI / typecheck',
+              'CI / test',
+              'CI / build',
+              'CI / deps-check',
+              'CI / runtime-legacy',
+              'CI / validate-mvp-v1',
+            ];
+            if (scoutTouched) {
+              requiredChecks.push('scout-preview-smoke');
+            }
 
             const extractValue = (label) => {
               const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -111,6 +133,66 @@ jobs:
                   missing.push(field);
                 }
               }
+
+              const scoutRunLink = extractValue('Link do run `scout-preview-smoke`');
+              const scoutRunMatch = scoutRunLink.match(
+                /^https:\/\/github\.com\/[^/]+\/[^/]+\/actions\/runs\/(\d+)/,
+              );
+              if (
+                isFilled(scoutRunLink) &&
+                !scoutRunMatch
+              ) {
+                missing.push('Link do run `scout-preview-smoke` (formato inválido)');
+              } else if (scoutRunMatch) {
+                const runId = Number(scoutRunMatch[1]);
+                try {
+                  const run = await github.rest.actions.getWorkflowRun({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    run_id: runId,
+                  });
+                  if (strictMode && run.data.conclusion !== 'success') {
+                    missing.push(
+                      `Link do run \`scout-preview-smoke\` (conclusion=${run.data.conclusion || 'unknown'})`,
+                    );
+                  }
+                } catch (error) {
+                  missing.push('Link do run `scout-preview-smoke` (run não acessível)');
+                }
+              }
+            }
+
+            const checkRuns = await github.paginate(
+              github.rest.checks.listForRef,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha,
+                per_page: 100,
+              },
+              (response) => response.data.check_runs,
+            );
+
+            const latestCheckByName = new Map();
+            for (const run of checkRuns) {
+              const current = latestCheckByName.get(run.name);
+              if (!current || new Date(run.started_at || 0) > new Date(current.started_at || 0)) {
+                latestCheckByName.set(run.name, run);
+              }
+            }
+
+            const missingChecks = [];
+            const nonSuccessChecks = [];
+
+            for (const checkName of requiredChecks) {
+              const run = latestCheckByName.get(checkName);
+              if (!run) {
+                missingChecks.push(checkName);
+                continue;
+              }
+              if (strictMode && run.conclusion !== 'success') {
+                nonSuccessChecks.push(`${checkName}=${run.conclusion || run.status || 'unknown'}`);
+              }
             }
 
             if (missing.length > 0) {
@@ -123,6 +205,32 @@ jobs:
                   `Campos faltando: ${missing.join(', ')}`,
                 ].join(' '),
               );
+              return;
+            }
+
+            if (strictMode && missingChecks.length > 0) {
+              core.setFailed(
+                [
+                  'Checks obrigatórios ausentes para o commit do PR.',
+                  `Faltando: ${missingChecks.join(', ')}`,
+                  'Confirme se o workflow CI base está ativo e se os checks foram publicados.',
+                ].join(' '),
+              );
+              return;
+            }
+
+            if (nonSuccessChecks.length > 0) {
+              core.setFailed(
+                [
+                  'Checks obrigatórios sem status SUCCESS no modo estrito.',
+                  `Status: ${nonSuccessChecks.join(', ')}`,
+                  'Ajuste o PR para draft até todos os checks finalizarem com sucesso.',
+                ].join(' '),
+              );
             } else {
-              core.info('PR template validado com sucesso.');
+              core.info(
+                strictMode
+                  ? 'PR template e checks obrigatórios validados com sucesso (modo estrito).'
+                  : `PR template validado com sucesso. Checks detectados em modo não estrito. Pendentes: ${missingChecks.length}`,
+              );
             }

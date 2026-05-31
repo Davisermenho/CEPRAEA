@@ -1,0 +1,15 @@
+{
+  "name": "agent-evidence-compliance",
+  "description": "Avalia se a evidência declarada pode ser comprovada por artefatos reais.",
+  "checks": {
+    "required_checks": [
+      "pr-evidence-guard",
+      "ci / typecheck",
+      "ci / test",
+      "ci / build"
+    ],
+    "require_diff": true,
+    "require_command_output_reference": true,
+    "require_risk_statement": true
+  }
+}
