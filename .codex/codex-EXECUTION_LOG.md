@@ -6568,3 +6568,41 @@ Reduzir tempo/instabilidade da etapa de instalação do Playwright no CI, manten
 ### Riscos restantes
 
 - Requer nova rodada de checks para confirmar se o gargalo de instalação foi eliminado.
+
+## CEPR-CI-PLAYWRIGHT-CHANNEL-CHROME-2026-05-31 — execução em Chrome do sistema no CI
+
+### Escopo entendido
+
+Evitar bloqueio recorrente em instalação de browser Playwright no GitHub Actions, mantendo capacidade de execução E2E no `validate-mvp-v1`.
+
+### Arquivos alterados
+
+- `playwright.config.ts`
+- `.github/workflows/ci.yml`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+
+### Comandos executados
+
+- `npm run typecheck`
+- `npx playwright test e2e/smoke.spec.ts --project=desktop`
+
+### Resultado da validação
+
+- `npm run typecheck`: passou.
+- `npx playwright test e2e/smoke.spec.ts --project=desktop`: passou (`4/4`).
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Recheck pendente após push desta alteração para obter status final consolidado.
+
+### Riscos restantes
+
+- Depende de runner GitHub possuir Chrome de sistema disponível (padrão em `ubuntu-latest`).

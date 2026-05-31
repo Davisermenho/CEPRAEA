@@ -3349,3 +3349,21 @@ A instalação do browser no CI foi refinada para `--only-shell`, alinhada ao us
 
 - `.github/workflows/ci.yml`
   - `validate-mvp-v1`: `npx playwright install --only-shell chromium`.
+
+### [CEPR-CI-PLAYWRIGHT-CHANNEL-CHROME-2026-05-31] — 2026-05-31 — remover download de browser no runner
+
+#### ✨ Resumo
+
+Troca da estratégia de execução E2E na CI para usar `channel: 'chrome'` quando `CI=true`, evitando download de browsers Playwright no pipeline `validate-mvp-v1`.
+
+#### 🛠️ Changed
+
+- `playwright.config.ts`
+  - projetos `desktop`, `mobile` e `mobile-coach` passam a usar `channel: 'chrome'` em CI.
+- `.github/workflows/ci.yml`
+  - remove etapa explícita de `playwright install` no job `validate-mvp-v1`.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck`
+- `npx playwright test e2e/smoke.spec.ts --project=desktop`

@@ -5,6 +5,7 @@ import path from 'path'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.resolve(__dirname, '.env.test'), override: true })
+const ciChannel = process.env.CI ? 'chrome' : undefined
 
 export default defineConfig({
   testDir: './e2e',
@@ -25,17 +26,26 @@ export default defineConfig({
   projects: [
     {
       name: 'desktop',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(ciChannel ? { channel: ciChannel } : {}),
+      },
       testIgnore: ['**/athlete/**'],
     },
     {
       name: 'mobile',
-      use: { ...devices['Pixel 5'] },
+      use: {
+        ...devices['Pixel 5'],
+        ...(ciChannel ? { channel: ciChannel } : {}),
+      },
       testMatch: ['**/athlete/**'],
     },
     {
       name: 'mobile-coach',
-      use: { ...devices['Pixel 5'] },
+      use: {
+        ...devices['Pixel 5'],
+        ...(ciChannel ? { channel: ciChannel } : {}),
+      },
       testMatch: [
         '**/guards.spec.ts',
         '**/coach/login.spec.ts',
