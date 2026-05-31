@@ -6707,3 +6707,47 @@ Revalidar a PR #70 e corrigir a falha remanescente de CI no `validate-mvp-v1` re
 ### Riscos restantes
 
 - Enquanto o corpo da PR não for atualizado com link válido do run `scout-preview-smoke`, o check `pr-evidence-guard` continuará falhando independentemente do estado de código.
+
+## CEPR-ANTI-ENUM-SIGNUP-REDIRECT-GUARD-2026-05-31 — correção adicional para estabilidade de CI
+
+### Escopo entendido
+
+Após nova rodada de checks da PR #70, `validate-mvp-v1` continuou falhando no mesmo teste de signup anti-enumeração. Ajustar o comportamento da tela para preservar a mensagem canônica mesmo quando o provedor cria sessão transitória.
+
+### Arquivos alterados
+
+- `src/features/atleta/pages/AtletaLoginPage.tsx`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `gh pr view 70 --json statusCheckRollup`
+- `gh run view 26716978796 --job 78737214158 --log-failed`
+- `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/athlete/login.spec.ts --project=desktop`
+- `npm run typecheck`
+
+### Resultado da validação
+
+- Rodada anterior de CI (commit `9418565`) concluiu com:
+  - `pr-evidence-guard`: `SUCCESS` (destravado);
+  - `validate-mvp-v1`: `FAILURE` (1 teste: signup anti-enumeração sem mensagem visível).
+- Após correção de guarda de redirecionamento:
+  - `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/athlete/login.spec.ts --project=desktop`: passou.
+  - `npm run typecheck`: passou.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Pendência operacional: push desta correção adicional e nova rodada de checks para confirmar `validate-mvp-v1`.
+
+### Riscos restantes
+
+- O caso de signup anti-enumeração mostrou flakiness apenas em carga de suíte completa na CI; confirmação final depende do próximo run remoto.

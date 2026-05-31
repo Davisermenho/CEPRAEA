@@ -39,9 +39,17 @@ export default function AtletaLoginPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [lockUntil, setLockUntil] = useState<number>(0)
   const captchaRef = useRef<TurnstileWidgetHandle>(null)
+  const antiEnumSignUpGuardUntilRef = useRef<number>(0)
 
   useEffect(() => {
     if (authenticated) {
+      // Anti-enumeração §13: após signup, nunca redirecionar automaticamente
+      // para área autenticada. Se o provedor abrir sessão (imediata ou tardia),
+      // forçamos sign-out durante a janela de guarda.
+      if (Date.now() < antiEnumSignUpGuardUntilRef.current) {
+        void supabase.auth.signOut()
+        return
+      }
       const target = redirectGuard(searchParams.get('returnUrl'), undefined)
       navigate(target === '/' ? '/atleta/treinos' : target, { replace: true })
     }
@@ -90,6 +98,7 @@ export default function AtletaLoginPage() {
     setSubmitting(true)
 
     if (mode === "register") {
+      antiEnumSignUpGuardUntilRef.current = Date.now() + 45_000
       const policy = validatePasswordPolicy(password)
       if (!policy.valid) { setSubmitting(false); setError(AUTH_MESSAGES["AUTH-RESET-002"]); return }
       const hibp = await hibpCheck(password)

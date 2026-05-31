@@ -3420,3 +3420,20 @@ Após revalidação da PR #70, o `validate-mvp-v1` falhou em 1 teste (`e2e/auth/
 
 - `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/auth/redirect-guard.spec.ts --project=desktop` ✅
 - `npm run typecheck` ✅
+
+### [CEPR-ANTI-ENUM-SIGNUP-REDIRECT-GUARD-2026-05-31] — 2026-05-31 — bloquear auto-redirecionamento após signup anti-enumeração
+
+#### ✨ Resumo
+
+Mesmo após robustez de clique no teste, o CI ainda falhou no caso de signup anti-enumeração (`validate-mvp-v1`) por ausência da mensagem canônica. Foi aplicada guarda de redirecionamento pós-signup na tela da atleta para impedir auto-login transitório do provedor de ocultar a mensagem `AUTH-SIGNUP-001`.
+
+#### 🛠️ Changed
+
+- `src/features/atleta/pages/AtletaLoginPage.tsx`
+  - adicionada janela de guarda (`antiEnumSignUpGuardUntilRef`) de 45s após submit de registro;
+  - se sessão aparecer durante a guarda, força `signOut()` e bloqueia navegação automática para `/atleta/treinos`.
+
+#### 🛡️ Evidências
+
+- `npx playwright test e2e/auth/anti-enumeration.spec.ts --project=desktop` ✅
+- `npm run typecheck` ✅
