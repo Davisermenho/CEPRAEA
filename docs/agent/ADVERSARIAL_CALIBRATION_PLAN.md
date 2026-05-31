@@ -28,7 +28,7 @@ Promover o `adversarial-review-required` de `advisory` para `enforced` sem bloqu
 
 | Data | PR | Critical | High | Falso positivo? | Ajuste aplicado |
 |---|---:|---:|---:|---|---|
-| _preencher_ |  |  |  |  |  |
+| 2026-05-31 | [#70](https://github.com/Davisermenho/CEPRAEA/pull/70) | 0 | 3 | Sim (timing de checks no evento `synchronize`) | `adversarial-review-required`: `COMMAND_CHECK_MISMATCH` agora só em `strictMode` |
 
 ## Procedimento de promoção
 
