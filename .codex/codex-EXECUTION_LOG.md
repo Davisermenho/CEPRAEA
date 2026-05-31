@@ -6660,3 +6660,50 @@ Prosseguir na correção do `validate-mvp-v1` para reduzir dependência frágil 
 ### Riscos restantes
 
 - `validate-mvp-v1` pode continuar sensível a variabilidade do ambiente CI/local até calibração final dos checks e confirmação dos nomes definitivos no branch protection após execução real.
+
+## CEPR-ANTI-ENUMERATION-SUBMIT-READY-GUARD-2026-05-31 — correção pós-revalidação do validate-mvp-v1
+
+### Escopo entendido
+
+Revalidar a PR #70 e corrigir a falha remanescente de CI no `validate-mvp-v1` relacionada ao fluxo anti-enumeração de signup.
+
+### Arquivos alterados
+
+- `e2e/auth/anti-enumeration.spec.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `gh pr checks 70 --watch --interval 10`
+- `gh pr view 70 --json statusCheckRollup`
+- `gh run view 26716616821 --job 78736211065 --log-failed`
+- `gh run view 26716616815 --job 78736211024 --log-failed`
+- `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/auth/redirect-guard.spec.ts --project=desktop`
+- `npm run typecheck`
+
+### Resultado da validação
+
+- Status consolidado da rodada anterior da PR #70:
+  - `validate-mvp-v1`: **FAILURE**.
+  - Falha raiz: `e2e/auth/anti-enumeration.spec.ts` no caso de signup (`expect(...'Verifique seu email...').toBeVisible`) por submit não disparado de forma determinística.
+  - `pr-evidence-guard`: **FAILURE** por `Link do run \`scout-preview-smoke\` (formato inválido)` no corpo da PR.
+- Após correção do teste:
+  - `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/auth/redirect-guard.spec.ts --project=desktop`: passou (`9/9`).
+  - `npm run typecheck`: passou.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Pendência operacional: push deste ajuste e nova rodada de checks para confirmar `validate-mvp-v1` em `SUCCESS`.
+
+### Riscos restantes
+
+- Enquanto o corpo da PR não for atualizado com link válido do run `scout-preview-smoke`, o check `pr-evidence-guard` continuará falhando independentemente do estado de código.

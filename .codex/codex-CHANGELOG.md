@@ -3403,3 +3403,20 @@ Foram aplicados ajustes de hardening e sincronização para reduzir flakiness em
 - `npx playwright test e2e/scout/scout-cepr0087-ux.spec.ts --project=desktop` ✅
 
 > Observação: `npm run validate:mvp:v1` segue com intermitências locais de infraestrutura do Supabase (`database system in recovery mode` / `not accepting connections`) e, em lotes longos, flakiness residual em alguns asserts de autenticação. A revalidação final foi encaminhada para CI da PR.
+
+### [CEPR-ANTI-ENUMERATION-SUBMIT-READY-GUARD-2026-05-31] — 2026-05-31 — estabilização de submit no CI sem dependência temporal de captcha
+
+#### ✨ Resumo
+
+Após revalidação da PR #70, o `validate-mvp-v1` falhou em 1 teste (`e2e/auth/anti-enumeration.spec.ts`, fluxo de signup) por clique antes do botão de submit estar habilitado no ambiente de CI. O teste foi endurecido para aguardar estado habilitado antes de cada submit de auth.
+
+#### 🛠️ Changed
+
+- `e2e/auth/anti-enumeration.spec.ts`
+  - adicionada função utilitária `clickWhenEnabled(...)`;
+  - login/signup/reset/coach-login/timing passaram a clicar apenas após `toBeEnabled` do botão.
+
+#### 🛡️ Evidências
+
+- `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/auth/redirect-guard.spec.ts --project=desktop` ✅
+- `npm run typecheck` ✅

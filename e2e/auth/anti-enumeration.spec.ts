@@ -2,7 +2,7 @@
 // Verifica que login/signup/reset retornam a mensagem canônica do vocabulário,
 // independente de o email existir ou não na base.
 
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import { signUpE2EUser } from '../helpers/supabaseSignup'
 
 const FAKE_EMAIL = 'nao-existe-mesmo@cepraea-test-never.example.com'
@@ -10,6 +10,12 @@ const STRONG_PASSWORD = 'Passw0rdXy!'
 const TIMING_EMAIL = `e2e-auth-timing-${Date.now()}@cepraea.test`
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL!
 const PUBLISHABLE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY!
+
+async function clickWhenEnabled(page: Page, name: RegExp) {
+  const submit = page.getByRole('button', { name })
+  await expect(submit).toBeEnabled({ timeout: 15_000 })
+  await submit.click()
+}
 
 test.describe('Anti-enumeração — vocabulário canônico', () => {
   test.beforeAll(async () => {
@@ -25,7 +31,7 @@ test.describe('Anti-enumeração — vocabulário canônico', () => {
     await page.goto('/atleta/login')
     await page.locator('#atleta-email').fill(FAKE_EMAIL)
     await page.locator('#atleta-password').fill('senhaqualquer')
-    await page.getByRole('button', { name: /entrar →/i }).click()
+    await clickWhenEnabled(page, /entrar →/i)
     await expect(page.getByText('Email ou senha incorretos.')).toBeVisible({ timeout: 10_000 })
   })
 
@@ -34,7 +40,7 @@ test.describe('Anti-enumeração — vocabulário canônico', () => {
     await page.getByRole('button', { name: /criar conta/i }).click()
     await page.locator('#atleta-email').fill(FAKE_EMAIL)
     await page.locator('#atleta-password').fill(STRONG_PASSWORD)
-    await page.getByRole('button', { name: /criar conta/i }).click()
+    await clickWhenEnabled(page, /criar conta/i)
     await expect(page.getByText('Verifique seu email para confirmar a conta.')).toBeVisible({ timeout: 30_000 })
   })
 
@@ -42,7 +48,7 @@ test.describe('Anti-enumeração — vocabulário canônico', () => {
     await page.goto('/atleta/login')
     await page.getByRole('button', { name: /esqueci minha senha/i }).click()
     await page.locator('#atleta-email').fill(FAKE_EMAIL)
-    await page.getByRole('button', { name: /enviar email de redefinição/i }).click()
+    await clickWhenEnabled(page, /enviar email de redefinição/i)
     await expect(page.getByText('Se o email existir em nossa base, enviaremos o link.')).toBeVisible({ timeout: 30_000 })
   })
 
@@ -50,7 +56,7 @@ test.describe('Anti-enumeração — vocabulário canônico', () => {
     await page.goto('/login')
     await page.locator('#coach-email').fill(FAKE_EMAIL)
     await page.locator('#coach-password').fill('senhaqualquer')
-    await page.getByRole('button', { name: /entrar →/i }).click()
+    await clickWhenEnabled(page, /entrar →/i)
     await expect(page.getByText('Email ou senha incorretos.')).toBeVisible({ timeout: 10_000 })
   })
 
@@ -60,7 +66,7 @@ test.describe('Anti-enumeração — vocabulário canônico', () => {
     await page.locator('#atleta-email').fill(FAKE_EMAIL)
     await page.locator('#atleta-password').fill('senhaerrada1')
     const t1 = Date.now()
-    await page.getByRole('button', { name: /entrar →/i }).click()
+    await clickWhenEnabled(page, /entrar →/i)
     await expect(page.getByText('Email ou senha incorretos.')).toBeVisible({ timeout: 15_000 })
     const elapsed1 = Date.now() - t1
 
@@ -69,7 +75,7 @@ test.describe('Anti-enumeração — vocabulário canônico', () => {
     await page.locator('#coach-email').fill(TIMING_EMAIL)
     await page.locator('#coach-password').fill('senha-deliberadamente-errada-123!')
     const t2 = Date.now()
-    await page.getByRole('button', { name: /entrar →/i }).click()
+    await clickWhenEnabled(page, /entrar →/i)
     await expect(page.getByText('Email ou senha incorretos.')).toBeVisible({ timeout: 15_000 })
     const elapsed2 = Date.now() - t2
 
