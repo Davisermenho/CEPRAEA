@@ -6606,3 +6606,57 @@ Evitar bloqueio recorrente em instalação de browser Playwright no GitHub Actio
 ### Riscos restantes
 
 - Depende de runner GitHub possuir Chrome de sistema disponível (padrão em `ubuntu-latest`).
+
+## CEPR-VALIDATE-MVP-V1-CAPTCHA-CI-HARDENING-2026-05-31 — fechamento da rodada e revalidação da PR #70
+
+### Escopo entendido
+
+Prosseguir na correção do `validate-mvp-v1` para reduzir dependência frágil de captcha no fluxo E2E/CI, consolidar hardening de auth e revalidar a PR técnica de calibração (#70).
+
+### Arquivos alterados
+
+- `src/features/atleta/pages/AtletaLoginPage.tsx`
+- `src/features/atleta/pages/AtletaPerfilPage.tsx`
+- `e2e/coach/login.spec.ts`
+- `e2e/athlete/login.spec.ts`
+- `e2e/athlete/profile.spec.ts`
+- `e2e/auth/anti-enumeration.spec.ts`
+- `e2e/auth/redirect-guard.spec.ts`
+- `e2e/helpers/auth.ts`
+- `scripts/run-e2e-local.sh`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `npx playwright test e2e/scout/scout-cepr0087-ux.spec.ts --project=desktop`
+- `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/auth/redirect-guard.spec.ts --project=desktop`
+- `gh pr checks 70 --watch`
+- `gh pr view 70 --json statusCheckRollup,url`
+
+### Resultado da validação
+
+- `npm run typecheck`: passou.
+- `npm test`: passou.
+- `npm run build`: passou.
+- Suites E2E isoladas (auth/scout): passaram após hardening.
+- `npm run validate:mvp:v1`: ainda apresenta intermitência local de infraestrutura Supabase (`database system in recovery mode` / `not accepting connections`) em execuções de lote; validação final direcionada para CI da PR.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Próximo passo operacional: push do commit desta rodada e monitoramento até conclusão dos checks remotos.
+
+### Riscos restantes
+
+- `validate-mvp-v1` pode continuar sensível a variabilidade do ambiente CI/local até calibração final dos checks e confirmação dos nomes definitivos no branch protection após execução real.

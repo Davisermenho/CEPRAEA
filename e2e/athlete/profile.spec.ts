@@ -115,8 +115,7 @@ test.describe('Perfil da atleta', () => {
     await page.goto('/atleta/perfil')
     await expect(page.getByRole('button', { name: /receber link para nova senha/i })).toBeVisible({ timeout: 10_000 })
     await page.getByRole('button', { name: /receber link para nova senha/i }).click()
-    // Supabase local aceita a chamada — feedback de sucesso deve aparecer
-    await expect(page.getByText(/email de redefinição enviado/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText(/se o email existir em nossa base, enviaremos o link/i)).toBeVisible({ timeout: 10_000 })
     await ctx.close()
   })
 
@@ -147,7 +146,7 @@ test.describe('Página nova senha — validações de formulário', () => {
     await page.locator('#nova-senha').fill('abc')
     await page.locator('#confirmar-senha').fill('abc')
     await page.getByRole('button', { name: /salvar nova senha/i }).click()
-    await expect(page.getByText(/senha deve ter pelo menos 6 caracteres/i)).toBeVisible({ timeout: 5_000 })
+    await expect(page.getByText(/senha não atende à política mínima/i)).toBeVisible({ timeout: 5_000 })
     await ctx.close()
   })
 

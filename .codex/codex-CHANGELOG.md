@@ -3367,3 +3367,39 @@ Troca da estratégia de execução E2E na CI para usar `channel: 'chrome'` quand
 
 - `npm run typecheck`
 - `npx playwright test e2e/smoke.spec.ts --project=desktop`
+
+### [CEPR-VALIDATE-MVP-AUTH-E2E-HARDENING-2026-05-31] — 2026-05-31 — estabilização do validate-mvp-v1 sem dependência frágil de captcha
+
+#### ✨ Resumo
+
+Foram aplicados ajustes de hardening e sincronização para reduzir flakiness em autenticação E2E (mensagens canônicas, waits de botão habilitado, retry de login com erro temporário, timeout defensivo em signup/reset anti-enumeração) e para preparar melhor o banco local antes da suíte E2E.
+
+#### 🛠️ Changed
+
+- `src/features/atleta/pages/AtletaLoginPage.tsx`
+  - timeout defensivo em `signUp/reset` (anti-enumeração não fica presa em `Entrando...` quando provedor demora);
+  - mantém sign-out após auto sessão no sign-up para preservar fluxo canônico.
+- `src/features/atleta/pages/AtletaPerfilPage.tsx`
+  - feedback de reset alinhado ao vocabulário canônico (`AUTH-RESET-001`) e token de captcha de teste quando disponível.
+- `e2e/helpers/auth.ts`
+  - `loginAsCoach/loginAsAthlete` agora aguardam submit habilitado e têm retry de estabilização para erro temporário de acesso.
+- `e2e/auth/redirect-guard.spec.ts`
+  - login com `returnUrl` recebeu retry/timeout robusto e tratamento de lock transitório.
+- `e2e/auth/anti-enumeration.spec.ts`
+  - senha forte no signup;
+  - usuário dedicado para medição de timing (evita contaminar conta principal);
+  - timeout mais realista para asserts assíncronos e limiar de timing em ambiente CI.
+- `e2e/coach/login.spec.ts`, `e2e/athlete/login.spec.ts`, `e2e/athlete/profile.spec.ts`
+  - assertivas alinhadas ao vocabulário/mensagens atuais.
+- `scripts/run-e2e-local.sh`
+  - gate de prontidão do Postgres (até 60s) antes de iniciar Playwright.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck` ✅
+- `npm test` ✅
+- `npm run build` ✅
+- `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/auth/redirect-guard.spec.ts --project=desktop` ✅ (após ajustes)
+- `npx playwright test e2e/scout/scout-cepr0087-ux.spec.ts --project=desktop` ✅
+
+> Observação: `npm run validate:mvp:v1` segue com intermitências locais de infraestrutura do Supabase (`database system in recovery mode` / `not accepting connections`) e, em lotes longos, flakiness residual em alguns asserts de autenticação. A revalidação final foi encaminhada para CI da PR.
