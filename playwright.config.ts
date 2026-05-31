@@ -6,11 +6,14 @@ import path from 'path'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.resolve(__dirname, '.env.test'), override: true })
 const ciChannel = process.env.CI ? 'chrome' : undefined
+const parsedWorkers = Number(process.env.PW_WORKERS ?? (process.env.CI ? '1' : '2'))
+const workerCount = Number.isFinite(parsedWorkers) && parsedWorkers > 0 ? parsedWorkers : 1
 
 export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
   fullyParallel: false,
+  workers: workerCount,
   forbidOnly: !!process.env.CI,
   retries: 0,
   globalSetup: './e2e/global.setup.ts',

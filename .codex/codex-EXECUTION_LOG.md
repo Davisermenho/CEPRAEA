@@ -19,11 +19,46 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-24 - 22:24 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-31 - 15:12 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
 
+
+## Entrada Rápida — 2026-05-31 15:12 BRT — CEPR-E2E-STABILITY-01
+
+- **Objetivo:** executar o plano de resilver para estabilizar `validate:mvp:v1` nas falhas E2E/ambiente.
+- **Mudanças de código/processo:**
+  - adição de `e2e/helpers/dbRetry.ts` com retry exponencial para falhas transitórias de Postgres (recovery/not accepting connections);
+  - endurecimento de preflight do banco em `scripts/run-e2e-local.sh` (inclui `pg_isready` e `pg_is_in_recovery() = false`);
+  - execução E2E serial por padrão no script de suíte (`PW_WORKERS=1`) com suporte parametrizado em `playwright.config.ts`;
+  - estabilização de specs críticas:
+    - onboarding inválido (`e2e/access/onboarding.spec.ts`);
+    - anti-enumeração sem dependência de signup transitório (`e2e/auth/anti-enumeration.spec.ts`);
+    - T03/T05 com SQL resiliente (`e2e/coach/athletes.spec.ts`, `e2e/coach/attendance.spec.ts`);
+    - smoke central do scout com assert por estado funcional (`e2e/scout/scout-cepr0083-smoke.spec.ts`);
+    - CEPR-0091 com setup de sessão em uma única página e SQL resiliente (`e2e/scout/scout-cepr0091-ux.spec.ts`);
+    - login helper com retentativa mais robusta (`e2e/helpers/auth.ts`);
+  - robustez adicional de signup E2E (`e2e/helpers/supabaseSignup.ts`) com retry para 5xx transitório;
+- **Evidências objetivas:**
+  - `npm run test:e2e -- e2e/access/onboarding.spec.ts e2e/auth/anti-enumeration.spec.ts e2e/coach/athletes.spec.ts e2e/coach/attendance.spec.ts e2e/scout/scout-cepr0083-smoke.spec.ts e2e/scout/scout-cepr0091-ux.spec.ts` ✅ (`23 passed`, `1 skipped`);
+  - `npm run validate:mvp:v1` ✅ (`187 passed`, `7 skipped`);
+  - `npm run typecheck` ✅; `npm test` ✅; `npm run build` ✅.
+
+## Entrada Rápida — 2026-05-31 14:28 BRT — CEPR-REPO-CLEANUP-RESILVER-01
+
+- **Objetivo:** executar limpeza operacional do repositório para reduzir ruído de varredura de agentes e remover artefatos não ativos do caminho principal.
+- **Mudanças de código/processo:**
+  - remoção de `.github/workflows/copilot-intructions.md` (duplicado/typo fora do padrão oficial);
+  - remoção de `src/shared/layouts/AuthGuard.tsx` (alias legado sem uso em runtime);
+  - remoção de `scripts/db/diagnose-before-0040-0042.sql` (diagnóstico histórico sem referência operacional ativa);
+  - desversionamento de `.files/scout.xlsx` (mantido local e ignorado via `.files/`);
+  - criação de `tsconfig.audit.json` e script `npm run audit:deadcode` para detecção contínua de código morto;
+  - criação de `docs/agent/repo-cleanup-resilver-2026-05-31.md` com organização-alvo e backlog de limpeza.
+- **Evidências objetivas:**
+  - `rg -n "AuthGuard" src` confirmou ausência de import ativo do alias legado ✅
+  - `rg -n "diagnose-before-0040-0042" scripts docs .github package.json AGENTS.json plan.md` sem referências operacionais ✅
+  - `git status --short --untracked-files=all` com diff restrito ao escopo planejado ✅
 
 ## Entrada Rápida — 2026-05-24 22:24 BRT — CEPR-ONTOLOGIA-LATEST-TRENDS-ATTACK-TRIAGEM-E-UPDATE-2026-05-24
 
@@ -6751,3 +6786,48 @@ Após nova rodada de checks da PR #70, `validate-mvp-v1` continuou falhando no m
 ### Riscos restantes
 
 - O caso de signup anti-enumeração mostrou flakiness apenas em carga de suíte completa na CI; confirmação final depende do próximo run remoto.
+
+## CEPR-BRANCH-CLEANUP-PR70-2026-05-31 — execução do plano de remoção da branch remota
+
+### Escopo entendido
+
+Resolver a pendência operacional de branch remota remanescente após merge da PR #70: remover `chore/agent-governance-resilver-pilot` do `origin` com validação completa.
+
+### Arquivos alterados
+
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `gh pr view 70 --json state,mergedAt,baseRefName,headRefName,mergeCommit,url`
+- `git fetch origin --prune`
+- `git ls-remote --heads origin chore/agent-governance-resilver-pilot`
+- `git branch -r --contains e4886bf64cf48500f098b939e74bb2d78a3b7650`
+- `git push origin --delete chore/agent-governance-resilver-pilot`
+- `git fetch --prune origin`
+- `git ls-remote --heads origin chore/agent-governance-resilver-pilot`
+- `git status --short`
+
+### Resultado da validação
+
+- PR #70 confirmada como `MERGED` em `2026-05-31T16:15:15Z`.
+- Commit de ponta da branch (`e4886bf...`) já contido em `origin/main` antes da remoção.
+- Remoção remota executada com sucesso: `- [deleted] chore/agent-governance-resilver-pilot`.
+- Verificação final `git ls-remote --heads origin chore/agent-governance-resilver-pilot`: sem saída (branch inexistente no remoto).
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Estado: `MERGED`.
+
+### Riscos restantes
+
+- Nenhum risco técnico relevante da remoção da branch remota.
+- Permanecem itens não rastreados pré-existentes no workspace (`docs/design/CHANGELOG.md`, `docs/ontologia/CHANGELOG.md`, `onthbpraia/`), sem alteração nesta tarefa.

@@ -1,34 +1,28 @@
 import { test, expect } from '@playwright/test'
-import { execFileSync } from 'node:child_process'
 import { loginAsCoach } from '../helpers/auth'
+import { runSqlWithRetry } from '../helpers/dbRetry'
 
 const STAMP = Date.now()
 const ATHLETE_NAME = `E2E-T05-${STAMP}`
 const ATHLETE_EMAIL = `e2e-t05-${STAMP}@cepraea.test`
 const TRAINING_OBS = `E2E-T05-Treino-${STAMP}`
 const TEAM_ID = process.env.VITE_SUPABASE_TEAM_ID ?? '10000000-0000-0000-0000-000000000001'
-const DB_URL = process.env.E2E_SUPABASE_DB_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
 const BASE_URL = 'http://localhost:5173'
 
-function psql(sql: string) {
-  execFileSync('psql', [DB_URL, '-v', 'ON_ERROR_STOP=1'], {
-    input: sql,
-    stdio: ['pipe', 'inherit', 'inherit'],
-  })
-}
-
 test.describe('T05 — attendanceStore Supabase-first: prova multi-contexto', () => {
-  test.beforeAll(() => {
+  test.beforeAll(async () => {
     // Garante idempotência: remove eventuais restos de execuções anteriores
-    psql(`DELETE FROM public.athletes WHERE team_id = '${TEAM_ID}' AND lower(email) = lower('${ATHLETE_EMAIL}');`)
-    psql(`
+    await runSqlWithRetry(
+      `DELETE FROM public.athletes WHERE team_id = '${TEAM_ID}' AND lower(email) = lower('${ATHLETE_EMAIL}');`,
+    )
+    await runSqlWithRetry(`
       INSERT INTO public.athletes (team_id, name, email, status, created_at, updated_at)
       VALUES ('${TEAM_ID}', '${ATHLETE_NAME}', '${ATHLETE_EMAIL}', 'ativo', now(), now());
     `)
   })
 
-  test.afterAll(() => {
-    psql(`
+  test.afterAll(async () => {
+    await runSqlWithRetry(`
       DELETE FROM public.attendance_records ar
       USING public.trainings t
       WHERE ar.training_id = t.id
@@ -72,7 +66,9 @@ test.describe('T05 — attendanceStore Supabase-first: prova multi-contexto', ()
     await ctxA.close()
 
     // Marca o treino como realizado para que apareça nos relatórios
-    psql(`UPDATE public.trainings SET status = 'realizado' WHERE team_id = '${TEAM_ID}' AND notes = '${TRAINING_OBS}';`)
+    await runSqlWithRetry(
+      `UPDATE public.trainings SET status = 'realizado' WHERE team_id = '${TEAM_ID}' AND notes = '${TRAINING_OBS}';`,
+    )
 
     // ── Contexto B: navegador limpo, sem IndexedDB do contexto A ─────────────
     const ctxB = await browser.newContext({ baseURL: BASE_URL })

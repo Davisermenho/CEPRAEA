@@ -4,26 +4,33 @@ const coachEmail = process.env.E2E_COACH_EMAIL ?? 'coach@cepraea.test'
 const coachPassword = process.env.E2E_COACH_PASSWORD ?? 'Passw0rdXy!'
 
 export async function loginAsCoach(page: Page) {
-  await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 30_000 })
-  await page.locator('#coach-email').fill(coachEmail)
-  await page.locator('#coach-password').fill(coachPassword)
-  const submit = page.getByRole('button', { name: /entrar/i })
-  await expect(submit).toBeEnabled({ timeout: 15_000 })
-  await submit.click()
   const homeLink = page.getByRole('link', { name: 'Início', exact: true })
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 30_000 })
+    await page.locator('#coach-email').fill(coachEmail)
+    await page.locator('#coach-password').fill(coachPassword)
+    const submit = page.getByRole('button', { name: /entrar/i })
+    await expect(submit).toBeEnabled({ timeout: 15_000 })
+    await submit.click()
+
     try {
-      await expect(homeLink).toBeVisible({ timeout: 20_000 })
-      await expect(page).not.toHaveURL(/\/login/)
+      await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 20_000 })
+      if (await homeLink.isVisible({ timeout: 5_000 }).catch(() => false)) {
+        return
+      }
+      if (!/\/login$/.test(new URL(page.url()).pathname)) {
+        return
+      }
+      await expect(homeLink).toBeVisible({ timeout: 15_000 })
       return
     } catch {
       const retryAccess = page.getByRole('button', { name: /tentar novamente/i })
       if (await retryAccess.isVisible({ timeout: 1_000 }).catch(() => false)) {
         await retryAccess.click()
-        continue
+        if (await homeLink.isVisible({ timeout: 10_000 }).catch(() => false)) return
       }
-      if (attempt === 2) throw new Error('Coach login completed but app access did not stabilize.')
-      await page.reload({ waitUntil: 'domcontentloaded' })
+      if (attempt === 3) throw new Error('Coach login completed but app access did not stabilize.')
+      await page.waitForTimeout(1_000)
     }
   }
 }

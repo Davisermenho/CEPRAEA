@@ -1,17 +1,14 @@
-import { execFileSync } from 'node:child_process'
 import { expect, test } from '@playwright/test'
 import { loginAsCoach } from '../helpers/auth'
+import { queryScalarWithRetry } from '../helpers/dbRetry'
 
 const TODAY = new Date().toISOString().split('T')[0]
-const DB_URL = process.env.E2E_SUPABASE_DB_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
 
-function queryScalar(sql: string): string {
-  return execFileSync('psql', [DB_URL, '-t', '-c', sql], { encoding: 'utf8' }).trim()
+async function queryScalar(sql: string): Promise<string> {
+  return queryScalarWithRetry(sql)
 }
 
-async function createGame(browser: import('@playwright/test').Browser, rival: string): Promise<string> {
-  const page = await browser.newPage()
-  await loginAsCoach(page)
+async function createGame(page: import('@playwright/test').Page, rival: string): Promise<string> {
   await page.goto('/scout/preparar')
   await page.waitForLoadState('networkidle', { timeout: 15_000 })
   await page.getByRole('button', { name: 'Jogo', exact: true }).click()
@@ -21,7 +18,6 @@ async function createGame(browser: import('@playwright/test').Browser, rival: st
   await page.waitForURL(/\/scout\/preparar\/[0-9a-f-]{36}/, { timeout: 10_000 })
   const gameId = page.url().match(/\/scout\/preparar\/([0-9a-f-]{36})/)?.[1]!
   expect(gameId).toBeTruthy()
-  await page.close()
   return gameId
 }
 
@@ -49,7 +45,7 @@ async function createPendingEntry(page: import('@playwright/test').Page, tempo =
   await expect(page.getByText(/Entrada criada como/i)).toBeVisible({ timeout: 15_000 })
 }
 
-function latestLiveEntryId(gameId: string): string {
+async function latestLiveEntryId(gameId: string): Promise<string> {
   return queryScalar(
     `SELECT id
      FROM public.scout_live_entries
@@ -62,9 +58,9 @@ function latestLiveEntryId(gameId: string): string {
 test.describe('CEPR-0091 — COLETA_AO_VIVO prevenção e recuperação de erro', () => {
   let gameId: string
 
-  test.beforeEach(async ({ browser, page }) => {
-    gameId = await createGame(browser, `Rival-CEPR0091-${Date.now()}-${Math.round(Math.random() * 1000)}`)
+  test.beforeEach(async ({ page }) => {
     await loginAsCoach(page)
+    gameId = await createGame(page, `Rival-CEPR0091-${Date.now()}-${Math.round(Math.random() * 1000)}`)
     await page.goto(`/scout/ao-vivo/${gameId}`)
     await page.waitForLoadState('networkidle', { timeout: 20_000 })
   })
@@ -94,18 +90,18 @@ test.describe('CEPR-0091 — COLETA_AO_VIVO prevenção e recuperação de erro'
 
     await expect(page.getByText('LIVE-0001')).toBeVisible()
 
-    const liveCount = queryScalar(
+    const liveCount = await queryScalar(
       `SELECT COUNT(*)
        FROM public.scout_live_entries
        WHERE scout_game_id = '${gameId}'
          AND deleted_at IS NULL`,
     )
-    const playsCount = queryScalar(
+    const playsCount = await queryScalar(
       `SELECT COUNT(*)
        FROM public.scout_plays
        WHERE scout_game_id = '${gameId}'`,
     )
-    const participationsCount = queryScalar(
+    const participationsCount = await queryScalar(
       `SELECT COUNT(*)
        FROM public.scout_play_participations pp
        JOIN public.scout_plays sp ON sp.id = pp.scout_play_id
@@ -119,7 +115,7 @@ test.describe('CEPR-0091 — COLETA_AO_VIVO prevenção e recuperação de erro'
 
   test('edita entrada PENDENTE e persiste a atualização na mesma scout_live_entries', async ({ page }) => {
     await createPendingEntry(page, '03:21')
-    const liveEntryId = latestLiveEntryId(gameId)
+    const liveEntryId = await latestLiveEntryId(gameId)
 
     await page.getByRole('button', { name: 'Editar LIVE-0001' }).click()
     await fillTempo(page, '04:44')
@@ -128,7 +124,7 @@ test.describe('CEPR-0091 — COLETA_AO_VIVO prevenção e recuperação de erro'
     await expect(page.getByText('Entrada LIVE-0001 atualizada.')).toBeVisible({ timeout: 15_000 })
     await expect(page.getByText('04:44 · Ataque posicionado')).toBeVisible()
 
-    const persistedTempo = queryScalar(
+    const persistedTempo = await queryScalar(
       `SELECT tempo_jogo
        FROM public.scout_live_entries
        WHERE id = '${liveEntryId}'`,
@@ -150,14 +146,14 @@ test.describe('CEPR-0091 — COLETA_AO_VIVO prevenção e recuperação de erro'
     await expect(page.getByRole('button', { name: 'Excluir LIVE-0001' })).toHaveCount(0)
     await expect(page.getByText('Nenhuma sequência registrada')).toBeVisible()
 
-    const deletedAt = queryScalar(
+    const deletedAt = await queryScalar(
       `SELECT deleted_at::text
        FROM public.scout_live_entries
        WHERE scout_game_id = '${gameId}'
        ORDER BY created_at DESC
        LIMIT 1`,
     )
-    const visibleCount = queryScalar(
+    const visibleCount = await queryScalar(
       `SELECT COUNT(*)
        FROM public.scout_live_entries
        WHERE scout_game_id = '${gameId}'
@@ -171,8 +167,8 @@ test.describe('CEPR-0091 — COLETA_AO_VIVO prevenção e recuperação de erro'
   test('bloqueia exclusão de entrada VALIDADA', async ({ page }) => {
     await createPendingEntry(page, '03:21')
 
-    const liveEntryId = latestLiveEntryId(gameId)
-    queryScalar(
+    const liveEntryId = await latestLiveEntryId(gameId)
+    await queryScalar(
       `UPDATE public.scout_live_entries
        SET status_validacao_code = 'VALIDADO'
        WHERE id = '${liveEntryId}';

@@ -48,17 +48,24 @@ test('SMOKE-01: /scout abre Central do Scout', async ({ page }) => {
 test('SMOKE-02: Central exibe empty state ou sessão ativa', async ({ page }) => {
   await loginAsCoach(page)
   await page.goto('/scout')
-  await page.waitForLoadState('networkidle', { timeout: 15_000 })
+  await expect(page.getByRole('heading', { name: 'O que você quer fazer?' })).toBeVisible({
+    timeout: 15_000,
+  })
 
-  const hasActiveSession = await page.getByText('Sessão ativa').isVisible().catch(() => false)
+  const sessionBadge = page.getByText('Sessão ativa')
+  const emptyState = page.getByText(/Nenhum scout preparado/i)
+  const state = await Promise.race([
+    sessionBadge.waitFor({ state: 'visible', timeout: 10_000 }).then(() => 'active' as const),
+    emptyState.waitFor({ state: 'visible', timeout: 10_000 }).then(() => 'empty' as const),
+  ])
 
-  if (hasActiveSession) {
+  if (state === 'active') {
     // Com sessão ativa: cards de "Coletar ao vivo" e "Analisar por vídeo" devem estar habilitados
     await expect(page.getByText('Coletar ao vivo')).toBeVisible()
     await expect(page.getByText('Analisar por vídeo')).toBeVisible()
   } else {
     // Sem sessão ativa: empty state e cards bloqueados
-    await expect(page.getByText('Nenhum scout preparado')).toBeVisible()
+    await expect(emptyState).toBeVisible()
     // Cards bloqueados têm texto "Prepare uma sessão primeiro."
     const disabledCards = page.getByText('Prepare uma sessão primeiro.')
     await expect(disabledCards.first()).toBeVisible()

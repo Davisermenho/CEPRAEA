@@ -6,10 +6,13 @@ import { test, expect } from '@playwright/test'
 test.describe('AcceptInvitePage — convite inválido', () => {
   test('UUID inválido mostra erro amigável', async ({ page }) => {
     await page.goto('/aceitar-convite/00000000-0000-0000-0000-000000000000')
-    // Should show invalid/error screen — NOT crash.
+    // Should show invalid/error state — not crash and not blank.
     await expect(
-      page.getByText(/convite inválido|erro|expirado/i)
-    ).toBeVisible({ timeout: 10_000 })
+      page.getByText(/convite inválido|erro/i)
+    ).toBeVisible({ timeout: 15_000 })
+    await expect(
+      page.getByText(/inválido|expirado|não foi possível aceitar/i)
+    ).toBeVisible({ timeout: 15_000 })
   })
 })
 

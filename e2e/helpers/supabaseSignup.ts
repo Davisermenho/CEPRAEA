@@ -12,6 +12,18 @@ interface SignupResponse {
   msg?: string
 }
 
+const SIGNUP_RETRY_ATTEMPTS = Number(process.env.E2E_SIGNUP_RETRY_ATTEMPTS ?? '4')
+const SIGNUP_RETRY_BASE_MS = Number(process.env.E2E_SIGNUP_RETRY_BASE_MS ?? '500')
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function shouldRetry(status: number, detail: string): boolean {
+  if (status >= 500) return true
+  return /unexpected failure|temporar|timeout|captcha/i.test(detail)
+}
+
 export function resolveCaptchaToken(): string | null {
   const token =
     process.env.E2E_TURNSTILE_TEST_TOKEN ??
@@ -41,22 +53,35 @@ function buildSignupPayload(email: string, password: string) {
 }
 
 export async function signUpE2EUser(args: SupabaseSignupArgs): Promise<{ userId: string; response: SignupResponse; status: number }> {
-  const response = await fetch(`${args.supabaseUrl}/auth/v1/signup`, {
-    method: 'POST',
-    headers: {
-      apikey: args.publishableKey,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(buildSignupPayload(args.email, args.password)),
-  })
+  let lastError: Error | null = null
 
-  const payload = (await response.json()) as SignupResponse
-  const userId = payload.user?.id
+  for (let attempt = 1; attempt <= SIGNUP_RETRY_ATTEMPTS; attempt += 1) {
+    const response = await fetch(`${args.supabaseUrl}/auth/v1/signup`, {
+      method: 'POST',
+      headers: {
+        apikey: args.publishableKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(buildSignupPayload(args.email, args.password)),
+    })
 
-  if (!response.ok || !userId) {
+    const payload = (await response.json()) as SignupResponse
+    const userId = payload.user?.id
     const detail = payload.msg ?? JSON.stringify(payload)
-    throw new Error(`Signup failed (${response.status}): ${detail}`)
+
+    if (response.ok && userId) {
+      return { userId, response: payload, status: response.status }
+    }
+
+    lastError = new Error(`Signup failed (${response.status}): ${detail}`)
+    const canRetry = attempt < SIGNUP_RETRY_ATTEMPTS && shouldRetry(response.status, detail)
+    if (!canRetry) {
+      throw lastError
+    }
+
+    const backoffMs = Math.min(SIGNUP_RETRY_BASE_MS * 2 ** (attempt - 1), 4_000)
+    await sleep(backoffMs)
   }
 
-  return { userId, response: payload, status: response.status }
+  throw lastError ?? new Error('Signup failed: unknown error')
 }

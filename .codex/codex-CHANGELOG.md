@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-24 - 22:24 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-31 - 15:12 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,8 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-31 | 15:12 | CEPR-E2E-STABILITY-01 | Estabilização do `validate:mvp:v1` concluída: reforço de resiliência E2E (DB/login/asserts) e execução completa validada | `npm run test:e2e -- ...` (6 arquivos críticos) ✅ (`23 passed`, `1 skipped`) · `npm run validate:mvp:v1` ✅ (`187 passed`, `7 skipped`) · `npm run typecheck` ✅ · `npm test` ✅ · `npm run build` ✅ |
+| 2026-05-31 | 14:28 | CEPR-REPO-CLEANUP-RESILVER-01 | Limpeza estrutural aplicada para reduzir ruído operacional de agentes: remoção de arquivo duplicado em workflow, alias legado sem uso e script SQL histórico órfão; adicionada auditoria contínua de código morto e guia de organização; artefato local `.files/scout.xlsx` desversionado | `.github/workflows/copilot-intructions.md` removido · `src/shared/layouts/AuthGuard.tsx` removido · `scripts/db/diagnose-before-0040-0042.sql` removido · `.files/scout.xlsx` removido do Git via `git rm --cached` · `tsconfig.audit.json` criado · `package.json` com `audit:deadcode` · `docs/agent/repo-cleanup-resilver-2026-05-31.md` criado |
 | 2026-05-21 | 23:38 | CEPR-GOV-HARDENING-05 | PR operacional formal de modo solo criada e ruído de CI reduzido: `npm ci` dos gates Scout passou a usar `--loglevel=error --no-audit --no-fund`; resolução da URL de preview endurecida com retry e fallback sem `teamId` para reduzir falhas 403 intermitentes na API da Vercel | `docs/auditorias/solo-mode-governance-2026-05-21.md` criado · `.github/workflows/scout-preview-smoke.yml` e `.github/workflows/scout-contract-cepr0098d.yml` atualizados · branch protection snapshot registrado |
 | 2026-05-21 | 17:48 | CEPR-GOV-HARDENING-04 | `AGENTS.md` alinhado explicitamente para operação solo (sem aprovação humana obrigatória de terceiros), mantendo obrigatoriedade de gates técnicos | `AGENTS.md` seção `5.9 Operação solo` criada · branch protection atual verificada com `required_reviews=0`, `require_last_push_approval=false` e checks obrigatórios ativos |
 | 2026-05-21 | 17:35 | CEPR-GOV-HARDENING-03 | Remoção de `dorny/paths-filter@v3` do Scout Preview Smoke para eliminar warning de Node 20; detecção de escopo migrada para `git diff` em shell, mantendo gate obrigatório e comportamento de skip por escopo | `.github/workflows/scout-preview-smoke.yml` atualizado com step shell `Detect Scout scope` · ausência de `dorny/paths-filter@v3` no workflow · `npm run typecheck` ✅ · `npm run build` ✅ |
@@ -3437,3 +3439,19 @@ Mesmo após robustez de clique no teste, o CI ainda falhou no caso de signup ant
 
 - `npx playwright test e2e/auth/anti-enumeration.spec.ts --project=desktop` ✅
 - `npm run typecheck` ✅
+
+### [CEPR-BRANCH-CLEANUP-PR70-2026-05-31] — 2026-05-31 — remoção da branch remota pós-merge
+
+#### ✨ Resumo
+
+Após autorização de merge já concluída da PR #70, foi executada a limpeza operacional da branch remota `chore/agent-governance-resilver-pilot`.
+
+#### 🛠️ Changed
+
+- Infra Git remoto (`origin`): branch `chore/agent-governance-resilver-pilot` removida via `git push origin --delete`.
+
+#### 🛡️ Evidências
+
+- `gh pr view 70 --json state,mergedAt,mergeCommit` confirmou PR #70 `MERGED`.
+- `git branch -r --contains e4886bf...` confirmou que a ponta da branch já estava contida em `origin/main` antes da remoção.
+- `git ls-remote --heads origin chore/agent-governance-resilver-pilot` sem saída após deleção.
