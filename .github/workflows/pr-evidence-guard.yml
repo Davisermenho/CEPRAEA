@@ -94,12 +94,12 @@ jobs:
             ];
 
             const requiredChecks = [
-              'CI / typecheck',
-              'CI / test',
-              'CI / build',
-              'CI / deps-check',
-              'CI / runtime-legacy',
-              'CI / validate-mvp-v1',
+              'typecheck',
+              'test',
+              'build',
+              'deps-check',
+              'runtime-legacy',
+              'validate-mvp-v1',
             ];
             if (scoutTouched) {
               requiredChecks.push('scout-preview-smoke');
@@ -175,6 +175,9 @@ jobs:
 
             const latestCheckByName = new Map();
             for (const run of checkRuns) {
+              if (!run || !run.name) {
+                continue;
+              }
               const current = latestCheckByName.get(run.name);
               if (!current || new Date(run.started_at || 0) > new Date(current.started_at || 0)) {
                 latestCheckByName.set(run.name, run);

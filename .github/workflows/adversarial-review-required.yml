@@ -82,6 +82,9 @@ jobs:
 
             const latestCheckByName = new Map();
             for (const run of checkRuns) {
+              if (!run || !run.name) {
+                continue;
+              }
               const current = latestCheckByName.get(run.name);
               if (!current || new Date(run.started_at || 0) > new Date(current.started_at || 0)) {
                 latestCheckByName.set(run.name, run);
@@ -129,10 +132,10 @@ jobs:
             }
 
             const commandToCheck = [
-              { token: 'npm run typecheck', check: 'CI / typecheck' },
-              { token: 'npm test', check: 'CI / test' },
-              { token: 'npm run build', check: 'CI / build' },
-              { token: 'npm run validate:mvp:v1', check: 'CI / validate-mvp-v1' },
+              { token: 'npm run typecheck', check: 'typecheck' },
+              { token: 'npm test', check: 'test' },
+              { token: 'npm run build', check: 'build' },
+              { token: 'npm run validate:mvp:v1', check: 'validate-mvp-v1' },
             ];
 
             for (const rule of commandToCheck) {
