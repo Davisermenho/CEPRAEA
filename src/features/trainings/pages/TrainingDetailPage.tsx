@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronLeft, CheckCircle2, MessageCircle, Copy,
-  UserCheck, Wifi, Shield, Link2, Ban,
+  UserCheck, Wifi, Link2, Ban,
 } from 'lucide-react'
 import { useTrainingStore } from '@/stores/trainingStore'
 import { useAthleteStore } from '@/stores/athleteStore'
@@ -10,6 +10,7 @@ import { useAttendanceStore } from '@/stores/attendanceStore'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
+import TrainingPlanEditor from '@/features/training-plans/TrainingPlanEditor'
 import { formatDateLong, formatPhone } from '@/lib/utils'
 import {
   gerarAnuncioTreino,
@@ -294,6 +295,8 @@ export default function TrainingDetailPage() {
             </Button>
           ))}
         </div>
+
+        <TrainingPlanEditor trainingId={training.id} />
 
         {supabasePresenceTokensEnabled && (
           <div className="mx-4 mb-4 rounded-2xl border border-cep-purple-700 bg-cep-purple-850 p-4 space-y-3">

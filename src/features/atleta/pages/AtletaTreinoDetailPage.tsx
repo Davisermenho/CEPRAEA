@@ -9,6 +9,7 @@ import { useAttendanceStore } from '@/stores/attendanceStore'
 import { formatDateLong, todayISO, cn } from '@/lib/utils'
 import type { AttendanceStatus } from '@/types'
 import { useCurrentAthlete } from '@/features/atleta/useCurrentAthlete'
+import TrainingPlanReadView from '@/features/training-plans/TrainingPlanReadView'
 
 export default function AtletaTreinoDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -158,6 +159,10 @@ export default function AtletaTreinoDetailPage() {
         {feedback && (
           <p className="text-xs text-cep-lime-400/80 mt-3">{feedback}</p>
         )}
+      </div>
+
+      <div className="mb-4">
+        <TrainingPlanReadView trainingId={training.id} />
       </div>
 
       {/* Quem vai */}
