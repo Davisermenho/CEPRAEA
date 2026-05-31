@@ -3299,3 +3299,27 @@ Após remover o bloqueio de captcha, a CI passou a falhar por policy de senha fo
 
 - `npm run typecheck`
 - `npx playwright test e2e/smoke.spec.ts --project=desktop`
+
+### [CEPR-VALIDATE-MVP-V1-CI-PLAYWRIGHT-CAPTCHA-TOKEN-2026-05-31] — 2026-05-31 — fechamento dos bloqueios remanescentes no job
+
+#### ✨ Resumo
+
+Ajustes finais para estabilizar o `validate-mvp-v1` na CI após remoção do captcha no signup:
+1) instalação explícita do browser Playwright no job,
+2) envio de token captcha também no fluxo de `signIn` via `/auth/v1/token?grant_type=password` usado nos testes públicos.
+
+#### 🛠️ Changed
+
+- `.github/workflows/ci.yml`
+  - adiciona `npx playwright install --with-deps chromium` no job `validate-mvp-v1`.
+- `e2e/helpers/supabaseSignup.ts`
+  - exporta `resolveCaptchaToken()` e `withCaptchaToken(...)` para reuso.
+  - aplica `captcha_token` também no payload raiz para compatibilidade extra.
+- `e2e/public/presence-token.spec.ts`
+- `e2e/public/presence-token-decline.spec.ts`
+  - `signIn(...)` passa a enviar payload com token captcha de teste.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck`
+- `npx playwright test e2e/public/presence-token.spec.ts e2e/public/presence-token-decline.spec.ts --project=desktop`

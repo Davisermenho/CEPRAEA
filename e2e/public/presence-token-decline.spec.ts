@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
 import { loginAsCoach, loginAsAthlete } from '../helpers/auth'
-import { signUpE2EUser } from '../helpers/supabaseSignup'
+import { signUpE2EUser, withCaptchaToken } from '../helpers/supabaseSignup'
 
 const STAMP = Date.now()
 const ATHLETE_NAME = `E2E-T06D-${STAMP}`
@@ -29,10 +29,11 @@ function querySql(sql: string): string {
 }
 
 async function signIn(email: string, password: string): Promise<string> {
+  const payload = withCaptchaToken({ email, password })
   const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     method: 'POST',
     headers: { apikey: PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(payload),
   })
   const data = await res.json() as { access_token?: string }
   if (!res.ok || !data.access_token) {

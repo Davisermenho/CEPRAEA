@@ -6451,3 +6451,49 @@ Após a correção de captcha, `validate-mvp-v1` remoto passou a falhar com `422
 ### Riscos restantes
 
 - Ainda é necessária nova rodada de checks da PR #70 após este commit para confirmar o estado final de `validate-mvp-v1`.
+
+## CEPR-VALIDATE-MVP-V1-CI-PLAYWRIGHT-CAPTCHA-TOKEN-2026-05-31 — fix final de infraestrutura + auth token
+
+### Escopo entendido
+
+Concluir a estabilização de `validate-mvp-v1` após monitoramento remoto da PR #70, atacando os dois últimos bloqueios observados no log:
+- Playwright sem binário no runner;
+- `signIn` via `grant_type=password` retornando `captcha verification process failed` em testes públicos.
+
+### Arquivos alterados
+
+- `.github/workflows/ci.yml`
+- `e2e/helpers/supabaseSignup.ts`
+- `e2e/public/presence-token.spec.ts`
+- `e2e/public/presence-token-decline.spec.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI (`gh`)
+- npm
+
+### Comandos executados
+
+- `gh run view 26713775832 --job 78728618847 --log-failed`
+- `gh run view 26713775832 --job 78728618847 --log | rg ...`
+- `npm run typecheck`
+- `npx playwright test e2e/public/presence-token.spec.ts e2e/public/presence-token-decline.spec.ts --project=desktop`
+
+### Resultado da validação
+
+- Log remoto confirmou falhas por ausência de browser (`Executable doesn't exist ... chrome-headless-shell`) e captcha no `signIn` por token endpoint.
+- `npm run typecheck`: passou.
+- `npx playwright test ...presence-token... --project=desktop`: passou (`2/2`).
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Nova rodada de checks ainda pendente neste ponto do registro (após novo commit será reexecutada).
+
+### Riscos restantes
+
+- Dependência de nova execução remota para confirmar o status final consolidado de `validate-mvp-v1`.

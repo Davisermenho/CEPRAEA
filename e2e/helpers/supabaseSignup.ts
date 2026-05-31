@@ -12,7 +12,7 @@ interface SignupResponse {
   msg?: string
 }
 
-function resolveCaptchaToken(): string | null {
+export function resolveCaptchaToken(): string | null {
   const token =
     process.env.E2E_TURNSTILE_TEST_TOKEN ??
     process.env.VITE_TURNSTILE_TEST_TOKEN ??
@@ -23,17 +23,21 @@ function resolveCaptchaToken(): string | null {
   return trimmed.length > 0 ? trimmed : null
 }
 
-function buildSignupPayload(email: string, password: string) {
+export function withCaptchaToken(payload: Record<string, unknown>) {
   const captchaToken = resolveCaptchaToken()
-  const payload: Record<string, unknown> = { email, password }
 
   if (captchaToken) {
     // Backward/forward compatibility across GoTrue payload variants.
     payload.gotrue_meta_security = { captcha_token: captchaToken }
+    payload.captcha_token = captchaToken
     payload.options = { captchaToken }
   }
 
   return payload
+}
+
+function buildSignupPayload(email: string, password: string) {
+  return withCaptchaToken({ email, password })
 }
 
 export async function signUpE2EUser(args: SupabaseSignupArgs): Promise<{ userId: string; response: SignupResponse; status: number }> {
