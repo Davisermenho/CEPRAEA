@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test'
 
 const coachEmail = process.env.E2E_COACH_EMAIL ?? 'coach@cepraea.test'
-const coachPassword = process.env.E2E_COACH_PASSWORD ?? 'password'
+const coachPassword = process.env.E2E_COACH_PASSWORD ?? 'Passw0rdXy!'
 
 export async function loginAsCoach(page: Page) {
   await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 30_000 })

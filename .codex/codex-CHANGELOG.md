@@ -3274,3 +3274,28 @@ Eliminação da dependência implícita de captcha nos signups E2E usados por `v
 - `npm run build`
 - `npm run validate:mvp:v1` (executado; falhou por 7 testes E2E legados não relacionados ao captcha)
 - confirmação em execução: cenários alterados de signup (incluindo `presence-token*` e `training-flow`) passaram durante a suíte.
+
+### [CEPR-E2E-PASSWORD-POLICY-CI-2026-05-31] — 2026-05-31 — alinhamento com policy de senha do Supabase Auth
+
+#### ✨ Resumo
+
+Após remover o bloqueio de captcha, a CI passou a falhar por policy de senha forte no signup E2E. As credenciais de teste foram alinhadas para cumprir a política (>=10 chars, maiúscula, minúscula e número).
+
+#### 🛠️ Changed
+
+- `.env.test`
+  - `E2E_COACH_PASSWORD` atualizado para senha forte.
+- `e2e/helpers/auth.ts`
+- `e2e/auth/redirect-guard.spec.ts`
+  - fallback de senha de coach atualizado para senha forte.
+- `e2e/athlete/onboarding.spec.ts`
+- `e2e/athlete/profile.spec.ts`
+- `e2e/athlete/training-flow.spec.ts`
+- `e2e/public/presence-token.spec.ts`
+- `e2e/public/presence-token-decline.spec.ts`
+  - senhas de atletas de teste atualizadas para senha forte.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck`
+- `npx playwright test e2e/smoke.spec.ts --project=desktop`

@@ -6403,3 +6403,51 @@ Corrigir o `validate-mvp-v1` para remover fragilidade de captcha no fluxo E2E da
 
 - Ainda há falhas E2E baseline não relacionadas ao objetivo de captcha, que podem manter `validate-mvp-v1` vermelho até tratamento dedicado.
 - Há arquivos não relacionados no workspace e não alterados nesta intervenção: `docs/design/CHANGELOG.md`, `docs/ontologia/CHANGELOG.md`, `onthbpraia/`.
+
+## CEPR-E2E-PASSWORD-POLICY-CI-2026-05-31 — correção de senha forte no signup E2E
+
+### Escopo entendido
+
+Após a correção de captcha, `validate-mvp-v1` remoto passou a falhar com `422` por policy de senha no Supabase Auth. Objetivo: alinhar senhas de teste sem alterar escopo funcional.
+
+### Arquivos alterados
+
+- `.env.test`
+- `e2e/helpers/auth.ts`
+- `e2e/auth/redirect-guard.spec.ts`
+- `e2e/athlete/onboarding.spec.ts`
+- `e2e/athlete/profile.spec.ts`
+- `e2e/athlete/training-flow.spec.ts`
+- `e2e/public/presence-token.spec.ts`
+- `e2e/public/presence-token-decline.spec.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI (`gh`)
+- npm
+
+### Comandos executados
+
+- `gh pr checks 70 --watch`
+- `gh run view 26713633660 --job 78728236364 --log-failed`
+- `npm run typecheck`
+- `npx playwright test e2e/smoke.spec.ts --project=desktop`
+
+### Resultado da validação
+
+- Identificado no CI: `Signup failed (422): Password should be at least 10 characters...` em `e2e/helpers/supabaseSignup.ts` durante `globalSetup` (`coachProvisioning`).
+- `npm run typecheck`: passou.
+- `npx playwright test e2e/smoke.spec.ts --project=desktop`: passou (`4/4`), confirmando `globalSetup` operacional após ajuste de senha.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Última rodada monitorada (antes deste ajuste de senha) finalizou com único fail em `validate-mvp-v1`; demais checks passaram.
+
+### Riscos restantes
+
+- Ainda é necessária nova rodada de checks da PR #70 após este commit para confirmar o estado final de `validate-mvp-v1`.

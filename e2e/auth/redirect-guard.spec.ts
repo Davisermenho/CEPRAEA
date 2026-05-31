@@ -4,7 +4,7 @@
 import { test, expect } from '@playwright/test'
 
 const coachEmail = process.env.E2E_COACH_EMAIL ?? 'coach@cepraea.test'
-const coachPassword = process.env.E2E_COACH_PASSWORD ?? 'password'
+const coachPassword = process.env.E2E_COACH_PASSWORD ?? 'Passw0rdXy!'
 
 async function loginWithReturnUrl(page: import('@playwright/test').Page, returnUrl: string) {
   const encoded = encodeURIComponent(returnUrl)

@@ -6,7 +6,7 @@ import { signUpE2EUser } from '../helpers/supabaseSignup'
 const STAMP = Date.now()
 const ATHLETE_NAME = `E2E-T06-${STAMP}`
 const ATHLETE_EMAIL = `e2e-t06-${STAMP}@cepraea.test`
-const ATHLETE_PASSWORD = 'password'
+const ATHLETE_PASSWORD = 'Passw0rdXy!'
 const TRAINING_GENKEY = `E2E-T06-${STAMP}`
 
 const DB_URL = process.env.E2E_SUPABASE_DB_URL!
