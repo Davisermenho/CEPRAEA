@@ -46,6 +46,6 @@ test.describe('LoginPage (treinador)', () => {
     await page.locator('#coach-email').fill(coachEmail)
     await page.locator('#coach-password').fill('senha-errada')
     await page.getByRole('button', { name: /entrar/i }).click()
-    await expect(page.getByText(/não foi possível entrar/i)).toBeVisible()
+    await expect(page.getByText(/email ou senha incorretos/i)).toBeVisible()
   })
 })

@@ -1,0 +1,238 @@
+name: Adversarial Review Required
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - ready_for_review
+  workflow_dispatch:
+    inputs:
+      pull_number:
+        description: "PR number to review"
+        required: true
+        type: number
+      mode:
+        description: "advisory or enforced"
+        required: false
+        default: advisory
+        type: choice
+        options:
+          - advisory
+          - enforced
+
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  pull-requests: read
+
+jobs:
+  adversarial-review-required:
+    name: adversarial-review-required
+    runs-on: ubuntu-latest
+    env:
+      ADVERSARIAL_MODE: ${{ inputs.mode || 'advisory' }}
+
+    steps:
+      - name: Run adversarial review
+        id: review
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('node:fs');
+
+            const mode = process.env.ADVERSARIAL_MODE || 'advisory';
+
+            let pr;
+            if (context.eventName === 'workflow_dispatch') {
+              const pullNumber = parseInt(context.payload.inputs.pull_number, 10);
+              const prResponse = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pullNumber,
+              });
+              pr = prResponse.data;
+            } else {
+              pr = context.payload.pull_request;
+            }
+
+            const body = pr.body || '';
+            const strictMode =
+              context.eventName === 'workflow_dispatch' ||
+              (context.eventName === 'pull_request' &&
+                context.payload.action === 'ready_for_review');
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+
+            const checkRuns = await github.paginate(
+              github.rest.checks.listForRef,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha,
+                per_page: 100,
+              },
+              (response) => response.data.check_runs,
+            );
+
+            const latestCheckByName = new Map();
+            for (const run of checkRuns) {
+              if (!run || !run.name) {
+                continue;
+              }
+              const current = latestCheckByName.get(run.name);
+              if (!current || new Date(run.started_at || 0) > new Date(current.started_at || 0)) {
+                latestCheckByName.set(run.name, run);
+              }
+            }
+
+            const findings = [];
+
+            const addFinding = (severity, code, message) => {
+              findings.push({ severity, code, message });
+            };
+
+            if (files.length === 0) {
+              addFinding('critical', 'NO_DIFF', 'PR sem arquivos alterados (diff vazio).');
+            }
+
+            const requiredLabels = [
+              'Escopo alterado',
+              'Arquivos alterados',
+              'Comandos executados',
+              'Resultado dos comandos',
+            ];
+
+            for (const label of requiredLabels) {
+              const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const regex = new RegExp(`^- ${escaped}:\\s*(.*)$`, 'm');
+              const match = body.match(regex);
+              const value = (match?.[1] || '').trim();
+              if (!value || value === '-' || /^<!--.*-->$/.test(value)) {
+                addFinding('high', `MISSING_${label.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}`, `Campo obrigatório ausente no PR template: ${label}.`);
+              }
+            }
+
+            const removedTestFiles = files
+              .filter((f) => f.status === 'removed')
+              .map((f) => f.filename)
+              .filter((name) => /(test|spec|e2e|playwright|supabase\/tests)/i.test(name));
+
+            if (removedTestFiles.length > 0) {
+              addFinding(
+                'high',
+                'TESTS_REMOVED',
+                `Arquivos de teste removidos: ${removedTestFiles.join(', ')}. Revisar se houve enfraquecimento indevido.`,
+              );
+            }
+
+            const commandToCheck = [
+              { token: 'npm run typecheck', check: 'typecheck' },
+              { token: 'npm test', check: 'test' },
+              { token: 'npm run build', check: 'build' },
+              { token: 'npm run validate:mvp:v1', check: 'validate-mvp-v1' },
+            ];
+
+            for (const rule of commandToCheck) {
+              if (strictMode && body.includes(rule.token) && !latestCheckByName.has(rule.check)) {
+                addFinding(
+                  'high',
+                  'COMMAND_CHECK_MISMATCH',
+                  `PR declara '${rule.token}', mas check '${rule.check}' não foi encontrado no SHA do PR.`,
+                );
+              }
+            }
+
+            const scoutScopeRegexes = [
+              /^src\/features\/scout\//,
+              /^src\/features\/auth\//,
+              /^src\/features\/atleta\//,
+              /^src\/features\/presence-tokens\//,
+              /^src\/lib\/supabase\.ts$/,
+              /^supabase\/migrations\//,
+              /^supabase\/tests\//,
+              /^supabase\/functions\//,
+              /^e2e\/scout\//,
+              /^playwright\.scout-preview-smoke\.config\.ts$/,
+            ];
+
+            const scoutTouched = files.some((file) =>
+              scoutScopeRegexes.some((regex) => regex.test(file.filename)),
+            );
+
+            if (scoutTouched) {
+              const scoutRun = latestCheckByName.get('scout-preview-smoke');
+              if (!scoutRun) {
+                addFinding('critical', 'SCOUT_SMOKE_MISSING', 'Escopo Scout detectado sem check scout-preview-smoke no SHA do PR.');
+              } else if (scoutRun.conclusion !== 'success') {
+                addFinding(
+                  'critical',
+                  'SCOUT_SMOKE_NOT_SUCCESS',
+                  `Escopo Scout detectado com scout-preview-smoke=${scoutRun.conclusion || scoutRun.status || 'unknown'}.`,
+                );
+              }
+            }
+
+            const criticalCount = findings.filter((f) => f.severity === 'critical').length;
+            const highCount = findings.filter((f) => f.severity === 'high').length;
+
+            const reportLines = [];
+            reportLines.push('# Adversarial Review Report');
+            reportLines.push('');
+            reportLines.push(`- Date: ${new Date().toISOString()}`);
+            reportLines.push(`- Mode: ${mode}`);
+            reportLines.push(`- PR: #${pr.number} (${pr.html_url})`);
+            reportLines.push(`- Head SHA: ${pr.head.sha}`);
+            reportLines.push(`- Files changed: ${files.length}`);
+            reportLines.push(`- Findings: critical=${criticalCount}, high=${highCount}`);
+            reportLines.push('');
+
+            if (findings.length === 0) {
+              reportLines.push('## Result');
+              reportLines.push('No findings.');
+            } else {
+              reportLines.push('## Findings');
+              for (const finding of findings) {
+                reportLines.push(`- [${finding.severity}] ${finding.code}: ${finding.message}`);
+              }
+            }
+
+            const report = reportLines.join('\n');
+            const reportPath = 'adversarial-review-report.md';
+            fs.writeFileSync(reportPath, report, 'utf8');
+
+            core.setOutput('critical_count', String(criticalCount));
+            core.setOutput('high_count', String(highCount));
+            core.setOutput('report_path', reportPath);
+
+            await core.summary
+              .addHeading('Adversarial Review')
+              .addRaw(report, true)
+              .write();
+
+            if (mode === 'enforced' && criticalCount > 0) {
+              core.setFailed(`Adversarial review failed in enforced mode (critical=${criticalCount}).`);
+            } else if (criticalCount > 0 || highCount > 0) {
+              core.warning(
+                `Adversarial findings detected (critical=${criticalCount}, high=${highCount}) in ${mode} mode.`,
+              );
+            } else {
+              core.info(`Adversarial review passed with no findings in ${mode} mode.`);
+            }
+
+      - name: Upload adversarial report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: adversarial-review-report
+          path: adversarial-review-report.md
+          if-no-files-found: error

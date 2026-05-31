@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
 import { loginAsCoach, loginAsAthlete } from '../helpers/auth'
+import { signUpE2EUser } from '../helpers/supabaseSignup'
 
 const STAMP = Date.now()
 const ATHLETE_NAME = `E2E-T07-${STAMP}`
 const ATHLETE_EMAIL = `e2e-t07-${STAMP}@cepraea.test`
-const ATHLETE_PASSWORD = 'password'
+const ATHLETE_PASSWORD = 'Passw0rdXy!'
 const TEAM_ID = process.env.VITE_SUPABASE_TEAM_ID!
 const DB_URL = process.env.E2E_SUPABASE_DB_URL!
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL!
@@ -64,14 +65,12 @@ test('vínculo de conta: não vinculada → atleta cria conta → painel mostra 
   await ctxCoach1.close()
 
   // — Passo 2: atleta cria conta via Supabase Auth signup —
-  const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-    method: 'POST',
-    headers: { apikey: PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: ATHLETE_EMAIL, password: ATHLETE_PASSWORD }),
+  const { userId } = await signUpE2EUser({
+    supabaseUrl: SUPABASE_URL,
+    publishableKey: PUBLISHABLE_KEY,
+    email: ATHLETE_EMAIL,
+    password: ATHLETE_PASSWORD,
   })
-  const signupData = await signupRes.json() as { user?: { id?: string } }
-  const userId = signupData.user?.id
-  if (!userId) throw new Error(`Signup falhou: ${JSON.stringify(signupData)}`)
 
   const esc = (s: string) => s.replaceAll("'", "''")
   runSql(`

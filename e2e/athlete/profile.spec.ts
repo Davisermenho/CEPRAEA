@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
 import { loginAsAthlete } from '../helpers/auth'
+import { signUpE2EUser } from '../helpers/supabaseSignup'
 
 const STAMP = Date.now()
 const ATHLETE_NAME = `E2E-PF-${STAMP}`
 const ATHLETE_EMAIL = `e2e-pf-${STAMP}@cepraea.test`
-const ATHLETE_PASSWORD = 'password'
+const ATHLETE_PASSWORD = 'Passw0rdXy!'
 
 const DB_URL = process.env.E2E_SUPABASE_DB_URL!
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL!
@@ -33,14 +34,12 @@ test.beforeAll(async () => {
 
   runSql(`delete from auth.users where email = '${esc(ATHLETE_EMAIL)}';`)
 
-  const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-    method: 'POST',
-    headers: { apikey: PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: ATHLETE_EMAIL, password: ATHLETE_PASSWORD }),
+  const { userId } = await signUpE2EUser({
+    supabaseUrl: SUPABASE_URL,
+    publishableKey: PUBLISHABLE_KEY,
+    email: ATHLETE_EMAIL,
+    password: ATHLETE_PASSWORD,
   })
-  const signupData = await signupRes.json() as { user?: { id?: string } }
-  const userId = signupData.user?.id
-  if (!userId) throw new Error(`Signup falhou: ${JSON.stringify(signupData)}`)
 
   runSql(`
     insert into public.profiles (id, name, email)
@@ -116,8 +115,7 @@ test.describe('Perfil da atleta', () => {
     await page.goto('/atleta/perfil')
     await expect(page.getByRole('button', { name: /receber link para nova senha/i })).toBeVisible({ timeout: 10_000 })
     await page.getByRole('button', { name: /receber link para nova senha/i }).click()
-    // Supabase local aceita a chamada — feedback de sucesso deve aparecer
-    await expect(page.getByText(/email de redefinição enviado/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText(/se o email existir em nossa base, enviaremos o link/i)).toBeVisible({ timeout: 10_000 })
     await ctx.close()
   })
 
@@ -148,7 +146,7 @@ test.describe('Página nova senha — validações de formulário', () => {
     await page.locator('#nova-senha').fill('abc')
     await page.locator('#confirmar-senha').fill('abc')
     await page.getByRole('button', { name: /salvar nova senha/i }).click()
-    await expect(page.getByText(/senha deve ter pelo menos 6 caracteres/i)).toBeVisible({ timeout: 5_000 })
+    await expect(page.getByText(/senha não atende à política mínima/i)).toBeVisible({ timeout: 5_000 })
     await ctx.close()
   })
 

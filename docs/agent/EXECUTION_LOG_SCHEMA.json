@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CEPRAEA Agent Execution Log Entry",
+  "type": "object",
+  "required": [
+    "task_id",
+    "date",
+    "agent",
+    "scope",
+    "summary",
+    "files_changed",
+    "tools",
+    "commands",
+    "command_results",
+    "preview_vercel",
+    "risks",
+    "status"
+  ],
+  "properties": {
+    "task_id": { "type": "string" },
+    "date": { "type": "string" },
+    "agent": { "type": "string", "enum": ["codex", "copilot", "claude", "other"] },
+    "scope": { "type": "string" },
+    "summary": { "type": "string" },
+    "files_changed": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "tools": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "commands": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "command_results": {
+      "type": "object",
+      "required": ["typecheck", "test", "build"],
+      "properties": {
+        "typecheck": { "type": "string", "enum": ["passou", "falhou", "nao_executado"] },
+        "test": { "type": "string", "enum": ["passou", "falhou", "nao_executado"] },
+        "build": { "type": "string", "enum": ["passou", "falhou", "nao_executado"] }
+      },
+      "additionalProperties": true
+    },
+    "preview_vercel": {
+      "type": "object",
+      "required": ["url", "status", "logs_criticos", "smoke_test"],
+      "properties": {
+        "url": { "type": "string" },
+        "status": { "type": "string" },
+        "logs_criticos": { "type": "string" },
+        "smoke_test": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "risks": { "type": "array", "items": { "type": "string" } },
+    "status": { "type": "string", "enum": ["success", "blocked", "partial"] }
+  },
+  "additionalProperties": false
+}

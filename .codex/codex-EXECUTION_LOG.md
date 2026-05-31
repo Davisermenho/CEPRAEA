@@ -6159,3 +6159,595 @@ Resolver as pendências operacionais da PR #57: retirar o estado `BEHIND`, prese
 ### Riscos restantes
 
 - Merge da PR #57 continua dependendo de autorização explícita após os checks remotos passarem.
+
+## CEPR-AGENT-GOVERNANCE-HARDENING-2026-05-31 — Hardening de governança do agente
+
+### Escopo entendido
+
+Ler o resultado da auditoria, validar cada recomendação contra o estado real do repositório e implementar as configurações com evidência técnica, sem tratar a auditoria como verdade absoluta.
+
+### Arquivos alterados
+
+- `.github/copilot-instructions.md`
+- `.github/instructions/frontend.instructions.md`
+- `.github/instructions/supabase.instructions.md`
+- `.github/instructions/scout.instructions.md`
+- `.github/instructions/agent-evidence.instructions.md`
+- `.github/instructions/pr-validation.instructions.md`
+- `.github/instructions/visual-ui.instructions.md`
+- `.github/workflows/ci.yml`
+- `.github/workflows/pr-evidence-guard.yml`
+- `.github/workflows/copilot-intructions.md`
+- `scripts/agent-check.sh`
+- `scripts/verify-agent-evidence.sh`
+- `scripts/agent-final-report-check.sh`
+- `scripts/validate-execution-log.mjs`
+- `docs/agent/EXECUTION_LOG_SCHEMA.json`
+- `docs/agent/EXECUTION_LOG_TEMPLATE.md`
+- `docs/agent/RUBRICA_DE_VALIDACAO_DO_AGENTE.md`
+- `docs/agent/TRAJETORIAS_ESPERADAS.md`
+- `docs/agent/EVALS_AGENT.md`
+- `docs/agent/evals/agent-instruction-following.json`
+- `docs/agent/evals/agent-evidence-compliance.json`
+- `docs/agent/PROMPT_IMPLEMENTADOR.md`
+- `docs/agent/PROMPT_CONTESTADOR.md`
+- `docs/agent/ADVERSARIAL_REVIEW_CHECKLIST.md`
+- `package.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr list --limit 3 --state all --json number,title,state,updatedAt,headRefName,baseRefName,url`
+- `cat /home/davis/.codex/attachments/.../pasted-text.txt`
+- `rg --files .github`
+- `sed -n '1,280p' .github/workflows/pr-evidence-guard.yml`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `bash scripts/agent-final-report-check.sh`
+- `bash scripts/verify-agent-evidence.sh`
+- `node scripts/validate-execution-log.mjs /tmp/execution-log-sample.json`
+- `git diff --check`
+- `gh api repos/Davisermenho/CEPRAEA/branches/main/protection`
+- `gh api --method PUT repos/Davisermenho/CEPRAEA/branches/main/protection/required_status_checks/contexts ...`
+
+### Resultado da validação
+
+- `npm run typecheck`: passou.
+- `npm test`: passou (`9` arquivos de teste, `107` testes).
+- `npm run build`: passou (com warnings não bloqueantes de chunk-size/import dinâmico já existentes).
+- `scripts/agent-final-report-check.sh`: passou com artefato de exemplo.
+- `scripts/verify-agent-evidence.sh`: passou após incluir seção de escopo no artefato de exemplo.
+- `scripts/validate-execution-log.mjs`: passou com JSON de exemplo.
+- `git diff --check`: passou.
+
+### Preview/PR remoto
+
+- Branch protection da `main` foi validada e atualizada para incluir os checks de CI base:
+  - `CI / typecheck`
+  - `CI / test`
+  - `CI / build`
+  - `CI / deps-check`
+  - `CI / runtime-legacy`
+  - `CI / validate-mvp-v1`
+
+### Riscos restantes
+
+- O workflow adversarial dedicado (`adversarial-review-required.yml`) não foi criado neste ciclo para evitar bloqueio prematuro sem calibragem de falsos positivos.
+- O novo CI/check ainda precisa rodar em PR real para confirmar os nomes finais dos contexts no branch protection.
+
+## CEPR-ADVERSARIAL-REVIEW-ADVISORY-2026-05-31 — Fase 1 do resilver
+
+### Escopo entendido
+
+Implementar a pendência de resilver para IA contestadora de forma não bloqueante, criando o workflow `adversarial-review-required.yml` em modo `advisory` e publicando plano de calibração antes de promover para gate obrigatório.
+
+### Arquivos alterados
+
+- `.github/workflows/adversarial-review-required.yml`
+- `docs/agent/ADVERSARIAL_CALIBRATION_PLAN.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `cat CEPRAEA.md`
+- `gh pr list --limit 3 --state all --json number,title,state,updatedAt,headRefName,baseRefName,url`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `git diff --check`
+
+### Resultado da validação
+
+- `npm run typecheck`: passou.
+- `npm test`: passou (`9` arquivos, `107` testes).
+- `npm run build`: passou (com warnings não bloqueantes de chunk-size/import dinâmico já existentes).
+- `git diff --check`: passou.
+
+### Preview/PR remoto
+
+- Não aplicável nesta etapa: workflow criado localmente para entrar em operação no próximo PR real.
+
+### Riscos restantes
+
+- O workflow está em `advisory` e ainda não bloqueia merge; precisa de 3-5 PRs piloto para calibrar falso positivo/negativo.
+- A promoção para `enforced` depende de validação humana com base no plano em `docs/agent/ADVERSARIAL_CALIBRATION_PLAN.md`.
+
+## CEPR-PR70-RESILVER-PILOT-2026-05-31 — PR técnico de teste + 1ª linha de calibração
+
+### Escopo entendido
+
+Abrir PR técnica para disparar o novo workflow adversarial em modo advisory, confirmar os nomes reais de checks na UI do GitHub e registrar a primeira linha de calibração com evidência real.
+
+### Arquivos alterados
+
+- `.github/workflows/adversarial-review-required.yml`
+- `.github/workflows/pr-evidence-guard.yml`
+- `.github/workflows/ci.yml`
+- `docs/agent/ADVERSARIAL_CALIBRATION_PLAN.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `git checkout -b chore/agent-governance-resilver-pilot`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `git commit ...`
+- `git push -u origin chore/agent-governance-resilver-pilot`
+- `gh pr create --base main --head chore/agent-governance-resilver-pilot ...`
+- `gh pr checks 70 --watch`
+- `gh run view 26712941615 --log`
+- `gh run view 26712941589 --job 78726376884 --log-failed`
+- `gh api --method PUT repos/Davisermenho/CEPRAEA/branches/main/protection/required_status_checks/contexts ...`
+- `gh api --method PATCH repos/Davisermenho/CEPRAEA/pulls/70 -f body=...`
+
+### Resultado da validação
+
+- PR #70 aberta com sucesso.
+- `adversarial-review-required` passou em advisory.
+- 1ª execução do adversarial apontou `0 critical / 3 high`, classificada como falso positivo de timing; ajuste aplicado no workflow.
+- `pr-evidence-guard` passou após correção de parsing e alinhamento de nomes.
+- check `validate-mvp-v1` permaneceu em execução longa por `supabase start` no momento do registro.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`
+- Preview Vercel: ativo e com deploy concluído na execução observada.
+- Contexts de branch protection atualizados para nomes reais dos checks.
+
+### Riscos restantes
+
+- `validate-mvp-v1` ainda pendente durante esta coleta de evidência; status final depende da conclusão do job no GitHub Actions.
+- workspace local mantém artefatos não relacionados não versionados (`docs/design/CHANGELOG.md`, `docs/ontologia/CHANGELOG.md`, `onthbpraia/`).
+
+## CEPR-VALIDATE-MVP-V1-CAPTCHA-E2E-2026-05-31 — hardening de signup E2E no CI
+
+### Escopo entendido
+
+Corrigir o `validate-mvp-v1` para remover fragilidade de captcha no fluxo E2E da CI (signup via Supabase Auth), revalidar a PR #70 e consolidar status dos checks.
+
+### Arquivos alterados
+
+- `e2e/helpers/supabaseSignup.ts`
+- `e2e/coachProvisioning.ts`
+- `e2e/athleteProvisioning.ts`
+- `e2e/ownerProvisioning.ts`
+- `e2e/public/presence-token.spec.ts`
+- `e2e/public/presence-token-decline.spec.ts`
+- `e2e/athlete/profile.spec.ts`
+- `e2e/athlete/onboarding.spec.ts`
+- `e2e/athlete/training-flow.spec.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI (`gh`)
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `sed -n '1,220p' CEPRAEA.md`
+- `gh pr list --limit 3 --state all --json number,title,headRefName,baseRefName,state,mergedAt,createdAt,updatedAt,url`
+- `rg -n "auth/v1/signup" e2e`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `npm run validate:mvp:v1`
+
+### Resultado da validação
+
+- `npm run typecheck`: passou.
+- `npm test`: passou (`9` arquivos, `107` testes).
+- `npm run build`: passou (com warnings não bloqueantes de chunk-size/import dinâmico já existentes).
+- `npm run validate:mvp:v1`: falhou por 7 cenários E2E legados não relacionados ao captcha (`access/onboarding`, `auth/anti-enumeration`, `auth/redirect-guard`, `coach/login`, `athlete/login`, `athlete/profile`).
+- Durante a execução completa, os cenários alterados que dependem de signup (`presence-token`, `presence-token-decline`, `athlete/training-flow`) executaram com sucesso, confirmando remoção da falha de captcha nesses fluxos.
+
+### Preview/PR remoto
+
+- PR alvo: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Revalidação remota pendente de push e nova rodada de checks neste registro.
+
+### Riscos restantes
+
+- Ainda há falhas E2E baseline não relacionadas ao objetivo de captcha, que podem manter `validate-mvp-v1` vermelho até tratamento dedicado.
+- Há arquivos não relacionados no workspace e não alterados nesta intervenção: `docs/design/CHANGELOG.md`, `docs/ontologia/CHANGELOG.md`, `onthbpraia/`.
+
+## CEPR-E2E-PASSWORD-POLICY-CI-2026-05-31 — correção de senha forte no signup E2E
+
+### Escopo entendido
+
+Após a correção de captcha, `validate-mvp-v1` remoto passou a falhar com `422` por policy de senha no Supabase Auth. Objetivo: alinhar senhas de teste sem alterar escopo funcional.
+
+### Arquivos alterados
+
+- `.env.test`
+- `e2e/helpers/auth.ts`
+- `e2e/auth/redirect-guard.spec.ts`
+- `e2e/athlete/onboarding.spec.ts`
+- `e2e/athlete/profile.spec.ts`
+- `e2e/athlete/training-flow.spec.ts`
+- `e2e/public/presence-token.spec.ts`
+- `e2e/public/presence-token-decline.spec.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI (`gh`)
+- npm
+
+### Comandos executados
+
+- `gh pr checks 70 --watch`
+- `gh run view 26713633660 --job 78728236364 --log-failed`
+- `npm run typecheck`
+- `npx playwright test e2e/smoke.spec.ts --project=desktop`
+
+### Resultado da validação
+
+- Identificado no CI: `Signup failed (422): Password should be at least 10 characters...` em `e2e/helpers/supabaseSignup.ts` durante `globalSetup` (`coachProvisioning`).
+- `npm run typecheck`: passou.
+- `npx playwright test e2e/smoke.spec.ts --project=desktop`: passou (`4/4`), confirmando `globalSetup` operacional após ajuste de senha.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Última rodada monitorada (antes deste ajuste de senha) finalizou com único fail em `validate-mvp-v1`; demais checks passaram.
+
+### Riscos restantes
+
+- Ainda é necessária nova rodada de checks da PR #70 após este commit para confirmar o estado final de `validate-mvp-v1`.
+
+## CEPR-VALIDATE-MVP-V1-CI-PLAYWRIGHT-CAPTCHA-TOKEN-2026-05-31 — fix final de infraestrutura + auth token
+
+### Escopo entendido
+
+Concluir a estabilização de `validate-mvp-v1` após monitoramento remoto da PR #70, atacando os dois últimos bloqueios observados no log:
+- Playwright sem binário no runner;
+- `signIn` via `grant_type=password` retornando `captcha verification process failed` em testes públicos.
+
+### Arquivos alterados
+
+- `.github/workflows/ci.yml`
+- `e2e/helpers/supabaseSignup.ts`
+- `e2e/public/presence-token.spec.ts`
+- `e2e/public/presence-token-decline.spec.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI (`gh`)
+- npm
+
+### Comandos executados
+
+- `gh run view 26713775832 --job 78728618847 --log-failed`
+- `gh run view 26713775832 --job 78728618847 --log | rg ...`
+- `npm run typecheck`
+- `npx playwright test e2e/public/presence-token.spec.ts e2e/public/presence-token-decline.spec.ts --project=desktop`
+
+### Resultado da validação
+
+- Log remoto confirmou falhas por ausência de browser (`Executable doesn't exist ... chrome-headless-shell`) e captcha no `signIn` por token endpoint.
+- `npm run typecheck`: passou.
+- `npx playwright test ...presence-token... --project=desktop`: passou (`2/2`).
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Nova rodada de checks ainda pendente neste ponto do registro (após novo commit será reexecutada).
+
+### Riscos restantes
+
+- Dependência de nova execução remota para confirmar o status final consolidado de `validate-mvp-v1`.
+
+## CEPR-VALIDATE-MVP-V1-PLAYWRIGHT-INSTALL-TUNING-2026-05-31 — ajuste de infraestrutura no workflow
+
+### Escopo entendido
+
+Destravar a revalidação remota ao identificar step preso em `npx playwright install --with-deps chromium` por período prolongado.
+
+### Arquivos alterados
+
+- `.github/workflows/ci.yml`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- GitHub CLI (`gh`)
+- Git
+
+### Comandos executados
+
+- `gh pr checks 70`
+- `gh api repos/Davisermenho/CEPRAEA/actions/jobs/78729107202`
+
+### Resultado da validação
+
+- Job remoto em progresso por longo período no passo `Run npx playwright install --with-deps chromium` (status `in_progress`, sem avançar para `supabase start`).
+- Ajuste aplicado para `npx playwright install chromium`.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Nova execução de checks necessária após push desta correção.
+
+### Riscos restantes
+
+- Até a nova execução concluir, `validate-mvp-v1` permanece sem status final para o commit atualizado.
+
+## CEPR-PLAYWRIGHT-ONLY-SHELL-CI-2026-05-31 — ajuste de instalação para headless shell
+
+### Escopo entendido
+
+Reduzir tempo/instabilidade da etapa de instalação do Playwright no CI, mantendo compatibilidade com execução headless.
+
+### Arquivos alterados
+
+- `.github/workflows/ci.yml`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+
+### Comandos executados
+
+- edição de workflow para `npx playwright install --only-shell chromium`.
+
+### Resultado da validação
+
+- Ajuste aplicado; depende de nova execução remota para status final.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Recheck pendente após push.
+
+### Riscos restantes
+
+- Requer nova rodada de checks para confirmar se o gargalo de instalação foi eliminado.
+
+## CEPR-CI-PLAYWRIGHT-CHANNEL-CHROME-2026-05-31 — execução em Chrome do sistema no CI
+
+### Escopo entendido
+
+Evitar bloqueio recorrente em instalação de browser Playwright no GitHub Actions, mantendo capacidade de execução E2E no `validate-mvp-v1`.
+
+### Arquivos alterados
+
+- `playwright.config.ts`
+- `.github/workflows/ci.yml`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+
+### Comandos executados
+
+- `npm run typecheck`
+- `npx playwright test e2e/smoke.spec.ts --project=desktop`
+
+### Resultado da validação
+
+- `npm run typecheck`: passou.
+- `npx playwright test e2e/smoke.spec.ts --project=desktop`: passou (`4/4`).
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Recheck pendente após push desta alteração para obter status final consolidado.
+
+### Riscos restantes
+
+- Depende de runner GitHub possuir Chrome de sistema disponível (padrão em `ubuntu-latest`).
+
+## CEPR-VALIDATE-MVP-V1-CAPTCHA-CI-HARDENING-2026-05-31 — fechamento da rodada e revalidação da PR #70
+
+### Escopo entendido
+
+Prosseguir na correção do `validate-mvp-v1` para reduzir dependência frágil de captcha no fluxo E2E/CI, consolidar hardening de auth e revalidar a PR técnica de calibração (#70).
+
+### Arquivos alterados
+
+- `src/features/atleta/pages/AtletaLoginPage.tsx`
+- `src/features/atleta/pages/AtletaPerfilPage.tsx`
+- `e2e/coach/login.spec.ts`
+- `e2e/athlete/login.spec.ts`
+- `e2e/athlete/profile.spec.ts`
+- `e2e/auth/anti-enumeration.spec.ts`
+- `e2e/auth/redirect-guard.spec.ts`
+- `e2e/helpers/auth.ts`
+- `scripts/run-e2e-local.sh`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `npx playwright test e2e/scout/scout-cepr0087-ux.spec.ts --project=desktop`
+- `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/auth/redirect-guard.spec.ts --project=desktop`
+- `gh pr checks 70 --watch`
+- `gh pr view 70 --json statusCheckRollup,url`
+
+### Resultado da validação
+
+- `npm run typecheck`: passou.
+- `npm test`: passou.
+- `npm run build`: passou.
+- Suites E2E isoladas (auth/scout): passaram após hardening.
+- `npm run validate:mvp:v1`: ainda apresenta intermitência local de infraestrutura Supabase (`database system in recovery mode` / `not accepting connections`) em execuções de lote; validação final direcionada para CI da PR.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Próximo passo operacional: push do commit desta rodada e monitoramento até conclusão dos checks remotos.
+
+### Riscos restantes
+
+- `validate-mvp-v1` pode continuar sensível a variabilidade do ambiente CI/local até calibração final dos checks e confirmação dos nomes definitivos no branch protection após execução real.
+
+## CEPR-ANTI-ENUMERATION-SUBMIT-READY-GUARD-2026-05-31 — correção pós-revalidação do validate-mvp-v1
+
+### Escopo entendido
+
+Revalidar a PR #70 e corrigir a falha remanescente de CI no `validate-mvp-v1` relacionada ao fluxo anti-enumeração de signup.
+
+### Arquivos alterados
+
+- `e2e/auth/anti-enumeration.spec.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `gh pr checks 70 --watch --interval 10`
+- `gh pr view 70 --json statusCheckRollup`
+- `gh run view 26716616821 --job 78736211065 --log-failed`
+- `gh run view 26716616815 --job 78736211024 --log-failed`
+- `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/auth/redirect-guard.spec.ts --project=desktop`
+- `npm run typecheck`
+
+### Resultado da validação
+
+- Status consolidado da rodada anterior da PR #70:
+  - `validate-mvp-v1`: **FAILURE**.
+  - Falha raiz: `e2e/auth/anti-enumeration.spec.ts` no caso de signup (`expect(...'Verifique seu email...').toBeVisible`) por submit não disparado de forma determinística.
+  - `pr-evidence-guard`: **FAILURE** por `Link do run \`scout-preview-smoke\` (formato inválido)` no corpo da PR.
+- Após correção do teste:
+  - `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/auth/redirect-guard.spec.ts --project=desktop`: passou (`9/9`).
+  - `npm run typecheck`: passou.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Pendência operacional: push deste ajuste e nova rodada de checks para confirmar `validate-mvp-v1` em `SUCCESS`.
+
+### Riscos restantes
+
+- Enquanto o corpo da PR não for atualizado com link válido do run `scout-preview-smoke`, o check `pr-evidence-guard` continuará falhando independentemente do estado de código.
+
+## CEPR-ANTI-ENUM-SIGNUP-REDIRECT-GUARD-2026-05-31 — correção adicional para estabilidade de CI
+
+### Escopo entendido
+
+Após nova rodada de checks da PR #70, `validate-mvp-v1` continuou falhando no mesmo teste de signup anti-enumeração. Ajustar o comportamento da tela para preservar a mensagem canônica mesmo quando o provedor cria sessão transitória.
+
+### Arquivos alterados
+
+- `src/features/atleta/pages/AtletaLoginPage.tsx`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `gh pr view 70 --json statusCheckRollup`
+- `gh run view 26716978796 --job 78737214158 --log-failed`
+- `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/athlete/login.spec.ts --project=desktop`
+- `npm run typecheck`
+
+### Resultado da validação
+
+- Rodada anterior de CI (commit `9418565`) concluiu com:
+  - `pr-evidence-guard`: `SUCCESS` (destravado);
+  - `validate-mvp-v1`: `FAILURE` (1 teste: signup anti-enumeração sem mensagem visível).
+- Após correção de guarda de redirecionamento:
+  - `npx playwright test e2e/auth/anti-enumeration.spec.ts e2e/athlete/login.spec.ts --project=desktop`: passou.
+  - `npm run typecheck`: passou.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Pendência operacional: push desta correção adicional e nova rodada de checks para confirmar `validate-mvp-v1`.
+
+### Riscos restantes
+
+- O caso de signup anti-enumeração mostrou flakiness apenas em carga de suíte completa na CI; confirmação final depende do próximo run remoto.

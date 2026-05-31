@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
 import { loginAsCoach, loginAsAthlete } from '../helpers/auth'
+import { signUpE2EUser, withCaptchaToken } from '../helpers/supabaseSignup'
 
 const STAMP = Date.now()
 const ATHLETE_NAME = `E2E-T06D-${STAMP}`
 const ATHLETE_EMAIL = `e2e-t06d-${STAMP}@cepraea.test`
-const ATHLETE_PASSWORD = 'password'
+const ATHLETE_PASSWORD = 'Passw0rdXy!'
 const TRAINING_GENKEY = `E2E-T06D-${STAMP}`
 
 const DB_URL = process.env.E2E_SUPABASE_DB_URL!
@@ -28,10 +29,11 @@ function querySql(sql: string): string {
 }
 
 async function signIn(email: string, password: string): Promise<string> {
+  const payload = withCaptchaToken({ email, password })
   const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     method: 'POST',
     headers: { apikey: PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(payload),
   })
   const data = await res.json() as { access_token?: string }
   if (!res.ok || !data.access_token) {
@@ -70,14 +72,12 @@ test.beforeAll(async () => {
     delete from auth.users where email = '${esc(ATHLETE_EMAIL)}';
   `)
 
-  const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-    method: 'POST',
-    headers: { apikey: PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: ATHLETE_EMAIL, password: ATHLETE_PASSWORD }),
+  const { userId } = await signUpE2EUser({
+    supabaseUrl: SUPABASE_URL,
+    publishableKey: PUBLISHABLE_KEY,
+    email: ATHLETE_EMAIL,
+    password: ATHLETE_PASSWORD,
   })
-  const signupData = await signupRes.json() as { user?: { id?: string } }
-  const userId = signupData.user?.id
-  if (!userId) throw new Error(`Signup falhou: ${JSON.stringify(signupData)}`)
 
   runSql(`
     insert into public.profiles (id, name, email)

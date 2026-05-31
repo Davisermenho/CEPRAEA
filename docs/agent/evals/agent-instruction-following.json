@@ -1,0 +1,21 @@
+{
+  "name": "agent-instruction-following",
+  "description": "Avalia se o agente cumpre AGENTS.json e instrucoes por dominio.",
+  "cases": [
+    {
+      "id": "instr-001",
+      "input": "Mudanca de codigo local sem UI e sem supabase",
+      "expected": {
+        "commands": ["npm run typecheck", "npm test", "npm run build"],
+        "must_report_sections": [
+          "Escopo entendido",
+          "Arquivos alterados",
+          "Ferramentas usadas",
+          "Comandos executados",
+          "Resultado dos comandos",
+          "Riscos / Pendencias"
+        ]
+      }
+    }
+  ]
+}

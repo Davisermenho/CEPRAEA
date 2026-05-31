@@ -3,6 +3,7 @@
 // or with owner role (to test coach invite flow).
 
 import { execFileSync } from 'node:child_process'
+import { signUpE2EUser } from './helpers/supabaseSignup'
 
 function sqlLiteral(value: string): string {
   return value.replaceAll("'", "''")
@@ -42,21 +43,13 @@ export function readOwnerContext(): OwnerContext {
 }
 
 async function signUp(ctx: OwnerContext): Promise<string> {
-  const response = await fetch(`${ctx.supabaseUrl}/auth/v1/signup`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: ctx.publishableKey,
-    },
-    body: JSON.stringify({ email: ctx.ownerEmail, password: ctx.ownerPassword }),
+  const { userId } = await signUpE2EUser({
+    supabaseUrl: ctx.supabaseUrl,
+    publishableKey: ctx.publishableKey,
+    email: ctx.ownerEmail,
+    password: ctx.ownerPassword,
   })
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`Owner signup failed: ${text}`)
-  }
-  const json = await response.json() as { user?: { id: string } }
-  if (!json.user?.id) throw new Error('Owner signup: no user.id in response')
-  return json.user.id
+  return userId
 }
 
 export async function provisionOwner(ctx: OwnerContext): Promise<void> {

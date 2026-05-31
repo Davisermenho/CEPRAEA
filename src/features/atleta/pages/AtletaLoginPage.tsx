@@ -14,6 +14,14 @@ import { PASSWORD_MIN_LENGTH } from "@/features/auth/lib/passwordPolicy"
 import { TurnstileWidget, type TurnstileWidgetHandle } from "@/features/auth/components/TurnstileWidget"
 
 type Mode = 'login' | 'register' | 'reset'
+const AUTH_REQUEST_TIMEOUT_MS = 12_000
+
+async function withAuthTimeout<T>(promise: Promise<T>): Promise<T | null> {
+  return await Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), AUTH_REQUEST_TIMEOUT_MS)),
+  ])
+}
 
 export default function AtletaLoginPage() {
   const navigate = useNavigate()
@@ -31,9 +39,17 @@ export default function AtletaLoginPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [lockUntil, setLockUntil] = useState<number>(0)
   const captchaRef = useRef<TurnstileWidgetHandle>(null)
+  const antiEnumSignUpGuardUntilRef = useRef<number>(0)
 
   useEffect(() => {
     if (authenticated) {
+      // Anti-enumeração §13: após signup, nunca redirecionar automaticamente
+      // para área autenticada. Se o provedor abrir sessão (imediata ou tardia),
+      // forçamos sign-out durante a janela de guarda.
+      if (Date.now() < antiEnumSignUpGuardUntilRef.current) {
+        void supabase.auth.signOut()
+        return
+      }
       const target = redirectGuard(searchParams.get('returnUrl'), undefined)
       navigate(target === '/' ? '/atleta/treinos' : target, { replace: true })
     }
@@ -66,10 +82,10 @@ export default function AtletaLoginPage() {
 
     if (mode === "reset") {
       setSubmitting(true)
-      await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      await withAuthTimeout(supabase.auth.resetPasswordForEmail(normalizedEmail, {
         redirectTo: `${window.location.origin}/atleta/nova-senha`,
         captchaToken,
-      })
+      }))
       setSubmitting(false)
       // Anti-enumeração §13: sempre AUTH-RESET-001, independente de sucesso/falha
       setInfo(AUTH_MESSAGES['AUTH-RESET-001'])
@@ -82,11 +98,12 @@ export default function AtletaLoginPage() {
     setSubmitting(true)
 
     if (mode === "register") {
+      antiEnumSignUpGuardUntilRef.current = Date.now() + 45_000
       const policy = validatePasswordPolicy(password)
       if (!policy.valid) { setSubmitting(false); setError(AUTH_MESSAGES["AUTH-RESET-002"]); return }
       const hibp = await hibpCheck(password)
       if (hibp.pwned) { setSubmitting(false); setError(AUTH_MESSAGES["AUTH-RESET-003"]); return }
-      await supabase.auth.signUp({
+      const signUpResult = await withAuthTimeout(supabase.auth.signUp({
         email: normalizedEmail,
         password,
         options: {
@@ -94,7 +111,12 @@ export default function AtletaLoginPage() {
           captchaToken,
           emailRedirectTo: `${window.location.origin}/atleta/treinos`,
         },
-      })
+      }))
+      // Em ambientes com auto-confirm habilitado, o signUp pode abrir sessão imediatamente.
+      // Mantemos o fluxo anti-enumeração no login sem navegar para área autenticada.
+      if (signUpResult?.data?.session) {
+        await supabase.auth.signOut()
+      }
       setSubmitting(false)
       // Anti-enumeração §13: sempre AUTH-SIGNUP-001, independente de sucesso/falha
       setInfo(AUTH_MESSAGES['AUTH-SIGNUP-001'])

@@ -26,6 +26,6 @@ test.describe('AtletaLoginPage', () => {
     await expect(page.getByText(/redefinir senha/i)).toBeVisible()
     await page.locator('#atleta-email').fill('')
     await page.getByRole('button', { name: /enviar email de redefinição/i }).click()
-    await expect(page.getByText(/informe um email válido/i)).toBeVisible()
+    await expect(page.getByText(/informe seu email/i)).toBeVisible()
   })
 })

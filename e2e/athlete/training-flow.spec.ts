@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test'
 import { execFileSync } from 'node:child_process'
 import { loginAsAthlete } from '../helpers/auth'
+import { signUpE2EUser } from '../helpers/supabaseSignup'
 
 const STAMP = Date.now()
 const ATHLETE_NAME = `E2E-AF-${STAMP}`
 const ATHLETE_EMAIL = `e2e-af-${STAMP}@cepraea.test`
-const ATHLETE_PASSWORD = 'password'
+const ATHLETE_PASSWORD = 'Passw0rdXy!'
 const GENKEY_FUTURE = `E2E-AF-F-${STAMP}`
 const GENKEY_PAST = `E2E-AF-P-${STAMP}`
 
@@ -46,14 +47,12 @@ test.beforeAll(async () => {
     delete from auth.users where email = '${esc(ATHLETE_EMAIL)}';
   `)
 
-  const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-    method: 'POST',
-    headers: { apikey: PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: ATHLETE_EMAIL, password: ATHLETE_PASSWORD }),
+  const { userId } = await signUpE2EUser({
+    supabaseUrl: SUPABASE_URL,
+    publishableKey: PUBLISHABLE_KEY,
+    email: ATHLETE_EMAIL,
+    password: ATHLETE_PASSWORD,
   })
-  const signupData = await signupRes.json() as { user?: { id?: string } }
-  const userId = signupData.user?.id
-  if (!userId) throw new Error(`Signup falhou: ${JSON.stringify(signupData)}`)
 
   runSql(`
     insert into public.profiles (id, name, email)

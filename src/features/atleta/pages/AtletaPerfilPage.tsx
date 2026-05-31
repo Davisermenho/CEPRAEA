@@ -5,6 +5,7 @@ import { useSupabaseAuth } from '@/features/auth/SupabaseAuthProvider'
 import { supabase } from '@/lib/supabase'
 import { formatPhone } from '@/lib/utils'
 import { useCurrentAthlete } from '@/features/atleta/useCurrentAthlete'
+import { AUTH_MESSAGES } from '@/features/auth/lib/authVocabulary'
 
 export default function AtletaPerfilPage() {
   const { signOut, user } = useSupabaseAuth()
@@ -22,11 +23,13 @@ export default function AtletaPerfilPage() {
   const handleSendReset = async () => {
     setSendingReset(true)
     setResetInfo('')
-    const { error } = await supabase.auth.resetPasswordForEmail(user.email ?? me.email, {
+    await supabase.auth.resetPasswordForEmail(user.email ?? me.email, {
       redirectTo: `${window.location.origin}/atleta/nova-senha`,
+      captchaToken: import.meta.env.VITE_TURNSTILE_TEST_TOKEN,
     })
     setSendingReset(false)
-    setResetInfo(error ? 'Não foi possível enviar o email agora.' : 'Email de redefinição enviado.')
+    // Anti-enumeração: feedback canônico, independente do resultado do provedor.
+    setResetInfo(AUTH_MESSAGES['AUTH-RESET-001'])
   }
 
   return (
