@@ -24,7 +24,9 @@ test.describe('Smoke', () => {
 
   test('app React renderiza conteúdo na raiz', async ({ page }) => {
     await page.goto('/')
-    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    // Usar 'load' em vez de 'networkidle': o Turnstile faz polling contínuo em
+    // produção, impedindo que networkidle seja atingido dentro do timeout.
+    await page.waitForLoadState('load', { timeout: 15000 })
     const root = page.locator('#root')
     await expect(root).not.toBeEmpty()
   })
@@ -43,7 +45,9 @@ test.describe('Smoke', () => {
     })
 
     await page.goto('/')
-    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    // Usar 'load' em vez de 'networkidle': o Turnstile faz polling contínuo em
+    // produção, impedindo que networkidle seja atingido dentro do timeout.
+    await page.waitForLoadState('load', { timeout: 15000 })
 
     expect(pageErrors).toEqual([])
     expect(consoleErrors).toEqual([])
