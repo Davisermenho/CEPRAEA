@@ -3323,3 +3323,18 @@ Ajustes finais para estabilizar o `validate-mvp-v1` na CI após remoção do cap
 
 - `npm run typecheck`
 - `npx playwright test e2e/public/presence-token.spec.ts e2e/public/presence-token-decline.spec.ts --project=desktop`
+
+### [CEPR-VALIDATE-MVP-V1-PLAYWRIGHT-INSTALL-TUNING-2026-05-31] — 2026-05-31 — destravar etapa de instalação no CI
+
+#### ✨ Resumo
+
+A etapa `npx playwright install --with-deps chromium` permaneceu em execução por tempo anormal no runner GitHub. O workflow foi ajustado para `npx playwright install chromium` para eliminar o gargalo de `apt` e manter instalação determinística do browser.
+
+#### 🛠️ Changed
+
+- `.github/workflows/ci.yml`
+  - `validate-mvp-v1`: troca de `--with-deps` para instalação direta de Chromium.
+
+#### 🛡️ Evidências
+
+- monitoramento contínuo de `gh pr checks 70` e `gh api repos/.../actions/jobs/78729107202` confirmou gargalo concentrado no step de instalação.

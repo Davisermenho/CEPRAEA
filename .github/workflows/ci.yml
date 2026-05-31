@@ -94,6 +94,6 @@ jobs:
         with:
           version: 2.98.1
       - run: npm ci --no-audit --no-fund
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       - run: supabase start
       - run: npm run validate:mvp:v1

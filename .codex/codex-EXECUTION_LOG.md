@@ -6497,3 +6497,40 @@ Concluir a estabilização de `validate-mvp-v1` após monitoramento remoto da PR
 ### Riscos restantes
 
 - Dependência de nova execução remota para confirmar o status final consolidado de `validate-mvp-v1`.
+
+## CEPR-VALIDATE-MVP-V1-PLAYWRIGHT-INSTALL-TUNING-2026-05-31 — ajuste de infraestrutura no workflow
+
+### Escopo entendido
+
+Destravar a revalidação remota ao identificar step preso em `npx playwright install --with-deps chromium` por período prolongado.
+
+### Arquivos alterados
+
+- `.github/workflows/ci.yml`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- GitHub CLI (`gh`)
+- Git
+
+### Comandos executados
+
+- `gh pr checks 70`
+- `gh api repos/Davisermenho/CEPRAEA/actions/jobs/78729107202`
+
+### Resultado da validação
+
+- Job remoto em progresso por longo período no passo `Run npx playwright install --with-deps chromium` (status `in_progress`, sem avançar para `supabase start`).
+- Ajuste aplicado para `npx playwright install chromium`.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Nova execução de checks necessária após push desta correção.
+
+### Riscos restantes
+
+- Até a nova execução concluir, `validate-mvp-v1` permanece sem status final para o commit atualizado.
