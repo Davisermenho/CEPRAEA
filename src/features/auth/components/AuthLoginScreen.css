@@ -150,3 +150,9 @@
   .auth-first-access-card { margin-top: 40px; }
   .auth-login-footer { margin-top: 40px; }
 }
+
+/* Turnstile captcha UX */
+.auth-login-captcha { min-height: 65px; margin-bottom: 4px; }
+.auth-login-captcha-hint { margin: 6px 0 18px; font-size: 12px; line-height: 1.4; color: var(--auth-muted); text-align: center; }
+.auth-login-captcha-error-block { margin-bottom: 18px; border-radius: 16px; padding: 12px 14px; font-size: 13px; line-height: 1.35; text-align: center; color: #ffb4b4; border: 1px solid rgba(248, 113, 113, 0.40); background: rgba(239, 68, 68, 0.16); display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.auth-login-captcha-retry-btn { border: 1px solid rgba(248, 113, 113, 0.50); background: transparent; color: #ffb4b4; font-size: 12px; font-weight: 700; border-radius: 10px; padding: 6px 18px; cursor: pointer; }

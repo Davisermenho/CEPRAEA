@@ -140,6 +140,6 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidget
     // No bypass mode, não renderiza container (widget é invisível mas o callback dispara síncrono).
     if (BYPASS_TOKEN) return null
 
-    return <div ref={containerRef} className={className} data-testid="turnstile-widget" />
+    return <div ref={containerRef} className={className} style={{ minHeight: "65px" }} data-testid="turnstile-widget" />
   },
 )

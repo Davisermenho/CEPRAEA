@@ -20,6 +20,8 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaError, setCaptchaError] = useState(false)
+  const [captchaRetry, setCaptchaRetry] = useState(0)
   const turnstileRef = useRef<TurnstileWidgetHandle>(null)
 
   useEffect(() => {
@@ -61,6 +63,12 @@ export default function LoginPage() {
     }
     const target = redirectGuard(searchParams.get('returnUrl'))
     navigate(target, { replace: true })
+  }
+
+  const handleCaptchaRetry = () => {
+    setCaptchaError(false)
+    setCaptchaToken(null)
+    setCaptchaRetry((n) => n + 1)
   }
 
   const disabled = submitting || authLoading || !configured || !captchaToken
@@ -106,12 +114,30 @@ export default function LoginPage() {
         </div>
 
         <TurnstileWidget
+          key={captchaRetry}
           ref={turnstileRef}
-          onToken={setCaptchaToken}
+          onToken={(token) => { setCaptchaToken(token); setCaptchaError(false) }}
           onExpired={() => setCaptchaToken(null)}
-          onError={() => setCaptchaToken(null)}
+          onError={() => { setCaptchaToken(null); setCaptchaError(true) }}
           className="auth-login-captcha"
         />
+        {!captchaToken && !captchaError && (
+          <p className="auth-login-captcha-hint">
+            Aguardando verificação de segurança…
+          </p>
+        )}
+        {captchaError && (
+          <div className="auth-login-captcha-error-block">
+            <span>Não foi possível carregar a verificação de segurança.</span>
+            <button
+              type="button"
+              onClick={handleCaptchaRetry}
+              className="auth-login-captcha-retry-btn"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        )}
 
         {!configured && (
           <div className="auth-login-status auth-login-status-error">
