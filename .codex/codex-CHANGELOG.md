@@ -3338,3 +3338,14 @@ A etapa `npx playwright install --with-deps chromium` permaneceu em execução p
 #### 🛡️ Evidências
 
 - monitoramento contínuo de `gh pr checks 70` e `gh api repos/.../actions/jobs/78729107202` confirmou gargalo concentrado no step de instalação.
+
+### [CEPR-PLAYWRIGHT-ONLY-SHELL-CI-2026-05-31] — 2026-05-31 — otimização final do download de browser
+
+#### ✨ Resumo
+
+A instalação do browser no CI foi refinada para `--only-shell`, alinhada ao uso headless no runner e ao path de falha observado (`chromium_headless_shell-*`).
+
+#### 🛠️ Changed
+
+- `.github/workflows/ci.yml`
+  - `validate-mvp-v1`: `npx playwright install --only-shell chromium`.

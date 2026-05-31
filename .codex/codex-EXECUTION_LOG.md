@@ -6534,3 +6534,37 @@ Destravar a revalidação remota ao identificar step preso em `npx playwright in
 ### Riscos restantes
 
 - Até a nova execução concluir, `validate-mvp-v1` permanece sem status final para o commit atualizado.
+
+## CEPR-PLAYWRIGHT-ONLY-SHELL-CI-2026-05-31 — ajuste de instalação para headless shell
+
+### Escopo entendido
+
+Reduzir tempo/instabilidade da etapa de instalação do Playwright no CI, mantendo compatibilidade com execução headless.
+
+### Arquivos alterados
+
+- `.github/workflows/ci.yml`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+
+### Comandos executados
+
+- edição de workflow para `npx playwright install --only-shell chromium`.
+
+### Resultado da validação
+
+- Ajuste aplicado; depende de nova execução remota para status final.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Recheck pendente após push.
+
+### Riscos restantes
+
+- Requer nova rodada de checks para confirmar se o gargalo de instalação foi eliminado.
