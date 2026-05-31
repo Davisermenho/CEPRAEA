@@ -3218,3 +3218,29 @@ Criação do workflow `adversarial-review-required` em modo `advisory`, com rela
 - `npm test`
 - `npm run build`
 - `git diff --check`
+
+### [CEPR-PR70-RESILVER-PILOT-2026-05-31] — 2026-05-31 — PR técnico de teste + 1ª linha de calibração
+
+#### ✨ Resumo
+
+Abertura da PR técnica #70 para disparar o workflow `adversarial-review-required`, validar nomes reais dos checks na UI do GitHub e registrar a primeira linha de calibração com evidência de falso positivo inicial.
+
+#### 🛠️ Changed
+
+- `.github/workflows/adversarial-review-required.yml`
+  - corrige parsing de check-runs com filtro de entradas inválidas.
+  - evita falso positivo inicial: `COMMAND_CHECK_MISMATCH` apenas em `strictMode`.
+- `.github/workflows/pr-evidence-guard.yml`
+  - corrige parsing de check-runs com filtro de entradas inválidas.
+  - alinha checks esperados para nomes reais publicados (`typecheck`, `test`, `build`, etc.).
+- `.github/workflows/ci.yml`
+  - adiciona setup Python + `rdflib`/`pyshacl`, Supabase CLI e `supabase start` no job `validate-mvp-v1`.
+- `docs/agent/ADVERSARIAL_CALIBRATION_PLAN.md`
+  - registra a 1ª linha de calibração com dados da PR #70.
+
+#### 🛡️ Evidências
+
+- PR criada: `https://github.com/Davisermenho/CEPRAEA/pull/70`
+- Checks confirmados na UI/API com nomes reais: `typecheck`, `test`, `build`, `deps-check`, `runtime-legacy`, `validate-mvp-v1`
+- `adversarial-review-required` em advisory: `pass` com 0 critical / 3 high na primeira coleta (falso positivo de timing)
+- branch protection atualizada para contexts reais via API

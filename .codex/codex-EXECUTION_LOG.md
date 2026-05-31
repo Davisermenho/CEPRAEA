@@ -6291,3 +6291,59 @@ Implementar a pendência de resilver para IA contestadora de forma não bloquean
 
 - O workflow está em `advisory` e ainda não bloqueia merge; precisa de 3-5 PRs piloto para calibrar falso positivo/negativo.
 - A promoção para `enforced` depende de validação humana com base no plano em `docs/agent/ADVERSARIAL_CALIBRATION_PLAN.md`.
+
+## CEPR-PR70-RESILVER-PILOT-2026-05-31 — PR técnico de teste + 1ª linha de calibração
+
+### Escopo entendido
+
+Abrir PR técnica para disparar o novo workflow adversarial em modo advisory, confirmar os nomes reais de checks na UI do GitHub e registrar a primeira linha de calibração com evidência real.
+
+### Arquivos alterados
+
+- `.github/workflows/adversarial-review-required.yml`
+- `.github/workflows/pr-evidence-guard.yml`
+- `.github/workflows/ci.yml`
+- `docs/agent/ADVERSARIAL_CALIBRATION_PLAN.md`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI
+- npm
+
+### Comandos executados
+
+- `git checkout -b chore/agent-governance-resilver-pilot`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `git commit ...`
+- `git push -u origin chore/agent-governance-resilver-pilot`
+- `gh pr create --base main --head chore/agent-governance-resilver-pilot ...`
+- `gh pr checks 70 --watch`
+- `gh run view 26712941615 --log`
+- `gh run view 26712941589 --job 78726376884 --log-failed`
+- `gh api --method PUT repos/Davisermenho/CEPRAEA/branches/main/protection/required_status_checks/contexts ...`
+- `gh api --method PATCH repos/Davisermenho/CEPRAEA/pulls/70 -f body=...`
+
+### Resultado da validação
+
+- PR #70 aberta com sucesso.
+- `adversarial-review-required` passou em advisory.
+- 1ª execução do adversarial apontou `0 critical / 3 high`, classificada como falso positivo de timing; ajuste aplicado no workflow.
+- `pr-evidence-guard` passou após correção de parsing e alinhamento de nomes.
+- check `validate-mvp-v1` permaneceu em execução longa por `supabase start` no momento do registro.
+
+### Preview/PR remoto
+
+- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`
+- Preview Vercel: ativo e com deploy concluído na execução observada.
+- Contexts de branch protection atualizados para nomes reais dos checks.
+
+### Riscos restantes
+
+- `validate-mvp-v1` ainda pendente durante esta coleta de evidência; status final depende da conclusão do job no GitHub Actions.
+- workspace local mantém artefatos não relacionados não versionados (`docs/design/CHANGELOG.md`, `docs/ontologia/CHANGELOG.md`, `onthbpraia/`).
