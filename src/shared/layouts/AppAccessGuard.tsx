@@ -10,7 +10,7 @@ import { getSupabaseTeamId } from '@/features/presence-tokens/presenceTokenConfi
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 
 export function AppAccessGuard() {
-  const { authenticated, configured, loading: authLoading } = useSupabaseAuth()
+  const { authenticated, configured, loading: authLoading, user } = useSupabaseAuth()
   const { loading: accessLoading, error, memberships, athleteLink, hasRole } = useAccessContext()
   const location = useLocation()
   const teamId = getSupabaseTeamId()
@@ -61,9 +61,17 @@ export function AppAccessGuard() {
       hasRole: false,
     })
 
-    // No memberships and no athlete link → redirect to onboarding so the user
-    // can create their own team or accept an invite.
+    // No memberships and no athlete link.
+    // If the user signed up with role "athlete", send to athlete area so
+    // AtletaGuard can run ensure_athlete_link(). Never send athletes to
+    // team onboarding.
     if (memberships.length === 0 && athleteLink === null) {
+      const isAthleteMetadata =
+        user?.user_metadata?.role === 'athlete' ||
+        user?.app_metadata?.role === 'athlete'
+      if (isAthleteMetadata) {
+        return <Navigate to="/atleta/treinos" replace />
+      }
       return <Navigate to="/onboarding/equipe" replace />
     }
 
