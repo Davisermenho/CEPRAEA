@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdir, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { signUpE2EUser } from './helpers/supabaseSignup'
 
 const PROVISION_LOCK_DIR = join(tmpdir(), 'cepraea-e2e-provision.lock')
 const PROVISION_LOCK_ATTEMPTS = 120
@@ -126,25 +127,12 @@ begin
 end $$;
 `)
 
-    const response = await fetch(`${context.supabaseUrl}/auth/v1/signup`, {
-      method: 'POST',
-      headers: {
-        apikey: context.publishableKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: context.coachEmail,
-        password: context.coachPassword,
-      }),
+    const { userId } = await signUpE2EUser({
+      supabaseUrl: context.supabaseUrl,
+      publishableKey: context.publishableKey,
+      email: context.coachEmail,
+      password: context.coachPassword,
     })
-
-    const payload = await response.json() as { msg?: string; user?: { id?: string } }
-    const userId = payload.user?.id
-
-    if (!response.ok || !userId) {
-      const detail = payload.msg ?? 'signup failed without user id'
-      throw new Error(`Failed to provision E2E coach: ${response.status} ${detail}`)
-    }
 
     const userIdSql = sqlLiteral(userId)
     const teamId = sqlLiteral(context.teamId)

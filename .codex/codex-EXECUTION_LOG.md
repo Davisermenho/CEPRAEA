@@ -6347,3 +6347,59 @@ Abrir PR técnica para disparar o novo workflow adversarial em modo advisory, co
 
 - `validate-mvp-v1` ainda pendente durante esta coleta de evidência; status final depende da conclusão do job no GitHub Actions.
 - workspace local mantém artefatos não relacionados não versionados (`docs/design/CHANGELOG.md`, `docs/ontologia/CHANGELOG.md`, `onthbpraia/`).
+
+## CEPR-VALIDATE-MVP-V1-CAPTCHA-E2E-2026-05-31 — hardening de signup E2E no CI
+
+### Escopo entendido
+
+Corrigir o `validate-mvp-v1` para remover fragilidade de captcha no fluxo E2E da CI (signup via Supabase Auth), revalidar a PR #70 e consolidar status dos checks.
+
+### Arquivos alterados
+
+- `e2e/helpers/supabaseSignup.ts`
+- `e2e/coachProvisioning.ts`
+- `e2e/athleteProvisioning.ts`
+- `e2e/ownerProvisioning.ts`
+- `e2e/public/presence-token.spec.ts`
+- `e2e/public/presence-token-decline.spec.ts`
+- `e2e/athlete/profile.spec.ts`
+- `e2e/athlete/onboarding.spec.ts`
+- `e2e/athlete/training-flow.spec.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI (`gh`)
+- npm
+
+### Comandos executados
+
+- `cat AGENTS.json`
+- `sed -n '1,220p' CEPRAEA.md`
+- `gh pr list --limit 3 --state all --json number,title,headRefName,baseRefName,state,mergedAt,createdAt,updatedAt,url`
+- `rg -n "auth/v1/signup" e2e`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `npm run validate:mvp:v1`
+
+### Resultado da validação
+
+- `npm run typecheck`: passou.
+- `npm test`: passou (`9` arquivos, `107` testes).
+- `npm run build`: passou (com warnings não bloqueantes de chunk-size/import dinâmico já existentes).
+- `npm run validate:mvp:v1`: falhou por 7 cenários E2E legados não relacionados ao captcha (`access/onboarding`, `auth/anti-enumeration`, `auth/redirect-guard`, `coach/login`, `athlete/login`, `athlete/profile`).
+- Durante a execução completa, os cenários alterados que dependem de signup (`presence-token`, `presence-token-decline`, `athlete/training-flow`) executaram com sucesso, confirmando remoção da falha de captcha nesses fluxos.
+
+### Preview/PR remoto
+
+- PR alvo: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
+- Revalidação remota pendente de push e nova rodada de checks neste registro.
+
+### Riscos restantes
+
+- Ainda há falhas E2E baseline não relacionadas ao objetivo de captcha, que podem manter `validate-mvp-v1` vermelho até tratamento dedicado.
+- Há arquivos não relacionados no workspace e não alterados nesta intervenção: `docs/design/CHANGELOG.md`, `docs/ontologia/CHANGELOG.md`, `onthbpraia/`.

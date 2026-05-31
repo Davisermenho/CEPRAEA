@@ -2,6 +2,7 @@
 // Creates an athlete record in the DB and an auth.users account for them.
 
 import { execFileSync } from 'node:child_process'
+import { signUpE2EUser } from './helpers/supabaseSignup'
 
 function sqlLiteral(value: string): string {
   return value.replaceAll("'", "''")
@@ -41,21 +42,13 @@ export function readAthleteContext(): AthleteContext {
 }
 
 async function signUp(ctx: AthleteContext): Promise<string> {
-  const response = await fetch(`${ctx.supabaseUrl}/auth/v1/signup`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: ctx.publishableKey,
-    },
-    body: JSON.stringify({ email: ctx.athleteEmail, password: ctx.athletePassword }),
+  const { userId } = await signUpE2EUser({
+    supabaseUrl: ctx.supabaseUrl,
+    publishableKey: ctx.publishableKey,
+    email: ctx.athleteEmail,
+    password: ctx.athletePassword,
   })
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`Athlete signup failed: ${text}`)
-  }
-  const json = await response.json() as { user?: { id: string } }
-  if (!json.user?.id) throw new Error('Athlete signup: no user.id in response')
-  return json.user.id
+  return userId
 }
 
 export async function provisionAthlete(ctx: AthleteContext): Promise<string> {

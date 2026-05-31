@@ -3244,3 +3244,33 @@ Abertura da PR técnica #70 para disparar o workflow `adversarial-review-require
 - Checks confirmados na UI/API com nomes reais: `typecheck`, `test`, `build`, `deps-check`, `runtime-legacy`, `validate-mvp-v1`
 - `adversarial-review-required` em advisory: `pass` com 0 critical / 3 high na primeira coleta (falso positivo de timing)
 - branch protection atualizada para contexts reais via API
+
+### [CEPR-VALIDATE-MVP-V1-CAPTCHA-E2E-2026-05-31] — 2026-05-31 — remover fragilidade de captcha no CI E2E
+
+#### ✨ Resumo
+
+Eliminação da dependência implícita de captcha nos signups E2E usados por `validate-mvp-v1`, centralizando o signup em helper compatível com payloads de captcha de teste para GoTrue.
+
+#### 🛠️ Changed
+
+- `e2e/helpers/supabaseSignup.ts`
+  - novo helper `signUpE2EUser(...)`.
+  - injeta token de captcha de teste via `E2E_TURNSTILE_TEST_TOKEN` ou `VITE_TURNSTILE_TEST_TOKEN`.
+  - envia `gotrue_meta_security.captcha_token` e `options.captchaToken` para compatibilidade.
+- `e2e/coachProvisioning.ts`
+- `e2e/athleteProvisioning.ts`
+- `e2e/ownerProvisioning.ts`
+- `e2e/public/presence-token.spec.ts`
+- `e2e/public/presence-token-decline.spec.ts`
+- `e2e/athlete/profile.spec.ts`
+- `e2e/athlete/onboarding.spec.ts`
+- `e2e/athlete/training-flow.spec.ts`
+  - todos migrados para `signUpE2EUser(...)` no lugar de chamadas diretas de `fetch('/auth/v1/signup')`.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- `npm run validate:mvp:v1` (executado; falhou por 7 testes E2E legados não relacionados ao captcha)
+- confirmação em execução: cenários alterados de signup (incluindo `presence-token*` e `training-flow`) passaram durante a suíte.
