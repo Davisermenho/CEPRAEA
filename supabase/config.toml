@@ -27,7 +27,7 @@ port = 54324
 [auth]
 enabled = true
 site_url = "http://localhost:5173"
-additional_redirect_urls = ["http://localhost:5173"]
+additional_redirect_urls = ["http://localhost:5173", "https://cepraea.vercel.app/**", "https://cepraea-*-davi-sermenhos-projects.vercel.app/**"]
 jwt_expiry = 3600
 enable_signup = true
 minimum_password_length = 10

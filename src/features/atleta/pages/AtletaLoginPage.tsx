@@ -89,7 +89,11 @@ export default function AtletaLoginPage() {
       await supabase.auth.signUp({
         email: normalizedEmail,
         password,
-        options: { data: { role: "athlete" }, captchaToken },
+        options: {
+          data: { role: "athlete" },
+          captchaToken,
+          emailRedirectTo: `${window.location.origin}/atleta/treinos`,
+        },
       })
       setSubmitting(false)
       // Anti-enumeração §13: sempre AUTH-SIGNUP-001, independente de sucesso/falha
