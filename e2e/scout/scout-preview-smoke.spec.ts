@@ -56,12 +56,6 @@ function isIgnorableConsoleError(message: string) {
   return ignorablePatterns.some((pattern) => pattern.test(message))
 }
 
-type SupabaseRestContext = {
-  restBase: string
-  apiKey: string
-  accessToken: string
-}
-
 type SmokeCleanupTarget = {
   teamName: string
   athleteName: string

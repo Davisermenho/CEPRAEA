@@ -235,7 +235,6 @@ export function EventForm({ jogoId, equipeAnalisada, adversario, initialPlacarCE
   const contextIsValid = !contextError
   const isShootout = form.faseJogoCEPRAEA === 'Shoot-out' || form.faseJogoAdversaria === 'Shoot-out'
   const attackingBlocks = attackingTeam === 'CEPRAEA' ? (form.ataqueCEPRAEA ?? []) : (form.ataqueAdversario ?? [])
-  const defendingBlocks = defendingTeam === 'CEPRAEA' ? (form.defesaCEPRAEA ?? []) : (form.defesaAdversaria ?? [])
   const attackingSystem = attackingTeam === 'CEPRAEA' ? form.sistemaTaticoCEPRAEA : form.sistemaTaticoAdversaria
   const hasCentralEspecialista = attackingBlocks.some((a) => a.funcao === 'Central Especialista' || a.funcao === 'Especialista') || !!attackingSystem?.includes('ESP central')
   const hasFinalizacao = forceFinalizacao || !!form.finalizacao?.houveFinalizacao || !!form.finalizacao?.tipoFinalizacao || attackingBlocks.some((a) => actionIndicatesFinish(a.acao))

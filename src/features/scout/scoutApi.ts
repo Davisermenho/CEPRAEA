@@ -345,36 +345,6 @@ function mapScoutLiveEntry(row: RawScoutLiveEntryRow): ScoutLiveEntry {
   }
 }
 
-function serializeScoutLiveEntry(input: ScoutLiveEntryWriteInput, teamId: string): Record<string, unknown> {
-  return {
-    team_id: teamId,
-    scout_game_id: input.scoutGameId,
-    id_jogada: input.idJogada,
-    tempo_jogo: input.tempoJogo,
-    fase_da_bola_code: input.faseDaBolaCode,
-    equipe_analisada_id: input.equipeAnalisadaId,
-    fase_equipe_analisada_code: input.faseEquipeAnalisadaCode,
-    sistema_ofensivo_code: input.sistemaOfensivoCode ?? null,
-    sistema_defensivo_code: input.sistemaDefensivoCode ?? null,
-    atleta_principal_id: input.atletaPrincipalId ?? null,
-    acao_principal_text: input.acaoPrincipalText ?? null,
-    acao_principal_suggestion_code: input.acaoPrincipalSuggestionCode ?? null,
-    acao_principal_is_custom: input.acaoPrincipalIsCustom ?? null,
-    tipo_finalizacao_code: input.tipoFinalizacaoCode ?? null,
-    resultado_factual_code: input.resultadoFactualCode,
-    motivo_pontuacao_code: input.motivoPontuacaoCode ?? null,
-    pontos_jogada: input.pontosJogada ?? null,
-    causa_provavel_code: input.causaProvavelCode ?? null,
-    prioridade_treino_code: input.prioridadeTreinoCode ?? null,
-    video_ref: input.videoRef ?? null,
-    status_validacao_code: input.statusValidacaoCode ?? 'PENDENTE',
-    obs_geral: input.obsGeral ?? null,
-    derived_scout_play_id: input.derivedScoutPlayId ?? null,
-    estrutura_transicao_code: input.estruturaTransicaoCode ?? null,
-    acao_preparatoria_code: input.acaoPreparatoriaCode ?? null,
-  }
-}
-
 function serializeScoutLiveEntryCreateInput(input: ScoutLiveEntryWriteInput): Record<string, unknown> {
   return {
     id_jogada: input.idJogada,

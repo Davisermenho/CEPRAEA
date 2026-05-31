@@ -5,7 +5,7 @@ import type { FormEvent } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getSupabaseTeamId } from '@/features/presence-tokens/presenceTokenConfig'
-import { normalizeEmail, InvalidEmailError } from '@/features/auth/lib/emailNormalization'
+import { normalizeEmail } from '@/features/auth/lib/emailNormalization'
 
 interface Invite {
   id: string

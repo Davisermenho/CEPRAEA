@@ -9,7 +9,6 @@ import type {
   ScoutFeedbackFilters,
   ScoutFeedbackRecipient,
   ScoutFeedbackStatus,
-  ScoutReportTrainingPriority,
 } from '@/types'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
