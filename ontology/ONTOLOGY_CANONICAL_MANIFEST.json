@@ -1,0 +1,64 @@
+{
+  "manifest_version": "1.1.0",
+  "updated_at": "2026-06-01T00:40:00-03:00",
+  "program": "CEPRAEA Ontology Unification",
+  "canonical_target_root": "ontology/",
+  "decision_id": "CEPR-ONTOLOGY-UNIFICATION-PHASE2",
+  "runtime_ssot": {
+    "description": "Executável canônico atual da ontologia (runtime + validação formal).",
+    "paths": [
+      "ontology/core.ttl",
+      "ontology/shacl/core.shacl.ttl",
+      "ontology/examples/minimal-data.ttl",
+      "ontology/examples/invalid-data.ttl",
+      "ontology/examples/golden/scout-live-real-valid.ttl",
+      "ontology/examples/golden/scout-live-real-invalid.ttl",
+      "ontology/examples/golden/scout-audited-flows-valid.ttl",
+      "ontology/examples/golden/scout-audited-flows-invalid.ttl",
+      "ontology/queries/competency/tests.json",
+      "ontology/queries/competency/q01_canonical_shot_mapping.rq",
+      "ontology/queries/competency/q02_scout_phase_codes.rq",
+      "ontology/queries/competency/q03_goal_points_by_action.rq",
+      "ontology/queries/competency/q04_golden_scout_live_flow.rq",
+      "ontology/queries/competency/q05_audited_scout_flow_shacl_slice.rq"
+    ]
+  },
+  "documentation_ssot": {
+    "description": "Base semântica documental consumida por checks atuais.",
+    "paths": [
+      "docs/ontologia/manuais/manual-ontologia-handebol-de-praia.md",
+      "docs/ontologia/manuais/glossario-ontologico-controlado.md",
+      "docs/ontologia/manuais/matriz-relacoes.md",
+      "docs/ontologia/manuais/registro-fontes.md",
+      "docs/design/navegacao.drawio.svg"
+    ]
+  },
+  "transitional_noncanonical": {
+    "description": "Estruturas existentes fora do SSOT executável; manter somente até migração controlada.",
+    "paths": [
+      "onthbpraia/",
+      "docs/ontologia/artigos/",
+      "docs/ontologia/merge/",
+      "docs/ontologia/triagens/",
+      "docs/ontologia-handebol-praia.md",
+      "docs/ontologia-mapeamento-supabase.md",
+      "docs/ontologia-plano-implementacao.md"
+    ]
+  },
+  "deprecation_queue": [
+    {
+      "path": "onthbpraia/",
+      "action": "migrate_then_delete",
+      "phase": "PR-3/PR-5"
+    }
+  ],
+  "validation_contract": {
+    "commands": [
+      "npm run check:ontology:paths",
+      "npm run check:ontology:semantics",
+      "npm run validate:ontology:formal",
+      "npm run check:ontology:runtime-alignment"
+    ],
+    "must_pass_for_merge": true
+  }
+}
