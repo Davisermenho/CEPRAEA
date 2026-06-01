@@ -6,13 +6,13 @@ from rdflib import Graph
 
 files = [
     "ontology/core.ttl",
-    "shacl/core.shacl.ttl",
-    "examples/minimal-data.ttl",
-    "examples/invalid-data.ttl",
-    "examples/golden/scout-live-real-valid.ttl",
-    "examples/golden/scout-live-real-invalid.ttl",
-    "examples/golden/scout-audited-flows-valid.ttl",
-    "examples/golden/scout-audited-flows-invalid.ttl",
+    "ontology/shacl/core.shacl.ttl",
+    "ontology/examples/minimal-data.ttl",
+    "ontology/examples/invalid-data.ttl",
+    "ontology/examples/golden/scout-live-real-valid.ttl",
+    "ontology/examples/golden/scout-live-real-invalid.ttl",
+    "ontology/examples/golden/scout-audited-flows-valid.ttl",
+    "ontology/examples/golden/scout-audited-flows-invalid.ttl",
 ]
 
 for file_path in files:
@@ -21,13 +21,13 @@ for file_path in files:
     print(f"[OK] parsed {file_path} with {len(graph)} triples")
 PY
 
-pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/minimal-data.ttl
-pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/golden/scout-live-real-valid.ttl
-pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/golden/scout-audited-flows-valid.ttl
+pyshacl -s ontology/shacl/core.shacl.ttl -e ontology/core.ttl -m -f human ontology/examples/minimal-data.ttl
+pyshacl -s ontology/shacl/core.shacl.ttl -e ontology/core.ttl -m -f human ontology/examples/golden/scout-live-real-valid.ttl
+pyshacl -s ontology/shacl/core.shacl.ttl -e ontology/core.ttl -m -f human ontology/examples/golden/scout-audited-flows-valid.ttl
 
 set +e
 INVALID_OUTPUT="$(
-  pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/invalid-data.ttl 2>&1
+  pyshacl -s ontology/shacl/core.shacl.ttl -e ontology/core.ttl -m -f human ontology/examples/invalid-data.ttl 2>&1
 )"
 INVALID_STATUS=$?
 set -e
@@ -42,7 +42,7 @@ echo "[OK] invalid-data.ttl failed SHACL as expected"
 
 set +e
 GOLDEN_INVALID_OUTPUT="$(
-  pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/golden/scout-live-real-invalid.ttl 2>&1
+  pyshacl -s ontology/shacl/core.shacl.ttl -e ontology/core.ttl -m -f human ontology/examples/golden/scout-live-real-invalid.ttl 2>&1
 )"
 GOLDEN_INVALID_STATUS=$?
 set -e
@@ -57,7 +57,7 @@ echo "[OK] scout-live-real-invalid.ttl failed SHACL as expected"
 
 set +e
 AUDITED_FLOWS_INVALID_OUTPUT="$(
-  pyshacl -s shacl/core.shacl.ttl -e ontology/core.ttl -m -f human examples/golden/scout-audited-flows-invalid.ttl 2>&1
+  pyshacl -s ontology/shacl/core.shacl.ttl -e ontology/core.ttl -m -f human ontology/examples/golden/scout-audited-flows-invalid.ttl 2>&1
 )"
 AUDITED_FLOWS_INVALID_STATUS=$?
 set -e
@@ -75,7 +75,7 @@ import json
 from pathlib import Path
 from rdflib import Graph
 
-manifest = json.loads(Path("queries/competency/tests.json").read_text(encoding="utf-8"))
+manifest = json.loads(Path("ontology/queries/competency/tests.json").read_text(encoding="utf-8"))
 
 datasets = manifest["datasets"]
 ontology_files = manifest["ontology"]

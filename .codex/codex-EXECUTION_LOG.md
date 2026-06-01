@@ -19,46 +19,25 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-31 - 15:12 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-31 - 22:48 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
 
 
-## Entrada Rápida — 2026-05-31 15:12 BRT — CEPR-E2E-STABILITY-01
+## Entrada Rápida — 2026-05-31 22:48 BRT — CEPR-ONTOLOGY-UNIFICATION-01
 
-- **Objetivo:** executar o plano de resilver para estabilizar `validate:mvp:v1` nas falhas E2E/ambiente.
+- **Objetivo:** iniciar execução do plano de unificação da ontologia em trilha controlada, começando por governança e inventário canônico (fase 1).
 - **Mudanças de código/processo:**
-  - adição de `e2e/helpers/dbRetry.ts` com retry exponencial para falhas transitórias de Postgres (recovery/not accepting connections);
-  - endurecimento de preflight do banco em `scripts/run-e2e-local.sh` (inclui `pg_isready` e `pg_is_in_recovery() = false`);
-  - execução E2E serial por padrão no script de suíte (`PW_WORKERS=1`) com suporte parametrizado em `playwright.config.ts`;
-  - estabilização de specs críticas:
-    - onboarding inválido (`e2e/access/onboarding.spec.ts`);
-    - anti-enumeração sem dependência de signup transitório (`e2e/auth/anti-enumeration.spec.ts`);
-    - T03/T05 com SQL resiliente (`e2e/coach/athletes.spec.ts`, `e2e/coach/attendance.spec.ts`);
-    - smoke central do scout com assert por estado funcional (`e2e/scout/scout-cepr0083-smoke.spec.ts`);
-    - CEPR-0091 com setup de sessão em uma única página e SQL resiliente (`e2e/scout/scout-cepr0091-ux.spec.ts`);
-    - login helper com retentativa mais robusta (`e2e/helpers/auth.ts`);
-  - robustez adicional de signup E2E (`e2e/helpers/supabaseSignup.ts`) com retry para 5xx transitório;
+  - criação de `ontology/ONTOLOGY_CANONICAL_MANIFEST.json` com SSOT atual, paths transitórios e fila de depreciação;
+  - criação de `ontology/DECISIONS.md` com decisões normativas de precedência e regras operacionais de migração;
+  - criação de `scripts/check-ontology-path-regression.sh` para bloquear regressão de paths ontológicos fora do escopo aprovado;
+  - integração do guard em `package.json` (`check:ontology:paths`) e no workflow `.github/workflows/ontology-quality-gate.yml`.
 - **Evidências objetivas:**
-  - `npm run test:e2e -- e2e/access/onboarding.spec.ts e2e/auth/anti-enumeration.spec.ts e2e/coach/athletes.spec.ts e2e/coach/attendance.spec.ts e2e/scout/scout-cepr0083-smoke.spec.ts e2e/scout/scout-cepr0091-ux.spec.ts` ✅ (`23 passed`, `1 skipped`);
-  - `npm run validate:mvp:v1` ✅ (`187 passed`, `7 skipped`);
-  - `npm run typecheck` ✅; `npm test` ✅; `npm run build` ✅.
-
-## Entrada Rápida — 2026-05-31 14:28 BRT — CEPR-REPO-CLEANUP-RESILVER-01
-
-- **Objetivo:** executar limpeza operacional do repositório para reduzir ruído de varredura de agentes e remover artefatos não ativos do caminho principal.
-- **Mudanças de código/processo:**
-  - remoção de `.github/workflows/copilot-intructions.md` (duplicado/typo fora do padrão oficial);
-  - remoção de `src/shared/layouts/AuthGuard.tsx` (alias legado sem uso em runtime);
-  - remoção de `scripts/db/diagnose-before-0040-0042.sql` (diagnóstico histórico sem referência operacional ativa);
-  - desversionamento de `.files/scout.xlsx` (mantido local e ignorado via `.files/`);
-  - criação de `tsconfig.audit.json` e script `npm run audit:deadcode` para detecção contínua de código morto;
-  - criação de `docs/agent/repo-cleanup-resilver-2026-05-31.md` com organização-alvo e backlog de limpeza.
-- **Evidências objetivas:**
-  - `rg -n "AuthGuard" src` confirmou ausência de import ativo do alias legado ✅
-  - `rg -n "diagnose-before-0040-0042" scripts docs .github package.json AGENTS.json plan.md` sem referências operacionais ✅
-  - `git status --short --untracked-files=all` com diff restrito ao escopo planejado ✅
+  - `npm run check:ontology:paths` ✅;
+  - `npm run check:ontology:semantics` ✅ (`0 aviso(s)`);
+  - `npm run validate:ontology:formal` ✅ (datasets válidos e inválidos com comportamento esperado);
+  - `npm run check:ontology:runtime-alignment` ✅ (`Pendências de cobertura formal: 0`).
 
 ## Entrada Rápida — 2026-05-24 22:24 BRT — CEPR-ONTOLOGIA-LATEST-TRENDS-ATTACK-TRIAGEM-E-UPDATE-2026-05-24
 
@@ -6787,14 +6766,87 @@ Após nova rodada de checks da PR #70, `validate-mvp-v1` continuou falhando no m
 
 - O caso de signup anti-enumeração mostrou flakiness apenas em carga de suíte completa na CI; confirmação final depende do próximo run remoto.
 
-## CEPR-BRANCH-CLEANUP-PR70-2026-05-31 — execução do plano de remoção da branch remota
+## CEPR-ONTOLOGY-UNIFICATION-PHASE2-2026-06-01 — execução da fase 2 (unificação física)
 
 ### Escopo entendido
 
-Resolver a pendência operacional de branch remota remanescente após merge da PR #70: remover `chore/agent-governance-resilver-pilot` do `origin` com validação completa.
+Concluir a fase 2 do plano de unificação da ontologia, movendo ativos executáveis (`shacl`, `examples`, `queries/competency`) para `ontology/` e validando o pipeline ontológico completo.
 
 ### Arquivos alterados
 
+- `.github/workflows/ontology-quality-gate.yml`
+- `ontology/DECISIONS.md`
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+- `ontology/examples/golden/scout-audited-flows-invalid.ttl` (rename)
+- `ontology/examples/golden/scout-audited-flows-valid.ttl` (rename)
+- `ontology/examples/golden/scout-live-real-invalid.ttl` (rename)
+- `ontology/examples/golden/scout-live-real-valid.ttl` (rename)
+- `ontology/examples/invalid-data.ttl` (rename)
+- `ontology/examples/minimal-data.ttl` (rename)
+- `ontology/queries/competency/q01_canonical_shot_mapping.rq` (rename)
+- `ontology/queries/competency/q02_scout_phase_codes.rq` (rename)
+- `ontology/queries/competency/q03_goal_points_by_action.rq` (rename)
+- `ontology/queries/competency/q04_golden_scout_live_flow.rq` (rename)
+- `ontology/queries/competency/q05_audited_scout_flow_shacl_slice.rq` (rename)
+- `ontology/queries/competency/tests.json` (rename + patch de referências)
+- `ontology/shacl/core.shacl.ttl` (rename)
+- `scripts/check-ontology-path-regression.sh`
+- `scripts/check-ontology-runtime-alignment.mjs`
+- `scripts/validate-ontology-formal.sh`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`) para conferência dos 3 PRs mais recentes
+
+### Comandos executados
+
+- `gh pr list -R Davisermenho/CEPRAEA --limit 3 --state all`
+- `git -C /tmp/cepraea-ontology-unification status --short`
+- `npm run check:ontology:paths`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+
+### Resultado dos comandos
+
+- `npm run check:ontology:paths`: passou.
+- `npm run check:ontology:semantics`: passou.
+- `npm run validate:ontology:formal`: passou (incluindo datasets inválidos falhando como esperado e CQs CEPR-CQ-01..05).
+- `npm run check:ontology:runtime-alignment`: passou.
+
+### Status do PR/Preview
+
+- PR alvo: `https://github.com/Davisermenho/CEPRAEA/pull/74` (draft).
+- Status: fase 2 pronta localmente para commit/push na mesma PR.
+- Preview Vercel: não aplicável nesta etapa (escopo ontologia/scripts/workflow sem fluxo UI).
+
+### Riscos restantes
+
+- `onthbpraia/` e demais artefatos transitórios documentais ainda existem e permanecem para fases seguintes do plano.
+- Ainda é necessário push e rodada de checks remotos para consolidar o estado da PR #74 com a fase 2.
+
+## CEPR-ONTOLOGY-PHASE2-SYNC-TO-MAIN-WORKSPACE-2026-06-01 — trazer fase 2 para workspace principal
+
+### Escopo entendido
+
+Trazer o conteúdo da fase 2 de unificação ontológica para o workspace principal do usuário (`/home/davis/cepraea-pwa`) sem perder/misturar mudanças locais já existentes.
+
+### Arquivos alterados
+
+- `.github/workflows/ontology-quality-gate.yml`
+- `ontology/DECISIONS.md`
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+- `ontology/examples/**`
+- `ontology/queries/competency/**`
+- `ontology/shacl/core.shacl.ttl`
+- `scripts/check-ontology-path-regression.sh`
+- `scripts/check-ontology-runtime-alignment.mjs`
+- `scripts/validate-ontology-formal.sh`
 - `.codex/codex-CHANGELOG.md`
 - `.codex/codex-EXECUTION_LOG.md`
 
@@ -6806,28 +6858,34 @@ Resolver a pendência operacional de branch remota remanescente após merge da P
 
 ### Comandos executados
 
-- `gh pr view 70 --json state,mergedAt,baseRefName,headRefName,mergeCommit,url`
-- `git fetch origin --prune`
-- `git ls-remote --heads origin chore/agent-governance-resilver-pilot`
-- `git branch -r --contains e4886bf64cf48500f098b939e74bb2d78a3b7650`
-- `git push origin --delete chore/agent-governance-resilver-pilot`
-- `git fetch --prune origin`
-- `git ls-remote --heads origin chore/agent-governance-resilver-pilot`
-- `git status --short`
+- `gh pr list -R Davisermenho/CEPRAEA --limit 3 --state all`
+- `git -C /home/davis/cepraea-pwa status --short --branch`
+- `git -C /home/davis/cepraea-pwa fetch origin chore/ontology-unification-phase1`
+- `git -C /home/davis/cepraea-pwa restore --source b7c6cb23...`
+- `find ontology -maxdepth 3 -type f | sort`
 
-### Resultado da validação
+### Resultado dos comandos
 
-- PR #70 confirmada como `MERGED` em `2026-05-31T16:15:15Z`.
-- Commit de ponta da branch (`e4886bf...`) já contido em `origin/main` antes da remoção.
-- Remoção remota executada com sucesso: `- [deleted] chore/agent-governance-resilver-pilot`.
-- Verificação final `git ls-remote --heads origin chore/agent-governance-resilver-pilot`: sem saída (branch inexistente no remoto).
+- Fetch remoto: OK.
+- Sincronização dos paths da fase 2: OK.
+- Estrutura `ontology/` no workspace principal agora contém SHACL, exemplos e queries de competência.
 
-### Preview/PR remoto
+### Status do PR/Preview
 
-- PR: `https://github.com/Davisermenho/CEPRAEA/pull/70`.
-- Estado: `MERGED`.
+- PR de origem técnica: `https://github.com/Davisermenho/CEPRAEA/pull/74`.
+- Operação local de sync; sem abertura de novo PR nesta etapa.
 
 ### Riscos restantes
 
-- Nenhum risco técnico relevante da remoção da branch remota.
-- Permanecem itens não rastreados pré-existentes no workspace (`docs/design/CHANGELOG.md`, `docs/ontologia/CHANGELOG.md`, `onthbpraia/`), sem alteração nesta tarefa.
+- O workspace principal já estava com mudanças locais amplas e não relacionadas; elas foram preservadas e continuam pendentes.
+
+### Complemento de validação pós-sync
+
+Após sincronizar os arquivos da fase 2, foi necessário adicionar o script ausente `check:ontology:paths` em `package.json` para preservar o mesmo contrato de execução do branch de unificação.
+
+Comandos executados e resultado:
+
+- `npm run check:ontology:paths` — passou.
+- `npm run check:ontology:semantics` — passou.
+- `npm run validate:ontology:formal` — passou.
+- `npm run check:ontology:runtime-alignment` — passou.
