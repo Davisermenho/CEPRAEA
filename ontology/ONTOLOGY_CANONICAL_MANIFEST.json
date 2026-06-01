@@ -1,0 +1,79 @@
+{
+  "manifest_version": "1.0.0",
+  "updated_at": "2026-05-31T22:48:00-03:00",
+  "program": "CEPRAEA Ontology Unification",
+  "canonical_target_root": "ontology/",
+  "decision_id": "CEPR-ONTOLOGY-UNIFICATION-PHASE1",
+  "runtime_ssot": {
+    "description": "Executável canônico atual da ontologia (runtime + validação formal).",
+    "paths": [
+      "ontology/core.ttl",
+      "shacl/core.shacl.ttl",
+      "examples/minimal-data.ttl",
+      "examples/invalid-data.ttl",
+      "examples/golden/scout-live-real-valid.ttl",
+      "examples/golden/scout-live-real-invalid.ttl",
+      "examples/golden/scout-audited-flows-valid.ttl",
+      "examples/golden/scout-audited-flows-invalid.ttl",
+      "queries/competency/tests.json",
+      "queries/competency/q01_canonical_shot_mapping.rq",
+      "queries/competency/q02_scout_phase_codes.rq",
+      "queries/competency/q03_goal_points_by_action.rq",
+      "queries/competency/q04_golden_scout_live_flow.rq",
+      "queries/competency/q05_audited_scout_flow_shacl_slice.rq"
+    ]
+  },
+  "documentation_ssot": {
+    "description": "Base semântica documental consumida por checks atuais.",
+    "paths": [
+      "docs/ontologia/manuais/manual-ontologia-handebol-de-praia.md",
+      "docs/ontologia/manuais/glossario-ontologico-controlado.md",
+      "docs/ontologia/manuais/matriz-relacoes.md",
+      "docs/ontologia/manuais/registro-fontes.md",
+      "docs/design/navegacao.drawio.svg"
+    ]
+  },
+  "transitional_noncanonical": {
+    "description": "Estruturas existentes fora do SSOT executável; manter somente até migração controlada.",
+    "paths": [
+      "onthbpraia/",
+      "docs/ontologia/artigos/",
+      "docs/ontologia/merge/",
+      "docs/ontologia/triagens/",
+      "docs/ontologia-handebol-praia.md",
+      "docs/ontologia-mapeamento-supabase.md",
+      "docs/ontologia-plano-implementacao.md"
+    ]
+  },
+  "deprecation_queue": [
+    {
+      "path": "onthbpraia/",
+      "action": "migrate_then_delete",
+      "phase": "PR-3/PR-5"
+    },
+    {
+      "path": "shacl/",
+      "action": "move_to_ontology_root",
+      "phase": "PR-2"
+    },
+    {
+      "path": "examples/",
+      "action": "move_to_ontology_root",
+      "phase": "PR-2"
+    },
+    {
+      "path": "queries/competency/",
+      "action": "move_to_ontology_root",
+      "phase": "PR-2"
+    }
+  ],
+  "validation_contract": {
+    "commands": [
+      "npm run check:ontology:paths",
+      "npm run check:ontology:semantics",
+      "npm run validate:ontology:formal",
+      "npm run check:ontology:runtime-alignment"
+    ],
+    "must_pass_for_merge": true
+  }
+}

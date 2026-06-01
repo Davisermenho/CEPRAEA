@@ -1,0 +1,44 @@
+# Ontology Unification Decisions
+
+## CEPR-ONTOLOGY-UNIFICATION-PHASE1
+Date: 2026-05-31
+Status: Approved
+
+### Decision 1: Single canonical direction
+The ontology must converge to a single canonical root: `ontology/`.
+
+### Decision 2: Runtime precedence
+For executable behavior, precedence is:
+1. CEPRAEA runtime contracts and codebooks.
+2. Formal ontology constraints (TTL/SHACL/SPARQL).
+3. Historical/reference materials.
+
+### Decision 3: No ad-hoc imports
+No direct copy from `onthbpraia/` to runtime ontology paths is allowed without a crosswalk entry (`ADOPT`, `ALIAS`, `SPLIT`, `DEPRECATE`).
+
+### Decision 4: Path regression guard
+New ontology-related files must not be introduced outside approved roots during migration.
+
+### Decision 5: Transitional structure
+Until PR-2 migration is done, current executable paths remain valid:
+- `ontology/`
+- `shacl/`
+- `examples/`
+- `queries/competency/`
+
+`onthbpraia/` and `docs/ontologia/artigos/` are transitional and must not receive new canonical assets.
+
+## Operational Rules
+
+1. Any PR touching ontology must run:
+- `npm run check:ontology:paths`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+
+2. Any new namespace/entity affecting Scout runtime must prove alignment with:
+- `src/types/index.ts`
+- `src/features/scout/domain/liveCollectionCompatibility.matrix.ts`
+- `src/features/scout/domain/liveCollectionFlow.contract.ts`
+
+3. Merge is blocked if ontology guard detects out-of-scope path additions.

@@ -19,11 +19,25 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-24 - 22:24 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-31 - 22:48 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
 
+
+## Entrada Rápida — 2026-05-31 22:48 BRT — CEPR-ONTOLOGY-UNIFICATION-01
+
+- **Objetivo:** iniciar execução do plano de unificação da ontologia em trilha controlada, começando por governança e inventário canônico (fase 1).
+- **Mudanças de código/processo:**
+  - criação de `ontology/ONTOLOGY_CANONICAL_MANIFEST.json` com SSOT atual, paths transitórios e fila de depreciação;
+  - criação de `ontology/DECISIONS.md` com decisões normativas de precedência e regras operacionais de migração;
+  - criação de `scripts/check-ontology-path-regression.sh` para bloquear regressão de paths ontológicos fora do escopo aprovado;
+  - integração do guard em `package.json` (`check:ontology:paths`) e no workflow `.github/workflows/ontology-quality-gate.yml`.
+- **Evidências objetivas:**
+  - `npm run check:ontology:paths` ✅;
+  - `npm run check:ontology:semantics` ✅ (`0 aviso(s)`);
+  - `npm run validate:ontology:formal` ✅ (datasets válidos e inválidos com comportamento esperado);
+  - `npm run check:ontology:runtime-alignment` ✅ (`Pendências de cobertura formal: 0`).
 
 ## Entrada Rápida — 2026-05-24 22:24 BRT — CEPR-ONTOLOGIA-LATEST-TRENDS-ATTACK-TRIAGEM-E-UPDATE-2026-05-24
 
