@@ -31,6 +31,12 @@ Current canonical paths are now:
 
 `onthbpraia/`, `docs/ontologia/artigos/` and `docs/ontologia/triagens/` remain transitional and must not receive new canonical assets.
 
+### Decision 6: Crosswalk gate for formal assets
+Any new ontology formal asset (`*.ttl`, `*.shacl*`, `*.rq`) requires an approved line in:
+- `ontology/migration/crosswalk-cepr-bh.md`
+
+Merge must be blocked when the crosswalk is missing, not approved, or does not cover the new asset with decision in `ADOPT|ALIAS|SPLIT|DEPRECATE`.
+
 ## Operational Rules
 
 1. Any PR touching ontology must run:

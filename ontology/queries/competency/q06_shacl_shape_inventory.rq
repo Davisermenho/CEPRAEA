@@ -1,0 +1,10 @@
+PREFIX cepr: <https://cepraea.app/ontology#>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+
+SELECT ?shape ?targetClass
+WHERE {
+  ?shape a sh:NodeShape ;
+         sh:targetClass ?targetClass .
+  FILTER(STRSTARTS(STR(?shape), STR(cepr:)))
+}
+ORDER BY ?shape

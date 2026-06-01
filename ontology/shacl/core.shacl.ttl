@@ -66,6 +66,22 @@ cepr:AerialThrowTwoPointsShape a sh:NodeShape ;
     """ ;
   ] .
 
+cepr:RegularShotOnePointShape a sh:NodeShape ;
+  sh:targetClass cepr:Goal ;
+  sh:sparql [
+    sh:message "Goal com RegularShot deve ter exatamente 1 ponto."@pt-BR ;
+    sh:select """
+      PREFIX cepr: <https://cepraea.app/ontology#>
+      SELECT $this
+      WHERE {
+        $this cepr:hasShootingAction ?action ;
+              cepr:points ?points .
+        ?action a cepr:RegularShot .
+        FILTER(?points != 1)
+      }
+    """ ;
+  ] .
+
 cepr:ScoutLiveEntryShape a sh:NodeShape ;
   sh:targetClass cepr:ScoutLiveEntry ;
   sh:property [
