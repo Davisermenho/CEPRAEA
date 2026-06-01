@@ -153,7 +153,7 @@ Portanto: **não renomear o PWA para caber no `onthbpraia`; adaptar o formalismo
 Arquivo recomendado:
 
 ```text
-docs/ontologia/merge/crosswalk-cepraea-onthbpraia.md
+ontology/docs/merge/crosswalk-cepraea-onthbpraia.md
 ```
 
 Formato mínimo:
@@ -318,11 +318,11 @@ Status: concluída e mergeada.
 Escopo permitido:
 
 ```text
-docs/ontologia/merge/AUDITORIA_FUSAO_ONTOLOGIAS.md
-docs/ontologia/merge/crosswalk-cepraea-onthbpraia.md
-docs/ontologia/merge/politica-namespace-versionamento.md
-docs/ontologia/merge/politica-breaking-changes.md
-docs/ontologia/merge/contrato-consumo-ia.md
+ontology/docs/merge/AUDITORIA_FUSAO_ONTOLOGIAS.md
+ontology/docs/merge/crosswalk-cepraea-onthbpraia.md
+ontology/docs/merge/politica-namespace-versionamento.md
+ontology/docs/merge/politica-breaking-changes.md
+ontology/docs/merge/contrato-consumo-ia.md
 ```
 
 Critérios obrigatórios:
@@ -426,7 +426,7 @@ Status: concluída e mergeada.
 Antes de endurecer SHACL, definir:
 
 ```text
-docs/ontologia/merge/politica-migracao-historica.md
+ontology/docs/merge/politica-migracao-historica.md
 ```
 
 Perguntas obrigatórias:

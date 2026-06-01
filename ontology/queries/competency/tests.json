@@ -3,19 +3,19 @@
     "ontology/core.ttl"
   ],
   "datasets": {
-    "minimal": "examples/minimal-data.ttl",
-    "invalid": "examples/invalid-data.ttl",
-    "golden_valid": "examples/golden/scout-live-real-valid.ttl",
-    "golden_invalid": "examples/golden/scout-live-real-invalid.ttl",
-    "audited_flows_valid": "examples/golden/scout-audited-flows-valid.ttl",
-    "audited_flows_invalid": "examples/golden/scout-audited-flows-invalid.ttl"
+    "minimal": "ontology/examples/minimal-data.ttl",
+    "invalid": "ontology/examples/invalid-data.ttl",
+    "golden_valid": "ontology/examples/golden/scout-live-real-valid.ttl",
+    "golden_invalid": "ontology/examples/golden/scout-live-real-invalid.ttl",
+    "audited_flows_valid": "ontology/examples/golden/scout-audited-flows-valid.ttl",
+    "audited_flows_invalid": "ontology/examples/golden/scout-audited-flows-invalid.ttl"
   },
   "tests": [
     {
       "id": "CEPR-CQ-01",
       "dataset": "minimal",
       "extra_graphs": [],
-      "query": "queries/competency/q01_canonical_shot_mapping.rq",
+      "query": "ontology/queries/competency/q01_canonical_shot_mapping.rq",
       "assert": {
         "row_count_eq": 2,
         "expected_rows": [
@@ -34,7 +34,7 @@
       "id": "CEPR-CQ-02",
       "dataset": "minimal",
       "extra_graphs": [],
-      "query": "queries/competency/q02_scout_phase_codes.rq",
+      "query": "ontology/queries/competency/q02_scout_phase_codes.rq",
       "assert": {
         "row_count_eq": 4,
         "expected_rows": [
@@ -61,7 +61,7 @@
       "id": "CEPR-CQ-03",
       "dataset": "minimal",
       "extra_graphs": [],
-      "query": "queries/competency/q03_goal_points_by_action.rq",
+      "query": "ontology/queries/competency/q03_goal_points_by_action.rq",
       "assert": {
         "row_count_eq": 3,
         "expected_rows": [
@@ -87,7 +87,7 @@
       "id": "CEPR-CQ-04",
       "dataset": "golden_valid",
       "extra_graphs": [],
-      "query": "queries/competency/q04_golden_scout_live_flow.rq",
+      "query": "ontology/queries/competency/q04_golden_scout_live_flow.rq",
       "assert": {
         "row_count_eq": 1,
         "expected_rows": [
@@ -107,7 +107,7 @@
       "id": "CEPR-CQ-05",
       "dataset": "audited_flows_valid",
       "extra_graphs": [],
-      "query": "queries/competency/q05_audited_scout_flow_shacl_slice.rq",
+      "query": "ontology/queries/competency/q05_audited_scout_flow_shacl_slice.rq",
       "assert": {
         "row_count_eq": 18,
         "expected_rows": [
@@ -218,6 +218,57 @@
             "flowRuntimeCode": "TRANS_OF.ARREMESSO.ARREMESSO",
             "phaseRuntimeCode": "TRANS_OF",
             "resultRuntimeCode": "PASSIVO"
+          }
+        ]
+      }
+    },
+    {
+      "id": "CEPR-CQ-06",
+      "dataset": "minimal",
+      "extra_graphs": [
+        "ontology/shacl/core.shacl.ttl"
+      ],
+      "query": "ontology/queries/competency/q06_shacl_shape_inventory.rq",
+      "assert": {
+        "row_count_gte": 3,
+        "expected_rows": [
+          {
+            "shape": "https://cepraea.app/ontology#GamePeriodDurationShape",
+            "targetClass": "https://cepraea.app/ontology#GamePeriod"
+          },
+          {
+            "shape": "https://cepraea.app/ontology#GoalShape",
+            "targetClass": "https://cepraea.app/ontology#Goal"
+          },
+          {
+            "shape": "https://cepraea.app/ontology#ScoutLiveEntryShape",
+            "targetClass": "https://cepraea.app/ontology#ScoutLiveEntry"
+          }
+        ]
+      }
+    },
+    {
+      "id": "CEPR-CQ-07",
+      "dataset": "minimal",
+      "extra_graphs": [],
+      "query": "ontology/queries/competency/q07_technical_shot_classification.rq",
+      "assert": {
+        "row_count_eq": 3,
+        "expected_rows": [
+          {
+            "goal": "https://cepraea.app/ontology#aerial_goal_1",
+            "shotType": "https://cepraea.app/ontology#AerialThrow",
+            "technicalClass": "tecnico_especial"
+          },
+          {
+            "goal": "https://cepraea.app/ontology#regular_goal_1",
+            "shotType": "https://cepraea.app/ontology#RegularShot",
+            "technicalClass": "regular"
+          },
+          {
+            "goal": "https://cepraea.app/ontology#spin_goal_1",
+            "shotType": "https://cepraea.app/ontology#SpinThrow",
+            "technicalClass": "tecnico_especial"
           }
         ]
       }

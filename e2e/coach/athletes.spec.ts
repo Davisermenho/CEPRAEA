@@ -1,30 +1,26 @@
 import { test, expect } from '@playwright/test'
-import { execFileSync } from 'node:child_process'
 import { loginAsCoach } from '../helpers/auth'
+import { runSqlWithRetry } from '../helpers/dbRetry'
 
 // Unique per run — prevents collision between parallel CI jobs or local re-runs
 const STAMP = Date.now()
 const UNIQUE_NAME = `E2E-T03-${STAMP}`
 const UNIQUE_EMAIL = `e2e-t03-${STAMP}@cepraea.test`
 const TEAM_ID = process.env.VITE_SUPABASE_TEAM_ID ?? '10000000-0000-0000-0000-000000000001'
-const DB_URL = process.env.E2E_SUPABASE_DB_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
 const BASE_URL = 'http://localhost:5173'
 
-function psql(sql: string) {
-  execFileSync('psql', [DB_URL, '-v', 'ON_ERROR_STOP=1'], {
-    input: sql,
-    stdio: ['pipe', 'inherit', 'inherit'],
-  })
-}
-
 test.describe('T03 — athleteStore Supabase-first: prova multi-contexto', () => {
-  test.beforeAll(() => {
+  test.beforeAll(async () => {
     // Clean up any leftover from a previous failed run
-    psql(`DELETE FROM public.athletes WHERE team_id = '${TEAM_ID}' AND lower(email) = lower('${UNIQUE_EMAIL}');`)
+    await runSqlWithRetry(
+      `DELETE FROM public.athletes WHERE team_id = '${TEAM_ID}' AND lower(email) = lower('${UNIQUE_EMAIL}');`,
+    )
   })
 
-  test.afterAll(() => {
-    psql(`DELETE FROM public.athletes WHERE team_id = '${TEAM_ID}' AND lower(email) = lower('${UNIQUE_EMAIL}');`)
+  test.afterAll(async () => {
+    await runSqlWithRetry(
+      `DELETE FROM public.athletes WHERE team_id = '${TEAM_ID}' AND lower(email) = lower('${UNIQUE_EMAIL}');`,
+    )
   })
 
   test('atleta criada no contexto A é visível no contexto B sem IndexedDB compartilhado', async ({ browser }) => {

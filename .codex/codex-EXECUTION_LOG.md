@@ -19,11 +19,25 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ExecutionLog CEPRAEA - HANDEBOL DE PRAIA
 >Versão 1.0 — 2026-05-06 <br>
-*Última atualização*: 2026-05-24 - 22:24 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-31 - 22:48 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>Este log documenta o processo de execução do agente <b><font family=arial size=3> Codex</font></b> incluindo os passos realizados, arquivos modificados, validações feitas e PRs criadas, garantindo transparência e rastreabilidade das mudanças no código.
 </font>
 
+
+## Entrada Rápida — 2026-05-31 22:48 BRT — CEPR-ONTOLOGY-UNIFICATION-01
+
+- **Objetivo:** iniciar execução do plano de unificação da ontologia em trilha controlada, começando por governança e inventário canônico (fase 1).
+- **Mudanças de código/processo:**
+  - criação de `ontology/ONTOLOGY_CANONICAL_MANIFEST.json` com SSOT atual, paths transitórios e fila de depreciação;
+  - criação de `ontology/DECISIONS.md` com decisões normativas de precedência e regras operacionais de migração;
+  - criação de `scripts/check-ontology-path-regression.sh` para bloquear regressão de paths ontológicos fora do escopo aprovado;
+  - integração do guard em `package.json` (`check:ontology:paths`) e no workflow `.github/workflows/ontology-quality-gate.yml`.
+- **Evidências objetivas:**
+  - `npm run check:ontology:paths` ✅;
+  - `npm run check:ontology:semantics` ✅ (`0 aviso(s)`);
+  - `npm run validate:ontology:formal` ✅ (datasets válidos e inválidos com comportamento esperado);
+  - `npm run check:ontology:runtime-alignment` ✅ (`Pendências de cobertura formal: 0`).
 
 ## Entrada Rápida — 2026-05-24 22:24 BRT — CEPR-ONTOLOGIA-LATEST-TRENDS-ATTACK-TRIAGEM-E-UPDATE-2026-05-24
 
@@ -6751,3 +6765,275 @@ Após nova rodada de checks da PR #70, `validate-mvp-v1` continuou falhando no m
 ### Riscos restantes
 
 - O caso de signup anti-enumeração mostrou flakiness apenas em carga de suíte completa na CI; confirmação final depende do próximo run remoto.
+
+## CEPR-ONTOLOGY-UNIFICATION-PHASE2-2026-06-01 — execução da fase 2 (unificação física)
+
+### Escopo entendido
+
+Concluir a fase 2 do plano de unificação da ontologia, movendo ativos executáveis (`shacl`, `examples`, `queries/competency`) para `ontology/` e validando o pipeline ontológico completo.
+
+### Arquivos alterados
+
+- `.github/workflows/ontology-quality-gate.yml`
+- `ontology/DECISIONS.md`
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+- `ontology/examples/golden/scout-audited-flows-invalid.ttl` (rename)
+- `ontology/examples/golden/scout-audited-flows-valid.ttl` (rename)
+- `ontology/examples/golden/scout-live-real-invalid.ttl` (rename)
+- `ontology/examples/golden/scout-live-real-valid.ttl` (rename)
+- `ontology/examples/invalid-data.ttl` (rename)
+- `ontology/examples/minimal-data.ttl` (rename)
+- `ontology/queries/competency/q01_canonical_shot_mapping.rq` (rename)
+- `ontology/queries/competency/q02_scout_phase_codes.rq` (rename)
+- `ontology/queries/competency/q03_goal_points_by_action.rq` (rename)
+- `ontology/queries/competency/q04_golden_scout_live_flow.rq` (rename)
+- `ontology/queries/competency/q05_audited_scout_flow_shacl_slice.rq` (rename)
+- `ontology/queries/competency/tests.json` (rename + patch de referências)
+- `ontology/shacl/core.shacl.ttl` (rename)
+- `scripts/check-ontology-path-regression.sh`
+- `scripts/check-ontology-runtime-alignment.mjs`
+- `scripts/validate-ontology-formal.sh`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`) para conferência dos 3 PRs mais recentes
+
+### Comandos executados
+
+- `gh pr list -R Davisermenho/CEPRAEA --limit 3 --state all`
+- `git -C /tmp/cepraea-ontology-unification status --short`
+- `npm run check:ontology:paths`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+
+### Resultado dos comandos
+
+- `npm run check:ontology:paths`: passou.
+- `npm run check:ontology:semantics`: passou.
+- `npm run validate:ontology:formal`: passou (incluindo datasets inválidos falhando como esperado e CQs CEPR-CQ-01..05).
+- `npm run check:ontology:runtime-alignment`: passou.
+
+### Status do PR/Preview
+
+- PR alvo: `https://github.com/Davisermenho/CEPRAEA/pull/74` (draft).
+- Status: fase 2 pronta localmente para commit/push na mesma PR.
+- Preview Vercel: não aplicável nesta etapa (escopo ontologia/scripts/workflow sem fluxo UI).
+
+### Riscos restantes
+
+- `onthbpraia/` e demais artefatos transitórios documentais ainda existem e permanecem para fases seguintes do plano.
+- Ainda é necessário push e rodada de checks remotos para consolidar o estado da PR #74 com a fase 2.
+
+## CEPR-ONTOLOGY-PHASE2-SYNC-TO-MAIN-WORKSPACE-2026-06-01 — trazer fase 2 para workspace principal
+
+### Escopo entendido
+
+Trazer o conteúdo da fase 2 de unificação ontológica para o workspace principal do usuário (`/home/davis/cepraea-pwa`) sem perder/misturar mudanças locais já existentes.
+
+### Arquivos alterados
+
+- `.github/workflows/ontology-quality-gate.yml`
+- `ontology/DECISIONS.md`
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+- `ontology/examples/**`
+- `ontology/queries/competency/**`
+- `ontology/shacl/core.shacl.ttl`
+- `scripts/check-ontology-path-regression.sh`
+- `scripts/check-ontology-runtime-alignment.mjs`
+- `scripts/validate-ontology-formal.sh`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `gh pr list -R Davisermenho/CEPRAEA --limit 3 --state all`
+- `git -C /home/davis/cepraea-pwa status --short --branch`
+- `git -C /home/davis/cepraea-pwa fetch origin chore/ontology-unification-phase1`
+- `git -C /home/davis/cepraea-pwa restore --source b7c6cb23...`
+- `find ontology -maxdepth 3 -type f | sort`
+
+### Resultado dos comandos
+
+- Fetch remoto: OK.
+- Sincronização dos paths da fase 2: OK.
+- Estrutura `ontology/` no workspace principal agora contém SHACL, exemplos e queries de competência.
+
+### Status do PR/Preview
+
+- PR de origem técnica: `https://github.com/Davisermenho/CEPRAEA/pull/74`.
+- Operação local de sync; sem abertura de novo PR nesta etapa.
+
+### Riscos restantes
+
+- O workspace principal já estava com mudanças locais amplas e não relacionadas; elas foram preservadas e continuam pendentes.
+
+### Complemento de validação pós-sync
+
+Após sincronizar os arquivos da fase 2, foi necessário adicionar o script ausente `check:ontology:paths` em `package.json` para preservar o mesmo contrato de execução do branch de unificação.
+
+Comandos executados e resultado:
+
+- `npm run check:ontology:paths` — passou.
+- `npm run check:ontology:semantics` — passou.
+- `npm run validate:ontology:formal` — passou.
+- `npm run check:ontology:runtime-alignment` — passou.
+
+## CEPR-ONTOLOGY-PR2-CONSOLIDATE-STRUCTURE-2026-06-01 — execução PR-2
+
+### Escopo entendido
+
+Consolidar estrutura física ontológica em um único local (`ontology/`), movendo documentação de `docs/ontologia/manuais` e `docs/ontologia/merge` para `ontology/docs`, ajustando scripts/workflow e validando os gates canônicos.
+
+### Arquivos alterados
+
+- `.github/workflows/ontology-quality-gate.yml`
+- `ontology/DECISIONS.md`
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+- `ontology/docs/manuais/*`
+- `ontology/docs/merge/*`
+- `scripts/check-ontology-semantics.mjs`
+- `scripts/check-ontology-path-regression.sh`
+- `docs/ontologia/triagens/*.md` (ajuste de parent para caminho canônico)
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `git mv docs/ontologia/manuais -> ontology/docs/manuais`
+- `git mv docs/ontologia/merge -> ontology/docs/merge`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:paths`
+
+### Resultado dos comandos
+
+- `check:ontology:semantics`: passou.
+- `validate:ontology:formal`: passou.
+- `check:ontology:runtime-alignment`: passou.
+- `check:ontology:paths`: passou.
+
+### Status do PR/Preview
+
+- Branch de trabalho: `chore/ontology-pr2-consolidate-structure`.
+- Commit/push: pendente na etapa de fechamento.
+- Preview Vercel: não aplicável nesta etapa local.
+
+### Riscos restantes
+
+- `onthbpraia/` e `docs/ontologia/triagens/` seguem como acervo transicional fora do SSOT executável.
+
+## CEPR-ONTOLOGY-PR3-CROSSWALK-GATE-2026-06-01 — execução do PR-3
+
+### Escopo entendido
+
+Resolver duplicidade com `onthbpraia` via crosswalk obrigatório, importar apenas ativos úteis (CQs e regra formal) para o modelo CEPR e bloquear merge de novos TTL/SHACL/RQ sem crosswalk aprovado.
+
+### Arquivos alterados
+
+- `.github/workflows/ontology-quality-gate.yml`
+- `package.json`
+- `scripts/check-ontology-crosswalk.sh`
+- `ontology/migration/crosswalk-cepr-bh.md`
+- `ontology/migration/imports/pr3/README.md`
+- `ontology/queries/competency/q06_shacl_shape_inventory.rq`
+- `ontology/queries/competency/q07_technical_shot_classification.rq`
+- `ontology/queries/competency/tests.json`
+- `ontology/shacl/core.shacl.ttl`
+- `ontology/DECISIONS.md`
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `npm run check:ontology:paths`
+- `npm run check:ontology:crosswalk`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+
+### Resultado dos comandos
+
+- `check:ontology:paths`: passou.
+- `check:ontology:crosswalk`: passou.
+- `check:ontology:semantics`: passou.
+- `validate:ontology:formal`: passou.
+- `check:ontology:runtime-alignment`: passou.
+
+### Status do PR/Preview
+
+- Branch de trabalho: `chore/ontology-pr3-crosswalk`.
+- Commit/push: pendentes nesta etapa.
+- Preview Vercel: não aplicável (escopo ontologia/scripts/workflow).
+
+### Riscos restantes
+
+- O guard de crosswalk está calibrado para mudanças de ontologia no range com base em `origin/main`; se o PR for empilhado sobre branches não mergeadas, o crosswalk deve cobrir também os ativos adicionados no stack.
+
+## CEPR-SCOUT-SMOKE-CAPTCHA-RESILIENCE-2026-06-01 — execução
+
+### Escopo entendido
+
+Corrigir o `scout-preview-smoke` para ficar resiliente ao bloqueio de captcha no login (`Não foi possível carregar a verificação de segurança`) e revalidar a PR.
+
+### Arquivos alterados
+
+- `e2e/scout/scout-preview-smoke.spec.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `npm run typecheck`
+- `npm run test:smoke:scout:preview -- --list` (sem `SMOKE_BASE_URL`)
+- `SMOKE_BASE_URL="https://cepraea-git-chore-ontology-pr2-consolidate-structure-davi-sermenhos-projects.vercel.app" npm run test:smoke:scout:preview -- --list`
+
+### Resultado dos comandos
+
+- `npm run typecheck`: passou.
+- `npm run test:smoke:scout:preview -- --list`: falhou por ausência de `SMOKE_BASE_URL` (esperado pela config).
+- `SMOKE_BASE_URL=... npm run test:smoke:scout:preview -- --list`: passou (suite carregada/listada corretamente).
+
+### Status do PR/Preview
+
+- PR alvo: `#75` (`chore/ontology-pr2-consolidate-structure`).
+- Commit/push da correção: pendente nesta etapa do log.
+- Revalidação de checks remotos: pendente após push.
+
+### Riscos restantes
+
+- A validação local não executou o fluxo e2e completo do smoke contra preview por falta de credenciais de segredo no ambiente local; confirmação final depende do check remoto `scout-preview-smoke` no GitHub Actions.

@@ -7,7 +7,7 @@ applies-to: [agent, developer, coach]
 version: 0.1-draft
 status: ready
 source: docs/ontologia/artigos/Goalkeeper behaviour inside and outside the goal area-1.md
-parent: docs/ontologia/manuais/manual-ontologia-handebol-de-praia.md
+parent: ontology/docs/manuais/manual-ontologia-handebol-de-praia.md
 ---
 
 # Triagem Ontologica - Goalkeeper behaviour inside and outside the goal area

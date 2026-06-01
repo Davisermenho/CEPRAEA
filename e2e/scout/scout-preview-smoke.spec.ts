@@ -22,6 +22,40 @@ function timestampTag() {
   return `${yyyy}${mm}${dd}_${hh}${mi}${ss}`
 }
 
+function installTurnstileBypass(page: import('@playwright/test').Page) {
+  return page.addInitScript(() => {
+    const bypassToken = 'E2E_SCOUT_SMOKE_BYPASS_TOKEN'
+    const noop = () => {}
+
+    ;(window as Window & {
+      turnstile?: {
+        render: (
+          container: HTMLElement,
+          options: {
+            callback?: (token: string) => void
+            'expired-callback'?: () => void
+          },
+        ) => string
+        reset: (widgetId?: string) => void
+        remove: (widgetId: string) => void
+      }
+    }).turnstile = {
+      render(_container, options) {
+        if (typeof options.callback === 'function') {
+          setTimeout(() => options.callback?.(bypassToken), 0)
+        }
+        return 'e2e-turnstile-widget-id'
+      },
+      reset() {
+        noop()
+      },
+      remove() {
+        noop()
+      },
+    }
+  })
+}
+
 function isCriticalResponse(url: string, status: number, body: string) {
   if (status < 400) return false
   const isSupabaseRoute =
@@ -232,6 +266,7 @@ async function runBestEffortCleanup(
 
 async function loginAsCoachPreview(page: import('@playwright/test').Page) {
   assertSmokeCredentials()
+  await installTurnstileBypass(page)
   await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 30_000 })
   await page.locator('#coach-email').fill(COACH_EMAIL!)
   await page.locator('#coach-password').fill(COACH_PASSWORD!)

@@ -3,13 +3,10 @@
 // independente de o email existir ou não na base.
 
 import { test, expect, type Page } from '@playwright/test'
-import { signUpE2EUser } from '../helpers/supabaseSignup'
 
 const FAKE_EMAIL = 'nao-existe-mesmo@cepraea-test-never.example.com'
 const STRONG_PASSWORD = 'Passw0rdXy!'
-const TIMING_EMAIL = `e2e-auth-timing-${Date.now()}@cepraea.test`
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL!
-const PUBLISHABLE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY!
+const TIMING_EMAIL = process.env.E2E_COACH_EMAIL ?? 'e2e.coach@cepraea.test'
 
 async function clickWhenEnabled(page: Page, name: RegExp) {
   const submit = page.getByRole('button', { name })
@@ -18,15 +15,6 @@ async function clickWhenEnabled(page: Page, name: RegExp) {
 }
 
 test.describe('Anti-enumeração — vocabulário canônico', () => {
-  test.beforeAll(async () => {
-    await signUpE2EUser({
-      supabaseUrl: SUPABASE_URL,
-      publishableKey: PUBLISHABLE_KEY,
-      email: TIMING_EMAIL,
-      password: STRONG_PASSWORD,
-    })
-  })
-
   test('login com email inexistente exibe AUTH-LOGIN-001', async ({ page }) => {
     await page.goto('/atleta/login')
     await page.locator('#atleta-email').fill(FAKE_EMAIL)

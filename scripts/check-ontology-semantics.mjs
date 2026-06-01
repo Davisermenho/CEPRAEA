@@ -10,20 +10,16 @@ const root = path.resolve(__dirname, '..')
 
 const fileCandidates = {
   manual: [
-    path.join(root, 'docs/ontologia/manuais/manual-ontologia-handebol-de-praia.md'),
-    path.join(root, 'docs/ontologia/manual-ontologia-handebol-de-praia.md'),
+    path.join(root, 'ontology/docs/manuais/manual-ontologia-handebol-de-praia.md'),
   ],
   glossary: [
-    path.join(root, 'docs/ontologia/manuais/glossario-ontologico-controlado.md'),
-    path.join(root, 'docs/ontologia/glossario-ontologico-controlado.md'),
+    path.join(root, 'ontology/docs/manuais/glossario-ontologico-controlado.md'),
   ],
   sources: [
-    path.join(root, 'docs/ontologia/manuais/registro-fontes.md'),
-    path.join(root, 'docs/ontologia/registro-fontes.md'),
+    path.join(root, 'ontology/docs/manuais/registro-fontes.md'),
   ],
   matrix: [
-    path.join(root, 'docs/ontologia/manuais/matriz-relacoes.md'),
-    path.join(root, 'docs/ontologia/matriz-relacoes.md'),
+    path.join(root, 'ontology/docs/manuais/matriz-relacoes.md'),
   ],
   svg: [
     path.join(root, 'docs/design/navegacao.drawio.svg'),

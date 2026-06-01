@@ -7,7 +7,7 @@ applies-to: [agent, developer, coach]
 version: 0.1-draft
 status: ready
 source: docs/ontologia/artigos/6-metre throw + punishments.pdf
-parent: docs/ontologia/manuais/manual-ontologia-handebol-de-praia.md
+parent: ontology/docs/manuais/manual-ontologia-handebol-de-praia.md
 ---
 
 # Triagem Ontológica — 6-metre throw + punishments

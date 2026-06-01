@@ -19,7 +19,7 @@ politica: "toda ação relevante deve atualizar este arquivo no mesmo commit ou 
 ---
 # 🤖 CODEX ChangeLog CEPRAEA - HANDEBOL DE PRAIA
 > Versão 1.0 — 2026-05-06
-*Última atualização*: 2026-05-24 - 22:24 BRT - Codex (`gpt-5`) ---
+*Última atualização*: 2026-05-31 - 22:48 BRT - Codex (`gpt-5`) ---
 ---
 <font family=verdana size=2>
 Este log documenta as mudanças relevantes promovidas pelo agente <b><font family=arial size=3> Codex</font></b>. Ele é atualizado exclusivamente pelo Copilot com base em evidências objetivas como commits, PRs e resultados de build.
@@ -29,6 +29,7 @@ Este log documenta as mudanças relevantes promovidas pelo agente <b><font famil
 
 | Data | Hora (BRT) | ID | Descrição | Evidência Verificável |
 |------|------------|----|-----------|-----------------------|
+| 2026-05-31 | 22:48 | CEPR-ONTOLOGY-UNIFICATION-01 | Fase 1 da unificação iniciada com inventário canônico e guard de regressão de paths ontológicos, sem mover runtime ainda | `ontology/ONTOLOGY_CANONICAL_MANIFEST.json` criado · `ontology/DECISIONS.md` criado · `scripts/check-ontology-path-regression.sh` criado · `npm run check:ontology:semantics` ✅ · `npm run validate:ontology:formal` ✅ · `npm run check:ontology:runtime-alignment` ✅ |
 | 2026-05-21 | 23:38 | CEPR-GOV-HARDENING-05 | PR operacional formal de modo solo criada e ruído de CI reduzido: `npm ci` dos gates Scout passou a usar `--loglevel=error --no-audit --no-fund`; resolução da URL de preview endurecida com retry e fallback sem `teamId` para reduzir falhas 403 intermitentes na API da Vercel | `docs/auditorias/solo-mode-governance-2026-05-21.md` criado · `.github/workflows/scout-preview-smoke.yml` e `.github/workflows/scout-contract-cepr0098d.yml` atualizados · branch protection snapshot registrado |
 | 2026-05-21 | 17:48 | CEPR-GOV-HARDENING-04 | `AGENTS.md` alinhado explicitamente para operação solo (sem aprovação humana obrigatória de terceiros), mantendo obrigatoriedade de gates técnicos | `AGENTS.md` seção `5.9 Operação solo` criada · branch protection atual verificada com `required_reviews=0`, `require_last_push_approval=false` e checks obrigatórios ativos |
 | 2026-05-21 | 17:35 | CEPR-GOV-HARDENING-03 | Remoção de `dorny/paths-filter@v3` do Scout Preview Smoke para eliminar warning de Node 20; detecção de escopo migrada para `git diff` em shell, mantendo gate obrigatório e comportamento de skip por escopo | `.github/workflows/scout-preview-smoke.yml` atualizado com step shell `Detect Scout scope` · ausência de `dorny/paths-filter@v3` no workflow · `npm run typecheck` ✅ · `npm run build` ✅ |
@@ -3437,3 +3438,156 @@ Mesmo após robustez de clique no teste, o CI ainda falhou no caso de signup ant
 
 - `npx playwright test e2e/auth/anti-enumeration.spec.ts --project=desktop` ✅
 - `npm run typecheck` ✅
+
+### [CEPR-ONTOLOGY-UNIFICATION-PHASE2-2026-06-01] — 2026-06-01 — unificação física de SHACL/examples/queries sob ontology/
+
+#### ✨ Resumo
+
+Execução da fase 2 da unificação ontológica com migração física dos diretórios executáveis para `ontology/`, atualização dos validadores/scripts/workflow e recalibração do manifesto canônico.
+
+#### 🛠️ Changed
+
+- `ontology/shacl/core.shacl.ttl` (movido de `shacl/core.shacl.ttl`)
+- `ontology/examples/**` (movido de `examples/**`)
+- `ontology/queries/competency/**` (movido de `queries/competency/**`)
+- `scripts/validate-ontology-formal.sh`
+  - paths de SHACL/datasets/manifest atualizados para `ontology/**`.
+- `scripts/check-ontology-runtime-alignment.mjs`
+  - inputs de SHACL/golden/tests atualizados para `ontology/**`.
+- `scripts/check-ontology-path-regression.sh`
+  - escopo canônico ajustado para `ontology/**`.
+- `.github/workflows/ontology-quality-gate.yml`
+  - padrões de escopo formal/runtime atualizados para o novo root unificado.
+- `ontology/queries/competency/tests.json`
+  - datasets e queries atualizados para `ontology/**`.
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+  - `decision_id` fase 2, `runtime_ssot.paths` e fila de depreciação recalibrados.
+- `ontology/DECISIONS.md`
+  - decisão transicional atualizada para refletir conclusão da migração física.
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:paths`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+
+### [CEPR-ONTOLOGY-PHASE2-SYNC-TO-MAIN-WORKSPACE-2026-06-01] — 2026-06-01 — sincronização da fase 2 para workspace principal
+
+#### ✨ Resumo
+
+Sincronização manual do conteúdo da fase 2 da unificação ontológica (commit `b7c6cb2`) para o workspace principal `/home/davis/cepraea-pwa`, sem alterar as demais mudanças locais em andamento.
+
+#### 🛠️ Changed
+
+- Estrutura unificada disponível em `ontology/`:
+  - `ontology/shacl/core.shacl.ttl`
+  - `ontology/examples/**`
+  - `ontology/queries/competency/**`
+- Sincronizados com a fase 2:
+  - `scripts/validate-ontology-formal.sh`
+  - `scripts/check-ontology-runtime-alignment.mjs`
+  - `scripts/check-ontology-path-regression.sh`
+  - `.github/workflows/ontology-quality-gate.yml`
+  - `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+  - `ontology/DECISIONS.md`
+
+#### 🛡️ Evidências
+
+- `git fetch origin chore/ontology-unification-phase1`
+- `git restore --source b7c6cb23...` (paths da fase 2)
+- `find ontology -maxdepth 3 -type f`
+
+#### 🔧 Ajuste complementar no workspace principal
+
+- `package.json`
+  - adiciona `check:ontology:paths` para manter o contrato de execução canônico também no workspace principal.
+
+#### ✅ Revalidação local pós-sync
+
+- `npm run check:ontology:paths`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+
+### [CEPR-ONTOLOGY-PR2-CONSOLIDATE-STRUCTURE-2026-06-01] — 2026-06-01 — consolidação física completa em `ontology/`
+
+#### ✨ Resumo
+
+Consolidação da estrutura física da ontologia em um único root canônico (`ontology/`), incluindo migração dos manuais e artefatos de merge para `ontology/docs/`, atualização de scripts/workflows e revalidação dos gates ontológicos.
+
+#### 🛠️ Changed
+
+- `docs/ontologia/manuais/*` -> `ontology/docs/manuais/*`
+- `docs/ontologia/merge/*` -> `ontology/docs/merge/*`
+- `scripts/check-ontology-semantics.mjs`
+  - resolve manuais canônicos em `ontology/docs/manuais/*`.
+- `scripts/check-ontology-path-regression.sh`
+  - escopo canônico atualizado para `ontology/**`.
+- `.github/workflows/ontology-quality-gate.yml`
+  - detecção semântica atualizada para `ontology/docs/**`.
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+  - `documentation_ssot` migrado para `ontology/docs/*`.
+- `ontology/DECISIONS.md`
+  - decisão de fase 2 atualizada com docs canônicos sob `ontology/docs/`.
+- links internos atualizados:
+  - `ontology/docs/merge/FUSAO.md`
+  - `ontology/docs/manuais/{glossario,matriz-relacoes,registro-fontes}.md`
+  - `docs/ontologia/triagens/*.md` (parent para manual canônico)
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:paths`
+
+### [CEPR-ONTOLOGY-PR3-CROSSWALK-GATE-2026-06-01] — 2026-06-01 — crosswalk obrigatório e import controlado do onthbpraia
+
+#### ✨ Resumo
+
+Implementada a fase PR-3 com crosswalk canônico obrigatório, import controlado de ativos úteis do `onthbpraia` (CQs e regra SHACL) e gate de bloqueio para novos TTL/SHACL/RQ sem crosswalk aprovado.
+
+#### 🛠️ Changed
+
+- Novo contrato de migração:
+  - `ontology/migration/crosswalk-cepr-bh.md`
+  - `ontology/migration/imports/pr3/README.md`
+- Import útil do legado (convertido para modelo CEPR):
+  - `ontology/queries/competency/q06_shacl_shape_inventory.rq`
+  - `ontology/queries/competency/q07_technical_shot_classification.rq`
+  - `ontology/shacl/core.shacl.ttl` (`cepr:RegularShotOnePointShape`)
+  - `ontology/queries/competency/tests.json` (CEPR-CQ-06 e CEPR-CQ-07)
+- Gate de governança:
+  - `scripts/check-ontology-crosswalk.sh`
+  - `package.json` (`check:ontology:paths`, `check:ontology:crosswalk`)
+  - `.github/workflows/ontology-quality-gate.yml` (step obrigatório do crosswalk)
+- Governança documental:
+  - `ontology/DECISIONS.md`
+  - `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:paths`
+- `npm run check:ontology:crosswalk`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+
+### [CEPR-SCOUT-SMOKE-CAPTCHA-RESILIENCE-2026-06-01] — 2026-06-01 — stub Turnstile no scout-preview-smoke
+
+#### ✨ Resumo
+
+Removida a dependência do carregamento externo do Turnstile no smoke de preview do Scout para estabilizar CI quando o widget de captcha falha/intermite no login.
+
+#### 🛠️ Changed
+
+- `e2e/scout/scout-preview-smoke.spec.ts`
+  - adiciona `installTurnstileBypass(page)` com `page.addInitScript(...)` que injeta `window.turnstile` stub.
+  - callback do stub emite token sintético (`E2E_SCOUT_SMOKE_BYPASS_TOKEN`) e evita bloqueio do botão `Entrar`.
+  - `loginAsCoachPreview` passa a instalar bypass antes de abrir `/login`.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck`
+- `SMOKE_BASE_URL="https://cepraea-git-chore-ontology-pr2-consolidate-structure-davi-sermenhos-projects.vercel.app" npm run test:smoke:scout:preview -- --list`
