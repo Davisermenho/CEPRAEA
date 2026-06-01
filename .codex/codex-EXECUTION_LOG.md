@@ -6996,3 +6996,44 @@ Resolver duplicidade com `onthbpraia` via crosswalk obrigatório, importar apena
 ### Riscos restantes
 
 - O guard de crosswalk está calibrado para mudanças de ontologia no range com base em `origin/main`; se o PR for empilhado sobre branches não mergeadas, o crosswalk deve cobrir também os ativos adicionados no stack.
+
+## CEPR-SCOUT-SMOKE-CAPTCHA-RESILIENCE-2026-06-01 — execução
+
+### Escopo entendido
+
+Corrigir o `scout-preview-smoke` para ficar resiliente ao bloqueio de captcha no login (`Não foi possível carregar a verificação de segurança`) e revalidar a PR.
+
+### Arquivos alterados
+
+- `e2e/scout/scout-preview-smoke.spec.ts`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `npm run typecheck`
+- `npm run test:smoke:scout:preview -- --list` (sem `SMOKE_BASE_URL`)
+- `SMOKE_BASE_URL="https://cepraea-git-chore-ontology-pr2-consolidate-structure-davi-sermenhos-projects.vercel.app" npm run test:smoke:scout:preview -- --list`
+
+### Resultado dos comandos
+
+- `npm run typecheck`: passou.
+- `npm run test:smoke:scout:preview -- --list`: falhou por ausência de `SMOKE_BASE_URL` (esperado pela config).
+- `SMOKE_BASE_URL=... npm run test:smoke:scout:preview -- --list`: passou (suite carregada/listada corretamente).
+
+### Status do PR/Preview
+
+- PR alvo: `#75` (`chore/ontology-pr2-consolidate-structure`).
+- Commit/push da correção: pendente nesta etapa do log.
+- Revalidação de checks remotos: pendente após push.
+
+### Riscos restantes
+
+- A validação local não executou o fluxo e2e completo do smoke contra preview por falta de credenciais de segredo no ambiente local; confirmação final depende do check remoto `scout-preview-smoke` no GitHub Actions.

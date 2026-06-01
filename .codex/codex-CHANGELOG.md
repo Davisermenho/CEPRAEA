@@ -3573,3 +3573,21 @@ Implementada a fase PR-3 com crosswalk canônico obrigatório, import controlado
 - `npm run check:ontology:semantics`
 - `npm run validate:ontology:formal`
 - `npm run check:ontology:runtime-alignment`
+
+### [CEPR-SCOUT-SMOKE-CAPTCHA-RESILIENCE-2026-06-01] — 2026-06-01 — stub Turnstile no scout-preview-smoke
+
+#### ✨ Resumo
+
+Removida a dependência do carregamento externo do Turnstile no smoke de preview do Scout para estabilizar CI quando o widget de captcha falha/intermite no login.
+
+#### 🛠️ Changed
+
+- `e2e/scout/scout-preview-smoke.spec.ts`
+  - adiciona `installTurnstileBypass(page)` com `page.addInitScript(...)` que injeta `window.turnstile` stub.
+  - callback do stub emite token sintético (`E2E_SCOUT_SMOKE_BYPASS_TOKEN`) e evita bloqueio do botão `Entrar`.
+  - `loginAsCoachPreview` passa a instalar bypass antes de abrir `/login`.
+
+#### 🛡️ Evidências
+
+- `npm run typecheck`
+- `SMOKE_BASE_URL="https://cepraea-git-chore-ontology-pr2-consolidate-structure-davi-sermenhos-projects.vercel.app" npm run test:smoke:scout:preview -- --list`
