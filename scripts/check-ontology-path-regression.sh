@@ -37,7 +37,7 @@ is_ontology_scoped_path() {
   local file="$1"
 
   case "$file" in
-    ontology/*|shacl/*|examples/*|queries/competency/*)
+    ontology/*)
       return 0
       ;;
     docs/ontologia/manuais/*|docs/ontologia/merge/*|docs/design/navegacao.drawio.svg)
@@ -75,7 +75,7 @@ done <<< "$changed_files"
 if [ "${#violations[@]}" -gt 0 ]; then
   echo "[ERROR] Regressão de paths ontológicos: arquivos alterados fora do escopo canônico/transicional permitido."
   printf ' - %s\n' "${violations[@]}"
-  echo "Ação: migrar para roots aprovadas (ontology/shacl/examples/queries/competency + docs/ontologia/manuais/merge) antes do merge."
+  echo "Ação: migrar para roots aprovadas (ontology/** + docs/ontologia/manuais/merge) antes do merge."
   exit 1
 fi
 

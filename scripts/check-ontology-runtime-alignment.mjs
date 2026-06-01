@@ -13,10 +13,10 @@ const files = {
   flowContract: path.join(root, 'src/features/scout/domain/liveCollectionFlow.contract.ts'),
   compatibilityMatrix: path.join(root, 'src/features/scout/domain/liveCollectionCompatibility.matrix.ts'),
   ontology: path.join(root, 'ontology/core.ttl'),
-  shacl: path.join(root, 'shacl/core.shacl.ttl'),
-  auditedValid: path.join(root, 'examples/golden/scout-audited-flows-valid.ttl'),
-  auditedInvalid: path.join(root, 'examples/golden/scout-audited-flows-invalid.ttl'),
-  competencyTests: path.join(root, 'queries/competency/tests.json'),
+  shacl: path.join(root, 'ontology/shacl/core.shacl.ttl'),
+  auditedValid: path.join(root, 'ontology/examples/golden/scout-audited-flows-valid.ttl'),
+  auditedInvalid: path.join(root, 'ontology/examples/golden/scout-audited-flows-invalid.ttl'),
+  competencyTests: path.join(root, 'ontology/queries/competency/tests.json'),
   packageJson: path.join(root, 'package.json'),
 }
 
@@ -191,10 +191,10 @@ function main() {
   const flowContract = readText('liveCollectionFlow.contract.ts', files.flowContract)
   const compatibilityMatrix = readText('liveCollectionCompatibility.matrix.ts', files.compatibilityMatrix)
   const ontology = readText('ontology/core.ttl', files.ontology)
-  const shacl = readText('shacl/core.shacl.ttl', files.shacl)
-  const auditedValid = readText('examples/golden/scout-audited-flows-valid.ttl', files.auditedValid)
-  const auditedInvalid = readText('examples/golden/scout-audited-flows-invalid.ttl', files.auditedInvalid)
-  const competencyTestsText = readText('queries/competency/tests.json', files.competencyTests)
+  const shacl = readText('ontology/shacl/core.shacl.ttl', files.shacl)
+  const auditedValid = readText('ontology/examples/golden/scout-audited-flows-valid.ttl', files.auditedValid)
+  const auditedInvalid = readText('ontology/examples/golden/scout-audited-flows-invalid.ttl', files.auditedInvalid)
+  const competencyTestsText = readText('ontology/queries/competency/tests.json', files.competencyTests)
   const packageJsonText = readText('package.json', files.packageJson)
 
   if (errors.length > 0) reportAndExit()
@@ -224,7 +224,7 @@ function main() {
   }
 
   const packageJson = parseJson('package.json', packageJsonText)
-  const competencyTests = parseJson('queries/competency/tests.json', competencyTestsText)
+  const competencyTests = parseJson('ontology/queries/competency/tests.json', competencyTestsText)
 
   const expectedScript = 'node scripts/check-ontology-runtime-alignment.mjs'
   if (packageJson?.scripts?.['check:ontology:runtime-alignment'] !== expectedScript) {
@@ -240,7 +240,7 @@ function main() {
   const cq05 = competencyTests?.tests?.find((test) => test.id === 'CEPR-CQ-05')
 
   if (!cq05) {
-    errors.push('queries/competency/tests.json sem teste CEPR-CQ-05 para fluxos auditados')
+    errors.push('ontology/queries/competency/tests.json sem teste CEPR-CQ-05 para fluxos auditados')
   }
 
   for (const contract of contracts) {

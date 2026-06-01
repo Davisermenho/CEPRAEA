@@ -3438,3 +3438,36 @@ Mesmo após robustez de clique no teste, o CI ainda falhou no caso de signup ant
 
 - `npx playwright test e2e/auth/anti-enumeration.spec.ts --project=desktop` ✅
 - `npm run typecheck` ✅
+
+### [CEPR-ONTOLOGY-UNIFICATION-PHASE2-2026-06-01] — 2026-06-01 — unificação física de SHACL/examples/queries sob ontology/
+
+#### ✨ Resumo
+
+Execução da fase 2 da unificação ontológica com migração física dos diretórios executáveis para `ontology/`, atualização dos validadores/scripts/workflow e recalibração do manifesto canônico.
+
+#### 🛠️ Changed
+
+- `ontology/shacl/core.shacl.ttl` (movido de `shacl/core.shacl.ttl`)
+- `ontology/examples/**` (movido de `examples/**`)
+- `ontology/queries/competency/**` (movido de `queries/competency/**`)
+- `scripts/validate-ontology-formal.sh`
+  - paths de SHACL/datasets/manifest atualizados para `ontology/**`.
+- `scripts/check-ontology-runtime-alignment.mjs`
+  - inputs de SHACL/golden/tests atualizados para `ontology/**`.
+- `scripts/check-ontology-path-regression.sh`
+  - escopo canônico ajustado para `ontology/**`.
+- `.github/workflows/ontology-quality-gate.yml`
+  - padrões de escopo formal/runtime atualizados para o novo root unificado.
+- `ontology/queries/competency/tests.json`
+  - datasets e queries atualizados para `ontology/**`.
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+  - `decision_id` fase 2, `runtime_ssot.paths` e fila de depreciação recalibrados.
+- `ontology/DECISIONS.md`
+  - decisão transicional atualizada para refletir conclusão da migração física.
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:paths`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`

@@ -20,13 +20,14 @@ No direct copy from `onthbpraia/` to runtime ontology paths is allowed without a
 New ontology-related files must not be introduced outside approved roots during migration.
 
 ### Decision 5: Transitional structure
-Until PR-2 migration is done, current executable paths remain valid:
-- `ontology/`
-- `shacl/`
-- `examples/`
-- `queries/competency/`
+Phase 2 completed the physical migration of executable ontology assets into `ontology/`.
+Current executable paths are now:
+- `ontology/core.ttl`
+- `ontology/shacl/`
+- `ontology/examples/`
+- `ontology/queries/competency/`
 
-`onthbpraia/` and `docs/ontologia/artigos/` are transitional and must not receive new canonical assets.
+`onthbpraia/` and `docs/ontologia/artigos/` remain transitional and must not receive new canonical assets.
 
 ## Operational Rules
 

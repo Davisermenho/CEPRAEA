@@ -6765,3 +6765,67 @@ Após nova rodada de checks da PR #70, `validate-mvp-v1` continuou falhando no m
 ### Riscos restantes
 
 - O caso de signup anti-enumeração mostrou flakiness apenas em carga de suíte completa na CI; confirmação final depende do próximo run remoto.
+
+## CEPR-ONTOLOGY-UNIFICATION-PHASE2-2026-06-01 — execução da fase 2 (unificação física)
+
+### Escopo entendido
+
+Concluir a fase 2 do plano de unificação da ontologia, movendo ativos executáveis (`shacl`, `examples`, `queries/competency`) para `ontology/` e validando o pipeline ontológico completo.
+
+### Arquivos alterados
+
+- `.github/workflows/ontology-quality-gate.yml`
+- `ontology/DECISIONS.md`
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+- `ontology/examples/golden/scout-audited-flows-invalid.ttl` (rename)
+- `ontology/examples/golden/scout-audited-flows-valid.ttl` (rename)
+- `ontology/examples/golden/scout-live-real-invalid.ttl` (rename)
+- `ontology/examples/golden/scout-live-real-valid.ttl` (rename)
+- `ontology/examples/invalid-data.ttl` (rename)
+- `ontology/examples/minimal-data.ttl` (rename)
+- `ontology/queries/competency/q01_canonical_shot_mapping.rq` (rename)
+- `ontology/queries/competency/q02_scout_phase_codes.rq` (rename)
+- `ontology/queries/competency/q03_goal_points_by_action.rq` (rename)
+- `ontology/queries/competency/q04_golden_scout_live_flow.rq` (rename)
+- `ontology/queries/competency/q05_audited_scout_flow_shacl_slice.rq` (rename)
+- `ontology/queries/competency/tests.json` (rename + patch de referências)
+- `ontology/shacl/core.shacl.ttl` (rename)
+- `scripts/check-ontology-path-regression.sh`
+- `scripts/check-ontology-runtime-alignment.mjs`
+- `scripts/validate-ontology-formal.sh`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`) para conferência dos 3 PRs mais recentes
+
+### Comandos executados
+
+- `gh pr list -R Davisermenho/CEPRAEA --limit 3 --state all`
+- `git -C /tmp/cepraea-ontology-unification status --short`
+- `npm run check:ontology:paths`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+
+### Resultado dos comandos
+
+- `npm run check:ontology:paths`: passou.
+- `npm run check:ontology:semantics`: passou.
+- `npm run validate:ontology:formal`: passou (incluindo datasets inválidos falhando como esperado e CQs CEPR-CQ-01..05).
+- `npm run check:ontology:runtime-alignment`: passou.
+
+### Status do PR/Preview
+
+- PR alvo: `https://github.com/Davisermenho/CEPRAEA/pull/74` (draft).
+- Status: fase 2 pronta localmente para commit/push na mesma PR.
+- Preview Vercel: não aplicável nesta etapa (escopo ontologia/scripts/workflow sem fluxo UI).
+
+### Riscos restantes
+
+- `onthbpraia/` e demais artefatos transitórios documentais ainda existem e permanecem para fases seguintes do plano.
+- Ainda é necessário push e rodada de checks remotos para consolidar o estado da PR #74 com a fase 2.
