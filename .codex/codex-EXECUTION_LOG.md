@@ -6941,3 +6941,58 @@ Consolidar estrutura física ontológica em um único local (`ontology/`), moven
 ### Riscos restantes
 
 - `onthbpraia/` e `docs/ontologia/triagens/` seguem como acervo transicional fora do SSOT executável.
+
+## CEPR-ONTOLOGY-PR3-CROSSWALK-GATE-2026-06-01 — execução do PR-3
+
+### Escopo entendido
+
+Resolver duplicidade com `onthbpraia` via crosswalk obrigatório, importar apenas ativos úteis (CQs e regra formal) para o modelo CEPR e bloquear merge de novos TTL/SHACL/RQ sem crosswalk aprovado.
+
+### Arquivos alterados
+
+- `.github/workflows/ontology-quality-gate.yml`
+- `package.json`
+- `scripts/check-ontology-crosswalk.sh`
+- `ontology/migration/crosswalk-cepr-bh.md`
+- `ontology/migration/imports/pr3/README.md`
+- `ontology/queries/competency/q06_shacl_shape_inventory.rq`
+- `ontology/queries/competency/q07_technical_shot_classification.rq`
+- `ontology/queries/competency/tests.json`
+- `ontology/shacl/core.shacl.ttl`
+- `ontology/DECISIONS.md`
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `npm run check:ontology:paths`
+- `npm run check:ontology:crosswalk`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+
+### Resultado dos comandos
+
+- `check:ontology:paths`: passou.
+- `check:ontology:crosswalk`: passou.
+- `check:ontology:semantics`: passou.
+- `validate:ontology:formal`: passou.
+- `check:ontology:runtime-alignment`: passou.
+
+### Status do PR/Preview
+
+- Branch de trabalho: `chore/ontology-pr3-crosswalk`.
+- Commit/push: pendentes nesta etapa.
+- Preview Vercel: não aplicável (escopo ontologia/scripts/workflow).
+
+### Riscos restantes
+
+- O guard de crosswalk está calibrado para mudanças de ontologia no range com base em `origin/main`; se o PR for empilhado sobre branches não mergeadas, o crosswalk deve cobrir também os ativos adicionados no stack.

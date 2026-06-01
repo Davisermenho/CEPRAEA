@@ -1,0 +1,18 @@
+PREFIX cepr: <https://cepraea.app/ontology#>
+
+SELECT ?goal ?shotType ?technicalClass
+WHERE {
+  ?goal a cepr:Goal ;
+        cepr:hasShootingAction ?shot .
+  ?shot a ?shotType .
+  FILTER(?shotType IN (cepr:RegularShot, cepr:SpinThrow, cepr:AerialThrow))
+
+  BIND(
+    IF(
+      ?shotType = cepr:RegularShot,
+      "regular",
+      "tecnico_especial"
+    ) AS ?technicalClass
+  )
+}
+ORDER BY ?goal

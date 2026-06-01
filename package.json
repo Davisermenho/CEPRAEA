@@ -26,6 +26,8 @@
     "agent:report:check": "bash scripts/agent-final-report-check.sh",
     "agent:execution-log:validate": "node scripts/validate-execution-log.mjs",
     "deps:check": "npm ls --all",
+    "check:ontology:paths": "bash scripts/check-ontology-path-regression.sh",
+    "check:ontology:crosswalk": "bash scripts/check-ontology-crosswalk.sh",
     "check:ontology:semantics": "node scripts/check-ontology-semantics.mjs",
     "validate:ontology:formal": "bash scripts/validate-ontology-formal.sh",
     "check:ontology:runtime-alignment": "node scripts/check-ontology-runtime-alignment.mjs",

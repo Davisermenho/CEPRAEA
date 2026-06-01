@@ -3541,3 +3541,35 @@ Consolidação da estrutura física da ontologia em um único root canônico (`o
 - `npm run validate:ontology:formal`
 - `npm run check:ontology:runtime-alignment`
 - `npm run check:ontology:paths`
+
+### [CEPR-ONTOLOGY-PR3-CROSSWALK-GATE-2026-06-01] — 2026-06-01 — crosswalk obrigatório e import controlado do onthbpraia
+
+#### ✨ Resumo
+
+Implementada a fase PR-3 com crosswalk canônico obrigatório, import controlado de ativos úteis do `onthbpraia` (CQs e regra SHACL) e gate de bloqueio para novos TTL/SHACL/RQ sem crosswalk aprovado.
+
+#### 🛠️ Changed
+
+- Novo contrato de migração:
+  - `ontology/migration/crosswalk-cepr-bh.md`
+  - `ontology/migration/imports/pr3/README.md`
+- Import útil do legado (convertido para modelo CEPR):
+  - `ontology/queries/competency/q06_shacl_shape_inventory.rq`
+  - `ontology/queries/competency/q07_technical_shot_classification.rq`
+  - `ontology/shacl/core.shacl.ttl` (`cepr:RegularShotOnePointShape`)
+  - `ontology/queries/competency/tests.json` (CEPR-CQ-06 e CEPR-CQ-07)
+- Gate de governança:
+  - `scripts/check-ontology-crosswalk.sh`
+  - `package.json` (`check:ontology:paths`, `check:ontology:crosswalk`)
+  - `.github/workflows/ontology-quality-gate.yml` (step obrigatório do crosswalk)
+- Governança documental:
+  - `ontology/DECISIONS.md`
+  - `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:paths`
+- `npm run check:ontology:crosswalk`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`

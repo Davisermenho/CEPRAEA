@@ -221,6 +221,57 @@
           }
         ]
       }
+    },
+    {
+      "id": "CEPR-CQ-06",
+      "dataset": "minimal",
+      "extra_graphs": [
+        "ontology/shacl/core.shacl.ttl"
+      ],
+      "query": "ontology/queries/competency/q06_shacl_shape_inventory.rq",
+      "assert": {
+        "row_count_gte": 3,
+        "expected_rows": [
+          {
+            "shape": "https://cepraea.app/ontology#GamePeriodDurationShape",
+            "targetClass": "https://cepraea.app/ontology#GamePeriod"
+          },
+          {
+            "shape": "https://cepraea.app/ontology#GoalShape",
+            "targetClass": "https://cepraea.app/ontology#Goal"
+          },
+          {
+            "shape": "https://cepraea.app/ontology#ScoutLiveEntryShape",
+            "targetClass": "https://cepraea.app/ontology#ScoutLiveEntry"
+          }
+        ]
+      }
+    },
+    {
+      "id": "CEPR-CQ-07",
+      "dataset": "minimal",
+      "extra_graphs": [],
+      "query": "ontology/queries/competency/q07_technical_shot_classification.rq",
+      "assert": {
+        "row_count_eq": 3,
+        "expected_rows": [
+          {
+            "goal": "https://cepraea.app/ontology#aerial_goal_1",
+            "shotType": "https://cepraea.app/ontology#AerialThrow",
+            "technicalClass": "tecnico_especial"
+          },
+          {
+            "goal": "https://cepraea.app/ontology#regular_goal_1",
+            "shotType": "https://cepraea.app/ontology#RegularShot",
+            "technicalClass": "regular"
+          },
+          {
+            "goal": "https://cepraea.app/ontology#spin_goal_1",
+            "shotType": "https://cepraea.app/ontology#SpinThrow",
+            "technicalClass": "tecnico_especial"
+          }
+        ]
+      }
     }
   ]
 }
