@@ -6889,3 +6889,55 @@ Comandos executados e resultado:
 - `npm run check:ontology:semantics` — passou.
 - `npm run validate:ontology:formal` — passou.
 - `npm run check:ontology:runtime-alignment` — passou.
+
+## CEPR-ONTOLOGY-PR2-CONSOLIDATE-STRUCTURE-2026-06-01 — execução PR-2
+
+### Escopo entendido
+
+Consolidar estrutura física ontológica em um único local (`ontology/`), movendo documentação de `docs/ontologia/manuais` e `docs/ontologia/merge` para `ontology/docs`, ajustando scripts/workflow e validando os gates canônicos.
+
+### Arquivos alterados
+
+- `.github/workflows/ontology-quality-gate.yml`
+- `ontology/DECISIONS.md`
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+- `ontology/docs/manuais/*`
+- `ontology/docs/merge/*`
+- `scripts/check-ontology-semantics.mjs`
+- `scripts/check-ontology-path-regression.sh`
+- `docs/ontologia/triagens/*.md` (ajuste de parent para caminho canônico)
+- `.codex/codex-CHANGELOG.md`
+- `.codex/codex-EXECUTION_LOG.md`
+
+### Ferramentas usadas
+
+- Terminal
+- Git
+- npm
+- GitHub CLI (`gh`)
+
+### Comandos executados
+
+- `git mv docs/ontologia/manuais -> ontology/docs/manuais`
+- `git mv docs/ontologia/merge -> ontology/docs/merge`
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:paths`
+
+### Resultado dos comandos
+
+- `check:ontology:semantics`: passou.
+- `validate:ontology:formal`: passou.
+- `check:ontology:runtime-alignment`: passou.
+- `check:ontology:paths`: passou.
+
+### Status do PR/Preview
+
+- Branch de trabalho: `chore/ontology-pr2-consolidate-structure`.
+- Commit/push: pendente na etapa de fechamento.
+- Preview Vercel: não aplicável nesta etapa local.
+
+### Riscos restantes
+
+- `onthbpraia/` e `docs/ontologia/triagens/` seguem como acervo transicional fora do SSOT executável.

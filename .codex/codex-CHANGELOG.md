@@ -3509,3 +3509,35 @@ Sincronização manual do conteúdo da fase 2 da unificação ontológica (commi
 - `npm run check:ontology:semantics`
 - `npm run validate:ontology:formal`
 - `npm run check:ontology:runtime-alignment`
+
+### [CEPR-ONTOLOGY-PR2-CONSOLIDATE-STRUCTURE-2026-06-01] — 2026-06-01 — consolidação física completa em `ontology/`
+
+#### ✨ Resumo
+
+Consolidação da estrutura física da ontologia em um único root canônico (`ontology/`), incluindo migração dos manuais e artefatos de merge para `ontology/docs/`, atualização de scripts/workflows e revalidação dos gates ontológicos.
+
+#### 🛠️ Changed
+
+- `docs/ontologia/manuais/*` -> `ontology/docs/manuais/*`
+- `docs/ontologia/merge/*` -> `ontology/docs/merge/*`
+- `scripts/check-ontology-semantics.mjs`
+  - resolve manuais canônicos em `ontology/docs/manuais/*`.
+- `scripts/check-ontology-path-regression.sh`
+  - escopo canônico atualizado para `ontology/**`.
+- `.github/workflows/ontology-quality-gate.yml`
+  - detecção semântica atualizada para `ontology/docs/**`.
+- `ontology/ONTOLOGY_CANONICAL_MANIFEST.json`
+  - `documentation_ssot` migrado para `ontology/docs/*`.
+- `ontology/DECISIONS.md`
+  - decisão de fase 2 atualizada com docs canônicos sob `ontology/docs/`.
+- links internos atualizados:
+  - `ontology/docs/merge/FUSAO.md`
+  - `ontology/docs/manuais/{glossario,matriz-relacoes,registro-fontes}.md`
+  - `docs/ontologia/triagens/*.md` (parent para manual canônico)
+
+#### 🛡️ Evidências
+
+- `npm run check:ontology:semantics`
+- `npm run validate:ontology:formal`
+- `npm run check:ontology:runtime-alignment`
+- `npm run check:ontology:paths`

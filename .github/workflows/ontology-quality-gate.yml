@@ -61,7 +61,7 @@ jobs:
           formal_scope=false
           runtime_alignment_scope=false
 
-          semantic_pattern='^(docs/ontologia/|scripts/check-ontology-semantics\.mjs$|scripts/check-ontology-path-regression\.sh$|\.github/workflows/ontology-quality-gate\.yml$)'
+          semantic_pattern='^(ontology/docs/|docs/design/navegacao\.drawio\.svg$|scripts/check-ontology-semantics\.mjs$|scripts/check-ontology-path-regression\.sh$|\.github/workflows/ontology-quality-gate\.yml$)'
           formal_pattern='^(ontology/|scripts/validate-ontology-formal\.sh$|scripts/check-ontology-path-regression\.sh$|\.github/workflows/ontology-quality-gate\.yml$)'
           runtime_alignment_pattern='^(src/types/index\.ts$|src/features/scout/domain/liveCollectionCompatibility\.matrix\.ts$|src/features/scout/domain/liveCollectionFlow\.contract\.ts$|ontology/|scripts/check-ontology-runtime-alignment\.mjs$|scripts/check-ontology-path-regression\.sh$|\.github/workflows/ontology-quality-gate\.yml$)'
 
@@ -116,7 +116,7 @@ jobs:
 
       - name: Run ontology path guard
         if: ${{ steps.scope.outputs.semantic == 'true' || steps.scope.outputs.formal == 'true' || steps.scope.outputs.runtime_alignment == 'true' }}
-        run: npm run check:ontology:paths
+        run: bash scripts/check-ontology-path-regression.sh
 
       - name: Run ontology semantic checks
         if: ${{ steps.scope.outputs.semantic == 'true' }}

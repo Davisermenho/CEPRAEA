@@ -7,7 +7,7 @@ applies-to: [agent, developer, coach]
 version: 0.1-draft
 status: ready
 source: docs/ontologia/artigos/Latest trends in attack_0.md
-parent: docs/ontologia/manuais/manual-ontologia-handebol-de-praia.md
+parent: ontology/docs/manuais/manual-ontologia-handebol-de-praia.md
 ---
 
 # Triagem Ontologica - Latest trends in attack_0

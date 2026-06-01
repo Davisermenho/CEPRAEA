@@ -1,7 +1,7 @@
 # Ontology Unification Decisions
 
-## CEPR-ONTOLOGY-UNIFICATION-PHASE1
-Date: 2026-05-31
+## CEPR-ONTOLOGY-UNIFICATION-PHASE2
+Date: 2026-06-01
 Status: Approved
 
 ### Decision 1: Single canonical direction
@@ -20,14 +20,16 @@ No direct copy from `onthbpraia/` to runtime ontology paths is allowed without a
 New ontology-related files must not be introduced outside approved roots during migration.
 
 ### Decision 5: Transitional structure
-Phase 2 completed the physical migration of executable ontology assets into `ontology/`.
-Current executable paths are now:
+Phase 2 completed the physical migration of executable ontology assets and canonical docs into `ontology/`.
+Current canonical paths are now:
 - `ontology/core.ttl`
 - `ontology/shacl/`
 - `ontology/examples/`
 - `ontology/queries/competency/`
+- `ontology/docs/manuais/`
+- `ontology/docs/merge/`
 
-`onthbpraia/` and `docs/ontologia/artigos/` remain transitional and must not receive new canonical assets.
+`onthbpraia/`, `docs/ontologia/artigos/` and `docs/ontologia/triagens/` remain transitional and must not receive new canonical assets.
 
 ## Operational Rules
 

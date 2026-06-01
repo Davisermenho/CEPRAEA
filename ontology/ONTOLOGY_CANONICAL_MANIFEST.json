@@ -1,6 +1,6 @@
 {
   "manifest_version": "1.1.0",
-  "updated_at": "2026-06-01T00:40:00-03:00",
+  "updated_at": "2026-06-01T04:05:00-03:00",
   "program": "CEPRAEA Ontology Unification",
   "canonical_target_root": "ontology/",
   "decision_id": "CEPR-ONTOLOGY-UNIFICATION-PHASE2",
@@ -26,10 +26,11 @@
   "documentation_ssot": {
     "description": "Base semântica documental consumida por checks atuais.",
     "paths": [
-      "docs/ontologia/manuais/manual-ontologia-handebol-de-praia.md",
-      "docs/ontologia/manuais/glossario-ontologico-controlado.md",
-      "docs/ontologia/manuais/matriz-relacoes.md",
-      "docs/ontologia/manuais/registro-fontes.md",
+      "ontology/docs/manuais/manual-ontologia-handebol-de-praia.md",
+      "ontology/docs/manuais/glossario-ontologico-controlado.md",
+      "ontology/docs/manuais/matriz-relacoes.md",
+      "ontology/docs/manuais/registro-fontes.md",
+      "ontology/docs/merge/",
       "docs/design/navegacao.drawio.svg"
     ]
   },
@@ -38,7 +39,6 @@
     "paths": [
       "onthbpraia/",
       "docs/ontologia/artigos/",
-      "docs/ontologia/merge/",
       "docs/ontologia/triagens/",
       "docs/ontologia-handebol-praia.md",
       "docs/ontologia-mapeamento-supabase.md",

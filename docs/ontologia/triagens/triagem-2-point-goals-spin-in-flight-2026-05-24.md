@@ -7,7 +7,7 @@ applies-to: [agent, developer, coach]
 version: 0.3-draft
 status: ready-for-triage
 source: docs/ontologia/artigos/2-point goals (spin and in-flight shots)-min.pdf
-parent: docs/ontologia/manuais/manual-ontologia-handebol-de-praia.md
+parent: ontology/docs/manuais/manual-ontologia-handebol-de-praia.md
 ---
 
 # Triagem Ontológica — 2-point goals (spin and in-flight shots)-min

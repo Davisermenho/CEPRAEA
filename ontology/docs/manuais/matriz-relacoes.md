@@ -6,7 +6,7 @@ authority: primary
 applies-to: [agent, developer, coach]
 version: 0.1-draft
 status: draft
-parent: docs/ontologia/manuais/manual-ontologia-handebol-de-praia.md
+parent: ontology/docs/manuais/manual-ontologia-handebol-de-praia.md
 ---
 
 # Matriz de Relações — Handebol de Praia
